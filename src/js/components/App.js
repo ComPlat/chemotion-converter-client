@@ -31,7 +31,7 @@ class App extends Component {
       body: data
     }
 
-    fetch('http://127.0.0.1:5000/api/v1.0/fileconversion', requestOptions)
+    fetch('http://127.0.0.1:5000/api/v1/fileconversion', requestOptions)
       .then(response => response.json())
       .then(data => this.setState({
         selectedFile: null,
