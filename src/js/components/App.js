@@ -8,7 +8,9 @@ class App extends Component {
     super(props)
     this.state = {
       selectedFile: null,
-      tableData: null
+      tableData: null,
+      error: false,
+      errorMessage: ''
     }
 
     this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -32,37 +34,54 @@ class App extends Component {
     }
 
     fetch('http://127.0.0.1:5000/api/v1/fileconversion', requestOptions)
-      .then(response => response.json())
+      .then(response => {
+        if(!response.ok) {
+          response.json().then(error => this.setState({
+            error: true,
+            errorMessage: error.error
+          }))
+        } else {
+          return response.json();
+        }
+      })
       .then(data => this.setState({
         selectedFile: null,
-        tableData: data.result
+        tableData: data.result,
+        error: false,
+        errorMessage: ''
       }))
   }
 
   render() {
     return(
       <div className='container'>
-        <div className='row justify-content-center'>
-
           {!this.state.tableData &&
-          <form>
-            <div className="form-group">
-              <label htmlFor="exampleFormControlFile1">Example file input</label>
-              <input type="file" className="form-control-file" id="exampleFormControlFile1" onChange={this.onChangeHandler}/>
+          <div className='row justify-content-center'>
+            <form>
+              <div className="form-group">
+                <label htmlFor="exampleFormControlFile1">Example file input</label>
+                <input type="file" className="form-control-file" id="exampleFormControlFile1" onChange={this.onChangeHandler}/>
+              </div>
+              <button type="button" className="btn btn-success btn-block" onClick={this.onClickHandler}>Upload</button>
+            </form>
+          </div>
+          }
+
+          {this.state.error &&
+            <div className='row justify-content-center'>
+              <div className="alert alert-danger">{ this.state.errorMessage }</div>
             </div>
-            <button type="button" className="btn btn-success btn-block" onClick={this.onClickHandler}>Upload</button>
-          </form>
           }
 
           {this.state.tableData &&
-            <ReactDataGrid
-            columns={this.state.tableData.header}
-            rowGetter={i => this.state.tableData.data[i]}
-            rowsCount={this.state.tableData.data.length}
-            minHeight={500} />
+            <div className='row justify-content-center'>
+              <ReactDataGrid
+              columns={this.state.tableData.header}
+              rowGetter={i => this.state.tableData.data[i]}
+              rowsCount={this.state.tableData.data.length}
+              minHeight={500} />
+            </div>
           }
-
-        </div>
       </div>
     )
   }
