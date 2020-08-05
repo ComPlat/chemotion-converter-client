@@ -13,8 +13,7 @@ class App extends Component {
       errorMessage: '',
       xValues: '0',
       yValues: '0',
-      firstRowIsHeader: true,
-      downloadingFile: false
+      firstRowIsHeader: true
     }
 
     this.onFileChangeHandler = this.onFileChangeHandler.bind(this)
