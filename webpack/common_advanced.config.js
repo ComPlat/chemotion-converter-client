@@ -11,7 +11,7 @@ module.exports = {
       '@fortawesome/fontawesome-free/scss/regular.scss',
       '@fortawesome/fontawesome-free/scss/solid.scss',
       './src/scss/main.scss',
-      './src/js/main.js',
+      './src/js/main_advanced.js',
       'popper.js',
       'bootstrap'
     ],

@@ -1,7 +1,7 @@
 import React, { Component} from "react"
 import ReactDataGrid from "react-data-grid"
 
-class App extends Component {
+class AdvancedApp extends Component {
 
   constructor (props) {
 
@@ -13,12 +13,14 @@ class App extends Component {
       errorMessage: '',
       xValues: '0',
       yValues: '0',
-      firstRowIsHeader: true
+      firstRowIsHeader: true,
+      identifiers: {}
     }
 
     this.onFileChangeHandler = this.onFileChangeHandler.bind(this)
     this.onSubmitFileHandler = this.onSubmitFileHandler.bind(this)
     this.toggleFirstRowIsHeader = this.toggleFirstRowIsHeader.bind(this)
+    this.toggleProperty = this.toggleProperty.bind(this)
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
     this.onSelectYcolumn = this.onSelectYcolumn.bind(this)
     this.onSubmitSelectedData = this.onSubmitSelectedData.bind(this)
@@ -36,22 +38,48 @@ class App extends Component {
     this.setState({ firstRowIsHeader: !this.state.firstRowIsHeader });
   }
 
+  toggleProperty(event) {
+    const checked  = event.target.checked
+    const property = event.target.id
+
+    const { identifiers } = { ...this.state }
+    let currentIdentifiers = identifiers
+
+    if (checked) {
+      if (!(property in identifiers)) {
+        const value = this.state.tableData.metadata[property]
+        currentIdentifiers[property] = value
+      }
+    } else {
+      if (property in identifiers) {
+        delete currentIdentifiers[property]
+      }
+    }
+    this.setState({ identifiers: currentIdentifiers })
+  }
+
   onSubmitSelectedData(e) {
     e.preventDefault()
-    const data = new FormData()
-    data.append('x_column', this.state.xValues)
-    data.append('y_column', this.state.yValues)
-    data.append('time_stamp', this.state.tableData.properties.time_stamp)
-    data.append('firstRowIsHeader', this.state.firstRowIsHeader)
+    const data = {}
+    const rules = {}
+    rules['x_column'] = this.state.xValues
+    rules['y_column'] = this.state.yValues
+    rules['firstRowIsHeader'] = this.state.firstRowIsHeader
+    data['rules'] = rules
+    data['identifiers'] = this.state.identifiers
+    data['uuid'] = this.state.tableData.metadata.uuid
 
     const requestOptions = {
       method: 'POST',
-      body: data
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
     }
 
-    let fileName = this.state.tableData.properties.time_stamp + '.jcamp'
+    let fileName = this.state.tableData.metadata.uuid + '.jcamp'
 
-    return fetch('http://127.0.0.1:5000/api/v1/jcampconversion', requestOptions)
+    return fetch('http://127.0.0.1:5000/api/v1/createprofile', requestOptions)
     .then(response => response.blob())
     .then(blob => {
       const url = window.URL.createObjectURL(blob)
@@ -88,7 +116,7 @@ class App extends Component {
       body: data
     }
 
-    fetch('http://127.0.0.1:5000/api/v1/fileconversion', requestOptions)
+    fetch('http://127.0.0.1:5000/api/v1/fileviewer', requestOptions)
       .then(response => {
         if(!response.ok) {
           response.json().then(error => {
@@ -106,7 +134,7 @@ class App extends Component {
         if(data) {
           this.setState({
             selectedFile: null,
-            tableData: data.result,
+            tableData: data,
             error: false,
             errorMessage: ''
           })
@@ -171,11 +199,22 @@ class App extends Component {
 
               <div className="tab-content border-bottom" id="Tabs">
                 <div className="tab-pane fade p-3" id="meta-data" role="tabpanel" aria-labelledby="meta-data-tab">
-                  <ul className="list-group">
-                    <li className="list-group-item">Filename: {this.state.tableData.properties.file_name }</li>
-                    <li className="list-group-item">Conenttype: {this.state.tableData.properties.content_type }</li>
-                    <li className="list-group-item">Extension: {this.state.tableData.properties.extension }</li>
-                  </ul>
+                  <form>
+                    {
+                      Object.keys(this.state.tableData.metadata).map((key, i) =>
+                        <div key={i} className="form-group row">
+                          <div className="col">
+                            <div className="form-check">
+                              <input className="form-check-input" type="checkbox" onChange={this.toggleProperty} id={key}/>
+                              <label className="form-check-label" htmlFor={key}>
+                                {key}: {this.state.tableData.metadata[key]}
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    }
+                  </form>
                 </div>
                 <div className="tab-pane fade show active p-3" id="table-data" role="tabpanel" aria-labelledby="table-data-tab">
 
@@ -187,7 +226,7 @@ class App extends Component {
                           <label className="form-check-label" htmlFor="first_row_is_header">first row is header</label>
                         </div>
                       </div>
-                      <div class="col">
+                      <div className="col">
                         <div className="form-group">
                           <label htmlFor="x_column"> Which column should be used as x-values?</label>
                           <select className="form-control" id="x_column" onChange={this.onSelectXcolumn}>
@@ -197,7 +236,7 @@ class App extends Component {
                           </select>
                         </div>
                       </div>
-                      <div class="col">
+                      <div className="col">
                         <div className="form-group">
                           <label htmlFor="y_column">Which column should be used as y-values?</label>
                           <select className="form-control" id="y_column" onChange={this.onSelectYcolumn}>
@@ -215,7 +254,7 @@ class App extends Component {
                   columns={this.state.tableData.header}
                   rowGetter={i => this.state.tableData.data[i]}
                   rowsCount={this.state.tableData.data.length}
-                  minHeight={400} />
+                  minHeight={300} />
                 </div>
               </div>
 
@@ -231,4 +270,4 @@ class App extends Component {
   }
 }
 
-export default App
+export default AdvancedApp
