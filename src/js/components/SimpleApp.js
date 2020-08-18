@@ -1,5 +1,8 @@
 import React, { Component} from "react"
 
+import ConverterApi from '../api/ConverterApi'
+
+
 class SimpleApp extends Component {
 
   constructor (props) {
@@ -23,35 +26,17 @@ class SimpleApp extends Component {
   }
 
   onSubmitFileHandler() {
-    const data = new FormData()
-    data.append('file', this.state.selectedFile)
+    const { selectedFile } = this.state
+    const fileName = 'convert.jcamp'
 
-    const requestOptions = {
-      method: 'POST',
-      body: data
-    }
-
-    let fileName = 'convert.jcamp'
-
-    return fetch('http://127.0.0.1:5000/api/v1/simplefileconversion', requestOptions)
-    .then(response => response.blob())
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = fileName
-
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-    })
-    .catch(error => {
-      return {
-        errors: {
-          path: 'File not found'
+    ConverterApi.fetchConversion(selectedFile, fileName)
+      .catch(error => {
+        return {
+          errors: {
+            path: 'File not found'
+          }
         }
-      }
-    })
+      })
   }
 
   render() {
