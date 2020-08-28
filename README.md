@@ -3,8 +3,8 @@ converter-client
 
 React client for the [converter-app](https://github.com/ComPlat/converter-app).
 
-Setup
------
+Development setup
+-----------------
 
 We recomment to use the [nove version manager](https://github.com/nvm-sh/nvm) to install node.js and npm:
 
@@ -17,12 +17,7 @@ After following the instructions in the installation script, `nvm` should be ava
 ```bash
 nvm use
 npm run build
-npm run build:prod  # for the production setup
 ```
-
-
-Usage
------
 
 While developing, the `webpack-dev-server` can be used to update the application on-the-fly:
 
@@ -30,14 +25,18 @@ While developing, the `webpack-dev-server` can be used to update the application
 npm run serve
 ```
 
+Production setup
+----------------
 
-Deployment
-----------
+For the production setup, the URL of the running [converter-app](https://github.com/ComPlat/converter-app) needs to be provided as environment variable:
+
+```bash
+nvm use
+CONVERTER_APP_URL=https://example.com/api/v1 npm run build:prod
+```
 
 After building the production setup, the files in `public` can be copied to the webserver:
 
-```
-nvm use
-npm run build:prod
+```bash
 rsync -av public/ user@example.com:/var/www/public/
 ```

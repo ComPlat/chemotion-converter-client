@@ -1,3 +1,5 @@
+const converter_app_url = process.env.CONVERTER_APP_URL
+
 class ConverterApi {
 
   static fetchTables(file) {
@@ -10,7 +12,7 @@ class ConverterApi {
     }
 
     let ok
-    return fetch('http://127.0.0.1:5000/api/v1/tables', requestOptions)
+    return fetch(converter_app_url + '/tables', requestOptions)
       .then(response => {
         ok = response.ok
         return response.json()
@@ -34,7 +36,7 @@ class ConverterApi {
     }
 
     let ok
-    return fetch('http://127.0.0.1:5000/api/v1/profiles', requestOptions)
+    return fetch(converter_app_url + '/profiles', requestOptions)
       .then(response => {
         ok = response.ok
         return response.json()
@@ -57,7 +59,7 @@ class ConverterApi {
       body: data
     }
 
-    return fetch('http://127.0.0.1:5000/api/v1/conversions', requestOptions)
+    return fetch(converter_app_url + '/api/v1/conversions', requestOptions)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob)

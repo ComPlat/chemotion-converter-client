@@ -6,7 +6,6 @@ import ConverterApi from '../api/ConverterApi'
 class App extends Component {
 
   constructor (props) {
-
     super(props)
     this.state = {
       selectedFile: null,
