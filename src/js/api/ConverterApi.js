@@ -24,7 +24,7 @@ class ConverterApi {
       })
   }
 
-  static createProfile(data, fileName) {
+  static createProfile(data) {
     const requestOptions = {
       method: 'POST',
       body: JSON.stringify(data),
@@ -33,17 +33,18 @@ class ConverterApi {
       }
     }
 
+    let ok
     return fetch('http://127.0.0.1:5000/api/v1/profiles', requestOptions)
-      .then(response => response.blob())
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = fileName
-
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
+      .then(response => {
+        ok = response.ok
+        return response.json()
+      })
+      .then(data => {
+        if (ok) {
+          return data
+        } else {
+          throw new Error(json.error)
+        }
       })
   }
 

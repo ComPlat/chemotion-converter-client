@@ -15,6 +15,7 @@ class AdvancedApp extends Component {
       columnList: null,
       error: false,
       errorMessage: '',
+      successMessage: '',
       xValues: '0',
       yValues: '0',
       identifiers: {}
@@ -87,7 +88,6 @@ class AdvancedApp extends Component {
 
     const { tableData, columnList, identifiers, xValues, yValues } = this.state
 
-    const fileName = tableData.metadata.uuid + '.jdx'
     const data = {
       rules: {
         x_column: columnList[xValues].value,
@@ -96,11 +96,13 @@ class AdvancedApp extends Component {
           return table.firstRowIsHeader || false
         })
       },
-      uuid: tableData.metadata.uuid,
       identifiers: identifiers
     }
 
-    ConverterApi.createProfile(data, fileName)
+    ConverterApi.createProfile(data)
+      .then(data => {
+        this.setState({ successMessage: 'Ok!' })
+      })
       .catch(error => {
         return {
           errors: {
@@ -224,7 +226,7 @@ class AdvancedApp extends Component {
   }
 
   renderCreateProfile() {
-    const { tableData } = this.state
+    const { tableData, successMessage } = this.state
 
     return (
       <div>
@@ -312,6 +314,8 @@ class AdvancedApp extends Component {
             <button type="submit" className="btn btn-primary" onClick={this.onSubmitSelectedData}>Submit</button>
           </form>
         </div>
+
+        {successMessage && <div className="row justify-content-center pt-3 text-success">{ successMessage }</div>}
       </div>
     )
   }
