@@ -3,7 +3,7 @@ import React, { Component} from "react"
 import ConverterApi from '../api/ConverterApi'
 
 
-class SimpleApp extends Component {
+class App extends Component {
 
   constructor (props) {
 
@@ -68,4 +68,4 @@ class SimpleApp extends Component {
   }
 }
 
-export default SimpleApp
+export default App

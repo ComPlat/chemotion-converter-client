@@ -1,7 +1,7 @@
 const webpack = require('webpack')
 const path = require('path')
 const merge = require('webpack-merge')
-const common = require('./common_advanced.config.js')
+const common = require('./common.config.js')
 
 module.exports = merge(common, {
   devtool: 'eval',

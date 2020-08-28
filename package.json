@@ -2,14 +2,10 @@
   "name": "chemotion-converter-client",
   "version": "0.1.0",
   "scripts": {
-    "build:prod_advanced": "webpack --config webpack/prod_advanced.config.js --mode production",
-    "build_advanced": "webpack --config webpack/dev_advanced.config.js --mode development",
-    "watch_advanced": "webpack --config webpack/dev_advanced.config.js --watch --mode development",
-    "serve_advanced": "webpack-dev-server --config webpack/dev_advanced.config.js --open --mode development",
-    "build:prod_simple": "webpack --config webpack/prod_simple.config.js --mode production",
-    "build_simple": "webpack --config webpack/dev_simple.config.js --mode development",
-    "watch_simple": "webpack --config webpack/dev_simple.config.js --watch --mode development",
-    "serve_simple": "webpack-dev-server --config webpack/dev_simple.config.js --open --mode development"
+    "build:prod": "webpack --config webpack/prod.config.js --mode production",
+    "build": "webpack --config webpack/dev.config.js --mode development",
+    "watch": "webpack --config webpack/dev.config.js --watch --mode development",
+    "serve": "webpack-dev-server --config webpack/dev.config.js --open --mode development"
   },
   "license": "AGPL-3.0",
   "repository": {
