@@ -59,7 +59,7 @@ class ConverterApi {
       body: data
     }
 
-    return fetch(converter_app_url + '/api/v1/conversions', requestOptions)
+    return fetch(converter_app_url + '/conversions', requestOptions)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob)
