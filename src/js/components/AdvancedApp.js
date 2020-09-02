@@ -253,6 +253,7 @@ class AdvancedApp extends Component {
            should be used as x-values and which as y-values</p>
           </div>
         </div>
+        {successMessage && <div className="alert alert-success" role="alert">Successfully created profile!</div>}
 
         {this.renderColumnsForm()}
 
@@ -327,8 +328,6 @@ class AdvancedApp extends Component {
             <button type="submit" className="btn btn-primary" onClick={this.onSubmitSelectedData}>Submit</button>
           </form>
         </div>
-
-        {successMessage && <div className="row justify-content-center pt-3 text-success">{ successMessage }</div>}
       </div>
     )
   }
