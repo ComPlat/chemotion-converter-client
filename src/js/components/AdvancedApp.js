@@ -14,6 +14,7 @@ class AdvancedApp extends Component {
       tableData: null,
       columnList: null,
       error: false,
+      isLoading: false,
       errorMessage: '',
       successMessage: '',
       xValues: '0',
@@ -122,6 +123,10 @@ class AdvancedApp extends Component {
   onSubmitFileHandler() {
     const { selectedFile } = this.state
 
+    this.setState({
+      isLoading: true
+    })
+
     ConverterApi.fetchTables(selectedFile)
       .then(tableData => {
         console.log(tableData);
@@ -142,6 +147,7 @@ class AdvancedApp extends Component {
 
           this.setState({
             selectedFile: null,
+            isLoading: false,
             tableData: tableData,
             columnList: columnList,
             error: false,
@@ -176,6 +182,13 @@ class AdvancedApp extends Component {
             <button type="button" className="btn btn-primary btn-lg btn-block" onClick={this.onSubmitFileHandler}>Upload</button>
             {this.state.error &&
               <div className="alert alert-danger mt-2">{ this.state.errorMessage }</div>
+            }
+            {this.state.isLoading &&
+              <div className="d-flex justify-content-center mt-3">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="sr-only">Loading...</span>
+                </div>
+              </div>
             }
           </form>
         </div>
