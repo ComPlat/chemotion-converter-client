@@ -16,7 +16,6 @@ class AdvancedApp extends Component {
       error: false,
       isLoading: false,
       errorMessage: '',
-      successMessage: '',
       xValues: '0',
       yValues: '0',
       identifiers: {}
@@ -102,7 +101,6 @@ class AdvancedApp extends Component {
 
     ConverterApi.createProfile(data)
       .then(data => {
-        this.setState({ successMessage: 'Ok!' })
         $('#modal').show()
       })
       .catch(error => {
@@ -240,7 +238,7 @@ class AdvancedApp extends Component {
   }
 
   renderCreateProfile() {
-    const { tableData, successMessage } = this.state
+    const { tableData } = this.state
 
     return (
       <div>
