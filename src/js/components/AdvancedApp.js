@@ -16,7 +16,6 @@ class AdvancedApp extends Component {
       error: false,
       isLoading: false,
       errorMessage: '',
-      successMessage: '',
       xValues: '0',
       yValues: '0',
       identifiers: {}
@@ -102,7 +101,7 @@ class AdvancedApp extends Component {
 
     ConverterApi.createProfile(data)
       .then(data => {
-        this.setState({ successMessage: 'Ok!' })
+        $('#modal').show()
       })
       .catch(error => {
         return {
@@ -129,7 +128,6 @@ class AdvancedApp extends Component {
 
     ConverterApi.fetchTables(selectedFile)
       .then(tableData => {
-        console.log(tableData);
         if (tableData) {
           // create a flat list of all columns
           const columnList = tableData.data.reduce((accumulator, table, tableIndex) => {
@@ -158,6 +156,7 @@ class AdvancedApp extends Component {
       .catch(error => {
         this.setState({
           error: true,
+          isLoading: false,
           errorMessage: error.message
         })
       })
@@ -239,7 +238,7 @@ class AdvancedApp extends Component {
   }
 
   renderCreateProfile() {
-    const { tableData, successMessage } = this.state
+    const { tableData } = this.state
 
     return (
       <div>
@@ -252,8 +251,7 @@ class AdvancedApp extends Component {
             <p className="text-center">We found the following metadata and table/s in your file. Please pick now, which the data of which column
            should be used as x-values and which as y-values</p>
           </div>
-        </div>
-        {successMessage && <div className="alert alert-success" role="alert">Successfully created profile!</div>}
+        </div>       
 
         {this.renderColumnsForm()}
 
@@ -342,6 +340,20 @@ class AdvancedApp extends Component {
         </div>
 
         {tableData ? this.renderCreateProfile() : this.renderUpload()}
+
+        <div className="modal modal-backdrop" data-backdrop="static" id="modal" tabIndex="-1">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-body">
+                <div className="alert alert-success" role="alert">Successfully created profile!</div>
+              </div>
+              <div className="modal-footer">
+                <a href="/advanced/" className="btn btn-secondary">Create another profile</a>
+                <a href="/" className="btn btn-primary">Upload file and use profile</a>
+              </div>
+            </div>
+          </div>
+        </div>
 
       </div>
     )
