@@ -2,6 +2,7 @@ import React, { Component} from "react"
 import ReactDataGrid from "react-data-grid"
 
 import ConverterApi from '../api/ConverterApi'
+import IdentifierInputBox from './IdentifierInputBox'
 
 
 class AdvancedApp extends Component {
@@ -18,16 +19,53 @@ class AdvancedApp extends Component {
       errorMessage: '',
       xValues: '0',
       yValues: '0',
-      identifiers: {}
+      identifiers: []
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
     this.onSelectYcolumn = this.onSelectYcolumn.bind(this)
     this.toggleFirstRowIsHeader = this.toggleFirstRowIsHeader.bind(this)
-    this.toggleMetadataProperty = this.toggleMetadataProperty.bind(this)
     this.onSubmitSelectedData = this.onSubmitSelectedData.bind(this)
     this.onFileChangeHandler = this.onFileChangeHandler.bind(this)
     this.onSubmitFileHandler = this.onSubmitFileHandler.bind(this)
+    this.addIdentifier = this.addIdentifier.bind(this)
+    this.updateIdentifiers = this.updateIdentifiers.bind(this)
+    this.removeIdentifier = this.removeIdentifier.bind(this)
+  }
+
+  addIdentifier (type) {
+    let identifier = {
+      type: type,
+      table: 0,
+      linenumber: '',
+      metadataKey: '',
+      value: '',
+      isExact: false,
+      isRegex: false
+    }
+    let identifiers = this.state.identifiers
+    identifiers.push(identifier)
+    this.setState({
+      identifiers: identifiers
+    })
+  }
+
+  updateIdentifiers(index, data) {
+    let newIdentifiers = [...this.state.identifiers]
+    if (index !== -1) {
+      let newData = newIdentifiers[index]
+      Object.assign(newData, data)
+      newIdentifiers[index] = newData
+      this.setState({ identifiers: newIdentifiers })
+    }
+  }
+
+  removeIdentifier (index) {
+    let newIdentifiers = [...this.state.identifiers]
+    if (index !== -1) {
+      newIdentifiers.splice(index, 1)
+      this.setState({identifiers: newIdentifiers})
+    }
   }
 
   onSelectXcolumn(event) {
@@ -61,26 +99,6 @@ class AdvancedApp extends Component {
     }
 
     this.setState({ tableData });
-  }
-
-  toggleMetadataProperty(event) {
-    const checked  = event.target.checked
-    const property = event.target.id
-
-    const { identifiers } = { ...this.state }
-    let currentIdentifiers = identifiers
-
-    if (checked) {
-      if (!(property in identifiers)) {
-        const value = this.state.tableData.metadata[property]
-        currentIdentifiers[property] = value
-      }
-    } else {
-      if (property in identifiers) {
-        delete currentIdentifiers[property]
-      }
-    }
-    this.setState({ identifiers: currentIdentifiers })
   }
 
   onSubmitSelectedData(event) {
@@ -251,14 +269,14 @@ class AdvancedApp extends Component {
             <p className="text-center">We found the following metadata and table/s in your file. Please pick now, which the data of which column
            should be used as x-values and which as y-values</p>
           </div>
-        </div>       
+        </div>
 
         {this.renderColumnsForm()}
 
         <ul className="nav nav-tabs" id="Tabs" role="tablist">
           <li className="nav-item" role="presentation">
             <a className="nav-link active" id="meta-data-tab" data-toggle="tab" href="#meta-data"
-               role="tab" aria-controls="meta-data" aria-selected="true">Metadata</a>
+               role="tab" aria-controls="meta-data" aria-selected="true">Identifiers</a>
           </li>
           {tableData.data.map((table, index) => {
             return (
@@ -272,22 +290,25 @@ class AdvancedApp extends Component {
 
         <div className="tab-content border-bottom" id="Tabs">
           <div className="tab-pane active show fade p-3" id="meta-data" role="tabpanel" aria-labelledby="meta-data-tab">
-            <form>
-              {
-                Object.keys(tableData.metadata).map((key, i) =>
-                  <div key={i} className="form-group row">
-                    <div className="col">
-                      <div className="form-check">
-                        <input className="form-check-input" type="checkbox" onChange={this.toggleMetadataProperty} id={key}/>
-                        <label className="form-check-label" htmlFor={key}>
-                          {key}: {tableData.metadata[key]}
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                )
-              }
-            </form>
+            <h4>Metadata</h4>
+            <IdentifierInputBox
+              type={'metadata'}
+              identifiers={this.state.identifiers}
+              addIdentifier={this.addIdentifier}
+              updateIdentifiers={this.updateIdentifiers}
+              removeIdentifier={this.removeIdentifier}
+              data={tableData.metadata}
+            />
+
+            <h4>Table Headers</h4>
+            <IdentifierInputBox
+              type={'tabledata'}
+              identifiers={this.state.identifiers}
+              addIdentifier={this.addIdentifier}
+              updateIdentifiers={this.updateIdentifiers}
+              removeIdentifier={this.removeIdentifier}
+              data={tableData.data}
+            />
           </div>
 
           {tableData.data.map((table, index) => {
