@@ -86,12 +86,12 @@ class IndentifierInput extends Component {
   render() {
     return (
       <form>
-        <div className="form-row align-items-center">
+        <div className="form-row">
 
           {this.props.type == 'metadata' &&
             <div className="col-auto">
               <label className="sr-only" htmlFor={"metadataKeySelect" + this.props.id}>Metadata</label>
-              <select className="form-control" id={"metadataKeySelect" + this.props.id} onChange={this.onSelectMetadata}>
+              <select className="form-control form-control-sm" id={"metadataKeySelect" + this.props.id} onChange={this.onSelectMetadata}>
                 {
                   Object.keys(this.props.options).map((option, i) =>
                     <option key={i}>{option}</option>
@@ -102,9 +102,9 @@ class IndentifierInput extends Component {
           }
 
           {this.props.type == 'tabledata' &&
-            <div className="col-auto">
+            <div className="col">
               <label className="sr-only" htmlFor={"tabledataTableSelect" + this.props.id}>Tabledata</label>
-              <select className="form-control" id={"abledataTableSelect" + this.props.id} onChange={this.onSelectTable}>
+              <select className="form-control form-control-sm" id={"abledataTableSelect" + this.props.id} onChange={this.onSelectTable}>
                 {
                   Object.keys(this.props.options).map((option, i) =>
                     <option key={i}>{"Table #" + i + 1}</option>
@@ -115,26 +115,26 @@ class IndentifierInput extends Component {
           }
 
           {this.props.type == 'tabledata' &&
-            <div className="col-auto">
+            <div className="col-2">
               <label className="sr-only" htmlFor={"tabledataLineSelect" + this.props.id}>Line</label>
               <input
                 onChange={this.updateLinenumber}
                 type="text"
                 placeholder={'Linenumber'}
-                className="form-control"
+                className="form-control form-control-sm"
                 id={"tabledataLineSelect" + this.props.id}
                 value={this.props.linenumber}
               />
             </div>
           }
 
-          <div className="col">
+          <div className="col-auto">
             <label className="sr-only" htmlFor={"inditifierValue" + this.props.id}>value</label>
             <div className="input-group mb-2">
               <input
                 onChange={this.updateValue}
                 type="text"
-                className="form-control"
+                className="form-control form-control-sm"
                 id={"inditifierValue" + this.props.id}
                 disabled={this.props.type === 'metadata' && this.state.disabled}
                 value={this.props.value}
@@ -142,7 +142,7 @@ class IndentifierInput extends Component {
             </div>
           </div>
 
-          <div className="col-auto">
+          <div className="col">
             <div className="form-check form-check-inline">
               <input
                 className="form-check-input"
@@ -168,7 +168,7 @@ class IndentifierInput extends Component {
           </div>
 
           <div className="col-auto">
-            <button type="button" className="btn btn-danger" onClick={this.removeIdentifier}>Remove</button>
+            <button type="button" className="btn btn-danger btn-sm" onClick={this.removeIdentifier}><i className="fas fa-trash-alt"></i></button>
           </div>
         </div>
       </form>

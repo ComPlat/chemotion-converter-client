@@ -39,7 +39,7 @@ class AdvancedApp extends Component {
   addOrUpdateOption(event) {
     let key = event.target.getAttribute('id')
     let value = event.target.value
-    let newSelectedOptions = {...this.state.selectedOptions}
+    let newSelectedOptions = { ...this.state.selectedOptions }
     newSelectedOptions[key] = value
     this.setState({
       selectedOptions: newSelectedOptions
@@ -149,7 +149,7 @@ class AdvancedApp extends Component {
     this.setState({
       selectedFile: event.target.files[0],
       loaded: 0,
-      isLoading:false,
+      isLoading: false,
       error: false,
       errorMessage: ''
     })
@@ -191,9 +191,9 @@ class AdvancedApp extends Component {
         }
       })
       .catch(error => {
-        error.text().then( errorMessage => {
+        error.text().then(errorMessage => {
           this.setState({
-            error:true,
+            error: true,
             errorMessage: JSON.parse(errorMessage).error,
             isLoading: false
           })
@@ -218,7 +218,7 @@ class AdvancedApp extends Component {
         <div className='row justify-content-center h-100'>
           <form>
             <div className="form-group">
-              <input type="file" className="form-control-file" id="fileUpload" onChange={this.onFileChangeHandler} />
+              <input type="file" className="form-control-file form-control-sm" id="fileUpload" onChange={this.onFileChangeHandler} />
             </div>
             <button type="button" className="btn btn-primary btn-lg btn-block" onClick={this.onSubmitFileHandler}>Upload</button>
             {this.state.error &&
@@ -244,7 +244,7 @@ class AdvancedApp extends Component {
       <div>
         <div className="form-group">
           <label htmlFor="x_column">Which column should be used as x-values?</label>
-          <select className="form-control" id="x_column" onChange={this.onSelectXcolumn}>
+          <select className="form-control form-control-sm" id="x_column" onChange={this.onSelectXcolumn}>
             {columnList.map((column, index) => {
               return <option value={index} key={index}>{column.label}</option>
             })}
@@ -252,7 +252,7 @@ class AdvancedApp extends Component {
         </div>
         <div className="form-group">
           <label htmlFor="y_column">Which column should be used as y-values?</label>
-          <select className="form-control" id="y_column" onChange={this.onSelectYcolumn}>
+          <select className="form-control form-control-sm" id="y_column" onChange={this.onSelectYcolumn}>
             {columnList.map((column, index) => {
               return <option value={index} key={index}>{column.label}</option>
             })}
@@ -270,8 +270,8 @@ class AdvancedApp extends Component {
         { Object.keys(options).map((option, index) => {
           return (
             <div key={index} className="form-group">
-              <label htmlFor={option} >{ option }</label>
-              <select className="form-control" onChange={this.addOrUpdateOption} id={option}>
+              <label htmlFor={option} >{option}</label>
+              <select className="form-control form-control-sm" onChange={this.addOrUpdateOption} id={option}>
                 {
                   options[option].map((select, selectIndex) => {
                     return <option value={select} key={select}>{select}</option>
@@ -313,7 +313,7 @@ class AdvancedApp extends Component {
               {tableData.data.map((table, index) => {
                 return (
                   <li key={index} className="nav-item" role="presentation">
-                    <a className={`nav-link ${index==0 ? "active" : ""}`} id="table-data-tab" href={'#table-data-' + index}
+                    <a className={`nav-link ${index == 0 ? "active" : ""}`} id="table-data-tab" href={'#table-data-' + index}
                       data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Table #{index + 1}</a>
                   </li>
                 )
@@ -323,7 +323,7 @@ class AdvancedApp extends Component {
             <div className="tab-content border-bottom" id="Tabs">
               {tableData.data.map((table, index) => {
                 return (
-                  <div key={index} className={`tab-pane fade p-3 ${index==0 ? "active show" : ""}`} id={'table-data-' + index}
+                  <div key={index} className={`tab-pane fade p-3 ${index == 0 ? "active show" : ""}`} id={'table-data-' + index}
                     role="tabpanel" aria-labelledby="table-data-tab">
 
                     {table.header && <pre><code>{
@@ -350,28 +350,48 @@ class AdvancedApp extends Component {
             </div>
 
           </div>
-          <div className="col-md-4 sidenav p-3 border-left">
-            {this.renderOptions()}
-            {this.renderColumnsForm()}
-            <label>Metadata</label>
-            <IdentifierInputBox
-              type={'metadata'}
-              identifiers={this.state.identifiers}
-              addIdentifier={this.addIdentifier}
-              updateIdentifiers={this.updateIdentifiers}
-              removeIdentifier={this.removeIdentifier}
-              data={tableData.metadata}
-            />
+          <div className="col-md-4 sidenav border-left pl-0 pr-0">
 
-            <label>Table Headers</label>
-            <IdentifierInputBox
-              type={'tabledata'}
-              identifiers={this.state.identifiers}
-              addIdentifier={this.addIdentifier}
-              updateIdentifiers={this.updateIdentifiers}
-              removeIdentifier={this.removeIdentifier}
-              data={tableData.data}
-            />
+            <div className="card border-left-0 border-top-0 rounded-0">
+              <div className="card-header">Metadata</div>
+              <div className="card-body">
+                {this.renderOptions()}
+              </div>
+            </div>
+
+            <div className="card border-left-0 border-top-0 rounded-0">
+              <div className="card-header">Rules</div>
+              <div className="card-body">
+                {this.renderColumnsForm()}
+              </div>
+            </div>
+
+            <div className="card border-left-0 border-top-0 rounded-0">
+              <div className="card-header">Identifiers</div>
+              <div className="card-body">
+                <label>File Data</label>
+                <IdentifierInputBox
+                  type={'metadata'}
+                  identifiers={this.state.identifiers}
+                  addIdentifier={this.addIdentifier}
+                  updateIdentifiers={this.updateIdentifiers}
+                  removeIdentifier={this.removeIdentifier}
+                  data={tableData.metadata}
+                />
+
+                <label>Table Headers</label>
+                <IdentifierInputBox
+                  type={'tabledata'}
+                  identifiers={this.state.identifiers}
+                  addIdentifier={this.addIdentifier}
+                  updateIdentifiers={this.updateIdentifiers}
+                  removeIdentifier={this.removeIdentifier}
+                  data={tableData.data}
+                />
+              </div>
+            </div>
+
+
 
             <div className="row justify-content-center pt-3">
               <form>
