@@ -60,7 +60,10 @@ class ConverterApi {
     }
 
     return fetch(converter_app_url + '/conversions', requestOptions)
-      .then(response => response.blob())
+      .then(response => {
+        if (!response.ok) { throw response }
+          return response.blob()
+      })
       .then(blob => {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -70,6 +73,7 @@ class ConverterApi {
         document.body.appendChild(a)
         a.click()
         a.remove()
+        return 'success'
       })
   }
 }
