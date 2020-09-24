@@ -11,18 +11,13 @@ class ConverterApi {
       body: data
     }
 
-    let ok
     return fetch(converter_app_url + '/tables', requestOptions)
       .then(response => {
-        ok = response.ok
+        if (!response.ok) { throw response }
         return response.json()
       })
       .then(data => {
-        if (ok) {
           return data
-        } else {
-          throw new Error(json.error)
-        }
       })
   }
 

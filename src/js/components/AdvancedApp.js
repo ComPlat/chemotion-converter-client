@@ -149,6 +149,9 @@ class AdvancedApp extends Component {
     this.setState({
       selectedFile: event.target.files[0],
       loaded: 0,
+      isLoading:false,
+      error: false,
+      errorMessage: ''
     })
   }
 
@@ -188,10 +191,12 @@ class AdvancedApp extends Component {
         }
       })
       .catch(error => {
-        this.setState({
-          error: true,
-          isLoading: false,
-          errorMessage: error.message
+        error.text().then( errorMessage => {
+          this.setState({
+            error:true,
+            errorMessage: JSON.parse(errorMessage).error,
+            isLoading: false
+          })
         })
       })
   }
