@@ -1,4 +1,4 @@
-import React, { Component} from "react"
+import React, { Component } from "react"
 import ReactDataGrid from "react-data-grid"
 
 import ConverterApi from '../api/ConverterApi'
@@ -7,7 +7,7 @@ import IdentifierInputBox from './IdentifierInputBox'
 
 class AdvancedApp extends Component {
 
-  constructor (props) {
+  constructor(props) {
 
     super(props)
     this.state = {
@@ -19,7 +19,9 @@ class AdvancedApp extends Component {
       errorMessage: '',
       xValues: '0',
       yValues: '0',
-      identifiers: []
+      identifiers: [],
+      options: {},
+      selectedOptions: {}
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
@@ -31,9 +33,21 @@ class AdvancedApp extends Component {
     this.addIdentifier = this.addIdentifier.bind(this)
     this.updateIdentifiers = this.updateIdentifiers.bind(this)
     this.removeIdentifier = this.removeIdentifier.bind(this)
+    this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
   }
 
-  addIdentifier (type) {
+  addOrUpdateOption(event) {
+    let key = event.target.getAttribute('id')
+    let value = event.target.value
+    let newSelectedOptions = {...this.state.selectedOptions}
+    newSelectedOptions[key] = value
+    this.setState({
+      selectedOptions: newSelectedOptions
+    })
+
+  }
+
+  addIdentifier(type) {
     let identifier = {
       type: type,
       table: 0,
@@ -60,20 +74,20 @@ class AdvancedApp extends Component {
     }
   }
 
-  removeIdentifier (index) {
+  removeIdentifier(index) {
     let newIdentifiers = [...this.state.identifiers]
     if (index !== -1) {
       newIdentifiers.splice(index, 1)
-      this.setState({identifiers: newIdentifiers})
+      this.setState({ identifiers: newIdentifiers })
     }
   }
 
   onSelectXcolumn(event) {
-    this.setState({xValues: event.target.value})
+    this.setState({ xValues: event.target.value })
   }
 
   onSelectYcolumn(event) {
-    this.setState({yValues: event.target.value})
+    this.setState({ yValues: event.target.value })
   }
 
   toggleFirstRowIsHeader(index) {
@@ -104,7 +118,7 @@ class AdvancedApp extends Component {
   onSubmitSelectedData(event) {
     event.preventDefault()
 
-    const { tableData, columnList, identifiers, xValues, yValues } = this.state
+    const { tableData, columnList, identifiers, xValues, yValues, selectedOptions } = this.state
 
     const data = {
       rules: {
@@ -114,7 +128,8 @@ class AdvancedApp extends Component {
           return table.firstRowIsHeader || false
         })
       },
-      identifiers: identifiers
+      identifiers: identifiers,
+      metadata: selectedOptions
     }
 
     ConverterApi.createProfile(data)
@@ -166,6 +181,7 @@ class AdvancedApp extends Component {
             isLoading: false,
             tableData: tableData,
             columnList: columnList,
+            options: tableData.options,
             error: false,
             errorMessage: ''
           })
@@ -184,21 +200,24 @@ class AdvancedApp extends Component {
     return (
       <div>
         <div className='row justify-content-center'>
-          <h2>Step 1: File Upload</h2>
+          <h1 className="p-5">Chemotion file converter</h1>
+        </div>
+        <div className='row justify-content-center'>
+          <h2>File Upload</h2>
         </div>
         <div className='row justify-content-center'>
           <div className='col-6'>
-            <p className="text-center">Please upload a file of the following types: csv, xy</p>
+            <p className="text-center">Please upload a file</p>
           </div>
         </div>
         <div className='row justify-content-center h-100'>
           <form>
             <div className="form-group">
-              <input type="file" className="form-control-file" id="fileUpload" onChange={this.onFileChangeHandler}/>
+              <input type="file" className="form-control-file" id="fileUpload" onChange={this.onFileChangeHandler} />
             </div>
             <button type="button" className="btn btn-primary btn-lg btn-block" onClick={this.onSubmitFileHandler}>Upload</button>
             {this.state.error &&
-              <div className="alert alert-danger mt-2">{ this.state.errorMessage }</div>
+              <div className="alert alert-danger mt-2">{this.state.errorMessage}</div>
             }
             {this.state.isLoading &&
               <div className="d-flex justify-content-center mt-3">
@@ -218,26 +237,45 @@ class AdvancedApp extends Component {
 
     return (
       <div>
-        <div className="col">
-          <div className="form-group">
-            <label htmlFor="x_column">Which column should be used as x-values?</label>
-            <select className="form-control" id="x_column" onChange={this.onSelectXcolumn}>
-              {columnList.map((column, index) => {
-                return <option value={index} key={index}>{column.label}</option>
-              })}
-            </select>
-          </div>
+        <div className="form-group">
+          <label htmlFor="x_column">Which column should be used as x-values?</label>
+          <select className="form-control" id="x_column" onChange={this.onSelectXcolumn}>
+            {columnList.map((column, index) => {
+              return <option value={index} key={index}>{column.label}</option>
+            })}
+          </select>
         </div>
-        <div className="col">
-          <div className="form-group">
-            <label htmlFor="y_column">Which column should be used as y-values?</label>
-            <select className="form-control" id="y_column" onChange={this.onSelectYcolumn}>
-              {columnList.map((column, index) => {
-                return <option value={index} key={index}>{column.label}</option>
-              })}
-            </select>
-          </div>
+        <div className="form-group">
+          <label htmlFor="y_column">Which column should be used as y-values?</label>
+          <select className="form-control" id="y_column" onChange={this.onSelectYcolumn}>
+            {columnList.map((column, index) => {
+              return <option value={index} key={index}>{column.label}</option>
+            })}
+          </select>
         </div>
+      </div>
+    )
+  }
+
+  renderOptions() {
+    const { options } = this.state
+
+    return (
+      <div>
+        { Object.keys(options).map((option, index) => {
+          return (
+            <div key={index} className="form-group">
+              <label htmlFor={option} >{ option }</label>
+              <select className="form-control" onChange={this.addOrUpdateOption} id={option}>
+                {
+                  options[option].map((select, selectIndex) => {
+                    return <option value={select} key={select}>{select}</option>
+                  })
+                }
+              </select>
+            </div>
+          )
+        })}
       </div>
     )
   }
@@ -250,9 +288,9 @@ class AdvancedApp extends Component {
     })
 
     return <ReactDataGrid columns={table.columns}
-                          rowGetter={i => rows[i]}
-                          rowsCount={rows.length}
-                          minHeight={300} />
+      rowGetter={i => rows[i]}
+      rowsCount={rows.length}
+      minHeight={300} />
   }
 
   renderCreateProfile() {
@@ -260,37 +298,57 @@ class AdvancedApp extends Component {
 
     return (
       <div>
-        <div className='row justify-content-center'>
-          <h2>Step 2: Pick columns for export</h2>
-        </div>
+        <div className="row position-relative">
+          <div className="col-md-8">
+            <div className='row justify-content-center'>
+              <h1 className="p-5">Chemotion file converter</h1>
+              <h2>Step 2: Add rules and identifiers for conversion profile</h2>
+            </div>
+            <ul className="nav nav-tabs" id="Tabs" role="tablist">
+              {tableData.data.map((table, index) => {
+                return (
+                  <li key={index} className="nav-item" role="presentation">
+                    <a className={`nav-link ${index==0 ? "active" : ""}`} id="table-data-tab" href={'#table-data-' + index}
+                      data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Table #{index + 1}</a>
+                  </li>
+                )
+              })}
+            </ul>
 
-        <div className='row justify-content-center'>
-          <div className='col-6'>
-            <p className="text-center">We found the following metadata and table/s in your file. Please pick now, which the data of which column
-           should be used as x-values and which as y-values</p>
+            <div className="tab-content border-bottom" id="Tabs">
+              {tableData.data.map((table, index) => {
+                return (
+                  <div key={index} className={`tab-pane fade p-3 ${index==0 ? "active show" : ""}`} id={'table-data-' + index}
+                    role="tabpanel" aria-labelledby="table-data-tab">
+
+                    {table.header && <pre><code>{
+                      table.header.map(line => {
+                        return line + '\n'
+                      })
+                    }</code></pre>}
+                    {table.rows.length > 0 &&
+                      <div>
+                        <div className="form-group form-check">
+                          <input type="checkbox" checked={table.firstRowIsHeader || false}
+                            onChange={e => this.toggleFirstRowIsHeader(index)}
+                            className="form-check-input" id="first_row_is_header" />
+                          <label className="form-check-label" htmlFor="first_row_is_header">first row are column names</label>
+                        </div>
+
+                        {this.renderDataGrid(table)}
+                      </div>
+                    }
+                  </div>
+                )
+              })
+              }
+            </div>
+
           </div>
-        </div>
-
-        {this.renderColumnsForm()}
-
-        <ul className="nav nav-tabs" id="Tabs" role="tablist">
-          <li className="nav-item" role="presentation">
-            <a className="nav-link active" id="meta-data-tab" data-toggle="tab" href="#meta-data"
-               role="tab" aria-controls="meta-data" aria-selected="true">Identifiers</a>
-          </li>
-          {tableData.data.map((table, index) => {
-            return (
-              <li key={index} className="nav-item" role="presentation">
-                <a className="nav-link " id="table-data-tab" href={'#table-data-' + index}
-                   data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Table #{index + 1}</a>
-              </li>
-            )
-          })}
-        </ul>
-
-        <div className="tab-content border-bottom" id="Tabs">
-          <div className="tab-pane active show fade p-3" id="meta-data" role="tabpanel" aria-labelledby="meta-data-tab">
-            <h4>Metadata</h4>
+          <div className="col-md-4 sidenav p-3 border-left">
+            {this.renderOptions()}
+            {this.renderColumnsForm()}
+            <label>Metadata</label>
             <IdentifierInputBox
               type={'metadata'}
               identifiers={this.state.identifiers}
@@ -300,7 +358,7 @@ class AdvancedApp extends Component {
               data={tableData.metadata}
             />
 
-            <h4>Table Headers</h4>
+            <label>Table Headers</label>
             <IdentifierInputBox
               type={'tabledata'}
               identifiers={this.state.identifiers}
@@ -309,44 +367,16 @@ class AdvancedApp extends Component {
               removeIdentifier={this.removeIdentifier}
               data={tableData.data}
             />
+
+            <div className="row justify-content-center pt-3">
+              <form>
+                <button type="submit" className="btn btn-primary" onClick={this.onSubmitSelectedData}>Submit</button>
+              </form>
+            </div>
           </div>
-
-          {tableData.data.map((table, index) => {
-            return (
-              <div key={index} className="tab-pane fade p-3" id={'table-data-' +index}
-                   role="tabpanel" aria-labelledby="table-data-tab">
-                <form>
-
-                </form>
-
-                {table.header && <pre><code>{
-                  table.header.map(line => {
-                    return line + '\n'
-                  })
-                }</code></pre>}
-                {table.rows.length > 0 &&
-                  <div>
-                    <div className="form-group form-check">
-                      <input type="checkbox" checked={table.firstRowIsHeader || false}
-                             onChange={e => this.toggleFirstRowIsHeader(index)}
-                             className="form-check-input" id="first_row_is_header"/>
-                      <label className="form-check-label" htmlFor="first_row_is_header">first row are column names</label>
-                    </div>
-
-                    {this.renderDataGrid(table)}
-                  </div>
-                }
-              </div>
-            )
-          })
-        }
         </div>
 
-        <div className="row justify-content-center pt-3">
-          <form>
-            <button type="submit" className="btn btn-primary" onClick={this.onSubmitSelectedData}>Submit</button>
-          </form>
-        </div>
+
       </div>
     )
   }
@@ -354,12 +384,8 @@ class AdvancedApp extends Component {
   render() {
     const { tableData } = this.state
 
-    return(
-      <div className='container vh-100'>
-        <div className='row justify-content-center'>
-          <h1 className="p-5">Chemotion file converter</h1>
-        </div>
-
+    return (
+      <div className='container-fluid vh-100'>
         {tableData ? this.renderCreateProfile() : this.renderUpload()}
 
         <div className="modal modal-backdrop" data-backdrop="static" id="modal" tabIndex="-1">
