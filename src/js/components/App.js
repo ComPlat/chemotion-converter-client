@@ -29,13 +29,12 @@ class App extends Component {
 
   onSubmitFileHandler() {
     const { selectedFile } = this.state
-    const fileName = 'convert.jcamp'
 
     this.setState({
       isLoading: true
     })
 
-    ConverterApi.fetchConversion(selectedFile, fileName)
+    ConverterApi.fetchConversion(selectedFile)
       .then(message => {
         if (message === 'success') {
           this.setState({

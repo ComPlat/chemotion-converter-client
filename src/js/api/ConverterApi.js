@@ -45,7 +45,7 @@ class ConverterApi {
       })
   }
 
-  static fetchConversion(file, fileName) {
+  static fetchConversion(file) {
     const data = new FormData()
     data.append('file', file)
 
@@ -54,10 +54,18 @@ class ConverterApi {
       body: data
     }
 
+    let fileName
     return fetch(converter_app_url + '/conversions', requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
-          return response.blob()
+        if (!response.ok) {
+          throw response
+        }
+        fileName = response.headers.get('content-disposition')
+          .split(';')
+          .find(n => n.includes('filename='))
+          .replace('filename=', '')
+          .trim();
+        return response.blob()
       })
       .then(blob => {
         const url = window.URL.createObjectURL(blob)
