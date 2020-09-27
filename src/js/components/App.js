@@ -10,7 +10,8 @@ class App extends Component {
     this.state = {
       selectedFile: null,
       error: false,
-      errorMessage: ''
+      errorMessage: '',
+      isLoading: false,
     }
 
     this.onFileChangeHandler = this.onFileChangeHandler.bind(this)
@@ -21,6 +22,8 @@ class App extends Component {
     this.setState({
       selectedFile: event.target.files[0],
       loaded: 0,
+      error: false,
+      errorMessage: ''
     })
   }
 
@@ -28,13 +31,26 @@ class App extends Component {
     const { selectedFile } = this.state
     const fileName = 'convert.jcamp'
 
+    this.setState({
+      isLoading: true
+    })
+
     ConverterApi.fetchConversion(selectedFile, fileName)
-      .catch(error => {
-        return {
-          errors: {
-            path: 'File not found'
-          }
+      .then(message => {
+        if (message === 'success') {
+          this.setState({
+            isLoading: false
+          })
         }
+      })
+      .catch(error => {
+        error.text().then( errorMessage => {
+          this.setState({
+            error:true,
+            errorMessage: JSON.parse(errorMessage).error,
+            isLoading: false
+          })
+        })
       })
   }
 
@@ -47,7 +63,7 @@ class App extends Component {
           <div>
             <div className='row justify-content-center'>
               <div className='col-6'>
-                <p className="text-center">Please upload a file of the following types: csv, xy</p>
+                <p className="text-center">Please upload a file</p>
               </div>
             </div>
             <div className='row justify-content-center h-100'>
@@ -58,6 +74,13 @@ class App extends Component {
                 <button type="button" className="btn btn-primary btn-lg btn-block" onClick={this.onSubmitFileHandler}>Upload</button>
                 {this.state.error &&
                   <div className="alert alert-danger mt-2">{ this.state.errorMessage }</div>
+                }
+                {this.state.isLoading &&
+                <div className="d-flex justify-content-center mt-3">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="sr-only">Loading...</span>
+                  </div>
+                </div>
                 }
               </form>
             </div>

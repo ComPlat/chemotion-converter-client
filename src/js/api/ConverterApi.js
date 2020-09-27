@@ -11,18 +11,13 @@ class ConverterApi {
       body: data
     }
 
-    let ok
     return fetch(converter_app_url + '/tables', requestOptions)
       .then(response => {
-        ok = response.ok
+        if (!response.ok) { throw response }
         return response.json()
       })
       .then(data => {
-        if (ok) {
           return data
-        } else {
-          throw new Error(json.error)
-        }
       })
   }
 
@@ -60,7 +55,10 @@ class ConverterApi {
     }
 
     return fetch(converter_app_url + '/conversions', requestOptions)
-      .then(response => response.blob())
+      .then(response => {
+        if (!response.ok) { throw response }
+          return response.blob()
+      })
       .then(blob => {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -70,6 +68,7 @@ class ConverterApi {
         document.body.appendChild(a)
         a.click()
         a.remove()
+        return 'success'
       })
   }
 }
