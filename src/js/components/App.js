@@ -56,17 +56,17 @@ class App extends Component {
 
   render() {
     return(
-      <div className='container vh-100'>
+      <div className='container'>
           <div className='row justify-content-center'>
               <h1 className="p-5">Chemotion file converter</h1>
           </div>
           <div>
             <div className='row justify-content-center'>
               <div className='col-6'>
-                <p className="text-center">Please upload a file</p>
+                <p className="text-center">Please upload a file.</p>
               </div>
             </div>
-            <div className='row justify-content-center h-100'>
+            <div className='row justify-content-center'>
               <form>
                 <div className="form-group">
                   <input type="file" className="form-control-file" id="fileUpload" onChange={this.onFileChangeHandler}/>

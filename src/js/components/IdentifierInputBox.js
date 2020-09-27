@@ -48,7 +48,7 @@ class IdentifierInputBox extends Component {
         }
         <form>
             <div className="form pt-3">
-              <button type="button" className="btn btn-success btn-sm float-right" onClick={this.onAddIdentifier}>Add Identifier</button>
+              <button type="button" className="btn btn-success btn-sm" onClick={this.onAddIdentifier}>Add Identifier</button>
             </div>
         </form>
       </div>

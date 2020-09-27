@@ -285,6 +285,18 @@ class AdvancedApp extends Component {
     )
   }
 
+  renderTableHeader(table) {
+    return (
+      <pre>
+        {
+          table.header.map(line => {
+            return <code>{line}</code>
+          })
+        }
+      </pre>
+    )
+  }
+
   renderDataGrid(table) {
     const rows = table.rows.map(row => {
       return Object.fromEntries(row.map((value, idx) => {
@@ -295,7 +307,7 @@ class AdvancedApp extends Component {
     return <ReactDataGrid columns={table.columns}
       rowGetter={i => rows[i]}
       rowsCount={rows.length}
-      minHeight={300} />
+      minHeight={600} />
   }
 
   renderCreateProfile() {
@@ -303,105 +315,102 @@ class AdvancedApp extends Component {
 
     return (
       <div>
-        <div className="row position-relative">
-          <div className="col-md-8">
-            <div className='row justify-content-center'>
-              <h1 className="p-5">Chemotion file converter</h1>
-              <h2>Step 2: Add rules and identifiers for conversion profile</h2>
-            </div>
-            <ul className="nav nav-tabs" id="Tabs" role="tablist">
-              {tableData.data.map((table, index) => {
-                return (
-                  <li key={index} className="nav-item" role="presentation">
-                    <a className={`nav-link ${index == 0 ? "active" : ""}`} id="table-data-tab" href={'#table-data-' + index}
-                      data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Table #{index + 1}</a>
-                  </li>
-                )
-              })}
-            </ul>
+        <div className="row">
+          <main className="col-md-8 vh-100">
+            <div>
+              <div className="pt-3 pb-3">
+                <h1>Chemotion file converter</h1>
+                <h2>Step 2: Add rules and identifiers for conversion profile</h2>
+              </div>
 
-            <div className="tab-content border-bottom" id="Tabs">
-              {tableData.data.map((table, index) => {
-                return (
-                  <div key={index} className={`tab-pane fade p-3 ${index == 0 ? "active show" : ""}`} id={'table-data-' + index}
-                    role="tabpanel" aria-labelledby="table-data-tab">
+              <ul className="nav nav-tabs" id="Tabs" role="tablist">
+                {tableData.data.map((table, index) => {
+                  return (
+                    <li key={index} className="nav-item" role="presentation">
+                      <a className={`nav-link ${index == 0 ? "active" : ""}`} id="table-data-tab" href={'#table-data-' + index}
+                        data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Table #{index + 1}</a>
+                    </li>
+                  )
+                })}
+              </ul>
 
-                    {table.header && <pre><code>{
-                      table.header.map(line => {
-                        return line + '\n'
-                      })
-                    }</code></pre>}
-                    {table.rows.length > 0 &&
-                      <div>
-                        <div className="form-group form-check">
-                          <input type="checkbox" checked={table.firstRowIsHeader || false}
-                            onChange={e => this.toggleFirstRowIsHeader(index)}
-                            className="form-check-input" id="first_row_is_header" />
-                          <label className="form-check-label" htmlFor="first_row_is_header">first row are column names</label>
+              <div className="tab-content border-bottom pt-3" id="Tabs">
+                {tableData.data.map((table, index) => {
+                  return (
+                    <div key={index} className={`tab-pane fade ${index == 0 ? "active show" : ""}`} id={'table-data-' + index}
+                      role="tabpanel" aria-labelledby="table-data-tab">
+
+                      {table.header && this.renderTableHeader(table)}
+
+                      {table.rows.length > 0 &&
+                        <div>
+                          <div className="form-group form-check">
+                            <input type="checkbox" checked={table.firstRowIsHeader || false}
+                              onChange={e => this.toggleFirstRowIsHeader(index)}
+                              className="form-check-input" id="first_row_is_header" />
+                            <label className="form-check-label" htmlFor="first_row_is_header">first row are column names</label>
+                          </div>
+
+                          {this.renderDataGrid(table)}
                         </div>
-
-                        {this.renderDataGrid(table)}
-                      </div>
-                    }
-                  </div>
-                )
-              })
-              }
-            </div>
-
-          </div>
-          <div className="col-md-4 sidenav border-left pl-0 pr-0">
-
-            <div className="card border-left-0 border-top-0 rounded-0">
-              <div className="card-header">Metadata</div>
-              <div className="card-body">
-                {this.renderOptions()}
+                      }
+                    </div>
+                  )
+                })
+                }
               </div>
             </div>
+          </main>
 
-            <div className="card border-left-0 border-top-0 rounded-0">
-              <div className="card-header">Rules</div>
-              <div className="card-body">
-                {this.renderColumnsForm()}
+          <aside className="col-md-4 vh-100">
+            <div>
+              <div className="card rounded-0 mt-3">
+                <div className="card-header">Metadata</div>
+                <div className="card-body">
+                  {this.renderOptions()}
+                </div>
+              </div>
+
+              <div className="card rounded-0 mt-3">
+                <div className="card-header">Rules</div>
+                <div className="card-body">
+                  {this.renderColumnsForm()}
+                </div>
+              </div>
+
+              <div className="card rounded-0 mt-3">
+                <div className="card-header">Identifiers</div>
+                <div className="card-body">
+                  <label>File Data</label>
+                  <IdentifierInputBox
+                    type={'metadata'}
+                    identifiers={this.state.identifiers}
+                    addIdentifier={this.addIdentifier}
+                    updateIdentifiers={this.updateIdentifiers}
+                    removeIdentifier={this.removeIdentifier}
+                    data={tableData.metadata}
+                  />
+
+                  <label>Table Headers</label>
+                  <IdentifierInputBox
+                    type={'tabledata'}
+                    identifiers={this.state.identifiers}
+                    addIdentifier={this.addIdentifier}
+                    updateIdentifiers={this.updateIdentifiers}
+                    removeIdentifier={this.removeIdentifier}
+                    data={tableData.data}
+                  />
+                </div>
+              </div>
+
+              <div className="row justify-content-center mt-3">
+                <form>
+                  <button type="submit" className="btn btn-primary" onClick={this.onSubmitSelectedData}>Create profile</button>
+                </form>
               </div>
             </div>
-
-            <div className="card border-left-0 border-top-0 rounded-0">
-              <div className="card-header">Identifiers</div>
-              <div className="card-body">
-                <label>File Data</label>
-                <IdentifierInputBox
-                  type={'metadata'}
-                  identifiers={this.state.identifiers}
-                  addIdentifier={this.addIdentifier}
-                  updateIdentifiers={this.updateIdentifiers}
-                  removeIdentifier={this.removeIdentifier}
-                  data={tableData.metadata}
-                />
-
-                <label>Table Headers</label>
-                <IdentifierInputBox
-                  type={'tabledata'}
-                  identifiers={this.state.identifiers}
-                  addIdentifier={this.addIdentifier}
-                  updateIdentifiers={this.updateIdentifiers}
-                  removeIdentifier={this.removeIdentifier}
-                  data={tableData.data}
-                />
-              </div>
-            </div>
-
-
-
-            <div className="row justify-content-center pt-3">
-              <form>
-                <button type="submit" className="btn btn-primary" onClick={this.onSubmitSelectedData}>Submit</button>
-              </form>
-            </div>
-          </div>
+          </aside>
         </div>
-
-
       </div>
     )
   }
@@ -410,7 +419,7 @@ class AdvancedApp extends Component {
     const { tableData } = this.state
 
     return (
-      <div className='container-fluid vh-100'>
+      <div className='container-fluid'>
         {tableData ? this.renderCreateProfile() : this.renderUpload()}
 
         <div className="modal modal-backdrop" data-backdrop="static" id="modal" tabIndex="-1">
