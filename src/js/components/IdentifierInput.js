@@ -80,7 +80,7 @@ class IndentifierInput extends Component {
         <div className="form-row">
 
           {this.props.type == 'metadata' &&
-            <div className="col-2">
+            <div className="col-4">
               <label className="sr-only" htmlFor={"metadataKeySelect" + this.props.id}>Metadata</label>
               <select className="form-control form-control-sm" id={"metadataKeySelect" + this.props.id} onChange={this.onSelectMetadata}>
                 {
@@ -119,7 +119,7 @@ class IndentifierInput extends Component {
             </div>
           }
 
-          <div className={(this.props.type == 'metadata' ? 'col-7' : 'col-3')}>
+          <div className={(this.props.type == 'metadata' ? 'col-5' : 'col-3')}>
             <label className="sr-only" htmlFor={"inditifierValue" + this.props.id}>value</label>
             <div className="input-group mb-2">
               <input
