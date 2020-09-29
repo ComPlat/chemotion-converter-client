@@ -53,13 +53,21 @@ class AdvancedApp extends Component {
   }
 
   addIdentifier(type) {
+    let metadataKey = ''
+    let value = ''
+
+    if (type === 'metadata') {
+      metadataKey = Object.keys(this.state.tableData.metadata)[0]
+      value = this.state.tableData.metadata[metadataKey]
+    }
+
     let identifier = {
       type: type,
       tableIndex: 0,
       lineNumber: '',
-      metadataKey: '',
+      metadataKey: metadataKey,
       headerKey: '',
-      value: '',
+      value: value,
       isRegex: false
     }
     let identifiers = this.state.identifiers
