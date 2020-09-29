@@ -93,7 +93,7 @@ class IndentifierInput extends Component {
           }
 
           {this.props.type == 'table' &&
-            <div className="col">
+            <div className="col-auto">
               <label className="sr-only" htmlFor={"tabledataTableSelect" + this.props.id}>Tabledata</label>
               <select className="form-control form-control-sm" id={"abledataTableSelect" + this.props.id} onChange={this.onSelectTable}>
                 {
@@ -119,7 +119,7 @@ class IndentifierInput extends Component {
             </div>
           }
 
-          <div className="col-auto">
+          <div className="col">
             <label className="sr-only" htmlFor={"inditifierHeaderKey" + this.props.id}>Headerkey</label>
             <div className="input-group mb-2">
               <input
@@ -132,7 +132,7 @@ class IndentifierInput extends Component {
             </div>
           </div>
 
-          <div className="col-auto">
+          <div className="col">
             <label className="sr-only" htmlFor={"inditifierValue" + this.props.id}>value</label>
             <div className="input-group mb-2">
               <input
@@ -158,8 +158,8 @@ class IndentifierInput extends Component {
             </div>
           </div>
 
-          <div className="col-auto">
-            <button type="button" className="btn btn-danger btn-sm" onClick={this.removeIdentifier}><i className="fas fa-trash-alt"></i></button>
+          <div className="col">
+            <button type="button" className="btn btn-danger btn-sm float-right" onClick={this.removeIdentifier}><i className="fas fa-trash-alt"></i></button>
           </div>
         </div>
       </form>
