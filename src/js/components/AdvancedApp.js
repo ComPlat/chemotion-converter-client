@@ -21,8 +21,7 @@ class AdvancedApp extends Component {
       yValues: false,
       identifiers: [],
       options: {},
-      selectedOptions: {},
-      showSuccessMessage: false
+      selectedOptions: {}
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
@@ -35,10 +34,6 @@ class AdvancedApp extends Component {
     this.updateIdentifiers = this.updateIdentifiers.bind(this)
     this.removeIdentifier = this.removeIdentifier.bind(this)
     this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
-  }
-
-  componentDidUpdate(){
-    setTimeout(() => this.setState({showSuccessMessage:false}), 3000);
   }
 
   addOrUpdateOption(event) {
@@ -363,14 +358,6 @@ class AdvancedApp extends Component {
                 <h1>Chemotion file converter</h1>
                 <h2>Step 2: Add rules and identifiers for conversion profile</h2>
               </div>
-
-              {this.state.showSuccessMessage &&
-              <div className="pt-3 pb-3">
-                <div className="alert alert-success" role="alert">
-                  Your file has been processed!
-                </div>
-              </div>
-              }
 
               <h4>Metadata</h4>
               <div className="pt-3 pb-3 mb-3 border-top border-bottom">
