@@ -17,8 +17,8 @@ class AdvancedApp extends Component {
       error: false,
       isLoading: false,
       errorMessage: '',
-      xValues: '0',
-      yValues: '0',
+      xValues: false,
+      yValues: false,
       identifiers: [],
       options: {},
       selectedOptions: {},
@@ -88,11 +88,21 @@ class AdvancedApp extends Component {
   }
 
   onSelectXcolumn(event) {
-    this.setState({ xValues: event.target.value })
+    let value = event.target.value
+    if (value === 'default') {
+      this.setState({ xValues: false})
+    } else {
+      this.setState({ xValues: value})
+    }
   }
 
   onSelectYcolumn(event) {
-    this.setState({ yValues: event.target.value })
+    let value = event.target.value
+    if (value === 'default') {
+      this.setState({ yValues: false})
+    } else {
+      this.setState({ yValues: value})
+    }
   }
 
   toggleFirstRowIsHeader(index) {
@@ -251,6 +261,7 @@ class AdvancedApp extends Component {
         <div className="form-group">
           <label htmlFor="x_column">Which column should be used as x-values?</label>
           <select className="form-control form-control-sm" id="x_column" onChange={this.onSelectXcolumn}>
+            <option value='default' >-----------</option>
             {columnList.map((column, index) => {
               return <option value={index} key={index}>{column.label}</option>
             })}
@@ -259,6 +270,7 @@ class AdvancedApp extends Component {
         <div className="form-group">
           <label htmlFor="y_column">Which column should be used as y-values?</label>
           <select className="form-control form-control-sm" id="y_column" onChange={this.onSelectYcolumn}>
+          <option value='default' >-----------</option>
             {columnList.map((column, index) => {
               return <option value={index} key={index}>{column.label}</option>
             })}
