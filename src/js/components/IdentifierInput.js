@@ -23,7 +23,7 @@ class IndentifierInput extends Component {
     let data = {
       metadataKey: option,
       value: value,
-      isExact: true
+      isRegex: false
     }
     this.props.updateIdentifiers(this.props.id, data)
     this.setState({
@@ -62,24 +62,8 @@ class IndentifierInput extends Component {
 
   toogleIsRegex(event) {
     let data = {}
-    if (!this.props.isRegex === this.props.isExact) {
-      let isRegex = !this.props.isRegex
-      let isExact = !this.props.isExact
-      let disabled = !isRegex
-      data['isRegex'] = isRegex
-      data['isExact'] = isExact
-      this.setState({
-        disabled: disabled
-      })
-    } else {
-      if (event.target.value == 'regex') {
-        let isRegex = !this.props.isRegex
-        data['isRegex'] = isRegex
-      } else {
-        let isExact = !this.props.isExact
-        data['isExact'] = isExact
-      }
-    }
+    let isRegex = !this.props.isRegex
+    data['isRegex'] = isRegex
     this.props.updateIdentifiers(this.props.id, data)
   }
 
@@ -136,7 +120,7 @@ class IndentifierInput extends Component {
                 type="text"
                 className="form-control form-control-sm"
                 id={"inditifierValue" + this.props.id}
-                disabled={this.props.type === 'metadata' && this.state.disabled}
+                disabled={this.props.type === 'metadata' && !this.props.isRegex}
                 value={this.props.value}
               />
             </div>
@@ -144,22 +128,9 @@ class IndentifierInput extends Component {
 
           <div className="col">
             <div className="form-check form-check-inline">
-              <input
-                className="form-check-input"
-                type="radio" name="inditifierInterpretOptions"
-                id={"interpreteExact" + this.props.id}
-                disabled={this.props.type === 'metadata' && this.props.value == ''}
-                value="exactmatch"
-                onChange={this.toogleIsRegex} checked={this.props.isExact}
-              />
-              <label className="form-check-label" htmlFor={"interpreteExact" + this.props.id}>exact Match</label>
-            </div>
-
-            <div className="form-check form-check-inline">
               <input className="form-check-input"
-                type="radio" name="inditifierInterpretOptions"
+                type="checkbox" name="inditifierInterpretOptions"
                 id={"interpreteReges" + this.props.id}
-                disabled={this.props.type === 'metadata' && this.props.value == ''}
                 value="regex"
                 onChange={this.toogleIsRegex} checked={this.props.isRegex}
               />

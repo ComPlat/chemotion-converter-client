@@ -36,7 +36,6 @@ class IdentifierInputBox extends Component {
                 linenumber={identifier.linenumber}
                 metadataKey={identifier.metadataKey}
                 value={identifier.value}
-                isExact={identifier.isExact}
                 isRegex={identifier.isRegex}
                 options={this.props.data}
                 removeIdentifier={this.removeIdentifier}

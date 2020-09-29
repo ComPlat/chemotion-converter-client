@@ -59,7 +59,6 @@ class AdvancedApp extends Component {
       linenumber: '',
       metadataKey: '',
       value: '',
-      isExact: false,
       isRegex: false
     }
     let identifiers = this.state.identifiers
