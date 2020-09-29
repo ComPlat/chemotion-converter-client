@@ -92,7 +92,7 @@ class IndentifierInput extends Component {
             </div>
           }
 
-          {this.props.type == 'tabledata' &&
+          {this.props.type == 'table' &&
             <div className="col">
               <label className="sr-only" htmlFor={"tabledataTableSelect" + this.props.id}>Tabledata</label>
               <select className="form-control form-control-sm" id={"abledataTableSelect" + this.props.id} onChange={this.onSelectTable}>
@@ -105,7 +105,7 @@ class IndentifierInput extends Component {
             </div>
           }
 
-          {this.props.type == 'tabledata' &&
+          {this.props.type == 'table' &&
             <div className="col-2">
               <label className="sr-only" htmlFor={"tabledataLineSelect" + this.props.id}>Line</label>
               <input

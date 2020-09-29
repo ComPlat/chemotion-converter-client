@@ -433,7 +433,7 @@ class AdvancedApp extends Component {
 
                   <label>Based on table headers</label>
                   <IdentifierInputBox
-                    type={'tabledata'}
+                    type={'table'}
                     identifiers={this.state.identifiers}
                     addIdentifier={this.addIdentifier}
                     updateIdentifiers={this.updateIdentifiers}
