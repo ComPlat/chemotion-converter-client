@@ -1,16 +1,9 @@
-// .sidenav {
-//     position: fixed;
-//     top: 0;
-//     right: 0;
-//     z-index: 1030;
-//     height: 100%;
-//     overflow: scroll;
-// }
-
 html,
 body {
-    overflow: hidden;
-    height: 100%;
+    @include media-breakpoint-up(md) {
+        overflow: hidden;
+        height: 100%;
+    }
 }
 
 main,

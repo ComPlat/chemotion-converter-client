@@ -343,7 +343,7 @@ class AdvancedApp extends Component {
       rowGetter={i => rows[i]}
       rowsCount={rows.length}
       enableCellAutoFocus={false}
-      minHeight={600} />
+      minHeight={800} />
   }
 
   renderCreateProfile() {
@@ -353,7 +353,7 @@ class AdvancedApp extends Component {
       <div>
         <div className="row">
           <main className="col-md-7 vh-100">
-            <div>
+            <div className="mb-5">
               <div className="pt-3 pb-3">
                 <h1>Chemotion file converter</h1>
                 <h2>Step 2: Add rules and identifiers for conversion profile</h2>
@@ -408,7 +408,7 @@ class AdvancedApp extends Component {
           </main>
 
           <aside className="col-md-5 vh-100">
-            <div>
+            <div className="mb-5">
               <div className="card rounded-0 mt-3">
                 <div className="card-header">
                   <div>Metadata</div>
@@ -451,11 +451,11 @@ class AdvancedApp extends Component {
                     removeIdentifier={this.removeIdentifier}
                     data={tableData.data}
                   />
-                  <small className="text-muted">The identifiers you create will be used to find the right profile for uploaded files. If you fill in the field 'header key', the identifier will also be added to the header of the converted file.</small>
+                  <small className="text-muted">The identifiers you create will be used to find the right profile for uploaded files. The 'value' will be compared to the selected file metadata or to the header of a table. If you provide a line number, only this line of the header will be used. If you select 'RexExp', you can enter a regular expression as value, which will be used to match the file. If you fill in the field 'header key', the compared string (or the first group of a given RegExp) will be added to the header of the converted file.</small>
                 </div>
               </div>
 
-              <div className="row justify-content-center mt-3 mb-3">
+              <div className="row justify-content-center mt-3">
                 <form>
                   <button type="submit" className="btn btn-primary" onClick={this.onSubmitSelectedData}>Create profile</button>
                 </form>

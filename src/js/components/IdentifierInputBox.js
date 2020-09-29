@@ -24,7 +24,7 @@ class IdentifierInputBox extends Component {
 
   render() {
     return (
-      <div className="pb-5">
+      <div className="mb-4">
         {
           this.props.identifiers.map((identifier, i) => {
             if (identifier.type === this.props.type) {
@@ -47,7 +47,7 @@ class IdentifierInputBox extends Component {
           )
         }
         <form>
-            <div className="form pt-3">
+            <div className="form">
               <button type="button" className="btn btn-success btn-sm" onClick={this.onAddIdentifier}>Add Identifier</button>
             </div>
         </form>

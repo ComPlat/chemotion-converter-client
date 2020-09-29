@@ -77,10 +77,9 @@ class IndentifierInput extends Component {
   render() {
     return (
       <form>
-        <div className="form-row">
-
+        <div className="form-row align-items-center">
           {this.props.type == 'metadata' &&
-            <div className="col-4">
+            <div className="col-lg-4 mb-2">
               <label className="sr-only" htmlFor={"metadataKeySelect" + this.props.id}>Metadata</label>
               <select className="form-control form-control-sm" id={"metadataKeySelect" + this.props.id} onChange={this.onSelectMetadata}>
                 {
@@ -93,7 +92,7 @@ class IndentifierInput extends Component {
           }
 
           {this.props.type == 'table' &&
-            <div className="col-2">
+            <div className="col-lg-2 mb-2">
               <label className="sr-only" htmlFor={"tabledataTableSelect" + this.props.id}>Tabledata</label>
               <select className="form-control form-control-sm" id={"abledataTableSelect" + this.props.id} onChange={this.onSelectTable}>
                 {
@@ -106,7 +105,7 @@ class IndentifierInput extends Component {
           }
 
           {this.props.type == 'table' &&
-            <div className="col-2">
+            <div className="col-lg-2 mb-2">
               <label className="sr-only" htmlFor={"tabledataLineSelect" + this.props.id}>Line</label>
               <input
                 onChange={this.updateLinenumber}
@@ -119,51 +118,51 @@ class IndentifierInput extends Component {
             </div>
           }
 
-          <div className={(this.props.type == 'metadata' ? 'col-5' : 'col-3')}>
-            <label className="sr-only" htmlFor={"inditifierValue" + this.props.id}>value</label>
-            <div className="input-group mb-2">
+          <div className={(this.props.type == 'metadata' ? 'col-lg-4' : 'col-lg-2') + ' mb-2'}>
+            <label className="sr-only" htmlFor={"identifierValue" + this.props.id}>value</label>
+            <div className="input-group">
               <input
                 onChange={this.updateValue}
                 type="text"
                 placeholder={'Value'}
                 className="form-control form-control-sm"
-                id={"inditifierValue" + this.props.id}
+                id={"identifierValue" + this.props.id}
                 disabled={this.props.type === 'metadata' && !this.props.isRegex}
                 value={this.props.value}
               />
             </div>
           </div>
 
-          {this.props.type == 'table' &&
-          <div className="col-2">
-            <label className="sr-only" htmlFor={"inditifierHeaderKey" + this.props.id}>Headerkey</label>
-            <div className="input-group mb-2">
-              <input
-                onChange={this.updateHeaderKey}
-                type="text"
-                placeholder={'header key'}
-                className="form-control form-control-sm"
-                id={"inditifierHeaderKey" + this.props.id}
-                value={this.props.headerKey}
-              />
-            </div>
-          </div>
-          }
-
-          <div className="col-2">
-            <div className="form-check form-check-inline">
+          <div className="col-lg-2 mb-2">
+            <div className="form-check">
               <input className="form-check-input"
-                type="checkbox" name="inditifierInterpretOptions"
-                id={"interpreteReges" + this.props.id}
+                type="checkbox" name="identifierInterpretOptions"
+                id={"isRegex" + this.props.id}
                 value="regex"
                 onChange={this.toogleIsRegex} checked={this.props.isRegex}
               />
-              <label className="form-check-label" htmlFor={"interpreteReges" + this.props.id}>regex</label>
+              <label className="form-check-label" htmlFor={"isRegex" + this.props.id}>RegExp</label>
             </div>
           </div>
 
-          <div className="col-1">
-            <button type="button" className="btn btn-danger btn-sm float-right" onClick={this.removeIdentifier}><i className="fas fa-trash-alt"></i></button>
+          {this.props.type == 'table' &&
+            <div className="col-lg-2 mb-2">
+              <label className="sr-only" htmlFor={"identifierHeaderKey" + this.props.id}>Headerkey</label>
+              <div className="input-group">
+                <input
+                  onChange={this.updateHeaderKey}
+                  type="text"
+                  placeholder={'Header key'}
+                  className="form-control form-control-sm"
+                  id={"identifierHeaderKey" + this.props.id}
+                  value={this.props.headerKey}
+                />
+              </div>
+            </div>
+          }
+
+          <div className="col-lg-2 mb-2">
+            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.removeIdentifier}>Remove</button>
           </div>
         </div>
       </form>
