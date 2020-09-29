@@ -143,6 +143,16 @@ class AdvancedApp extends Component {
 
     const { tableData, columnList, identifiers, xValues, yValues, selectedOptions } = this.state
 
+    let xv = false
+    if (xValues) {
+      xv = columnList[xValues].value
+    }
+
+    let yv = false
+    if (yValues) {
+      yv = columnList[yValues].value
+    }
+
     const data = {
       table: {
         xColumn: xv,
