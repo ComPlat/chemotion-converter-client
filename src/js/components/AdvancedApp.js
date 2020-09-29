@@ -448,7 +448,7 @@ class AdvancedApp extends Component {
                 </div>
               </div>
 
-              <div className="row justify-content-center mt-3">
+              <div className="row justify-content-center mt-3 mb-3">
                 <form>
                   <button type="submit" className="btn btn-primary" onClick={this.onSubmitSelectedData}>Create profile</button>
                 </form>
