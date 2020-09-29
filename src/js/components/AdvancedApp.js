@@ -274,7 +274,7 @@ class AdvancedApp extends Component {
               <select className="form-control form-control-sm" onChange={this.addOrUpdateOption} id={option}>
                 {
                   options[option].map((select, selectIndex) => {
-                    return <option value={select} key={select}>{select}</option>
+                    return <option value={select} key={selectIndex}>{select}</option>
                   })
                 }
               </select>
