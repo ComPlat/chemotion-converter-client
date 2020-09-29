@@ -32,9 +32,10 @@ class IdentifierInputBox extends Component {
                 key={i}
                 id={i}
                 type={identifier.type}
-                table={identifier.table}
-                linenumber={identifier.linenumber}
+                tableIndex={identifier.tableIndex}
+                lineNumber={identifier.lineNumber}
                 metadataKey={identifier.metadataKey}
+                headerKey={identifier.headerKey}
                 value={identifier.value}
                 isRegex={identifier.isRegex}
                 options={this.props.data}

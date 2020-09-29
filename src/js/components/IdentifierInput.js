@@ -32,18 +32,16 @@ class IndentifierInput extends Component {
   }
 
   onSelectTable(event) {
-    let option = event.target.value
-    let table = this.props.options[option]
     let data = {
-      table: table
+      tableIndex: Number(event.target.value)
     }
     this.props.updateIdentifiers(this.props.id, data)
   }
 
   updateLinenumber (event) {
-    let linenumber = event.target.value
+    let lineNumber = event.target.value
     let data = {
-      linenumber: linenumber
+      lineNumber: lineNumber
     }
     this.props.updateIdentifiers(this.props.id, data)
   }
@@ -91,7 +89,7 @@ class IndentifierInput extends Component {
               <select className="form-control form-control-sm" id={"abledataTableSelect" + this.props.id} onChange={this.onSelectTable}>
                 {
                   Object.keys(this.props.options).map((option, i) =>
-                    <option key={i}>{"Table #" + i + 1}</option>
+                    <option key={i} value={i}>{"Table #" + i + 1}</option>
                   )
                 }
               </select>
@@ -107,7 +105,7 @@ class IndentifierInput extends Component {
                 placeholder={'Linenumber'}
                 className="form-control form-control-sm"
                 id={"tabledataLineSelect" + this.props.id}
-                value={this.props.linenumber}
+                value={this.props.lineNumber}
               />
             </div>
           }

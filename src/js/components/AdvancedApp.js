@@ -55,9 +55,10 @@ class AdvancedApp extends Component {
   addIdentifier(type) {
     let identifier = {
       type: type,
-      table: 0,
-      linenumber: '',
+      tableIndex: 0,
+      lineNumber: '',
       metadataKey: '',
+      headerKey: '',
       value: '',
       isRegex: false
     }
@@ -135,7 +136,7 @@ class AdvancedApp extends Component {
     const { tableData, columnList, identifiers, xValues, yValues, selectedOptions } = this.state
 
     const data = {
-      rules: {
+      data: {
         x_column: columnList[xValues].value,
         y_column: columnList[yValues].value,
         firstRowIsHeader: tableData.data.map(table => {
@@ -143,7 +144,7 @@ class AdvancedApp extends Component {
         })
       },
       identifiers: identifiers,
-      metadata: selectedOptions
+      header: selectedOptions
     }
 
     ConverterApi.createProfile(data)
