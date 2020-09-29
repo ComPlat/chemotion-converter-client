@@ -339,7 +339,7 @@ class AdvancedApp extends Component {
     return (
       <div>
         <div className="row">
-          <main className="col-md-8 vh-100">
+          <main className="col-md-7 vh-100">
             <div>
               <div className="pt-3 pb-3">
                 <h1>Chemotion file converter</h1>
@@ -402,7 +402,7 @@ class AdvancedApp extends Component {
             </div>
           </main>
 
-          <aside className="col-md-4 vh-100">
+          <aside className="col-md-5 vh-100">
             <div>
               <div className="card rounded-0 mt-3">
                 <div className="card-header">Metadata</div>

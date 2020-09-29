@@ -15,6 +15,7 @@ class IndentifierInput extends Component {
     this.removeIdentifier = this.removeIdentifier.bind(this)
     this.updateLinenumber = this.updateLinenumber.bind(this)
     this.updateValue = this.updateValue.bind(this)
+    this.updateHeaderKey = this.updateHeaderKey.bind(this)
   }
 
   onSelectMetadata(event) {
@@ -42,6 +43,14 @@ class IndentifierInput extends Component {
     let lineNumber = event.target.value
     let data = {
       lineNumber: lineNumber
+    }
+    this.props.updateIdentifiers(this.props.id, data)
+  }
+
+  updateHeaderKey (event) {
+    let value = event.target.value
+    let data = {
+      headerKey: value
     }
     this.props.updateIdentifiers(this.props.id, data)
   }
@@ -102,13 +111,26 @@ class IndentifierInput extends Component {
               <input
                 onChange={this.updateLinenumber}
                 type="text"
-                placeholder={'Linenumber'}
+                placeholder={'# line'}
                 className="form-control form-control-sm"
                 id={"tabledataLineSelect" + this.props.id}
                 value={this.props.lineNumber}
               />
             </div>
           }
+
+          <div className="col-auto">
+            <label className="sr-only" htmlFor={"inditifierHeaderKey" + this.props.id}>Headerkey</label>
+            <div className="input-group mb-2">
+              <input
+                onChange={this.updateHeaderKey}
+                type="text"
+                className="form-control form-control-sm"
+                id={"inditifierHeaderKey" + this.props.id}
+                value={this.props.headerKey}
+              />
+            </div>
+          </div>
 
           <div className="col-auto">
             <label className="sr-only" htmlFor={"inditifierValue" + this.props.id}>value</label>
