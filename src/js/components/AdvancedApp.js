@@ -21,7 +21,8 @@ class AdvancedApp extends Component {
       yValues: '0',
       identifiers: [],
       options: {},
-      selectedOptions: {}
+      selectedOptions: {},
+      showSuccessMessage: false
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
@@ -34,6 +35,10 @@ class AdvancedApp extends Component {
     this.updateIdentifiers = this.updateIdentifiers.bind(this)
     this.removeIdentifier = this.removeIdentifier.bind(this)
     this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
+  }
+
+  componentDidUpdate(){
+    setTimeout(() => this.setState({showSuccessMessage:false}), 3000);
   }
 
   addOrUpdateOption(event) {
@@ -185,6 +190,7 @@ class AdvancedApp extends Component {
             tableData: tableData,
             columnList: columnList,
             options: tableData.options,
+            showSuccessMessage: true,
             error: false,
             errorMessage: ''
           })
@@ -287,13 +293,16 @@ class AdvancedApp extends Component {
 
   renderTableHeader(table) {
     return (
-      <pre>
-        {
-          table.header.map(line => {
-            return <code>{line}</code>
-          })
-        }
-      </pre>
+      <div>
+        Header
+        <pre>
+          {
+            table.header.map((line, index) => {
+              return <code key={index}>{line}</code>
+            })
+          }
+        </pre>
+      </div>
     )
   }
 
@@ -304,9 +313,11 @@ class AdvancedApp extends Component {
       }))
     })
 
-    return <ReactDataGrid columns={table.columns}
+    return <ReactDataGrid
+      columns={table.columns}
       rowGetter={i => rows[i]}
       rowsCount={rows.length}
+      enableCellAutoFocus={false}
       minHeight={600} />
   }
 
@@ -323,6 +334,23 @@ class AdvancedApp extends Component {
                 <h2>Step 2: Add rules and identifiers for conversion profile</h2>
               </div>
 
+              {this.state.showSuccessMessage &&
+              <div className="pt-3 pb-3">
+                <div className="alert alert-success" role="alert">
+                  Your file has been processed!
+                </div>
+              </div>
+              }
+
+              <h4>Metadata</h4>
+              <div className="pt-3 pb-3 mb-3 border-top border-bottom">
+                {Object.keys(tableData.metadata).map((entry, index) => {
+                    return <div key={index}>{entry}: {tableData.metadata[entry]}</div>
+                  })
+                }
+              </div>
+
+              <h4>Tables</h4>
               <ul className="nav nav-tabs" id="Tabs" role="tablist">
                 {tableData.data.map((table, index) => {
                   return (
@@ -340,7 +368,7 @@ class AdvancedApp extends Component {
                     <div key={index} className={`tab-pane fade ${index == 0 ? "active show" : ""}`} id={'table-data-' + index}
                       role="tabpanel" aria-labelledby="table-data-tab">
 
-                      {table.header && this.renderTableHeader(table)}
+                      {table.header.length > 0 && this.renderTableHeader(table)}
 
                       {table.rows.length > 0 &&
                         <div>
@@ -381,7 +409,7 @@ class AdvancedApp extends Component {
               <div className="card rounded-0 mt-3">
                 <div className="card-header">Identifiers</div>
                 <div className="card-body">
-                  <label>File Data</label>
+                  <label>Based on metadata</label>
                   <IdentifierInputBox
                     type={'metadata'}
                     identifiers={this.state.identifiers}
@@ -391,7 +419,7 @@ class AdvancedApp extends Component {
                     data={tableData.metadata}
                   />
 
-                  <label>Table Headers</label>
+                  <label>Based on table headers</label>
                   <IdentifierInputBox
                     type={'tabledata'}
                     identifiers={this.state.identifiers}
