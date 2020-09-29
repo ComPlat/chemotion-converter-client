@@ -136,9 +136,9 @@ class AdvancedApp extends Component {
     const { tableData, columnList, identifiers, xValues, yValues, selectedOptions } = this.state
 
     const data = {
-      data: {
-        x_column: columnList[xValues].value,
-        y_column: columnList[yValues].value,
+      table: {
+        xColumn: xv,
+        yColumn: yv,
         firstRowIsHeader: tableData.data.map(table => {
           return table.firstRowIsHeader || false
         })
