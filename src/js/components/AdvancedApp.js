@@ -410,16 +410,22 @@ class AdvancedApp extends Component {
           <aside className="col-md-5 vh-100">
             <div>
               <div className="card rounded-0 mt-3">
-                <div className="card-header">Metadata</div>
+                <div className="card-header">
+                  <div>Metadata</div>
+                </div>
                 <div className="card-body">
                   {this.renderOptions()}
+                  <small className="text-muted">The data you pick here will be added to the metadata of your converted file.</small>
                 </div>
               </div>
 
               <div className="card rounded-0 mt-3">
-                <div className="card-header">Rules</div>
+                <div className="card-header">
+                  <div>Rules</div>
+                </div>
                 <div className="card-body">
                   {this.renderColumnsForm()}
+                  <small className="text-muted">The data you pick will determine which table columns are going to converted.</small>
                 </div>
               </div>
 
@@ -445,6 +451,7 @@ class AdvancedApp extends Component {
                     removeIdentifier={this.removeIdentifier}
                     data={tableData.data}
                   />
+                  <small className="text-muted">The identifiers you create will be used to find the right profile for uploaded files. If you fill in the field 'header key', the identifier will also be added to the header of the converted file.</small>
                 </div>
               </div>
 
