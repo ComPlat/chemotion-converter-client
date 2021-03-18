@@ -11,6 +11,7 @@ class AdminApp extends Component {
 
     super(props)
     this.state = {
+      status: 'list',
       selectedFile: null,
       tableData: null,
       columnList: null,
@@ -34,6 +35,7 @@ class AdminApp extends Component {
     this.updateIdentifiers = this.updateIdentifiers.bind(this)
     this.removeIdentifier = this.removeIdentifier.bind(this)
     this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
+    this.showUpdateView = this.showUpdateView.bind(this)
   }
 
   addOrUpdateOption(event) {
@@ -45,6 +47,12 @@ class AdminApp extends Component {
       selectedOptions: newSelectedOptions
     })
 
+  }
+
+  showUpdateView() {
+    this.setState({
+      status: 'create'
+    })
   }
 
   addIdentifier(type) {
@@ -346,6 +354,39 @@ class AdminApp extends Component {
       minHeight={800} />
   }
 
+  renderProfileList() {
+    return (
+      <div>
+        <div className="row justify-content-center">
+          <main className="col-md-7 vh-100">
+            <div className="mb-5">
+              <div className="pt-3 pb-3">
+                <h1>Chemotion file converter</h1>
+                <h2>Update Profiles</h2>
+              </div>
+              <div className="row my-3">
+                <div className="col">
+                  <button type="button" onClick={this.showUpdateView} className="btn btn-primary float-right">Create new profile</button>
+                </div>
+              </div>
+              <ul className="list-group">
+                <li className="list-group-item d-flex justify-content-between align-items-center">
+                  Profile 1
+                </li>
+                <li className="list-group-item d-flex justify-content-between align-items-center">
+                  Profile 2
+              </li>
+              <li className="list-group-item d-flex justify-content-between align-items-center">
+                Profile 3
+              </li>
+            </ul>
+          </div>
+        </main>
+      </div>
+    </div>
+    )
+  }
+
   renderCreateProfile() {
     const { tableData } = this.state
 
@@ -468,11 +509,17 @@ class AdminApp extends Component {
   }
 
   render() {
-    const { tableData } = this.state
+    const { tableData, status } = this.state
 
     return (
       <div className='container-fluid'>
-        {tableData ? this.renderCreateProfile() : this.renderUpload()}
+        { status == 'list' &&
+          this.renderProfileList()
+        }
+
+        { status == 'create' &&
+          tableData ? this.renderCreateProfile() : this.renderUpload()
+        }
 
         <div className="modal modal-backdrop" data-backdrop="static" id="modal" tabIndex="-1">
           <div className="modal-dialog modal-dialog-centered">
