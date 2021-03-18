@@ -5,7 +5,7 @@ import ConverterApi from '../api/ConverterApi'
 import IdentifierInputBox from './IdentifierInputBox'
 
 
-class AdvancedApp extends Component {
+class AdminApp extends Component {
 
   constructor(props) {
 
@@ -481,7 +481,7 @@ class AdvancedApp extends Component {
                 <div className="alert alert-success" role="alert">Successfully created profile!</div>
               </div>
               <div className="modal-footer">
-                <a href="/advanced/" className="btn btn-secondary">Create another profile</a>
+                <a href="/admin/" className="btn btn-secondary">Create another profile</a>
                 <a href="/" className="btn btn-primary">Upload file and use profile</a>
               </div>
             </div>
@@ -493,4 +493,4 @@ class AdvancedApp extends Component {
   }
 }
 
-export default AdvancedApp
+export default AdminApp

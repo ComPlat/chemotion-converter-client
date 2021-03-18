@@ -15,13 +15,13 @@ module.exports = {
       'popper.js',
       'bootstrap'
     ],
-    'advanced/index': [
+    'admin/index': [
       '@fortawesome/fontawesome-free/scss/fontawesome.scss',
       '@fortawesome/fontawesome-free/scss/brands.scss',
       '@fortawesome/fontawesome-free/scss/regular.scss',
       '@fortawesome/fontawesome-free/scss/solid.scss',
       './src/scss/style.scss',
-      './src/js/advanced.js',
+      './src/js/admin.js',
       'popper.js',
       'bootstrap'
     ],
