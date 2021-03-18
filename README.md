@@ -16,6 +16,7 @@ After following the instructions in the installation script, `nvm` should be ava
 
 ```bash
 nvm use
+npm i
 npm run build
 ```
 
