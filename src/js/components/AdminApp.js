@@ -26,7 +26,9 @@ class AdminApp extends Component {
       identifiers: [],
       options: {},
       selectedOptions: {},
-      profiles: []
+      profiles: [],
+      currentIndex: -1,
+      currentIdentifier: ''
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
@@ -41,8 +43,10 @@ class AdminApp extends Component {
     this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
     this.showUpdateView = this.showUpdateView.bind(this)
     this.deleteProfile = this.deleteProfile.bind(this)
+    this.editProfile = this.editProfile.bind(this)
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
+    this.renderEditProfile = this.renderEditProfile.bind(this)
   }
 
   componentDidMount() {
@@ -52,6 +56,14 @@ class AdminApp extends Component {
           profiles: profiles
         })
       })
+  }
+
+  editProfile(index, identifier) {
+    this.setState({
+      status: 'edit',
+      currentIndex: index,
+      currentIdentifier: identifier
+    })
   }
 
   deleteProfile(index, identifier) {
@@ -422,6 +434,7 @@ class AdminApp extends Component {
                         identifier={profile.id}
                         index={i}
                         deleteProfile={this.deleteProfile}
+                        editProfile={this.editProfile}
                       />
                     }
                   )
@@ -432,6 +445,10 @@ class AdminApp extends Component {
       </div>
     </div>
     )
+  }
+
+  renderEditProfile () {
+    return (<h1>Edit</h1>)
   }
 
   renderCreateProfile() {
@@ -583,6 +600,10 @@ class AdminApp extends Component {
       <div className='container-fluid'>
         { status == 'list' &&
           this.renderProfileList()
+        }
+
+        { status == 'edit' &&
+          this.renderEditProfile()
         }
 
         { status == 'create' &&
