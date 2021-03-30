@@ -2,6 +2,35 @@ const converter_app_url = process.env.CONVERTER_APP_URL
 
 class ConverterApi {
 
+  static deleteProfile (identifier) {
+
+    const requestOptions = {
+      method: 'DELETE'
+    }
+
+    return fetch(converter_app_url + '/profiles/' + identifier, requestOptions)
+      .then(response => {
+        if (!response.ok) { throw response }
+          return response
+      })
+  }
+
+  static fetchProfiles () {
+
+    const requestOptions = {
+      method: 'GET'
+    }
+
+    return fetch(converter_app_url + '/profiles', requestOptions)
+      .then(response => {
+        if (!response.ok) { throw response }
+        return response.json()
+      })
+      .then(data => {
+        return data
+      })
+  }
+
   static fetchTables(file) {
     const data = new FormData()
     data.append('file', file)

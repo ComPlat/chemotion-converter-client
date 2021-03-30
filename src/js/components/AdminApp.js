@@ -3,6 +3,7 @@ import ReactDataGrid from "react-data-grid"
 
 import ConverterApi from '../api/ConverterApi'
 import IdentifierInputBox from './IdentifierInputBox'
+import ListItem from './ListItem'
 
 
 class AdminApp extends Component {
@@ -18,11 +19,14 @@ class AdminApp extends Component {
       error: false,
       isLoading: false,
       errorMessage: '',
+      title: 'test',
+      description: 'description',
       xValues: false,
       yValues: false,
       identifiers: [],
       options: {},
-      selectedOptions: {}
+      selectedOptions: {},
+      profiles: []
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
@@ -36,6 +40,29 @@ class AdminApp extends Component {
     this.removeIdentifier = this.removeIdentifier.bind(this)
     this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
     this.showUpdateView = this.showUpdateView.bind(this)
+    this.deleteProfile = this.deleteProfile.bind(this)
+  }
+
+  componentDidMount() {
+    ConverterApi.fetchProfiles()
+      .then(profiles => {
+        this.setState({
+          profiles: profiles
+        })
+      })
+  }
+
+  deleteProfile(index, identifier) {
+
+    ConverterApi.deleteProfile(identifier)
+      .then(() => {
+        let newProfiles = [...this.state.profiles]
+          if (index !== -1) {
+            newProfiles.splice(index, 1)
+            this.setState({ profiles: newProfiles })
+          }
+        }
+      )
   }
 
   addOrUpdateOption(event) {
@@ -144,7 +171,7 @@ class AdminApp extends Component {
   onSubmitSelectedData(event) {
     event.preventDefault()
 
-    const { tableData, columnList, identifiers, xValues, yValues, selectedOptions } = this.state
+    const { title, description, tableData, columnList, identifiers, xValues, yValues, selectedOptions } = this.state
 
     let xv = false
     if (xValues) {
@@ -165,7 +192,9 @@ class AdminApp extends Component {
         })
       },
       identifiers: identifiers,
-      header: selectedOptions
+      header: selectedOptions,
+      title: title,
+      description: description
     }
 
     ConverterApi.createProfile(data)
@@ -370,15 +399,18 @@ class AdminApp extends Component {
                 </div>
               </div>
               <ul className="list-group">
-                <li className="list-group-item d-flex justify-content-between align-items-center">
-                  Profile 1
-                </li>
-                <li className="list-group-item d-flex justify-content-between align-items-center">
-                  Profile 2
-              </li>
-              <li className="list-group-item d-flex justify-content-between align-items-center">
-                Profile 3
-              </li>
+                { this.state.profiles.map((profile, i) => {
+                      return <ListItem
+                        key={i}
+                        title={profile.title}
+                        description={profile.description}
+                        identifier={profile.id}
+                        index={i}
+                        deleteProfile={this.deleteProfile}
+                      />
+                    }
+                  )
+                }
             </ul>
           </div>
         </main>
@@ -450,6 +482,27 @@ class AdminApp extends Component {
 
           <aside className="col-md-5 vh-100">
             <div className="mb-5">
+
+            <div className="card rounded-0 mt-3">
+                <div className="card-header">
+                  <div>Profile</div>
+                </div>
+                <div className="card-body">
+                  <div>
+                    <label>Title</label>
+                    <input type="text" class="form-control form-control-sm" value=""/>
+                    <small className="text-muted">Please add a title for this profile.</small>
+                  </div>
+
+                  <div className="mt-3">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="3"></textarea>
+                    <small className="text-muted">Please add a description for this profile.</small>
+                  </div>
+
+                </div>
+              </div>
+
               <div className="card rounded-0 mt-3">
                 <div className="card-header">
                   <div>Metadata</div>
