@@ -19,8 +19,8 @@ class AdminApp extends Component {
       error: false,
       isLoading: false,
       errorMessage: '',
-      title: 'test',
-      description: 'description',
+      title: '',
+      description: '',
       xValues: false,
       yValues: false,
       identifiers: [],
@@ -41,6 +41,8 @@ class AdminApp extends Component {
     this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
     this.showUpdateView = this.showUpdateView.bind(this)
     this.deleteProfile = this.deleteProfile.bind(this)
+    this.updateTitle = this.updateTitle.bind(this)
+    this.updateDescription = this.updateDescription.bind(this)
   }
 
   componentDidMount() {
@@ -53,7 +55,6 @@ class AdminApp extends Component {
   }
 
   deleteProfile(index, identifier) {
-
     ConverterApi.deleteProfile(identifier)
       .then(() => {
         let newProfiles = [...this.state.profiles]
@@ -63,6 +64,20 @@ class AdminApp extends Component {
           }
         }
       )
+  }
+
+  updateTitle(event) {
+      let title = event.currentTarget.value
+      this.setState({
+        title: title
+      })
+  }
+
+  updateDescription(event) {
+    let description = event.currentTarget.value
+    this.setState({
+      description: description
+    })
   }
 
   addOrUpdateOption(event) {
@@ -490,13 +505,13 @@ class AdminApp extends Component {
                 <div className="card-body">
                   <div>
                     <label>Title</label>
-                    <input type="text" class="form-control form-control-sm" value=""/>
+                    <input type="text" className="form-control form-control-sm" onChange={this.updateTitle} value={this.state.title} />
                     <small className="text-muted">Please add a title for this profile.</small>
                   </div>
 
                   <div className="mt-3">
                     <label>Description</label>
-                    <textarea class="form-control" rows="3"></textarea>
+                    <textarea className="form-control" rows="3" onChange={this.updateDescription} value={this.state.description}/>
                     <small className="text-muted">Please add a description for this profile.</small>
                   </div>
 
