@@ -74,6 +74,30 @@ class ConverterApi {
       })
   }
 
+  static updateProfile(data, identifier) {
+    const requestOptions = {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    let ok
+    return fetch(converter_app_url + '/profiles/' + identifier, requestOptions)
+      .then(response => {
+        ok = response.ok
+        return response.json()
+      })
+      .then(data => {
+        if (ok) {
+          return data
+        } else {
+          throw new Error(error)
+        }
+      })
+  }
+
   static fetchConversion(file) {
     const data = new FormData()
     data.append('file', file)

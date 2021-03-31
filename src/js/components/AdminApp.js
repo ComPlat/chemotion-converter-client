@@ -28,7 +28,9 @@ class AdminApp extends Component {
       selectedOptions: {},
       profiles: [],
       currentIndex: -1,
-      currentIdentifier: ''
+      currentIdentifier: '',
+      header: {},
+      table: {}
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
@@ -47,6 +49,8 @@ class AdminApp extends Component {
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
     this.renderEditProfile = this.renderEditProfile.bind(this)
+    this.dispatchView = this.dispatchView.bind(this)
+    this.updateProfile = this.updateProfile.bind(this)
   }
 
   componentDidMount() {
@@ -59,11 +63,44 @@ class AdminApp extends Component {
   }
 
   editProfile(index, identifier) {
+    let currentProfile = this.state.profiles[index]
     this.setState({
       status: 'edit',
       currentIndex: index,
-      currentIdentifier: identifier
+      currentIdentifier: identifier,
+      title: currentProfile.title,
+      description: currentProfile.description,
+      identifiers: currentProfile.identifiers,
+      header: currentProfile.header,
+      table: currentProfile.table
     })
+  }
+
+  updateProfile() {
+    const { title, description, identifiers, header, table} = this.state
+    let data = {
+      title: title,
+      description: description,
+      identifiers: identifiers,
+      header: header,
+      table: table
+    }
+    ConverterApi.updateProfile(data, this.state.currentIdentifier)
+      .then((data) => {
+        let newProfiles = [...this.state.profiles]
+        newProfiles[this.state.currentIndex] = data
+        this.setState({
+          profiles: newProfiles,
+          status: 'list',
+          title: '',
+          description: '',
+          identifiers: [],
+          header: {},
+          table: {},
+          currentIndex: -1,
+          currentIdentifier: '',
+        })
+      })
   }
 
   deleteProfile(index, identifier) {
@@ -448,7 +485,38 @@ class AdminApp extends Component {
   }
 
   renderEditProfile () {
-    return (<h1>Edit</h1>)
+    return (
+      <div>
+        <div className="row justify-content-center">
+          <main className="col-md-7 vh-100">
+            <div className="mb-5">
+              <div className="pt-3 pb-3">
+                <h1>Chemotion file converter</h1>
+                <h2>Update Profile</h2>
+              </div>
+              <div className="card rounded-0 mt-3">
+                <div className="card-header">
+                  <div>Profile</div>
+                </div>
+                <div className="card-body">
+                  <div>
+                    <label>Title</label>
+                    <input type="text" className="form-control form-control-sm" onChange={this.updateTitle} value={this.state.title} />
+                    <small className="text-muted">Please add a title for this profile.</small>
+                  </div>
+                  <div className="mt-3">
+                    <label>Description</label>
+                    <textarea className="form-control" rows="3" onChange={this.updateDescription} value={this.state.description}/>
+                    <small className="text-muted">Please add a description for this profile.</small>
+                  </div>
+                </div>
+              </div>
+              <div onClick={this.updateProfile} className="btn btn-primary btn-block mt-3">Submit</div>
+            </div>
+          </main>
+        </div>
+      </div>
+    )
   }
 
   renderCreateProfile() {
@@ -593,22 +661,27 @@ class AdminApp extends Component {
     )
   }
 
+  dispatchView () {
+    const { tableData, status } = this.state
+    if (status === 'list') {
+      return this.renderProfileList()
+    } else if (status == 'edit') {
+      return this.renderEditProfile()
+    } else if (status == 'create') {
+      if (tableData) {
+        return this.renderCreateProfile()
+      } else {
+        return this.renderUpload()
+      }
+    }
+  }
+
   render() {
     const { tableData, status } = this.state
 
     return (
       <div className='container-fluid'>
-        { status == 'list' &&
-          this.renderProfileList()
-        }
-
-        { status == 'edit' &&
-          this.renderEditProfile()
-        }
-
-        { status == 'create' &&
-          tableData ? this.renderCreateProfile() : this.renderUpload()
-        }
+        {this.dispatchView()}
 
         <div className="modal modal-backdrop" data-backdrop="static" id="modal" tabIndex="-1">
           <div className="modal-dialog modal-dialog-centered">
