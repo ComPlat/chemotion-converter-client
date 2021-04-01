@@ -30,7 +30,9 @@ class AdminApp extends Component {
       currentIndex: -1,
       currentIdentifier: '',
       header: {},
-      table: {}
+      table: {},
+      deleteIdentifier: '',
+      deleteIndex: '',
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
@@ -51,6 +53,8 @@ class AdminApp extends Component {
     this.renderEditProfile = this.renderEditProfile.bind(this)
     this.dispatchView = this.dispatchView.bind(this)
     this.updateProfile = this.updateProfile.bind(this)
+    this.submitDeleteProfile = this.submitDeleteProfile.bind(this)
+    this.dismissDeleteProfile = this.dismissDeleteProfile.bind(this)
   }
 
   componentDidMount() {
@@ -104,15 +108,36 @@ class AdminApp extends Component {
   }
 
   deleteProfile(index, identifier) {
-    ConverterApi.deleteProfile(identifier)
+    $('#delete-modal').show()
+    this.setState({
+      deleteIdentifier: identifier,
+      deleteIndex: index
+    })
+  }
+
+  submitDeleteProfile () {
+    ConverterApi.deleteProfile(this.state.deleteIdentifier)
       .then(() => {
         let newProfiles = [...this.state.profiles]
-          if (index !== -1) {
-            newProfiles.splice(index, 1)
-            this.setState({ profiles: newProfiles })
+          if (this.state.deleteIndex !== -1) {
+            newProfiles.splice(this.state.deleteIndex, 1)
+            this.setState({
+              profiles: newProfiles,
+              deleteIdentifier: '',
+              deleteIndex: ''
+            })
+            $('#delete-modal').hide()
           }
         }
       )
+  }
+
+  dismissDeleteProfile () {
+    $('#delete-modal').hide()
+    this.setState({
+      deleteIdentifier: '',
+      deleteIndex: ''
+    })
   }
 
   updateTitle(event) {
@@ -692,6 +717,20 @@ class AdminApp extends Component {
               <div className="modal-footer">
                 <a href="/admin/" className="btn btn-secondary">Create another profile</a>
                 <a href="/" className="btn btn-primary">Upload file and use profile</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="modal modal-backdrop" data-backdrop="static" id="delete-modal" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Do you really want to delete this profile?</h5>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={this.dismissDeleteProfile}  data-bs-dismiss="modal">Cancel</button>
+                <button type="button" className="btn btn-primary" onClick={this.submitDeleteProfile}>Yes, delete Profile</button>
               </div>
             </div>
           </div>
