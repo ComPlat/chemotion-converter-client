@@ -33,6 +33,7 @@ class AdminApp extends Component {
       table: {},
       deleteIdentifier: '',
       deleteIndex: '',
+      showAlert: false
     }
 
     this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
@@ -64,6 +65,10 @@ class AdminApp extends Component {
           profiles: profiles
         })
       })
+  }
+
+  componentDidUpdate(){
+    setTimeout(() => this.setState({showAlert: false}), 6000);
   }
 
   editProfile(index, identifier) {
@@ -103,6 +108,7 @@ class AdminApp extends Component {
           table: {},
           currentIndex: -1,
           currentIdentifier: '',
+          showAlert: true
         })
       })
   }
@@ -487,6 +493,10 @@ class AdminApp extends Component {
                   <button type="button" onClick={this.showUpdateView} className="btn btn-primary float-right">Create new profile</button>
                 </div>
               </div>
+              { this.state.showAlert &&
+                <div className="alert alert-success" role="alert">Profile successfully updated!</div>
+              }
+
               <ul className="list-group">
                 { this.state.profiles.map((profile, i) => {
                       return <ListItem
@@ -706,6 +716,7 @@ class AdminApp extends Component {
 
     return (
       <div className='container-fluid'>
+
         {this.dispatchView()}
 
         <div className="modal modal-backdrop" data-backdrop="static" id="modal" tabIndex="-1">
