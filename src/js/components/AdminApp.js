@@ -550,7 +550,7 @@ class AdminApp extends Component {
 
               <div className="card rounded-0 mt-3">
                 <div className="card-header">
-                    <div>Metadata</div>
+                    <div>Identifiers</div>
                 </div>
                 <div className="card-body">
                   <IdentifierInputBox
