@@ -529,6 +529,7 @@ class AdminApp extends Component {
                 <h1>Chemotion file converter</h1>
                 <h2>Update Profile</h2>
               </div>
+
               <div className="card rounded-0 mt-3">
                 <div className="card-header">
                   <div>Profile</div>
@@ -544,6 +545,24 @@ class AdminApp extends Component {
                     <textarea className="form-control" rows="3" onChange={this.updateDescription} value={this.state.description}/>
                     <small className="text-muted">Please add a description for this profile.</small>
                   </div>
+                </div>
+              </div>
+
+              <div className="card rounded-0 mt-3">
+                <div className="card-header">
+                    <div>Metadata</div>
+                </div>
+                <div className="card-body">
+                  <IdentifierInputBox
+                    status={this.state.status}
+                    type={'metadata'}
+                    status={this.state.status}
+                    identifiers={this.state.identifiers}
+                    addIdentifier={this.addIdentifier}
+                    updateIdentifiers={this.updateIdentifiers}
+                    removeIdentifier={this.removeIdentifier}
+                    data={[]}
+                  />
                 </div>
               </div>
               <div onClick={this.updateProfile} className="btn btn-primary btn-block mt-3">Submit</div>
@@ -663,6 +682,7 @@ class AdminApp extends Component {
                 <div className="card-body">
                   <label>Based on metadata</label>
                   <IdentifierInputBox
+                    status={this.state.status}
                     type={'metadata'}
                     identifiers={this.state.identifiers}
                     addIdentifier={this.addIdentifier}
@@ -673,6 +693,7 @@ class AdminApp extends Component {
 
                   <label>Based on table headers</label>
                   <IdentifierInputBox
+                    status={this.state.status}
                     type={'table'}
                     identifiers={this.state.identifiers}
                     addIdentifier={this.addIdentifier}
