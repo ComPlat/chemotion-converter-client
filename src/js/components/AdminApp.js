@@ -365,6 +365,14 @@ class AdminApp extends Component {
   renderUpload() {
     return (
       <div>
+        <div className="row justify-content-center pt-3">
+          <nav aria-label="breadcrumb">
+            <ol className="breadcrumb">
+              <li className="breadcrumb-item" aria-current="page"><a href="">All profiles</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Create Profile</li>
+            </ol>
+          </nav>
+        </div>
         <div className='row justify-content-center'>
           <h1 className="p-5">Chemotion file converter</h1>
         </div>
@@ -526,6 +534,12 @@ class AdminApp extends Component {
           <main className="col-md-7 vh-100">
             <div className="mb-5">
               <div className="pt-3 pb-3">
+                <nav aria-label="breadcrumb">
+                  <ol className="breadcrumb">
+                    <li className="breadcrumb-item" aria-current="page"><a href="">All profiles</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{'Edit Profile: ' + this.state.title }</li>
+                  </ol>
+                </nav>
                 <h1>Chemotion file converter</h1>
                 <h2>Update Profile</h2>
               </div>
@@ -550,6 +564,91 @@ class AdminApp extends Component {
 
               <div className="card rounded-0 mt-3">
                 <div className="card-header">
+                    <div>Metadata</div>
+                </div>
+                <div className="card-body">
+                  { Object.keys(this.state.header).map((entry, i) => {
+                    return(
+                      <div key={i} className="form-row align-items-center">
+                        <div className="col-lg-2 mb-2">
+                          <input
+                            readOnly
+                            type="text"
+                            className="form-control form-control-sm"
+                            value={entry}
+                          />
+                        </div>
+                        <div className="col-lg-10 mb-2">
+                          <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            value={this.state.header[entry]}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="card rounded-0 mt-3">
+                <div className="card-header">
+                    <div>Rules</div>
+                </div>
+                <div className="card-body">
+                  <div className="form-row align-items-center">
+                    <div className="col-lg-2 mb-2">
+                        <input
+                          readOnly
+                          type="text"
+                          className="form-control form-control-sm"
+                          value="x-Values"
+                        />
+                    </div>
+                    <div className="col-lg-4 mb-2">
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={this.state.table.xColumn.tableIndex}
+                        />
+                    </div>
+                    <div className="col-lg-4 mb-2">
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={this.state.table.xColumn.columnIndex}
+                        />
+                    </div>
+                  </div>
+                  <div className="form-row align-items-center">
+                    <div className="col-lg-2 mb-2">
+                        <input
+                          readOnly
+                          type="text"
+                          className="form-control form-control-sm"
+                          value="y-Values"
+                        />
+                    </div>
+                    <div className="col-lg-4 mb-2">
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={this.state.table.yColumn.tableIndex}
+                        />
+                    </div>
+                    <div className="col-lg-4 mb-2">
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={this.state.table.yColumn.columnIndex}
+                        />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card rounded-0 mt-3">
+                <div className="card-header">
                     <div>Identifiers</div>
                 </div>
                 <div className="card-body">
@@ -563,8 +662,21 @@ class AdminApp extends Component {
                     removeIdentifier={this.removeIdentifier}
                     data={[]}
                   />
+
+                  <IdentifierInputBox
+                    status={this.state.status}
+                    type={'table'}
+                    status={this.state.status}
+                    identifiers={this.state.identifiers}
+                    addIdentifier={this.addIdentifier}
+                    updateIdentifiers={this.updateIdentifiers}
+                    removeIdentifier={this.removeIdentifier}
+                    data={[]}
+                  />
                 </div>
               </div>
+
+
               <div onClick={this.updateProfile} className="btn btn-primary btn-block mt-3">Submit</div>
             </div>
           </main>
@@ -582,6 +694,12 @@ class AdminApp extends Component {
           <main className="col-md-7 vh-100">
             <div className="mb-5">
               <div className="pt-3 pb-3">
+                <nav aria-label="breadcrumb">
+                  <ol className="breadcrumb">
+                    <li className="breadcrumb-item" aria-current="page"><a href="">All profiles</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create Profile</li>
+                  </ol>
+                </nav>
                 <h1>Chemotion file converter</h1>
                 <h2>Step 2: Add rules and identifiers for conversion profile</h2>
               </div>
