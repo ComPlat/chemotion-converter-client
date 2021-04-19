@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import IdentifierInputBox from '../../IdentifierInputBox'
+import IdentifierInputBox from '../common/IdentifierInputBox'
 
 class ProfileEditForm extends Component {
 

@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import ReactDataGrid from "react-data-grid"
-import IdentifierInputBox from '../../IdentifierInputBox'
+import IdentifierInputBox from '../common/IdentifierInputBox'
 
 class ProfileCreate extends Component {
 

@@ -2,7 +2,6 @@ import React, { Component } from "react"
 //import ReactDataGrid from "react-data-grid"
 
 import ConverterApi from '../../api/ConverterApi'
-import IdentifierInputBox from '../IdentifierInputBox'
 import ProfileList from './list/ProfileList'
 import ProfileEditForm from './edit/ProfileEditForm'
 import FileUploadForm from './create/FileUploadForm'
