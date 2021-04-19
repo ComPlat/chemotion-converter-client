@@ -434,7 +434,6 @@ class AdminApp extends Component {
   }
 
   render() {
-    const { tableData, status } = this.state
 
     return (
       <div className='container-fluid'>
