@@ -53,11 +53,13 @@ class AdminApp extends Component {
     this.editProfile = this.editProfile.bind(this)
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
+    this.updateHeaderValue = this.updateHeaderValue.bind(this)
     this.dispatchView = this.dispatchView.bind(this)
     this.updateProfile = this.updateProfile.bind(this)
     this.submitDeleteProfile = this.submitDeleteProfile.bind(this)
     this.dismissDeleteProfile = this.dismissDeleteProfile.bind(this)
     this.getTitleforStatus = this.getTitleforStatus.bind(this)
+    this.updateRule = this.updateRule.bind(this)
   }
 
   componentDidMount() {
@@ -160,6 +162,25 @@ class AdminApp extends Component {
     })
   }
 
+  updateHeaderValue(key, value) {
+    let newHeader = { ...this.state.header}
+    newHeader[key] = value
+    this.setState({
+      header: newHeader
+    })
+  }
+
+  updateRule(key, tableIndex, columnIndex) {
+    let newTable = { ...this.state.table }
+    newTable[key] = {
+      tableIndex: tableIndex,
+      columnIndex: columnIndex
+    }
+    this.setState({
+      table: newTable
+    })
+  }
+
   addOrUpdateOption(event) {
     let key = event.target.getAttribute('id')
     let value = event.target.value
@@ -181,7 +202,7 @@ class AdminApp extends Component {
     let metadataKey = ''
     let value = ''
 
-    if (type === 'metadata') {
+    if (type === 'metadata' && this.state.status == 'create') {
       metadataKey = Object.keys(this.state.tableData.metadata)[0]
       value = this.state.tableData.metadata[metadataKey]
     }
@@ -380,8 +401,12 @@ class AdminApp extends Component {
         header={this.state.header}
         table={this.state.table}
         identifiers={this.state.identifiers}
+        updateIdentifiers={this.updateIdentifiers}
+        addIdentifier={this.addIdentifier}
         updateTitle={this.updateTitle}
         updateDescription={this.updateDescription}
+        updateHeaderValue={this.updateHeaderValue}
+        updateRule={this.updateRule}
         updateProfile={this.updateProfile}
         removeIdentifier={this.removeIdentifier}
       />

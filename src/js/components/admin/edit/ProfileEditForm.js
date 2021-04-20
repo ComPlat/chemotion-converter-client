@@ -1,5 +1,7 @@
 import React, { Component } from "react"
 import IdentifierInputBox from '../common/IdentifierInputBox'
+import HeaderEntry from './HeaderEntry'
+import RuleEntry from './RuleEntry'
 
 class ProfileEditForm extends Component {
 
@@ -7,6 +9,7 @@ class ProfileEditForm extends Component {
     super(props)
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
+    this.updateHeaderValue = this.updateHeaderValue.bind(this)
 
   }
 
@@ -18,6 +21,10 @@ class ProfileEditForm extends Component {
   updateDescription(event) {
     let description = event.currentTarget.value
     this.props.updateDescription(description)
+  }
+
+  updateHeaderValue(key, value) {
+    this.props.updateHeaderValue(key, value)
   }
 
   render() {
@@ -47,23 +54,12 @@ class ProfileEditForm extends Component {
           <div className="card-body">
             {Object.keys(this.props.header).map((entry, i) => {
               return (
-                <div key={i} className="form-row align-items-center">
-                  <div className="col-lg-2 mb-2">
-                    <input
-                      readOnly
-                      type="text"
-                      className="form-control form-control-sm"
-                      value={entry}
-                    />
-                  </div>
-                  <div className="col-lg-10 mb-2">
-                    <input
-                      type="text"
-                      className="form-control form-control-sm"
-                      value={this.props.header[entry]}
-                    />
-                  </div>
-                </div>
+                < HeaderEntry
+                  key={i}
+                  name={entry}
+                  value={this.props.header[entry]}
+                  updateHeaderValue={this.updateHeaderValue}
+                />
               )
             })}
           </div>
@@ -74,54 +70,20 @@ class ProfileEditForm extends Component {
             <div>Rules</div>
           </div>
           <div className="card-body">
-            <div className="form-row align-items-center">
-              <div className="col-lg-2 mb-2">
-                <input
-                  readOnly
-                  type="text"
-                  className="form-control form-control-sm"
-                  value="x-Values"
-                />
-              </div>
-              <div className="col-lg-4 mb-2">
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={this.props.table.xColumn.tableIndex}
-                />
-              </div>
-              <div className="col-lg-4 mb-2">
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={this.props.table.xColumn.columnIndex}
-                />
-              </div>
-            </div>
-            <div className="form-row align-items-center">
-              <div className="col-lg-2 mb-2">
-                <input
-                  readOnly
-                  type="text"
-                  className="form-control form-control-sm"
-                  value="y-Values"
-                />
-              </div>
-              <div className="col-lg-4 mb-2">
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={this.props.table.yColumn.tableIndex}
-                />
-              </div>
-              <div className="col-lg-4 mb-2">
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={this.props.table.yColumn.columnIndex}
-                />
-              </div>
-            </div>
+            <RuleEntry
+              name={'xColumn'}
+              title={'x-Values'}
+              tableIndex={this.props.table.xColumn.tableIndex}
+              columnIndex={this.props.table.xColumn.columnIndex}
+              updateRule={this.props.updateRule}
+            />
+            <RuleEntry
+              name={'yColumn'}
+              title={'y-Values'}
+              tableIndex={this.props.table.yColumn.tableIndex}
+              columnIndex={this.props.table.yColumn.columnIndex}
+              updateRule={this.props.updateRule}
+            />
           </div>
         </div>
 
@@ -134,8 +96,8 @@ class ProfileEditForm extends Component {
               status='edit'
               type={'metadata'}
               identifiers={this.props.identifiers}
-              addIdentifier={this.addIdentifier}
-              updateIdentifiers={this.updateIdentifiers}
+              addIdentifier={this.props.addIdentifier}
+              updateIdentifiers={this.props.updateIdentifiers}
               removeIdentifier={this.props.removeIdentifier}
               data={[]}
             />
@@ -144,8 +106,8 @@ class ProfileEditForm extends Component {
               status='edit'
               type={'table'}
               identifiers={this.props.identifiers}
-              addIdentifier={this.addIdentifier}
-              updateIdentifiers={this.updateIdentifiers}
+              addIdentifier={this.props.addIdentifier}
+              updateIdentifiers={this.props.updateIdentifiers}
               removeIdentifier={this.props.removeIdentifier}
               data={[]}
             />

@@ -10,6 +10,8 @@ class IndentifierEditInput extends Component {
     this.toogleIsRegex = this.toogleIsRegex.bind(this)
     this.updateLinenumber = this.updateLinenumber.bind(this)
     this.updateHeaderKey = this.updateHeaderKey.bind(this)
+    this.updateMetadataKey = this.updateMetadataKey.bind(this)
+    this.updateTableIndex = this.updateTableIndex.bind(this)
   }
 
   updateValue(event) {
@@ -47,6 +49,22 @@ class IndentifierEditInput extends Component {
     this.props.updateIdentifiers(this.props.id, data)
   }
 
+  updateMetadataKey (event) {
+    let value = event.target.value
+    let data = {
+      metadataKey: value
+    }
+    this.props.updateIdentifiers(this.props.id, data)
+  }
+
+  updateTableIndex (event) {
+    let value = event.target.value
+    let data = {
+      tableIndex: value
+    }
+    this.props.updateIdentifiers(this.props.id, data)
+  }
+
   render() {
     return (
       <form>
@@ -55,7 +73,7 @@ class IndentifierEditInput extends Component {
             <div className="col-lg-2 mb-2">
               <label className="sr-only" htmlFor={"metadataKeySelect" + this.props.id}>Metadata</label>
               <input
-                readOnly
+                onChange={this.updateMetadataKey}
                 className="form-control form-control-sm"
                 value={this.props.metadataKey}
               />
@@ -87,14 +105,15 @@ class IndentifierEditInput extends Component {
         }
 
         {this.props.type == 'table' &&
-          <div className="form-row align-items-center">
+          <div className="form-row">
             <div className="col-lg-2 mb-2">
               <label className="sr-only">Metadata</label>
               <input
-                readOnly
+                onChange={this.updateTableIndex}
                 className="form-control form-control-sm"
-                value={"Table #" + this.props.tableIndex + 1}
+                value={this.props.tableIndex}
               />
+              <label><small>Table Index</small></label>
             </div>
 
             <div className="col-lg-2 mb-2">
@@ -107,6 +126,7 @@ class IndentifierEditInput extends Component {
                 id={"tabledataLineSelect" + this.props.id}
                 value={this.props.lineNumber}
               />
+              <label><small>Linenumber</small></label>
             </div>
 
             <div className='col-lg-2 mb-2'>
