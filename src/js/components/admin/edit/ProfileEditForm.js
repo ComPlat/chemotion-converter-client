@@ -29,7 +29,7 @@ class ProfileEditForm extends Component {
 
   render() {
     return (
-      <div>
+      <div className="scroll">
         <div className="card rounded-0 mt-3">
           <div className="card-header">
             <div>Profile</div>
@@ -114,12 +114,12 @@ class ProfileEditForm extends Component {
           </div>
         </div>
 
-
-        <div onClick={this.props.updateProfile} className="btn btn-primary btn-block mt-3">Submit</div>
+        <div className="text-center mb-5">
+          <button onClick={this.props.updateProfile} className="btn btn-primary mt-3">Save profile</button>
+        </div>
       </div>
     )
   }
-
 }
 
 export default ProfileEditForm

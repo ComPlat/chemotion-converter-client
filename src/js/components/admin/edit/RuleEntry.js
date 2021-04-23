@@ -29,18 +29,18 @@ class RuleEntry extends Component {
             value={this.props.title}
           />
         </div>
-        <div className="col-lg-4 mb-2">
+        <div className="col-lg-2 mb-2">
           <input
-            type="text"
+            type="number"
             className="form-control form-control-sm"
             onChange={this.updateTableIndex}
             value={this.props.tableIndex}
           />
           <label><small>Table Index</small></label>
         </div>
-        <div className="col-lg-4 mb-2">
+        <div className="col-lg-2 mb-2">
           <input
-            type="text"
+            type="number"
             className="form-control form-control-sm"
             onChange={this.updateColumnIndex}
             value={this.props.columnIndex}

@@ -350,7 +350,7 @@ class AdminApp extends Component {
           const columnList = tableData.data.reduce((accumulator, table, tableIndex) => {
             const tableColumns = table.columns.map((tableColumn, columnIndex) => {
               return Object.assign({}, tableColumn, {
-                label: `Table #${tableIndex + 1} ${tableColumn.name}`,
+                label: `Table #${tableIndex} Column #${columnIndex}`,
                 value: {
                   tableIndex: tableIndex,
                   columnIndex: columnIndex
@@ -458,49 +458,43 @@ class AdminApp extends Component {
   }
 
   render() {
-
     return (
-      <div className='container-fluid'>
-        <div className="row justify-content-center">
-          <main className={`vh-100 ${this.state.tableData ? "col-md-12" : "col-md-5"}`}>
-            <div className="mb-5">
-              <div className="pt-3 pb-3">
-                <nav aria-label="breadcrumb">
-                  {this.state.status == 'list' &&
-                    <ol className="breadcrumb">
-                      <li className="breadcrumb-item active" aria-current="page">All profiles</li>
-                    </ol>
-                  }
-                  {this.state.status == 'edit' &&
-                    <ol className="breadcrumb">
-                      <li className="breadcrumb-item" aria-current="page"><a href="">All profiles</a></li>
-                      <li className="breadcrumb-item active" aria-current="page">{'Edit Profile: ' + this.state.title}</li>
-                    </ol>
-                  }
-                  {this.state.status == 'create' &&
-                    <ol className="breadcrumb">
-                      <li className="breadcrumb-item" aria-current="page"><a href="">All profiles</a></li>
-                      <li className="breadcrumb-item active" aria-current="page">{'Create Profile'}</li>
-                    </ol>
-                  }
-                </nav>
-                <h1>Chemotion file converter</h1>
-                <h2>{this.getTitleforStatus()}</h2>
+      <div className={this.state.tableData ? 'container-fluid' : 'container'}>
+        <header className="d-flex flex-column">
+          <nav aria-label="breadcrumb">
+            {this.state.status == 'list' &&
+              <ol className="breadcrumb">
+                <li className="breadcrumb-item active" aria-current="page">Chemotion file converter admin</li>
+              </ol>
+            }
+            {this.state.status == 'edit' &&
+              <ol className="breadcrumb">
+                <li className="breadcrumb-item" aria-current="page"><a href="">Chemotion file converter admin</a></li>
+                <li className="breadcrumb-item active" aria-current="page">{'Edit Profile: ' + this.state.title}</li>
+              </ol>
+            }
+            {this.state.status == 'create' &&
+              <ol className="breadcrumb">
+                <li className="breadcrumb-item" aria-current="page"><a href="">Chemotion file converter admin</a></li>
+                <li className="breadcrumb-item active" aria-current="page">{'Create Profile'}</li>
+              </ol>
+            }
+          </nav>
+
+          <div className="mt-auto">
+            {this.state.status == "list" &&
+              <div className="float-right">
+                <button type="button" onClick={this.showUpdateView} className="btn btn-primary">Create new profile</button>
               </div>
-              {this.state.status == "list" &&
-                <div className="row my-3">
-                  <div className="col">
-                    <button type="button" onClick={this.showUpdateView} className="btn btn-primary float-right">Create new profile</button>
-                  </div>
-                </div>
-              }
-              {this.state.showAlert &&
-                <div className="alert alert-success" role="alert">Profile successfully updated!</div>
-              }
-              {this.dispatchView()}
-            </div>
-          </main>
-        </div>
+            }
+
+            <h2 className="mb-0">{this.getTitleforStatus()}</h2>
+          </div>
+        </header>
+
+        <main>
+          {this.dispatchView()}
+        </main>
 
         <div className="modal modal-backdrop" data-backdrop="static" id="modal" tabIndex="-1">
           <div className="modal-dialog modal-dialog-centered">
@@ -523,13 +517,12 @@ class AdminApp extends Component {
                 <h5 className="modal-title">Do you really want to delete this profile?</h5>
               </div>
               <div className="modal-footer">
+                <button type="button" className="btn btn-danger" onClick={this.submitDeleteProfile}>Delete profile</button>
                 <button type="button" className="btn btn-secondary" onClick={this.dismissDeleteProfile} data-bs-dismiss="modal">Cancel</button>
-                <button type="button" className="btn btn-primary" onClick={this.submitDeleteProfile}>Yes, delete Profile</button>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     )
   }

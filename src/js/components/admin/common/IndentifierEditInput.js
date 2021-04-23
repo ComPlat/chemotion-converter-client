@@ -107,7 +107,6 @@ class IndentifierEditInput extends Component {
         {this.props.type == 'table' &&
           <div className="form-row">
             <div className="col-lg-2 mb-2">
-              <label className="sr-only">Metadata</label>
               <input
                 onChange={this.updateTableIndex}
                 className="form-control form-control-sm"
@@ -117,31 +116,26 @@ class IndentifierEditInput extends Component {
             </div>
 
             <div className="col-lg-2 mb-2">
-              <label className="sr-only" htmlFor={"tabledataLineSelect" + this.props.id}>Line</label>
               <input
                 onChange={this.updateLinenumber}
                 type="text"
-                placeholder={'# line'}
+                placeholder="Line number"
                 className="form-control form-control-sm"
-                id={"tabledataLineSelect" + this.props.id}
                 value={this.props.lineNumber}
               />
-              <label><small>Linenumber</small></label>
+              <label><small>Line number</small></label>
             </div>
 
             <div className='col-lg-2 mb-2'>
-              <label className="sr-only" htmlFor={"identifierValue" + this.props.id}>value</label>
-              <div className="input-group">
-                <input
-                  onChange={this.updateValue}
-                  type="text"
-                  placeholder={'Value'}
-                  className="form-control form-control-sm"
-                  id={"identifierValue" + this.props.id}
-                  disabled={this.props.type === 'metadata' && !this.props.isRegex}
-                  value={this.props.value}
-                />
-              </div>
+              <input
+                onChange={this.updateValue}
+                type="text"
+                placeholder="Value"
+                className="form-control form-control-sm"
+                disabled={this.props.type === 'metadata' && !this.props.isRegex}
+                value={this.props.value}
+              />
+              <label><small>Value</small></label>
             </div>
 
             <div className="col-lg-2 mb-2">
@@ -149,7 +143,7 @@ class IndentifierEditInput extends Component {
                 <input className="form-check-input"
                   type="checkbox" name="identifierInterpretOptions"
                   id={"isRegex" + this.props.id}
-                  value="regex"
+                  value="RegExp"
                   onChange={this.toogleIsRegex} checked={this.props.isRegex}
                 />
                 <label className="form-check-label" htmlFor={"isRegex" + this.props.id}>RegExp</label>
@@ -157,17 +151,14 @@ class IndentifierEditInput extends Component {
             </div>
 
             <div className="col-lg-2 mb-2">
-              <label className="sr-only" htmlFor={"identifierHeaderKey" + this.props.id}>Headerkey</label>
-              <div className="input-group">
-                <input
-                  onChange={this.updateHeaderKey}
-                  type="text"
-                  placeholder={'Header key'}
-                  className="form-control form-control-sm"
-                  id={"identifierHeaderKey" + this.props.id}
-                  value={this.props.headerKey}
-                />
-              </div>
+              <input
+                onChange={this.updateHeaderKey}
+                type="text"
+                placeholder="Header key"
+                className="form-control form-control-sm"
+                value={this.props.headerKey}
+              />
+              <label><small>Header key</small></label>
             </div>
 
             <div className="col-lg-2 mb-2">
