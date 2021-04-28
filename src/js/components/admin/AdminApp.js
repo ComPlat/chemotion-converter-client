@@ -54,6 +54,7 @@ class AdminApp extends Component {
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
     this.updateHeaderValue = this.updateHeaderValue.bind(this)
+    this.updateFirstRowIsHeaderValue = this.updateFirstRowIsHeaderValue.bind(this)
     this.dispatchView = this.dispatchView.bind(this)
     this.updateProfile = this.updateProfile.bind(this)
     this.submitDeleteProfile = this.submitDeleteProfile.bind(this)
@@ -167,6 +168,14 @@ class AdminApp extends Component {
     newHeader[key] = value
     this.setState({
       header: newHeader
+    })
+  }
+
+  updateFirstRowIsHeaderValue(index, checked) {
+    let newTable = { ...this.state.table }
+    newTable['firstRowIsHeader'][index]=checked
+    this.setState({
+      table: newTable
     })
   }
 
@@ -406,6 +415,7 @@ class AdminApp extends Component {
         updateTitle={this.updateTitle}
         updateDescription={this.updateDescription}
         updateHeaderValue={this.updateHeaderValue}
+        updateFirstRowIsHeaderValue={this.updateFirstRowIsHeaderValue}
         updateRule={this.updateRule}
         updateProfile={this.updateProfile}
         removeIdentifier={this.removeIdentifier}

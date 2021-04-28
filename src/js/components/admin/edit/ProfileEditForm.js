@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import IdentifierInputBox from '../common/IdentifierInputBox'
 import HeaderEntry from './HeaderEntry'
 import RuleEntry from './RuleEntry'
+import FirstRowIsHeaderEntry from './FirstRowIsHeaderEntry'
 
 class ProfileEditForm extends Component {
 
@@ -25,6 +26,10 @@ class ProfileEditForm extends Component {
 
   updateHeaderValue(key, value) {
     this.props.updateHeaderValue(key, value)
+  }
+
+  updateFirstRowIsHeaderValue(index, checked) {
+    this.props.updateFirstRowIsHeaderValue(index, checked)
   }
 
   render() {
@@ -62,6 +67,25 @@ class ProfileEditForm extends Component {
                 />
               )
             })}
+          </div>
+        </div>
+
+        <div className="card rounded-0 mt-3">
+          <div className="card-header">
+            <div>Tables</div>
+          </div>
+          <div className="card-body">
+            { this.props.table.firstRowIsHeader.map((entry, i) => {
+              return <FirstRowIsHeaderEntry
+                key={i}
+                title={'Table ' + i}
+                checked={entry}
+                index={i}
+                updateFirstRowIsHeaderValue={this.props.updateFirstRowIsHeaderValue}
+              />
+            })
+
+            }
           </div>
         </div>
 
