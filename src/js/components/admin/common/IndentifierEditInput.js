@@ -69,25 +69,25 @@ class IndentifierEditInput extends Component {
     return (
       <form>
         {this.props.type == 'metadata' &&
-          <div className="form-row align-items-center">
+          <div className="form-row">
             <div className="col-lg-2 mb-2">
-              <label className="sr-only" htmlFor={"metadataKeySelect" + this.props.id}>Metadata</label>
               <input
                 onChange={this.updateMetadataKey}
                 className="form-control form-control-sm"
                 value={this.props.metadataKey}
               />
+              <label className="mb-0"><small>Metadata key</small></label>
             </div>
             <div className="col-lg-6 mb-2">
-              <label className="sr-only" htmlFor={"metadataKeySelect" + this.props.id}>Metadata</label>
               <input
                 type="text"
                 onChange={this.updateValue}
                 className="form-control form-control-sm"
                 value={this.props.value}
               />
+              <label className="mb-0"><small>Metadata value</small></label>
             </div>
-            <div className="col-lg-2 mb-2">
+            <div className="col-lg-2 mt-1 mb-2">
               <div className="form-check">
                 <input className="form-check-input"
                   type="checkbox" name="identifierInterpretOptions"
@@ -112,7 +112,7 @@ class IndentifierEditInput extends Component {
                 className="form-control form-control-sm"
                 value={this.props.tableIndex}
               />
-              <label><small>Table Index</small></label>
+              <label className="mb-0"><small>Table Index</small></label>
             </div>
 
             <div className="col-lg-2 mb-2">
@@ -123,7 +123,7 @@ class IndentifierEditInput extends Component {
                 className="form-control form-control-sm"
                 value={this.props.lineNumber}
               />
-              <label><small>Line number</small></label>
+              <label className="mb-0"><small>Line number</small></label>
             </div>
 
             <div className='col-lg-2 mb-2'>
@@ -135,10 +135,10 @@ class IndentifierEditInput extends Component {
                 disabled={this.props.type === 'metadata' && !this.props.isRegex}
                 value={this.props.value}
               />
-              <label><small>Value</small></label>
+              <label className="mb-0"><small>Value</small></label>
             </div>
 
-            <div className="col-lg-2 mb-2">
+            <div className="col-lg-2 mt-1 mb-2">
               <div className="form-check">
                 <input className="form-check-input"
                   type="checkbox" name="identifierInterpretOptions"
@@ -158,7 +158,7 @@ class IndentifierEditInput extends Component {
                 className="form-control form-control-sm"
                 value={this.props.headerKey}
               />
-              <label><small>Header key</small></label>
+              <label className="mb-0"><small>Header key</small></label>
             </div>
 
             <div className="col-lg-2 mb-2">

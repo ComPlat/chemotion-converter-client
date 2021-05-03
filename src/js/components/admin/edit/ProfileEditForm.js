@@ -11,7 +11,6 @@ class ProfileEditForm extends Component {
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
     this.updateHeaderValue = this.updateHeaderValue.bind(this)
-
   }
 
   updateTitle(event) {
@@ -34,7 +33,7 @@ class ProfileEditForm extends Component {
 
   render() {
     return (
-      <div className="scroll">
+      <div>
         <div className="card rounded-0 mt-3">
           <div className="card-header">
             <div>Profile</div>
@@ -57,38 +56,38 @@ class ProfileEditForm extends Component {
             <div>Metadata</div>
           </div>
           <div className="card-body">
-            {Object.keys(this.props.header).map((entry, i) => {
-              return (
-                < HeaderEntry
-                  key={i}
-                  name={entry}
-                  value={this.props.header[entry]}
-                  updateHeaderValue={this.updateHeaderValue}
-                />
-              )
-            })}
-          </div>
-        </div>
-
-        <div className="card rounded-0 mt-3">
-          <div className="card-header">
-            <div>Tables</div>
-          </div>
-          <div className="card-body">
-            { this.props.table.firstRowIsHeader.map((entry, i) => {
-              return <FirstRowIsHeaderEntry
-                key={i}
-                title={'Table ' + i}
-                checked={entry}
-                index={i}
-                updateFirstRowIsHeaderValue={this.props.updateFirstRowIsHeaderValue}
-              />
-            })
-
+            {
+              Object.keys(this.props.header).map((entry, i) => {
+                return (
+                  <HeaderEntry
+                    key={i}
+                    name={entry}
+                    value={this.props.header[entry]}
+                    updateHeaderValue={this.updateHeaderValue}
+                  />
+                )
+              })
             }
           </div>
         </div>
-
+        <div className="card rounded-0 mt-3">
+          <div className="card-header">
+            <div>First row are column names</div>
+          </div>
+          <div className="card-body">
+            {
+              this.props.table.firstRowIsHeader.map((entry, i) => {
+                return <FirstRowIsHeaderEntry
+                  key={i}
+                  title={'Table ' + i}
+                  checked={entry}
+                  index={i}
+                  updateFirstRowIsHeaderValue={this.props.updateFirstRowIsHeaderValue}
+                />
+              })
+            }
+          </div>
+        </div>
         <div className="card rounded-0 mt-3">
           <div className="card-header">
             <div>Rules</div>
@@ -110,7 +109,6 @@ class ProfileEditForm extends Component {
             />
           </div>
         </div>
-
         <div className="card rounded-0 mt-3">
           <div className="card-header">
             <div>Identifiers</div>
@@ -125,7 +123,6 @@ class ProfileEditForm extends Component {
               removeIdentifier={this.props.removeIdentifier}
               data={[]}
             />
-
             <IdentifierInputBox
               status='edit'
               type={'table'}
@@ -137,13 +134,13 @@ class ProfileEditForm extends Component {
             />
           </div>
         </div>
-
         <div className="text-center mb-5">
           <button onClick={this.props.updateProfile} className="btn btn-primary mt-3">Save profile</button>
         </div>
       </div>
     )
   }
+
 }
 
 export default ProfileEditForm

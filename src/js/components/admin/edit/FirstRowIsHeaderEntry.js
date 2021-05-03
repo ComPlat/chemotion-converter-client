@@ -14,20 +14,14 @@ class FirstRowIsHeaderEntry extends Component {
   }
 
   render() {
+    const htmlId = 'first-row-is-header-' + this.props.index;
     return (
       <div className="form-row">
-        <div className="col-lg-2 mb-2">
-          <input
-            readOnly
-            type="text"
-            className="form-control form-control-sm"
-            value={this.props.title}
-          />
-        </div>
-        <div className="col-lg-2 mb-2">
-          <div className="mb-3 form-check">
-            <input type="checkbox" onChange={this.handleChangeChecked} defaultChecked={this.props.checked} className="form-check-input" />
-            <label className="form-check-label">First Row is Header</label>
+        <div className="col-lg-2">
+          <div className="mb-2 form-check">
+            <input type="checkbox" id={htmlId} className="form-check-input"
+                   onChange={this.handleChangeChecked} defaultChecked={this.props.checked} />
+            <label className="form-check-label" htmlFor={htmlId}>{this.props.title}</label>
           </div>
         </div>
       </div>

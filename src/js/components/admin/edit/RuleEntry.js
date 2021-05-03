@@ -36,7 +36,7 @@ class RuleEntry extends Component {
             onChange={this.updateTableIndex}
             value={this.props.tableIndex}
           />
-          <label><small>Table Index</small></label>
+          <label className="mb-0"><small>Table Index</small></label>
         </div>
         <div className="col-lg-2 mb-2">
           <input
@@ -45,7 +45,7 @@ class RuleEntry extends Component {
             onChange={this.updateColumnIndex}
             value={this.props.columnIndex}
           />
-          <label><small>Column Index</small></label>
+          <label className="mb-0"><small>Column Index</small></label>
         </div>
       </div>
     )

@@ -5,7 +5,6 @@ class HeaderEntry extends Component {
   constructor(props) {
     super(props)
     this.updateHeaderValue = this.updateHeaderValue.bind(this)
-
   }
 
   updateHeaderValue (event) {

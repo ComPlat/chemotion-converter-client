@@ -1,17 +1,16 @@
 $header-height: 134px; // static height, manually computed
 
-html,
-body {
-    @include media-breakpoint-up(md) {
-        overflow: hidden;
-        height: 100%;
-    }
-}
-
 header {
     height: $header-height;
     padding-top: 1rem;
     padding-bottom: 2rem;
+}
+
+.container-fluid {
+    @include media-breakpoint-up(md) {
+        overflow: hidden;
+        height: 100%;
+    }
 }
 
 .scroll {

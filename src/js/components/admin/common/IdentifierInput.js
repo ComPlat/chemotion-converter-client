@@ -3,7 +3,6 @@ import React, { Component } from "react"
 class IndentifierInput extends Component {
 
   constructor(props) {
-
     super(props)
     this.state = {
       disabled: true
