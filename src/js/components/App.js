@@ -68,7 +68,7 @@ class App extends Component {
             <div className='row justify-content-center'>
               <form>
                 <div className="form-group">
-                  <input type="file" className="form-control-file" id="fileUpload" onChange={this.onFileChangeHandler}/>
+                  <input type="file" className="form-control form-control-file" id="fileUpload" onChange={this.onFileChangeHandler}/>
                 </div>
                 <button type="button" className="btn btn-primary btn-lg btn-block" onClick={this.onSubmitFileHandler}>Upload</button>
                 {this.state.error &&

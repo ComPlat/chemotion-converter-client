@@ -1,15 +1,4 @@
-// html,
-// body {
-//     @include media-breakpoint-up(md) {
-//         overflow: hidden;
-//         height: 100%;
-//     }
-// }
-
-// main,
-// aside {
-//     overflow-y: auto;
-// }
+$header-height: 134px; // static height, manually computed
 
 html,
 body {
@@ -20,18 +9,16 @@ body {
 }
 
 header {
-    height: 10rem;
+    height: $header-height;
     padding-top: 1rem;
     padding-bottom: 2rem;
 }
 
-main {
-
-}
-
 .scroll {
-    height: calc(100vh - 10rem);
-    overflow-y: auto;
+    @include media-breakpoint-up(md) {
+        height: calc(100vh - #{$header-height});
+        overflow-y: auto;
+    }
 }
 
 .tab-pane {

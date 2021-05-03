@@ -470,7 +470,7 @@ class AdminApp extends Component {
   render() {
     return (
       <div className={this.state.tableData ? 'container-fluid' : 'container'}>
-        <header className="d-flex flex-column">
+        <header>
           <nav aria-label="breadcrumb">
             {this.state.status == 'list' &&
               <ol className="breadcrumb">
