@@ -55,20 +55,22 @@ class ProfileCreate extends Component {
 
     return (
       <div>
-        { Object.keys(options).map((option, index) => {
-          return (
-            <div key={index} className="form-group">
-              <label htmlFor={option} >{option}</label>
-              <select className="form-control form-control-sm" onChange={this.props.addOrUpdateOption} id={option}>
-                {
-                  options[option].map((select, selectIndex) => {
-                    return <option value={select} key={selectIndex}>{select}</option>
-                  })
-                }
-              </select>
-            </div>
-          )
-        })}
+        {
+          Object.keys(options).map((option, index) => {
+            return (
+              <div key={index} className="form-group">
+                <label htmlFor={option} >{option}</label>
+                <select className="form-control form-control-sm" onChange={this.props.addOrUpdateOption} id={option}>
+                  {
+                    options[option].map((select, selectIndex) => {
+                      return <option value={select} key={selectIndex}>{select}</option>
+                    })
+                  }
+                </select>
+              </div>
+            )
+          }
+        )}
       </div>
     )
   }
@@ -109,8 +111,7 @@ class ProfileCreate extends Component {
             <div className="pt-3 pb-3 mb-3 border-top border-bottom">
               {Object.keys(this.props.tableData.metadata).map((entry, index) => {
                 return <div key={index}>{entry}: {this.props.tableData.metadata[entry]}</div>
-              })
-              }
+              })}
             </div>
 
             <h4>Tables</h4>
@@ -139,7 +140,7 @@ class ProfileCreate extends Component {
                           <input type="checkbox" checked={table.firstRowIsHeader || false}
                             onChange={e => this.props.toggleFirstRowIsHeader(index)}
                             className="form-check-input" id="first_row_is_header" />
-                          <label className="form-check-label" htmlFor="first_row_is_header">first row are column names</label>
+                          <label className="form-check-label" htmlFor="first_row_is_header">First row are column names</label>
                         </div>
 
                         {this.renderDataGrid(table)}

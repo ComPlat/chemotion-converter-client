@@ -198,7 +198,6 @@ class AdminApp extends Component {
     this.setState({
       selectedOptions: newSelectedOptions
     })
-
   }
 
   showUpdateView() {
@@ -369,12 +368,18 @@ class AdminApp extends Component {
             return accumulator.concat(tableColumns)
           }, [])
 
+          const selectedOptions = {}
+          for (let key in tableData.options) {
+            selectedOptions[key] = tableData.options[key][0]
+          }
+
           this.setState({
             selectedFile: null,
             isLoading: false,
             tableData: tableData,
             columnList: columnList,
             options: tableData.options,
+            selectedOptions: selectedOptions,
             showSuccessMessage: true,
             error: false,
             errorMessage: ''
@@ -405,21 +410,21 @@ class AdminApp extends Component {
     } else if (status == 'edit') {
       return (
         <ProfileEditForm
-        title={this.state.title}
-        description={this.state.description}
-        header={this.state.header}
-        table={this.state.table}
-        identifiers={this.state.identifiers}
-        updateIdentifiers={this.updateIdentifiers}
-        addIdentifier={this.addIdentifier}
-        updateTitle={this.updateTitle}
-        updateDescription={this.updateDescription}
-        updateHeaderValue={this.updateHeaderValue}
-        updateFirstRowIsHeaderValue={this.updateFirstRowIsHeaderValue}
-        updateRule={this.updateRule}
-        updateProfile={this.updateProfile}
-        removeIdentifier={this.removeIdentifier}
-      />
+          title={this.state.title}
+          description={this.state.description}
+          header={this.state.header}
+          table={this.state.table}
+          identifiers={this.state.identifiers}
+          updateIdentifiers={this.updateIdentifiers}
+          addIdentifier={this.addIdentifier}
+          updateTitle={this.updateTitle}
+          updateDescription={this.updateDescription}
+          updateHeaderValue={this.updateHeaderValue}
+          updateFirstRowIsHeaderValue={this.updateFirstRowIsHeaderValue}
+          updateRule={this.updateRule}
+          updateProfile={this.updateProfile}
+          removeIdentifier={this.removeIdentifier}
+        />
       )
     } else if (status == 'create') {
       if (tableData) {

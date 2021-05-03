@@ -76,7 +76,7 @@ class IndentifierEditInput extends Component {
                 className="form-control form-control-sm"
                 value={this.props.metadataKey}
               />
-              <label className="mb-0"><small>Metadata key</small></label>
+              <label className="mb-0"><small>Key</small></label>
             </div>
             <div className="col-lg-6 mb-2">
               <input
@@ -85,7 +85,7 @@ class IndentifierEditInput extends Component {
                 className="form-control form-control-sm"
                 value={this.props.value}
               />
-              <label className="mb-0"><small>Metadata value</small></label>
+              <label className="mb-0"><small>Value</small></label>
             </div>
             <div className="col-lg-2 mt-1 mb-2">
               <div className="form-check">
