@@ -79,7 +79,7 @@ class ProfileEditForm extends Component {
               this.props.table.firstRowIsHeader.map((entry, i) => {
                 return <FirstRowIsHeaderEntry
                   key={i}
-                  title={'Table ' + i}
+                  title={'Table #' + i}
                   checked={entry}
                   index={i}
                   updateFirstRowIsHeaderValue={this.props.updateFirstRowIsHeaderValue}
