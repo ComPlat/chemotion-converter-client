@@ -10,7 +10,7 @@ class ProfileList extends Component {
 
   render () {
     return (
-      <ul className="list-group">
+      <ul className="list-group mb-5">
         {
           this.props.profiles.map((profile, i) => {
             return <ListItem
