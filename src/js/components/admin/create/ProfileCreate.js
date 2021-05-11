@@ -120,7 +120,7 @@ class ProfileCreate extends Component {
                 return (
                   <li key={index} className="nav-item" role="presentation">
                     <a className={`nav-link ${index == 0 ? "active" : ""}`} id="table-data-tab" href={'#table-data-' + index}
-                      data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Table #{index + 1}</a>
+                      data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Table #{index}</a>
                   </li>
                 )
               })}

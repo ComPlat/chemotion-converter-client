@@ -282,9 +282,11 @@ class AdminApp extends Component {
       table._columns = table.columns
       table._first = table.rows.shift()
       table.columns = table._first.map((value, idx) => {
+        const originalName = table._columns[idx].name
+
         return {
           key: idx.toString(),
-          name: value
+          name: value + ` (${originalName})`
         }
       })
     }
