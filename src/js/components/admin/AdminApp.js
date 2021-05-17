@@ -517,10 +517,10 @@ class AdminApp extends Component {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-body">
-                <div className="alert alert-success" role="alert">Successfully created profile!</div>
+                <div className="alert alert-success" role="alert">Profile successfully created!</div>
               </div>
               <div className="modal-footer">
-                <a href="/admin/" className="btn btn-secondary">Create another profile</a>
+                <a href="." className="btn btn-secondary">Back to profiles list</a>
                 <a href="/" className="btn btn-primary">Upload file and use profile</a>
               </div>
             </div>
