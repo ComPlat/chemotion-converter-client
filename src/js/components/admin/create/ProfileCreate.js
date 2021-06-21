@@ -47,7 +47,9 @@ class ProfileCreate extends Component {
       rowGetter={i => rows[i]}
       rowsCount={rows.length}
       enableCellAutoFocus={false}
-      minHeight={400} />
+      minColumnWidth={140}
+      minHeight={410}
+      nativeScroll={true} />
   }
 
   renderOptions() {
