@@ -43,13 +43,21 @@ class App extends Component {
         }
       })
       .catch(error => {
-        error.text().then( errorMessage => {
+        if (error.status === 413) {
           this.setState({
-            error:true,
-            errorMessage: JSON.parse(errorMessage).error,
+            error: true,
+            errorMessage: 'The uploaded file is too large.',
             isLoading: false
           })
-        })
+        } else {
+          error.text().then( errorMessage => {
+            this.setState({
+              error:true,
+              errorMessage: JSON.parse(errorMessage).error,
+              isLoading: false
+            })
+          })
+        }
       })
   }
 

@@ -389,13 +389,21 @@ class AdminApp extends Component {
         }
       })
       .catch(error => {
-        error.text().then(errorMessage => {
+        if (error.status === 413) {
           this.setState({
             error: true,
-            errorMessage: JSON.parse(errorMessage).error,
+            errorMessage: 'The uploaded file is too large.',
             isLoading: false
           })
-        })
+        } else {
+          error.text().then(errorMessage => {
+            this.setState({
+              error: true,
+              errorMessage: JSON.parse(errorMessage).error,
+              isLoading: false
+            })
+          })
+        }
       })
   }
 
