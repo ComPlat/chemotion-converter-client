@@ -1,14 +1,23 @@
-html,
-body {
+$header-height: 134px; // static height, manually computed
+
+header {
+    height: $header-height;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+}
+
+.container-fluid {
     @include media-breakpoint-up(md) {
         overflow: hidden;
         height: 100%;
     }
 }
 
-main,
-aside {
-    overflow-y: auto;
+.scroll {
+    @include media-breakpoint-up(md) {
+        height: calc(100vh - #{$header-height});
+        overflow-y: auto;
+    }
 }
 
 .tab-pane {

@@ -9,13 +9,14 @@ Development setup
 We recomment to use the [nove version manager](https://github.com/nvm-sh/nvm) to install node.js and npm:
 
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 ```
 
 After following the instructions in the installation script, `nvm` should be available. The application can then be transpiled using:
 
 ```bash
-nvm use
+nvm install
+npm install
 npm run build
 ```
 
