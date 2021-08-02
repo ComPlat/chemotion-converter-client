@@ -96,7 +96,7 @@ class IndentifierInput extends Component {
               <select className="form-control form-control-sm" id={"abledataTableSelect" + this.props.id} onChange={this.onSelectTable}>
                 {
                   Object.keys(this.props.options).map((option, i) =>
-                    <option key={i} value={i}>{"Table #" + i + 1}</option>
+                    <option key={i} value={i}>{"Table #" + i}</option>
                   )
                 }
               </select>
