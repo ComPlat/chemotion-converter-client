@@ -15,6 +15,15 @@ class ConverterApi {
       })
   }
 
+  static downloadProfile (identifier) {
+    const a = document.createElement('a');
+    a.href = converter_app_url + '/profiles/' + identifier;
+    a.download = identifier + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   static fetchProfiles () {
 
     const requestOptions = {

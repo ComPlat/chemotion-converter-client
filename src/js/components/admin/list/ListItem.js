@@ -7,6 +7,7 @@ class ListItem extends Component {
     this.state = {}
     this.deleteProfile = this.deleteProfile.bind(this)
     this.editProfile = this.editProfile.bind(this)
+    this.downloadProfile = this.downloadProfile.bind(this)
   }
 
   deleteProfile () {
@@ -17,6 +18,10 @@ class ListItem extends Component {
     this.props.editProfile(this.props.index, this.props.identifier)
   }
 
+  downloadProfile () {
+    this.props.downloadProfile(this.props.index, this.props.identifier)
+  }
+
   render () {
     return (
       <li className="list-group-item d-flex justify-content-between align-items-center">
@@ -25,6 +30,7 @@ class ListItem extends Component {
           {this.props.description}
         </div>
         <div>
+          <span className="btn btn-success btn-sm mr-2" onClick={this.downloadProfile}>Download</span>
           <span className="btn btn-primary btn-sm mr-2" onClick={this.editProfile}>Edit</span>
           <span className="btn btn-danger btn-sm" onClick={this.deleteProfile}>Delete</span>
         </div>
