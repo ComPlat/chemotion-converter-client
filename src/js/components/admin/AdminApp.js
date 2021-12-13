@@ -82,6 +82,7 @@ class AdminApp extends Component {
       status: 'edit',
       currentIndex: index,
       currentIdentifier: identifier,
+      id: currentProfile.id,
       title: currentProfile.title,
       description: currentProfile.description,
       identifiers: currentProfile.identifiers,
@@ -420,6 +421,7 @@ class AdminApp extends Component {
     } else if (status == 'edit') {
       return (
         <ProfileEditForm
+          id={this.state.id}
           title={this.state.title}
           description={this.state.description}
           header={this.state.header}
