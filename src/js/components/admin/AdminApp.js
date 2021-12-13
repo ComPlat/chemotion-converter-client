@@ -127,6 +127,10 @@ class AdminApp extends Component {
     })
   }
 
+  downloadProfile(index, identifier) {
+    ConverterApi.downloadProfile(identifier)
+  }
+
   submitDeleteProfile() {
     ConverterApi.deleteProfile(this.state.deleteIdentifier)
       .then(() => {
@@ -413,10 +417,11 @@ class AdminApp extends Component {
     if (status === 'list') {
       return (
         <ProfileList
-        profiles={this.state.profiles}
-        editProfile={this.editProfile}
-        deleteProfile={this.deleteProfile}
-      />
+          profiles={this.state.profiles}
+          editProfile={this.editProfile}
+          deleteProfile={this.deleteProfile}
+          downloadProfile={this.downloadProfile}
+        />
       )
     } else if (status == 'edit') {
       return (

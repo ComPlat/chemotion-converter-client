@@ -20,7 +20,8 @@ class ProfileList extends Component {
               identifier={profile.id}
               index={i}
               deleteProfile={this.props.deleteProfile}
-              editProfile={this.props.editProfile} />
+              editProfile={this.props.editProfile}
+              downloadProfile={this.props.downloadProfile} />
             }
           )
         }
