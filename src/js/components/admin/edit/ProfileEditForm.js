@@ -39,7 +39,7 @@ class ProfileEditForm extends Component {
             <div>Profile</div>
           </div>
           <div className="card-body">
-            <div>
+            <div className="mt-3">
               <label>Title</label>
               <input type="text" className="form-control form-control-sm" onChange={this.updateTitle} value={this.props.title} />
               <small className="text-muted">Please add a title for this profile.</small>
@@ -48,6 +48,11 @@ class ProfileEditForm extends Component {
               <label>Description</label>
               <textarea className="form-control" rows="3" onChange={this.updateDescription} value={this.props.description} />
               <small className="text-muted">Please add a description for this profile.</small>
+            </div>
+            <div className="mt-3">
+              <label>ID</label>
+              <div><code>{this.props.id}</code></div>
+              <small className="text-muted">The unique id for this profile.</small>
             </div>
           </div>
         </div>
