@@ -15,6 +15,7 @@ class ProfileList extends Component {
           this.props.profiles.map((profile, i) => {
             return <ListItem
               key={i}
+              id={profile.id}
               title={profile.title}
               description={profile.description}
               identifier={profile.id}

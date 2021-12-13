@@ -30,6 +30,7 @@ class ListItem extends Component {
           {this.props.description}
         </div>
         <div>
+          <code className="mr-2">{this.props.id}</code>
           <span className="btn btn-success btn-sm mr-2" onClick={this.downloadProfile}>Download</span>
           <span className="btn btn-primary btn-sm mr-2" onClick={this.editProfile}>Edit</span>
           <span className="btn btn-danger btn-sm" onClick={this.deleteProfile}>Delete</span>

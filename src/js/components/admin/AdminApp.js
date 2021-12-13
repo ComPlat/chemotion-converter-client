@@ -49,7 +49,9 @@ class AdminApp extends Component {
     this.removeIdentifier = this.removeIdentifier.bind(this)
     this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
     this.showUpdateView = this.showUpdateView.bind(this)
+    this.showImportView = this.showImportView.bind(this)
     this.deleteProfile = this.deleteProfile.bind(this)
+    this.downloadProfile = this.downloadProfile.bind(this)
     this.editProfile = this.editProfile.bind(this)
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
@@ -128,7 +130,17 @@ class AdminApp extends Component {
   }
 
   downloadProfile(index, identifier) {
-    ConverterApi.downloadProfile(identifier)
+    const profile = Object.assign({}, this.state.profiles[index])
+
+    // remove the id to prevent double information
+    delete profile.id
+
+    const a = document.createElement('a')
+    a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(profile, null, 2))
+    a.download = identifier + '.json'
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   submitDeleteProfile() {
@@ -202,6 +214,12 @@ class AdminApp extends Component {
     newSelectedOptions[key] = value
     this.setState({
       selectedOptions: newSelectedOptions
+    })
+  }
+
+  showImportView() {
+    this.setState({
+      status: 'import'
     })
   }
 
@@ -352,64 +370,87 @@ class AdminApp extends Component {
   }
 
   onSubmitFileHandler() {
-    const { selectedFile } = this.state
+    const { selectedFile, status } = this.state
 
     this.setState({
       isLoading: true
     })
 
-    ConverterApi.fetchTables(selectedFile)
-      .then(tableData => {
-        if (tableData) {
-          // create a flat list of all columns
-          const columnList = tableData.data.reduce((accumulator, table, tableIndex) => {
-            const tableColumns = table.columns.map((tableColumn, columnIndex) => {
-              return Object.assign({}, tableColumn, {
-                label: `Table #${tableIndex} Column #${columnIndex}`,
-                value: {
-                  tableIndex: tableIndex,
-                  columnIndex: columnIndex
-                }
-              })
-            })
-            return accumulator.concat(tableColumns)
-          }, [])
+    if (status == 'import') {
+      const createProfile = e => {
+        const profile = JSON.parse(e.target.result)
 
-          const selectedOptions = {}
-          for (let key in tableData.options) {
-            selectedOptions[key] = tableData.options[key][0]
-          }
-
-          this.setState({
-            selectedFile: null,
-            isLoading: false,
-            tableData: tableData,
-            columnList: columnList,
-            options: tableData.options,
-            selectedOptions: selectedOptions,
-            showSuccessMessage: true,
-            error: false,
-            errorMessage: ''
+        ConverterApi.createProfile(profile)
+          .then(data => {
+            $('#modal').show()
           })
-        }
-      })
-      .catch(error => {
-        if (error.status === 413) {
-          this.setState({
-            error: true,
-            errorMessage: 'The uploaded file is too large.',
-            isLoading: false
-          })
-        } else {
-          error.text().then(errorMessage => {
+          .catch(errors => {
             this.setState({
               error: true,
-              errorMessage: JSON.parse(errorMessage).error,
+              errorMessage: Object.values(errors).join(', '),
               isLoading: false
             })
           })
-        }
-      })
+      }
+
+      const reader = new FileReader()
+      reader.readAsText(selectedFile)
+      reader.onload = createProfile.bind(this)
+
+    } else {
+      ConverterApi.fetchTables(selectedFile)
+        .then(tableData => {
+          if (tableData) {
+            // create a flat list of all columns
+            const columnList = tableData.data.reduce((accumulator, table, tableIndex) => {
+              const tableColumns = table.columns.map((tableColumn, columnIndex) => {
+                return Object.assign({}, tableColumn, {
+                  label: `Table #${tableIndex} Column #${columnIndex}`,
+                  value: {
+                    tableIndex: tableIndex,
+                    columnIndex: columnIndex
+                  }
+                })
+              })
+              return accumulator.concat(tableColumns)
+            }, [])
+
+            const selectedOptions = {}
+            for (let key in tableData.options) {
+              selectedOptions[key] = tableData.options[key][0]
+            }
+
+            this.setState({
+              selectedFile: null,
+              isLoading: false,
+              tableData: tableData,
+              columnList: columnList,
+              options: tableData.options,
+              selectedOptions: selectedOptions,
+              showSuccessMessage: true,
+              error: false,
+              errorMessage: ''
+            })
+          }
+        })
+        .catch(error => {
+          if (error.status === 413) {
+            this.setState({
+              error: true,
+              errorMessage: 'The uploaded file is too large.',
+              isLoading: false
+            })
+          } else {
+            error.text().then(errorMessage => {
+              this.setState({
+                error: true,
+                errorMessage: JSON.parse(errorMessage).error,
+                isLoading: false
+              })
+            })
+          }
+        })
+    }
   }
 
   dispatchView() {
@@ -443,9 +484,19 @@ class AdminApp extends Component {
           removeIdentifier={this.removeIdentifier}
         />
       )
+    } else if (status == 'import') {
+      return (
+        <FileUploadForm
+          onFileChangeHandler={this.onFileChangeHandler}
+          onSubmitFileHandler={this.onSubmitFileHandler}
+          errorMessage={this.state.errorMessage}
+          error={this.state.error}
+          isLoading={this.state.isLoading}
+        />
+      )
     } else if (status == 'create') {
       if (tableData) {
-        return(
+        return (
           <ProfileCreate
             tableData={this.state.tableData}
             title={this.state.title}
@@ -484,6 +535,8 @@ class AdminApp extends Component {
       return 'Profiles List'
     } else if (this.state.status == 'edit') {
       return 'Update Profile'
+    } else if (this.state.status == 'import') {
+      return 'Import Profile'
     } else {
       return 'Create Profile'
     }
@@ -511,11 +564,18 @@ class AdminApp extends Component {
                 <li className="breadcrumb-item active" aria-current="page">{'Create Profile'}</li>
               </ol>
             }
+            {this.state.status == 'import' &&
+              <ol className="breadcrumb">
+                <li className="breadcrumb-item" aria-current="page"><a href="">Chemotion file converter admin</a></li>
+                <li className="breadcrumb-item active" aria-current="page">{'Import Profile'}</li>
+              </ol>
+            }
           </nav>
 
           <div className="mt-auto">
             {this.state.status == "list" &&
               <div className="float-right">
+                <button type="button" onClick={this.showImportView} className="btn btn-success mr-2">Import profile</button>
                 <button type="button" onClick={this.showUpdateView} className="btn btn-primary">Create new profile</button>
               </div>
             }
