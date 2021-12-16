@@ -4,8 +4,8 @@ import React, { Component } from "react"
 import ConverterApi from '../../api/ConverterApi'
 import ProfileList from './list/ProfileList'
 import ProfileEditForm from './edit/ProfileEditForm'
-import FileUploadForm from './create/FileUploadForm'
 import ProfileCreate from './create/ProfileCreate'
+import FileUploadForm from './common/FileUploadForm'
 
 
 class AdminApp extends Component {

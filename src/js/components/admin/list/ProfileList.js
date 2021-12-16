@@ -1,30 +1,27 @@
 import React, { Component } from "react"
 
-import ListItem from './ListItem'
+import ProfileListItem from './ProfileListItem'
 
 class ProfileList extends Component {
 
-  constructor(props) {
-    super(props)
-  }
-
   render () {
+    const { profiles, deleteProfile, editProfile, downloadProfile } = this.props
+
     return (
       <ul className="list-group mb-5">
         {
-          this.props.profiles.map((profile, i) => {
-            return <ListItem
-              key={i}
-              id={profile.id}
-              title={profile.title}
-              description={profile.description}
-              identifier={profile.id}
-              index={i}
-              deleteProfile={this.props.deleteProfile}
-              editProfile={this.props.editProfile}
-              downloadProfile={this.props.downloadProfile} />
-            }
-          )
+          profiles.map((profile, index) => {
+            return (
+              <ProfileListItem
+                key={index}
+                id={profile.id}
+                title={profile.title}
+                description={profile.description}
+                deleteProfile={() => deleteProfile(index, profile.id)}
+                editProfile={() => editProfile(index, profile.id)}
+                downloadProfile={() => downloadProfile(index, profile.id)} />
+            )
+          })
         }
       </ul>
     )
