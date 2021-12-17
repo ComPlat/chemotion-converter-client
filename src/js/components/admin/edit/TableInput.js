@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 
-class RuleEntry extends Component {
+class TableInput extends Component {
 
   constructor(props) {
     super(props)
@@ -8,14 +8,20 @@ class RuleEntry extends Component {
     this.updateColumnIndex = this.updateColumnIndex.bind(this)
   }
 
-  updateTableIndex (event) {
-    let value = event.currentTarget.value
-    this.props.updateRule(this.props.name, value, this.props.columnIndex)
+  updateTableIndex(event) {
+    const value = event.currentTarget.value
+    this.props.onChange(this.props.name, {
+        tableIndex: value,
+        columnIndex: this.props.columnIndex
+    })
   }
 
-  updateColumnIndex (event) {
-    let value = event.currentTarget.value
-    this.props.updateRule(this.props.name, this.props.tableIndex, value)
+  updateColumnIndex(event) {
+    const value = event.currentTarget.value
+    this.props.onChange(this.props.name, {
+        tableIndex: this.props.tableIndex,
+        columnIndex: value
+    })
   }
 
   render() {
@@ -26,7 +32,7 @@ class RuleEntry extends Component {
             readOnly
             type="text"
             className="form-control form-control-sm"
-            value={this.props.title}
+            value={this.props.name}
           />
         </div>
         <div className="col-lg-2 mb-2">
@@ -50,7 +56,6 @@ class RuleEntry extends Component {
       </div>
     )
   }
-
 }
 
-export default RuleEntry
+export default TableInput

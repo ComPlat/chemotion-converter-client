@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 
-class IndentifierEditInput extends Component {
+class IndentifierInput extends Component {
 
   constructor(props) {
     super(props)
@@ -19,7 +19,7 @@ class IndentifierEditInput extends Component {
     let data = {
       value: value
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   updateLinenumber (event) {
@@ -27,14 +27,14 @@ class IndentifierEditInput extends Component {
     let data = {
       lineNumber: lineNumber
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   toogleIsRegex(event) {
     let data = {}
     let isRegex = !this.props.isRegex
     data['isRegex'] = isRegex
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   removeIdentifier() {
@@ -46,7 +46,7 @@ class IndentifierEditInput extends Component {
     let data = {
       headerKey: value
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   updateMetadataKey (event) {
@@ -54,7 +54,7 @@ class IndentifierEditInput extends Component {
     let data = {
       metadataKey: value
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   updateTableIndex (event) {
@@ -62,7 +62,7 @@ class IndentifierEditInput extends Component {
     let data = {
       tableIndex: value
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   render() {
@@ -172,4 +172,4 @@ class IndentifierEditInput extends Component {
   }
 }
 
-export default IndentifierEditInput
+export default IndentifierInput
