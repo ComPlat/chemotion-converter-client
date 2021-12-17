@@ -25,7 +25,7 @@ class IndentifierInput extends Component {
       value: value,
       isRegex: false
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
     this.setState({
       disabled: true
     })
@@ -35,7 +35,7 @@ class IndentifierInput extends Component {
     let data = {
       tableIndex: Number(event.target.value)
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   updateLinenumber (event) {
@@ -43,7 +43,7 @@ class IndentifierInput extends Component {
     let data = {
       lineNumber: lineNumber
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   updateHeaderKey (event) {
@@ -51,7 +51,7 @@ class IndentifierInput extends Component {
     let data = {
       headerKey: value
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   updateValue (event) {
@@ -59,7 +59,7 @@ class IndentifierInput extends Component {
     let data = {
       value: value
     }
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   removeIdentifier() {
@@ -70,7 +70,7 @@ class IndentifierInput extends Component {
     let data = {}
     let isRegex = !this.props.isRegex
     data['isRegex'] = isRegex
-    this.props.updateIdentifiers(this.props.id, data)
+    this.props.updateIdentifier(this.props.id, data)
   }
 
   render() {

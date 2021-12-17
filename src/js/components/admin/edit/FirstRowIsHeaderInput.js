@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 
-class FirstRowIsHeaderEntry extends Component {
+class FirstRowIsHeaderInput extends Component {
 
   constructor(props) {
     super(props)
@@ -10,7 +10,7 @@ class FirstRowIsHeaderEntry extends Component {
   handleChangeChecked() {
     let checked = !this.props.checked
     let index = this.props.index
-    this.props.updateFirstRowIsHeaderValue(index, checked)
+    this.props.updateFirstRowIsHeader(index, checked)
   }
 
   render() {
@@ -30,4 +30,4 @@ class FirstRowIsHeaderEntry extends Component {
 
 }
 
-export default FirstRowIsHeaderEntry
+export default FirstRowIsHeaderInput

@@ -1,9 +1,9 @@
 import React, { Component } from "react"
-//import ReactDataGrid from "react-data-grid"
 
 import ConverterApi from '../../api/ConverterApi'
+
 import ProfileList from './list/ProfileList'
-import ProfileEditForm from './edit/ProfileEditForm'
+import ProfileEdit from './edit/ProfileEdit'
 import ProfileCreate from './create/ProfileCreate'
 import FileUploadForm from './common/FileUploadForm'
 
@@ -16,53 +16,55 @@ class AdminApp extends Component {
     this.state = {
       status: 'list',
       selectedFile: null,
+      profiles: [],
       tableData: null,
       columnList: null,
+      headerOptions: [],
       error: false,
       isLoading: false,
       errorMessage: '',
       title: '',
       description: '',
-      xValues: false,
-      yValues: false,
+      tables: [],
       identifiers: [],
-      options: {},
-      selectedOptions: {},
-      profiles: [],
-      currentIndex: -1,
+      firstRowIsHeader: [],
       currentIdentifier: '',
-      header: {},
-      table: {},
+      currentIndex: -1,
       deleteIdentifier: '',
-      deleteIndex: '',
+      deleteIndex: -1,
       showAlert: false,
     }
 
-    this.onSelectXcolumn = this.onSelectXcolumn.bind(this)
-    this.onSelectYcolumn = this.onSelectYcolumn.bind(this)
-    this.toggleFirstRowIsHeader = this.toggleFirstRowIsHeader.bind(this)
-    this.onSubmitSelectedData = this.onSubmitSelectedData.bind(this)
-    this.onFileChangeHandler = this.onFileChangeHandler.bind(this)
-    this.onSubmitFileHandler = this.onSubmitFileHandler.bind(this)
-    this.addIdentifier = this.addIdentifier.bind(this)
-    this.updateIdentifiers = this.updateIdentifiers.bind(this)
-    this.removeIdentifier = this.removeIdentifier.bind(this)
-    this.addOrUpdateOption = this.addOrUpdateOption.bind(this)
     this.showUpdateView = this.showUpdateView.bind(this)
     this.showImportView = this.showImportView.bind(this)
-    this.deleteProfile = this.deleteProfile.bind(this)
-    this.downloadProfile = this.downloadProfile.bind(this)
-    this.editProfile = this.editProfile.bind(this)
+    this.showEditView = this.showEditView.bind(this)
+    this.showDeleteModal = this.showDeleteModal.bind(this)
+    this.hideDeleteModal = this.hideDeleteModal.bind(this)
+
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
-    this.updateHeaderValue = this.updateHeaderValue.bind(this)
-    this.updateFirstRowIsHeaderValue = this.updateFirstRowIsHeaderValue.bind(this)
-    this.dispatchView = this.dispatchView.bind(this)
+
+    this.addTable = this.addTable.bind(this)
+    this.updateHeader = this.updateHeader.bind(this)
+    this.updateTable = this.updateTable.bind(this)
+    this.removeTable = this.removeTable.bind(this)
+
+    this.addIdentifier = this.addIdentifier.bind(this)
+    this.updateIdentifier = this.updateIdentifier.bind(this)
+    this.removeIdentifier = this.removeIdentifier.bind(this)
+
+    this.toggleFirstRowIsHeader = this.toggleFirstRowIsHeader.bind(this)
+    this.updateFirstRowIsHeader = this.updateFirstRowIsHeader.bind(this)
+
+    this.createProfile = this.createProfile.bind(this)
     this.updateProfile = this.updateProfile.bind(this)
-    this.submitDeleteProfile = this.submitDeleteProfile.bind(this)
-    this.dismissDeleteProfile = this.dismissDeleteProfile.bind(this)
+    this.deleteProfile = this.deleteProfile.bind(this)
+    this.downloadProfile = this.downloadProfile.bind(this)
+    this.updateFile = this.updateFile.bind(this)
+    this.uploadFile = this.uploadFile.bind(this)
+
+    this.dispatchView = this.dispatchView.bind(this)
     this.getTitleforStatus = this.getTitleforStatus.bind(this)
-    this.updateRule = this.updateRule.bind(this)
   }
 
   componentDidMount() {
@@ -75,53 +77,38 @@ class AdminApp extends Component {
   }
 
   componentDidUpdate() {
-    setTimeout(() => this.setState({ showAlert: false }), 6000);
+    // setTimeout(() => this.setState({ showAlert: false }), 6000);
   }
 
-  editProfile(index, identifier) {
+  showImportView() {
+    this.setState({
+      status: 'import'
+    })
+  }
+
+  showUpdateView() {
+    this.setState({
+      status: 'create'
+    })
+  }
+
+  showEditView(index, identifier) {
     let currentProfile = this.state.profiles[index]
     this.setState({
       status: 'edit',
-      currentIndex: index,
       currentIdentifier: identifier,
+      currentIndex: index,
       id: currentProfile.id,
       title: currentProfile.title,
       description: currentProfile.description,
       identifiers: currentProfile.identifiers,
       header: currentProfile.header,
-      table: currentProfile.table
+      tables: currentProfile.tables,
+      firstRowIsHeader: currentProfile.firstRowIsHeader
     })
   }
 
-  updateProfile() {
-    const { title, description, identifiers, header, table } = this.state
-    let data = {
-      title: title,
-      description: description,
-      identifiers: identifiers,
-      header: header,
-      table: table
-    }
-    ConverterApi.updateProfile(data, this.state.currentIdentifier)
-      .then((data) => {
-        let newProfiles = [...this.state.profiles]
-        newProfiles[this.state.currentIndex] = data
-        this.setState({
-          profiles: newProfiles,
-          status: 'list',
-          title: '',
-          description: '',
-          identifiers: [],
-          header: {},
-          table: {},
-          currentIndex: -1,
-          currentIdentifier: '',
-          showAlert: true
-        })
-      })
-  }
-
-  deleteProfile(index, identifier) {
+  showDeleteModal(index, identifier) {
     $('#delete-modal').show()
     this.setState({
       deleteIdentifier: identifier,
@@ -129,42 +116,11 @@ class AdminApp extends Component {
     })
   }
 
-  downloadProfile(index, identifier) {
-    const profile = Object.assign({}, this.state.profiles[index])
-
-    // remove the id to prevent double information
-    delete profile.id
-
-    const a = document.createElement('a')
-    a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(profile, null, 2))
-    a.download = identifier + '.json'
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-
-  submitDeleteProfile() {
-    ConverterApi.deleteProfile(this.state.deleteIdentifier)
-      .then(() => {
-        let newProfiles = [...this.state.profiles]
-        if (this.state.deleteIndex !== -1) {
-          newProfiles.splice(this.state.deleteIndex, 1)
-          this.setState({
-            profiles: newProfiles,
-            deleteIdentifier: '',
-            deleteIndex: ''
-          })
-          $('#delete-modal').hide()
-        }
-      }
-      )
-  }
-
-  dismissDeleteProfile() {
+  hideDeleteModal() {
     $('#delete-modal').hide()
     this.setState({
       deleteIdentifier: '',
-      deleteIndex: ''
+      deleteIndex: -1
     })
   }
 
@@ -180,65 +136,63 @@ class AdminApp extends Component {
     })
   }
 
-  updateHeaderValue(key, value) {
-    let newHeader = { ...this.state.header}
-    newHeader[key] = value
-    this.setState({
-      header: newHeader
-    })
+  addTable() {
+    const { tables, tableData } = this.state
+    tables.push(this.initTable(tableData))
+    this.setState({ tables })
   }
 
-  updateFirstRowIsHeaderValue(index, checked) {
-    let newTable = { ...this.state.table }
-    newTable['firstRowIsHeader'][index]=checked
-    this.setState({
-      table: newTable
-    })
-  }
-
-  updateRule(key, tableIndex, columnIndex) {
-    let newTable = { ...this.state.table }
-    newTable[key] = {
-      tableIndex: tableIndex,
-      columnIndex: columnIndex
+  initTable(tableData) {
+    const header = {}
+    if (tableData) {
+      for (let key in tableData.options) {
+        header[key] = tableData.options[key][0]
+      }
     }
-    this.setState({
-      table: newTable
-    })
+
+    return {
+      header: header,
+      table: {}
+    }
   }
 
-  addOrUpdateOption(event) {
-    let key = event.target.getAttribute('id')
-    let value = event.target.value
-    let newSelectedOptions = { ...this.state.selectedOptions }
-    newSelectedOptions[key] = value
-    this.setState({
-      selectedOptions: newSelectedOptions
-    })
+  updateHeader(index, key, value) {
+    const tables = [...this.state.tables]
+    if (index !== -1) {
+      const header = tables[index].header
+      header[key] = value
+      tables[index].header = header
+      this.setState({ tables })
+    }
   }
 
-  showImportView() {
-    this.setState({
-      status: 'import'
-    })
+  updateTable(index, key, value) {
+    const tables = [...this.state.tables]
+    if (index !== -1) {
+      const table = tables[index].table
+      table[key] = value
+      tables[index].table = table
+      this.setState({ tables })
+    }
   }
 
-  showUpdateView() {
-    this.setState({
-      status: 'create'
-    })
+  removeTable(index) {
+    const tables = [...this.state.tables]
+    tables.splice(index, 1)
+    this.setState({ tables })
   }
 
   addIdentifier(type) {
+    const { identifiers } = this.state
+
     let metadataKey = ''
     let value = ''
-
     if (type === 'metadata' && this.state.status == 'create') {
       metadataKey = Object.keys(this.state.tableData.metadata)[0]
       value = this.state.tableData.metadata[metadataKey]
     }
 
-    let identifier = {
+    const identifier = {
       type: type,
       tableIndex: 0,
       lineNumber: '',
@@ -247,47 +201,33 @@ class AdminApp extends Component {
       value: value,
       isRegex: false
     }
-    let identifiers = this.state.identifiers
+
     identifiers.push(identifier)
-    this.setState({
-      identifiers: identifiers
-    })
+    this.setState({ identifiers })
   }
 
-  updateIdentifiers(index, data) {
-    let newIdentifiers = [...this.state.identifiers]
+  updateIdentifier(index, data) {
+    const identifiers = [...this.state.identifiers]
     if (index !== -1) {
-      let newData = newIdentifiers[index]
-      Object.assign(newData, data)
-      newIdentifiers[index] = newData
-      this.setState({ identifiers: newIdentifiers })
+      const identifier = identifiers[index]
+      Object.assign(identifier, data)
+      identifiers[index] = identifier
+      this.setState({ identifiers })
     }
   }
 
   removeIdentifier(index) {
-    let newIdentifiers = [...this.state.identifiers]
+    let identifiers = [...this.state.identifiers]
     if (index !== -1) {
-      newIdentifiers.splice(index, 1)
-      this.setState({ identifiers: newIdentifiers })
+      identifiers.splice(index, 1)
+      this.setState({ identifiers })
     }
   }
 
-  onSelectXcolumn(event) {
-    let value = event.target.value
-    if (value === 'default') {
-      this.setState({ xValues: false })
-    } else {
-      this.setState({ xValues: value })
-    }
-  }
-
-  onSelectYcolumn(event) {
-    let value = event.target.value
-    if (value === 'default') {
-      this.setState({ yValues: false })
-    } else {
-      this.setState({ yValues: value })
-    }
+  updateFirstRowIsHeader(index, checked) {
+    const firstRowIsHeader = [...this.state.firstRowIsHeader]
+    firstRowIsHeader[index] = checked
+    this.setState({ firstRowIsHeader })
   }
 
   toggleFirstRowIsHeader(index) {
@@ -314,39 +254,27 @@ class AdminApp extends Component {
       })
     }
 
-    this.setState({ tableData });
+    const firstRowIsHeader = tableData.data.map(table => {
+      return table.firstRowIsHeader || false
+    })
+
+    this.setState({ tableData, firstRowIsHeader });
   }
 
-  onSubmitSelectedData(event) {
+
+  createProfile(event) {
     event.preventDefault()
 
-    const { title, description, tableData, columnList, identifiers, xValues, yValues, selectedOptions } = this.state
-
-    let xv = false
-    if (xValues) {
-      xv = columnList[xValues].value
+    const { title, description, tables, identifiers, tableData, firstRowIsHeader } = this.state
+    const profile = {
+      title,
+      description,
+      tables,
+      identifiers,
+      firstRowIsHeader
     }
 
-    let yv = false
-    if (yValues) {
-      yv = columnList[yValues].value
-    }
-
-    const data = {
-      table: {
-        xColumn: xv,
-        yColumn: yv,
-        firstRowIsHeader: tableData.data.map(table => {
-          return table.firstRowIsHeader || false
-        })
-      },
-      identifiers: identifiers,
-      header: selectedOptions,
-      title: title,
-      description: description
-    }
-
-    ConverterApi.createProfile(data)
+    ConverterApi.createProfile(profile)
       .then(data => {
         $('#modal').show()
       })
@@ -359,7 +287,63 @@ class AdminApp extends Component {
       })
   }
 
-  onFileChangeHandler(event) {
+  updateProfile() {
+    const { id, title, description, tables, identifiers, tableData, firstRowIsHeader } = this.state
+    const profile = {
+      id,
+      title,
+      description,
+      tables,
+      identifiers,
+      firstRowIsHeader
+    }
+
+    ConverterApi.updateProfile(profile, this.state.currentIdentifier)
+      .then((data) => {
+        let newProfiles = [...this.state.profiles]
+        newProfiles[this.state.currentIndex] = data
+        this.setState({
+          profiles: newProfiles,
+          status: 'list',
+          title: '',
+          description: '',
+          identifiers: [],
+          header: {},
+          table: {},
+          currentIdentifier: '',
+          currentIndex: -1,
+          showAlert: true
+        })
+      })
+  }
+
+  deleteProfile() {
+    ConverterApi.deleteProfile(this.state.deleteIdentifier)
+      .then(() => {
+        let newProfiles = [...this.state.profiles]
+        if (this.state.deleteIndex !== -1) {
+          newProfiles.splice(this.state.deleteIndex, 1)
+          this.setState({
+            profiles: newProfiles,
+            deleteIdentifier: '',
+            deleteIndex: -1
+          })
+          $('#delete-modal').hide()
+        }
+      }
+    )
+  }
+
+  downloadProfile(index, identifier) {
+    const a = document.createElement('a')
+    a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.state.profiles[index], null, 2))
+    a.download = identifier + '.json'
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  updateFile(event) {
     this.setState({
       selectedFile: event.target.files[0],
       loaded: 0,
@@ -369,7 +353,7 @@ class AdminApp extends Component {
     })
   }
 
-  onSubmitFileHandler() {
+  uploadFile() {
     const { selectedFile, status } = this.state
 
     this.setState({
@@ -415,18 +399,15 @@ class AdminApp extends Component {
               return accumulator.concat(tableColumns)
             }, [])
 
-            const selectedOptions = {}
-            for (let key in tableData.options) {
-              selectedOptions[key] = tableData.options[key][0]
-            }
-
             this.setState({
               selectedFile: null,
               isLoading: false,
               tableData: tableData,
               columnList: columnList,
-              options: tableData.options,
-              selectedOptions: selectedOptions,
+              headerOptions: tableData.options,
+              tables: [this.initTable(tableData)],
+              identifiers: [],
+              firstRowIsHeader: tableData.data.map(table => false),
               showSuccessMessage: true,
               error: false,
               errorMessage: ''
@@ -454,44 +435,47 @@ class AdminApp extends Component {
   }
 
   dispatchView() {
-    const { tableData, status } = this.state
+    const { tableData, status, error, errorMessage, isLoading } = this.state
+
     if (status === 'list') {
       return (
         <ProfileList
           profiles={this.state.profiles}
-          editProfile={this.editProfile}
-          deleteProfile={this.deleteProfile}
+          editProfile={this.showEditView}
+          deleteProfile={this.showDeleteModal}
           downloadProfile={this.downloadProfile}
         />
       )
     } else if (status == 'edit') {
       return (
-        <ProfileEditForm
+        <ProfileEdit
           id={this.state.id}
           title={this.state.title}
           description={this.state.description}
-          header={this.state.header}
-          table={this.state.table}
+          tables={this.state.tables}
           identifiers={this.state.identifiers}
-          updateIdentifiers={this.updateIdentifiers}
-          addIdentifier={this.addIdentifier}
+          firstRowIsHeader={this.state.firstRowIsHeader}
           updateTitle={this.updateTitle}
           updateDescription={this.updateDescription}
-          updateHeaderValue={this.updateHeaderValue}
-          updateFirstRowIsHeaderValue={this.updateFirstRowIsHeaderValue}
-          updateRule={this.updateRule}
-          updateProfile={this.updateProfile}
+          addTable={this.addTable}
+          updateHeader={this.updateHeader}
+          updateTable={this.updateTable}
+          removeTable={this.removeTable}
+          addIdentifier={this.addIdentifier}
+          updateIdentifier={this.updateIdentifier}
           removeIdentifier={this.removeIdentifier}
+          updateFirstRowIsHeader={this.updateFirstRowIsHeader}
+          updateProfile={this.updateProfile}
         />
       )
     } else if (status == 'import') {
       return (
         <FileUploadForm
-          onFileChangeHandler={this.onFileChangeHandler}
-          onSubmitFileHandler={this.onSubmitFileHandler}
-          errorMessage={this.state.errorMessage}
-          error={this.state.error}
-          isLoading={this.state.isLoading}
+          onFileChangeHandler={this.updateFile}
+          onSubmitFileHandler={this.uploadFile}
+          errorMessage={errorMessage}
+          error={error}
+          isLoading={isLoading}
         />
       )
     } else if (status == 'create') {
@@ -499,31 +483,33 @@ class AdminApp extends Component {
         return (
           <ProfileCreate
             tableData={this.state.tableData}
+            columnList={this.state.columnList}
+            toggleFirstRowIsHeader={this.toggleFirstRowIsHeader}
+            headerOptions={this.state.headerOptions}
             title={this.state.title}
             description={this.state.description}
-            options={this.state.options}
-            columnList={this.state.columnList}
             identifiers={this.state.identifiers}
+            tables={this.state.tables}
             updateTitle={this.updateTitle}
             updateDescription={this.updateDescription}
-            removeIdentifier={this.removeIdentifier}
+            addTable={this.addTable}
+            updateHeader={this.updateHeader}
+            updateTable={this.updateTable}
+            removeTable={this.removeTable}
             addIdentifier={this.addIdentifier}
-            onSubmitSelectedData={this.onSubmitSelectedData}
-            updateIdentifiers={this.updateIdentifiers}
-            addOrUpdateOption={this.addOrUpdateOption}
-            toggleFirstRowIsHeader={this.toggleFirstRowIsHeader}
-            onSelectXcolumn={this.onSelectXcolumn}
-            onSelectYcolumn={this.onSelectYcolumn}
+            updateIdentifier={this.updateIdentifier}
+            removeIdentifier={this.removeIdentifier}
+            createProfile={this.createProfile}
           />
         )
       } else {
         return (
           <FileUploadForm
-            onFileChangeHandler={this.onFileChangeHandler}
-            onSubmitFileHandler={this.onSubmitFileHandler}
-            errorMessage={this.state.errorMessage}
-            error={this.state.error}
-            isLoading={this.state.isLoading}
+            onFileChangeHandler={this.updateFile}
+            onSubmitFileHandler={this.uploadFile}
+            errorMessage={errorMessage}
+            error={error}
+            isLoading={isLoading}
           />
         )
       }
@@ -609,8 +595,8 @@ class AdminApp extends Component {
                 <h5 className="modal-title">Do you really want to delete this profile?</h5>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-danger" onClick={this.submitDeleteProfile}>Delete profile</button>
-                <button type="button" className="btn btn-secondary" onClick={this.dismissDeleteProfile} data-bs-dismiss="modal">Cancel</button>
+                <button type="button" className="btn btn-danger" onClick={this.deleteProfile}>Delete profile</button>
+                <button type="button" className="btn btn-secondary" onClick={this.hideDeleteModal} data-bs-dismiss="modal">Cancel</button>
               </div>
             </div>
           </div>
