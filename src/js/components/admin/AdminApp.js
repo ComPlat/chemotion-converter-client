@@ -47,6 +47,9 @@ class AdminApp extends Component {
     this.addTable = this.addTable.bind(this)
     this.updateHeader = this.updateHeader.bind(this)
     this.updateTable = this.updateTable.bind(this)
+    this.addOperation = this.addOperation.bind(this)
+    this.updateOperation = this.updateOperation.bind(this)
+    this.removeOperation = this.removeOperation.bind(this)
     this.removeTable = this.removeTable.bind(this)
 
     this.addIdentifier = this.addIdentifier.bind(this)
@@ -157,22 +160,56 @@ class AdminApp extends Component {
     }
   }
 
+  addHeader() {
+
+  }
+
   updateHeader(index, key, value) {
     const tables = [...this.state.tables]
     if (index !== -1) {
-      const header = tables[index].header
-      header[key] = value
-      tables[index].header = header
+      tables[index].header[key] = value
       this.setState({ tables })
     }
+  }
+
+  removeHeader() {
+
   }
 
   updateTable(index, key, value) {
     const tables = [...this.state.tables]
     if (index !== -1) {
-      const table = tables[index].table
-      table[key] = value
-      tables[index].table = table
+      tables[index].table[key] = value
+      this.setState({ tables })
+    }
+  }
+
+  addOperation(index, key, type) {
+    const tables = [...this.state.tables]
+    if (index !== -1) {
+      if (tables[index].table[key] === undefined) {
+        tables[index].table[key] = []
+      }
+      tables[index].table[key].push({
+        type: type,
+        operator: '+'
+      })
+      this.setState({ tables })
+    }
+  }
+
+  updateOperation(index, key, opIndex, opKey, value) {
+    const tables = [...this.state.tables]
+    if (index !== -1) {
+      tables[index].table[key][opIndex][opKey] = value
+      this.setState({ tables })
+    }
+  }
+
+  removeOperation(index, key, opIndex) {
+    const tables = [...this.state.tables]
+    if (index !== -1) {
+      tables[index].table[key].splice(opIndex, 1)
       this.setState({ tables })
     }
   }
@@ -506,6 +543,9 @@ class AdminApp extends Component {
             addTable={this.addTable}
             updateHeader={this.updateHeader}
             updateTable={this.updateTable}
+            addOperation={this.addOperation}
+            updateOperation={this.updateOperation}
+            removeOperation={this.removeOperation}
             removeTable={this.removeTable}
             addIdentifier={this.addIdentifier}
             updateIdentifier={this.updateIdentifier}

@@ -15,15 +15,17 @@ class HeaderForm extends Component {
         {
           Object.keys(this.props.headerOptions).map((option, index) => {
             return (
-              <div key={index} className="form-group">
-                <label htmlFor={option}>{option}</label>
-                <select className="form-control form-control-sm" onChange={e => this.props.onChange(option, e.target.value)} id={option}>
-                  {
-                    this.props.headerOptions[option].map((select, selectIndex) => {
-                      return <option value={select} key={selectIndex}>{select}</option>
-                    })
-                  }
-                </select>
+              <div key={index} className="form-group row">
+                <label htmlFor={option} className="col-sm-4 col-form-label">{option}</label>
+                <div className="col-sm-8">
+                  <select className="form-control form-control-sm" onChange={e => this.props.updateHeader(option, e.target.value)} id={option}>
+                    {
+                      this.props.headerOptions[option].map((select, selectIndex) => {
+                        return <option value={select} key={selectIndex}>{select}</option>
+                      })
+                    }
+                  </select>
+                </div>
               </div>
             )
           }
