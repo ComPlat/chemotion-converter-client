@@ -45,8 +45,9 @@ class ProfileCreate extends Component {
 
   render() {
     const { tableData, columnList, headerOptions, title, description, identifiers, tables,
-            updateTitle, updateDescription, addTable, updateHeader, updateTable, removeTable,
-            addIdentifier, updateIdentifier, removeIdentifier, toggleFirstRowIsHeader, createProfile } = this.props
+            updateTitle, updateDescription, addTable, updateHeader, updateTable, addOperation,
+            updateOperation, removeOperation, removeTable, addIdentifier, updateIdentifier, removeIdentifier,
+            toggleFirstRowIsHeader, createProfile } = this.props
 
     return (
       <div className="row">
@@ -135,8 +136,18 @@ class ProfileCreate extends Component {
                         </div>
                       </div>
                       <div className="card-body">
-                        <HeaderForm headerOptions={headerOptions} onChange={(key, value) => updateHeader(index, key, value)} />
-                        <TableForm columnList={columnList} onChange={(key, value) => updateTable(index, key, value)} />
+                        <HeaderForm
+                          headerOptions={headerOptions}
+                          updateHeader={(key, value) => updateHeader(index, key, value)}
+                        />
+                        <TableForm
+                          table={table.table}
+                          columnList={columnList}
+                          updateTable={(key, value) => updateTable(index, key, value)}
+                          addOperation={(key, type) => addOperation(index, key, type)}
+                          updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
+                          removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)}
+                        />
                       </div>
                     </div>
                   </React.Fragment>
