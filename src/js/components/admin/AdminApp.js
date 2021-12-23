@@ -62,6 +62,7 @@ class AdminApp extends Component {
     this.downloadProfile = this.downloadProfile.bind(this)
     this.updateFile = this.updateFile.bind(this)
     this.uploadFile = this.uploadFile.bind(this)
+    this.importFile = this.importFile.bind(this)
 
     this.dispatchView = this.dispatchView.bind(this)
     this.getTitleforStatus = this.getTitleforStatus.bind(this)
@@ -261,7 +262,6 @@ class AdminApp extends Component {
     this.setState({ tableData, firstRowIsHeader });
   }
 
-
   createProfile(event) {
     event.preventDefault()
 
@@ -354,88 +354,98 @@ class AdminApp extends Component {
   }
 
   uploadFile() {
-    const { selectedFile, status } = this.state
+    const { selectedFile } = this.state
 
     this.setState({
       isLoading: true
     })
 
-    if (status == 'import') {
-      const createProfile = e => {
-        const profile = JSON.parse(e.target.result)
+    ConverterApi.fetchTables(selectedFile)
+      .then(tableData => {
+        if (tableData) {
+          // create a flat list of all columns
+          const columnList = tableData.data.reduce((accumulator, table, tableIndex) => {
+            const tableColumns = table.columns.map((tableColumn, columnIndex) => {
+              return Object.assign({}, tableColumn, {
+                label: `Table #${tableIndex} Column #${columnIndex}`,
+                value: {
+                  tableIndex: tableIndex,
+                  columnIndex: columnIndex
+                }
+              })
+            })
+            return accumulator.concat(tableColumns)
+          }, [])
 
-        ConverterApi.createProfile(profile)
-          .then(data => {
-            $('#modal').show()
+          this.setState({
+            selectedFile: null,
+            isLoading: false,
+            tableData: tableData,
+            columnList: columnList,
+            headerOptions: tableData.options,
+            tables: [this.initTable(tableData)],
+            identifiers: [],
+            firstRowIsHeader: tableData.data.map(table => false),
+            error: false,
+            errorMessage: ''
           })
-          .catch(errors => {
+        }
+      })
+      .catch(error => {
+        if (error.status === 413) {
+          this.setState({
+            error: true,
+            errorMessage: 'The uploaded file is too large.',
+            isLoading: false
+          })
+        } else {
+          error.text().then(errorMessage => {
             this.setState({
               error: true,
-              errorMessage: Object.values(errors).join(', '),
+              errorMessage: JSON.parse(errorMessage).error,
               isLoading: false
             })
           })
-      }
+        }
+      })
+  }
 
-      const reader = new FileReader()
-      reader.readAsText(selectedFile)
-      reader.onload = createProfile.bind(this)
+  importFile() {
+    const { selectedFile } = this.state
 
-    } else {
-      ConverterApi.fetchTables(selectedFile)
-        .then(tableData => {
-          if (tableData) {
-            // create a flat list of all columns
-            const columnList = tableData.data.reduce((accumulator, table, tableIndex) => {
-              const tableColumns = table.columns.map((tableColumn, columnIndex) => {
-                return Object.assign({}, tableColumn, {
-                  label: `Table #${tableIndex} Column #${columnIndex}`,
-                  value: {
-                    tableIndex: tableIndex,
-                    columnIndex: columnIndex
-                  }
-                })
-              })
-              return accumulator.concat(tableColumns)
-            }, [])
+    this.setState({
+      isLoading: true
+    })
 
-            this.setState({
-              selectedFile: null,
-              isLoading: false,
-              tableData: tableData,
-              columnList: columnList,
-              headerOptions: tableData.options,
-              tables: [this.initTable(tableData)],
-              identifiers: [],
-              firstRowIsHeader: tableData.data.map(table => false),
-              showSuccessMessage: true,
-              error: false,
-              errorMessage: ''
-            })
-          }
+    const createProfile = e => {
+      const profile = JSON.parse(e.target.result)
+
+      ConverterApi.createProfile(profile)
+        .then(data => {
+          $('#modal').show()
+          this.setState({
+            selectedFile: null,
+            isLoading: false,
+            error: false,
+            errorMessage: ''
+          })
         })
-        .catch(error => {
-          if (error.status === 413) {
-            this.setState({
-              error: true,
-              errorMessage: 'The uploaded file is too large.',
-              isLoading: false
-            })
-          } else {
-            error.text().then(errorMessage => {
-              this.setState({
-                error: true,
-                errorMessage: JSON.parse(errorMessage).error,
-                isLoading: false
-              })
-            })
-          }
+        .catch(errors => {
+          this.setState({
+            error: true,
+            errorMessage: Object.values(errors).join(', '),
+            isLoading: false
+          })
         })
     }
+
+    const reader = new FileReader()
+    reader.readAsText(selectedFile)
+    reader.onload = createProfile.bind(this)
   }
 
   dispatchView() {
-    const { tableData, status, error, errorMessage, isLoading } = this.state
+    const { tableData, status, error, errorMessage, isLoading, selectedFile } = this.state
 
     if (status === 'list') {
       return (
@@ -472,10 +482,11 @@ class AdminApp extends Component {
       return (
         <FileUploadForm
           onFileChangeHandler={this.updateFile}
-          onSubmitFileHandler={this.uploadFile}
+          onSubmitFileHandler={this.importFile}
           errorMessage={errorMessage}
           error={error}
           isLoading={isLoading}
+          disabled={selectedFile === null}
         />
       )
     } else if (status == 'create') {
@@ -510,6 +521,7 @@ class AdminApp extends Component {
             errorMessage={errorMessage}
             error={error}
             isLoading={isLoading}
+            disabled={selectedFile === null}
           />
         )
       }
