@@ -45,12 +45,14 @@ class AdminApp extends Component {
     this.updateDescription = this.updateDescription.bind(this)
 
     this.addTable = this.addTable.bind(this)
-    this.updateHeader = this.updateHeader.bind(this)
     this.updateTable = this.updateTable.bind(this)
+    this.removeTable = this.removeTable.bind(this)
+    this.addHeader = this.addHeader.bind(this)
+    this.updateHeader = this.updateHeader.bind(this)
+    this.removeHeader = this.removeHeader.bind(this)
     this.addOperation = this.addOperation.bind(this)
     this.updateOperation = this.updateOperation.bind(this)
     this.removeOperation = this.removeOperation.bind(this)
-    this.removeTable = this.removeTable.bind(this)
 
     this.addIdentifier = this.addIdentifier.bind(this)
     this.updateIdentifier = this.updateIdentifier.bind(this)
@@ -160,28 +162,53 @@ class AdminApp extends Component {
     }
   }
 
-  addHeader() {
-
-  }
-
-  updateHeader(index, key, value) {
-    const tables = [...this.state.tables]
-    if (index !== -1) {
-      tables[index].header[key] = value
-      this.setState({ tables })
-    }
-  }
-
-  removeHeader() {
-
-  }
-
   updateTable(index, key, value) {
     const tables = [...this.state.tables]
     if (index !== -1) {
       tables[index].table[key] = value
       this.setState({ tables })
     }
+  }
+
+  removeTable(index) {
+    const tables = [...this.state.tables]
+    tables.splice(index, 1)
+    this.setState({ tables })
+  }
+
+  addHeader(index) {
+    const tables = [...this.state.tables]
+    if (index !== -1) {
+      const key = 'HEADER' + Object.keys(tables[index].header).length
+      tables[index].header[key] = ''
+    }
+    this.setState({ tables })
+  }
+
+  updateHeader(index, key, value, oldKey) {
+    const tables = [...this.state.tables]
+    if (index !== -1) {
+      if (oldKey === undefined) {
+        tables[index].header[key] = value
+      } else {
+        // create a new header to preserve the order
+        tables[index].header = Object.keys(tables[index].header).reduce((agg, cur) => {
+          if (cur == oldKey) {
+            agg[key] = value
+          } else {
+            agg[cur] = tables[index].header[cur]
+          }
+          return agg
+        }, {})
+      }
+      this.setState({ tables })
+    }
+  }
+
+  removeHeader(index, key) {
+    const tables = [...this.state.tables]
+    delete tables[index].header[key]
+    this.setState({ tables })
   }
 
   addOperation(index, key, type) {
@@ -212,12 +239,6 @@ class AdminApp extends Component {
       tables[index].table[key].splice(opIndex, 1)
       this.setState({ tables })
     }
-  }
-
-  removeTable(index) {
-    const tables = [...this.state.tables]
-    tables.splice(index, 1)
-    this.setState({ tables })
   }
 
   addIdentifier(type) {
@@ -505,9 +526,11 @@ class AdminApp extends Component {
           updateTitle={this.updateTitle}
           updateDescription={this.updateDescription}
           addTable={this.addTable}
-          updateHeader={this.updateHeader}
           updateTable={this.updateTable}
           removeTable={this.removeTable}
+          addHeader={this.addHeader}
+          updateHeader={this.updateHeader}
+          removeHeader={this.removeHeader}
           addIdentifier={this.addIdentifier}
           updateIdentifier={this.updateIdentifier}
           removeIdentifier={this.removeIdentifier}
@@ -541,12 +564,12 @@ class AdminApp extends Component {
             updateTitle={this.updateTitle}
             updateDescription={this.updateDescription}
             addTable={this.addTable}
-            updateHeader={this.updateHeader}
             updateTable={this.updateTable}
+            removeTable={this.removeTable}
+            updateHeader={this.updateHeader}
             addOperation={this.addOperation}
             updateOperation={this.updateOperation}
             removeOperation={this.removeOperation}
-            removeTable={this.removeTable}
             addIdentifier={this.addIdentifier}
             updateIdentifier={this.updateIdentifier}
             removeIdentifier={this.removeIdentifier}
