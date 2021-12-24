@@ -13,8 +13,8 @@ class ProfileEdit extends Component {
 
   render() {
     const { id, title, description, updateTitle, updateDescription, addTable, updateTable, removeTable,
-            addHeader, updateHeader, removeHeader, addIdentifier, updateIdentifier, removeIdentifier,
-            toggleFirstRowIsHeader, updateProfile } = this.props
+            addHeader, updateHeader, removeHeader, addOperation, updateOperation, removeOperation,
+            addIdentifier, updateIdentifier, removeIdentifier, toggleFirstRowIsHeader, updateProfile } = this.props
 
     return (
       <div>
@@ -61,7 +61,11 @@ class ProfileEdit extends Component {
                                 addHeader={() => addHeader(index)}
                                 updateHeader={(key, value, oldKey) => updateHeader(index, key, value, oldKey)}
                                 removeHeader={(key) => removeHeader(index, key)} />
-                    <TableForm table={table.table} onChange={(key, value) => updateTable(index, key, value)} />
+                    <TableForm table={table.table}
+                               updateTable={(key, value) => updateTable(index, key, value)}
+                               addOperation={(key, type) => addOperation(index, key, type)}
+                               updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
+                               removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)} />
                   </div>
                 </div>
               </React.Fragment>
