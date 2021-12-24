@@ -214,13 +214,21 @@ class AdminApp extends Component {
   addOperation(index, key, type) {
     const tables = [...this.state.tables]
     if (index !== -1) {
+      const operation = {
+        type: type,
+        operator: '+'
+      }
+      if (type == 'column') {
+        operation['column'] = {
+          tableIndex: null,
+          columnIndex: null
+        }
+      }
+
       if (tables[index].table[key] === undefined) {
         tables[index].table[key] = []
       }
-      tables[index].table[key].push({
-        type: type,
-        operator: '+'
-      })
+      tables[index].table[key].push(operation)
       this.setState({ tables })
     }
   }
@@ -531,6 +539,9 @@ class AdminApp extends Component {
           addHeader={this.addHeader}
           updateHeader={this.updateHeader}
           removeHeader={this.removeHeader}
+          addOperation={this.addOperation}
+          updateOperation={this.updateOperation}
+          removeOperation={this.removeOperation}
           addIdentifier={this.addIdentifier}
           updateIdentifier={this.updateIdentifier}
           removeIdentifier={this.removeIdentifier}

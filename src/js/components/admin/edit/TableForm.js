@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 
-import TableInput from './TableInput'
+import TableColumn from './TableColumn'
 
 class TableForm extends Component {
 
@@ -9,23 +9,25 @@ class TableForm extends Component {
   }
 
   render() {
+    const { table, updateTable, addOperation, updateOperation, removeOperation } = this.props
+
     return (
       <div>
         <div>
           <label>Table columns</label>
         </div>
-        <TableInput
-          name={'xColumn'}
-          tableIndex={this.props.table.xColumn ? this.props.table.xColumn.tableIndex : ''}
-          columnIndex={this.props.table.xColumn ? this.props.table.xColumn.columnIndex : ''}
-          onChange={this.props.onChange}
-        />
-        <TableInput
-          name={'yColumn'}
-          tableIndex={this.props.table.yColumn ? this.props.table.yColumn.tableIndex : ''}
-          columnIndex={this.props.table.yColumn ? this.props.table.yColumn.columnIndex : ''}
-          onChange={this.props.onChange}
-        />
+        <div className="row">
+          <div className="col-lg-6 mb-2">
+            <TableColumn table={table} label="x-values"
+                         columnKey="xColumn" operationsKey="xOperations" updateTable={updateTable}
+                         addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
+          </div>
+          <div className="col-lg-6 mb-2">
+            <TableColumn table={table} label="y-values"
+                         columnKey="yColumn" operationsKey="yOperations" updateTable={updateTable}
+                         addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
+          </div>
+        </div>
         <small className="text-muted">The data you pick will determine which table columns are going to converted.</small>
       </div>
     )
