@@ -11,6 +11,15 @@ class TableColumn extends Component {
   render() {
     const { table, label, columnKey, operationsKey, updateTable,
             addOperation, updateOperation, removeOperation } = this.props
+
+    const getValue = (column, key) => {
+      if (column !== undefined && typeof column[key] == 'number' && !isNaN(column[key])) {
+        return column[key]
+      } else {
+        return null
+      }
+    }
+
     return (
       <div>
         <label className="mb-2">{label}</label>
@@ -20,10 +29,10 @@ class TableColumn extends Component {
               type="number"
               className="form-control form-control-sm"
               onChange={event => updateTable(columnKey, {
-                tableIndex: event.target.value,
-                columnIndex: table[columnKey].columnIndex
+                tableIndex: parseInt(event.target.value),
+                columnIndex: getValue(table[columnKey], 'columnIndex')
               })}
-              value={table[columnKey].tableIndex}
+              value={getValue(table[columnKey], 'tableIndex') || ''}
             />
             <small>Table Index</small>
           </div>
@@ -32,10 +41,10 @@ class TableColumn extends Component {
               type="number"
               className="form-control form-control-sm"
               onChange={event => updateTable(columnKey, {
-                tableIndex: table[columnKey].tableIndex,
-                columnIndex: event.target.value
+                tableIndex: getValue(table[columnKey], 'tableIndex'),
+                columnIndex: parseInt(event.target.value)
               })}
-              value={table[columnKey].columnIndex}
+              value={getValue(table[columnKey], 'columnIndex') || ''}
             />
             <small>Column Index</small>
           </div>
@@ -56,10 +65,10 @@ class TableColumn extends Component {
                         type="number"
                         className="form-control form-control-sm"
                         onChange={event => updateOperation(operationsKey, index, 'column', {
-                          tableIndex: event.target.value,
-                          columnIndex: operation.column.columnIndex
+                          tableIndex: parseInt(event.target.value),
+                          columnIndex: getValue(operation.column, 'columnIndex')
                         })}
-                        value={operation.column.tableIndex || ''}
+                        value={getValue(operation.column, 'tableIndex') || ''}
                       />
                       <small>Table Index</small>
                     </div>
@@ -68,10 +77,10 @@ class TableColumn extends Component {
                         type="number"
                         className="form-control form-control-sm"
                         onChange={event => updateOperation(operationsKey, index, 'column', {
-                          tableIndex: operation.column.tableIndex,
-                          columnIndex: event.target.value
+                          tableIndex: getValue(operation.column, 'tableIndex'),
+                          columnIndex: parseInt(event.target.value)
                         })}
-                        value={operation.column.columnIndex || ''}
+                        value={getValue(operation.column, 'columnIndex') || ''}
                       />
                       <small>Column Index</small>
                     </div>

@@ -166,6 +166,12 @@ class AdminApp extends Component {
     const tables = [...this.state.tables]
     if (index !== -1) {
       tables[index].table[key] = value
+
+      // remove the column if tableIndex and columnIndex is null
+      if (Object.values(tables[index].table[key]).every(value => (value === null || isNaN(value)))) {
+        delete tables[index].table[key]
+      }
+
       this.setState({ tables })
     }
   }
@@ -245,6 +251,12 @@ class AdminApp extends Component {
     const tables = [...this.state.tables]
     if (index !== -1) {
       tables[index].table[key].splice(opIndex, 1)
+
+      // remove operations if it is empty
+      if (tables[index].table[key].length == 0) {
+        delete tables[index].table[key]
+      }
+
       this.setState({ tables })
     }
   }
