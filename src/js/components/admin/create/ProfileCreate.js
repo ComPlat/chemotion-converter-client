@@ -11,18 +11,34 @@ class ProfileCreate extends Component {
     super(props)
   }
 
-  renderTableHeader(table) {
+  renderMetadata(metadata) {
     return (
-      <div>
-        Header
-        <pre>
+      <div className="">
+        <dl className="row">
           {
-            table.header.map((line, index) => {
-              return <code key={index}>{line}</code>
+            Object.keys(metadata).map((key, index) => {
+              return (
+                <React.Fragment key={index}>
+                  <dt className="col-sm-3">{key}:</dt>
+                  <dd className="col-sm-9 mb-0">{metadata[key]}</dd>
+                </React.Fragment>
+              )
             })
           }
-        </pre>
+        </dl>
       </div>
+    )
+  }
+
+  renderHeader(header) {
+    return (
+      <pre>
+        {
+          header.map((line, index) => {
+            return <code key={index}>{line}</code>
+          })
+        }
+      </pre>
     )
   }
 
@@ -53,48 +69,64 @@ class ProfileCreate extends Component {
       <div className="row">
         <div className="col-md-7 scroll">
           <div className="mb-5">
-            <h4>Metadata</h4>
-            <div className="pt-3 pb-3 mb-3 border-top border-bottom">
-              {Object.keys(tableData.metadata).map((entry, index) => {
-                return <div key={index}>{entry}: {tableData.metadata[entry]}</div>
-              })}
-            </div>
+            <hr />
+            <h4>Input file metadata</h4>
+            {Object.keys(tableData.metadata).length > 0 && this.renderMetadata(tableData.metadata)}
+            <hr />
 
-            <h4>Tables</h4>
             <ul className="nav nav-tabs" id="Tabs" role="tablist">
               {tableData.data.map((table, index) => {
                 return (
                   <li key={index} className="nav-item" role="presentation">
                     <a className={`nav-link ${index == 0 ? "active" : ""}`} id="table-data-tab" href={'#table-data-' + index}
-                      data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Table #{index}</a>
+                      data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Input table #{index}</a>
                   </li>
                 )
               })}
             </ul>
 
-            <div className="tab-content border-bottom pt-3" id="Tabs">
-              {tableData.data.map((table, index) => {
-                return (
-                  <div key={index} className={`tab-pane fade ${index == 0 ? "active show" : ""}`} id={'table-data-' + index}
-                    role="tabpanel" aria-labelledby="table-data-tab">
+            <div className="tab-content pt-3" id="Tabs">
+              {
+                tableData.data.map((table, index) => {
+                  return (
+                    <div key={index} className={`tab-pane fade ${index == 0 ? "active show" : ""}`} id={'table-data-' + index}
+                      role="tabpanel" aria-labelledby="table-data-tab">
 
-                    {table.header.length > 0 && this.renderTableHeader(table)}
-
-                    {table.rows.length > 0 &&
-                      <div>
-                        <div className="form-group form-check">
-                          <input type="checkbox" checked={table.firstRowIsHeader || false}
-                            onChange={e => toggleFirstRowIsHeader(index)}
-                            className="form-check-input" id="first_row_is_header" />
-                          <label className="form-check-label" htmlFor="first_row_is_header">First row are column names</label>
+                      {
+                        table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
+                        <div>
+                          <h4>Input table metadata</h4>
+                          {this.renderMetadata(table.metadata)}
+                          <hr />
                         </div>
+                      }
+                      {
+                        table.header !== undefined && table.header.length > 0 &&
+                        <div>
+                          <h4>Input table header</h4>
+                          {this.renderHeader(table.header)}
+                          <hr />
+                        </div>
+                      }
+                      {
+                        table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
+                        <div>
+                          <h4>Input table data</h4>
 
-                        {this.renderDataGrid(table)}
-                      </div>
-                    }
-                  </div>
-                )
-              })
+                          {this.renderDataGrid(table)}
+
+                          <div className="form-group form-check mt-3">
+                            <input type="checkbox" checked={table.firstRowIsHeader || false}
+                              onChange={e => toggleFirstRowIsHeader(index)}
+                              className="form-check-input" id="first_row_is_header" />
+                            <label className="form-check-label" htmlFor="first_row_is_header">First row are column names</label>
+                          </div>
+                          <hr />
+                        </div>
+                      }
+                    </div>
+                  )
+                })
               }
             </div>
           </div>
@@ -128,7 +160,7 @@ class ProfileCreate extends Component {
                       <div className="card-header">
                         <div className="form-row">
                           <div className="col-lg-10">
-                            Table #{index}
+                            Output table #{index}
                           </div>
                           <div className="col-lg-2">
                             <button type="button" className="btn btn-danger btn-sm btn-block float-right" onClick={removeTable}>Remove</button>

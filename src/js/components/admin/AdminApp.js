@@ -445,7 +445,7 @@ class AdminApp extends Component {
           const columnList = tableData.data.reduce((accumulator, table, tableIndex) => {
             const tableColumns = table.columns.map((tableColumn, columnIndex) => {
               return Object.assign({}, tableColumn, {
-                label: `Table #${tableIndex} Column #${columnIndex}`,
+                label: `Input table #${tableIndex} Column #${columnIndex}`,
                 value: {
                   tableIndex: tableIndex,
                   columnIndex: columnIndex
