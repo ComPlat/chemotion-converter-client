@@ -194,26 +194,59 @@ class ProfileCreate extends Component {
             <div className="card rounded-0 mt-3">
               <div className="card-header">Identifiers</div>
               <div className="card-body">
-                <label>Based on metadata</label>
+                <label>Based on file metadata</label>
                 <IdentifierForm
-                  type="metadata"
+                  type="fileMetadata"
                   identifiers={identifiers}
+                  tableData={tableData}
+                  tables={tables}
                   addIdentifier={addIdentifier}
                   updateIdentifier={updateIdentifier}
                   removeIdentifier={removeIdentifier}
-                  data={tableData.metadata}
+                />
+
+                <label>Based on Table metadata</label>
+                <IdentifierForm
+                  type="tableMetadata"
+                  identifiers={identifiers}
+                  tableData={tableData}
+                  tables={tables}
+                  addIdentifier={addIdentifier}
+                  updateIdentifier={updateIdentifier}
+                  removeIdentifier={removeIdentifier}
                 />
 
                 <label>Based on table headers</label>
                 <IdentifierForm
-                  type="table"
+                  type="tableHeader"
                   identifiers={identifiers}
+                  tableData={tableData}
+                  tables={tables}
                   addIdentifier={addIdentifier}
                   updateIdentifier={updateIdentifier}
                   removeIdentifier={removeIdentifier}
-                  data={tableData.data}
                 />
-                <small className="text-muted">The identifiers you create will be used to find the right profile for uploaded files. The 'value' will be compared to the selected file metadata or to the header of a table. If you provide a line number, only this line of the header will be used. If you select 'RexExp', you can enter a regular expression as value, which will be used to match the file. If you fill in the field 'header key', the compared string (or the first group of a given RegExp) will be added to the header of the converted file.</small>
+                <small>
+                  <p className="text-muted">
+                    The identifiers you create here are used to find the correct profile for uploaded files, and they are used to extract metadata and add it to the output tables.
+                  </p>
+                  <ul className="text-muted mb-0">
+                    <li>
+                      The <code>Value</code> will be compared to the selected metadata or to the header of a table. If you select <code>Regex</code>, you can enter a regular expression as value.
+                    </li>
+                    <li>If you provide a line number, only this line of the header will be used. If line number is ommited, the whole header is compared (or searched with the Regex).
+                    </li>
+                    <li>
+                      If groups are used in the regular expression (e.g. <code>Key: (.*?)</code>) only the first group will be extracted as metadata.
+                    </li>
+                    <li>
+                      If you enter an <code>Output key</code> the matched value will be added to the output tables. If you set an <code>Output table</code> explicitely, it will only be added to this table, otherwise it will be added to all output tables.
+                    </li>
+                    <li>
+                      The <code>Output layer</code> input is used for additional processing in the Chemotion ELN.
+                    </li>
+                  </ul>
+                </small>
               </div>
             </div>
 

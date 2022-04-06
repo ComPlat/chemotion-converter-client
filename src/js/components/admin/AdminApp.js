@@ -262,23 +262,38 @@ class AdminApp extends Component {
   }
 
   addIdentifier(type) {
-    const { identifiers } = this.state
-
-    let metadataKey = ''
-    let value = ''
-    if (type === 'metadata' && this.state.status == 'create') {
-      metadataKey = Object.keys(this.state.tableData.metadata)[0]
-      value = this.state.tableData.metadata[metadataKey]
-    }
+    const { identifiers, tableData } = this.state
 
     const identifier = {
       type: type,
-      tableIndex: 0,
-      lineNumber: '',
-      metadataKey: metadataKey,
-      headerKey: '',
-      value: value,
-      isRegex: false
+      isRegex: false,
+      outputTableIndex: null,
+      outputLayer: '',
+      outputKey: ''
+    }
+
+    if (this.state.status == 'create') {
+      if (type === 'fileMetadata') {
+        identifier['key'] = Object.keys(tableData.metadata)[0]
+        identifier['value'] = tableData.metadata[identifier['key']]
+      }
+      if (type === 'tableMetadata') {
+        identifier['tableIndex'] = 0
+
+        if (tableData.tables.length > 0 && tableData.tables[0].metadata !== undefined) {
+          identifier['key'] = Object.keys(tableData.tables[0].metadata)[0]
+          identifier['value'] = tableData.tables[0].metadata[identifier['key']]
+        } else {
+          identifier['key'] = ''
+          identifier['value'] = ''
+        }
+
+      }
+      if (type === 'tableHeader') {
+        identifier['tableIndex'] = 0
+        identifier['lineNumber'] = ''
+        identifier['value'] = ''
+      }
     }
 
     identifiers.push(identifier)

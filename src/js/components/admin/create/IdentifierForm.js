@@ -9,31 +9,29 @@ class IdentifierForm extends Component {
   }
 
   render() {
+    const { type, identifiers, tableData, tables, addIdentifier, updateIdentifier, removeIdentifier } = this.props
+
     return (
       <div className="mb-4">
         {
-          this.props.identifiers.map((identifier, index) => {
-            if (identifier.type === this.props.type) {
+          identifiers.map((identifier, index) => {
+            if (identifier.type === type) {
               return <IdentifierInput
                 key={index}
-                id={index}
-                type={identifier.type}
-                tableIndex={identifier.tableIndex}
-                lineNumber={identifier.lineNumber}
-                metadataKey={identifier.metadataKey}
-                headerKey={identifier.headerKey}
-                value={identifier.value}
-                isRegex={identifier.isRegex}
-                options={this.props.data}
-                removeIdentifier={this.props.removeIdentifier}
-                updateIdentifier={this.props.updateIdentifier}
+                index={index}
+                type={type}
+                identifier={identifier}
+                tableData={tableData}
+                tables={tables}
+                removeIdentifier={removeIdentifier}
+                updateIdentifier={updateIdentifier}
               />
             }
           })
         }
         <form>
             <div className="form">
-              <button type="button" className="btn btn-success btn-sm" onClick={event => this.props.addIdentifier(this.props.type)}>
+              <button type="button" className="btn btn-success btn-sm" onClick={event => addIdentifier(type)}>
                 Add Identifier
               </button>
             </div>

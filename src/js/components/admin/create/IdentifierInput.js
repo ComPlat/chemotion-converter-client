@@ -4,164 +4,158 @@ class IndentifierInput extends Component {
 
   constructor(props) {
     super(props)
-    this.state = {
-      disabled: true
+  }
+
+  getKeyOptions() {
+    const { type, tableData } = this.props
+
+    if (type == 'fileMetadata') {
+      return Object.keys(tableData.metadata).map(key => ({
+        key,
+        label: key,
+        value: tableData.metadata[key]
+      }))
+    } else if (type == 'tableMetadata') {
+      return tableData.tables.reduce((acc, table, tableIndex) => {
+        if (table.metadata !== undefined) {
+          return acc.concat(Object.keys(table.metadata).map(key => ({
+            key,
+            tableIndex,
+            value: table.metadata[key],
+            label: `Input table ${tableIndex} ${key}` })))
+        } else {
+          return acc
+        }
+      }, [])
+    } else {
+      return []
+    }
+  }
+
+  updateKey(option) {
+    const { index, type, identifier, updateIdentifier } = this.props
+    const identifierData = {
+      key: option.key
+    }
+    if (type == 'tableMetadata') {
+      identifierData.tableIndex = option.tableIndex
+    }
+    if (!identifier.isRegex) {
+      identifierData.value = option.value
     }
 
-    this.onSelectMetadata = this.onSelectMetadata.bind(this)
-    this.onSelectTable = this.onSelectTable.bind(this)
-    this.toogleIsRegex = this.toogleIsRegex.bind(this)
-    this.removeIdentifier = this.removeIdentifier.bind(this)
-    this.updateLinenumber = this.updateLinenumber.bind(this)
-    this.updateValue = this.updateValue.bind(this)
-    this.updateHeaderKey = this.updateHeaderKey.bind(this)
-  }
-
-  onSelectMetadata(event) {
-    let option = event.target.value
-    let value = this.props.options[option]
-    let data = {
-      metadataKey: option,
-      value: value,
-      isRegex: false
-    }
-    this.props.updateIdentifier(this.props.id, data)
-    this.setState({
-      disabled: true
-    })
-  }
-
-  onSelectTable(event) {
-    let data = {
-      tableIndex: Number(event.target.value)
-    }
-    this.props.updateIdentifier(this.props.id, data)
-  }
-
-  updateLinenumber (event) {
-    let lineNumber = event.target.value
-    let data = {
-      lineNumber: lineNumber
-    }
-    this.props.updateIdentifier(this.props.id, data)
-  }
-
-  updateHeaderKey (event) {
-    let value = event.target.value
-    let data = {
-      headerKey: value
-    }
-    this.props.updateIdentifier(this.props.id, data)
-  }
-
-  updateValue (event) {
-    let value = event.target.value
-    let data = {
-      value: value
-    }
-    this.props.updateIdentifier(this.props.id, data)
-  }
-
-  removeIdentifier() {
-    this.props.removeIdentifier(this.props.id)
-  }
-
-  toogleIsRegex(event) {
-    let data = {}
-    let isRegex = !this.props.isRegex
-    data['isRegex'] = isRegex
-    this.props.updateIdentifier(this.props.id, data)
+    updateIdentifier(index, identifierData)
   }
 
   render() {
+    const { index, type, identifier, tableData, tables, addIdentifier, updateIdentifier, removeIdentifier } = this.props
+    const keyOptions = this.getKeyOptions()
+    const valueDisabled = (type == 'fileMetadata' || type == 'tableMetadata') && !identifier.isRegex
+
     return (
       <form>
         <div className="form-row align-items-center">
-          {this.props.type == 'metadata' &&
+          {
+            (type == 'fileMetadata' || type == 'tableMetadata') &&
             <div className="col-lg-4 mb-2">
-              <label className="sr-only" htmlFor={"metadataKeySelect" + this.props.id}>Metadata</label>
-              <select className="form-control form-control-sm" id={"metadataKeySelect" + this.props.id} onChange={this.onSelectMetadata}>
+              <label className="sr-only" htmlFor={`keySelect${index}`}>Key</label>
+              <select className="form-control form-control-sm" id={`keySelect${index}`}
+                      onChange={(event) => this.updateKey(keyOptions[event.target.value])}>
                 {
-                  Object.keys(this.props.options).map((option, i) =>
-                    <option key={i}>{option}</option>
-                  )
+                  keyOptions.map((option, i) => (
+                    <option key={i} value={i}>{option.label}</option>
+                  ))
                 }
               </select>
             </div>
           }
-
-          {this.props.type == 'table' &&
-            <div className="col-lg-2 mb-2">
-              <label className="sr-only" htmlFor={"tabledataTableSelect" + this.props.id}>Tabledata</label>
-              <select className="form-control form-control-sm" id={"abledataTableSelect" + this.props.id} onChange={this.onSelectTable}>
+          {
+            (type == 'tableHeader') &&
+            <div className="col-lg-4 mb-2">
+              <label className="sr-only" htmlFor={`tableIndexSelect${index}`}>Key</label>
+              <select className="form-control form-control-sm" id={`tableIndexSelect${index}`}
+                      onChange={(event) => updateIdentifier(index, { tableIndex: parseInt(event.target.value, 10) })}>
                 {
-                  Object.keys(this.props.options).map((option, i) =>
-                    <option key={i} value={i}>{"Table #" + i}</option>
-                  )
+                  tableData.tables.map((table, tableIndex) => <option key={tableIndex} value={tableIndex}>Input table #{tableIndex}</option>)
                 }
               </select>
             </div>
           }
-
-          {this.props.type == 'table' &&
+          {
+            (type == 'tableHeader') &&
             <div className="col-lg-2 mb-2">
-              <label className="sr-only" htmlFor={"tabledataLineSelect" + this.props.id}>Line</label>
+              <label className="sr-only" htmlFor={`lineNumberInput${index}`}>Line</label>
               <input
-                onChange={this.updateLinenumber}
                 type="text"
-                placeholder={'# line'}
+                id={`lineNumberInput${index}`}
                 className="form-control form-control-sm"
-                id={"tabledataLineSelect" + this.props.id}
-                value={this.props.lineNumber}
+                placeholder={'# Line'}
+                value={identifier.lineNumber}
+                onChange={(event) => updateIdentifier(index, { lineNumber: parseInt(event.target.value, 10) })}
               />
             </div>
           }
-
-          <div className={(this.props.type == 'metadata' ? 'col-lg-4' : 'col-lg-2') + ' mb-2'}>
-            <label className="sr-only" htmlFor={"identifierValue" + this.props.id}>value</label>
+          <div className={(type == 'tableHeader' ? 'col-lg-4' : 'col-lg-6') + ' mb-2'}>
+            <label className="sr-only" htmlFor={`valueInput${index}`}>Value</label>
             <div className="input-group">
               <input
-                onChange={this.updateValue}
                 type="text"
-                placeholder={'Value'}
+                id={`valueInput${index}`}
                 className="form-control form-control-sm"
-                id={"identifierValue" + this.props.id}
-                disabled={this.props.type === 'metadata' && !this.props.isRegex}
-                value={this.props.value}
+                placeholder={valueDisabled ? '' : 'Value'}
+                value={identifier.value}
+                onChange={(event) => updateIdentifier(index, { value: event.target.value })}
+                disabled={valueDisabled}
               />
             </div>
           </div>
-
           <div className="col-lg-2 mb-2">
             <div className="form-check">
               <input className="form-check-input"
-                type="checkbox" name="identifierInterpretOptions"
-                id={"isRegex" + this.props.id}
-                value="regex"
-                onChange={this.toogleIsRegex} checked={this.props.isRegex}
+                type="checkbox"
+                id={`regexInput${index}`}
+                checked={identifier.isRegex}
+                onChange={(event) => updateIdentifier(index, { isRegex: !identifier.isRegex })}
               />
-              <label className="form-check-label" htmlFor={"isRegex" + this.props.id}>RegExp</label>
+              <label className="form-check-label" htmlFor={`regexInput${index}`}>Regex</label>
             </div>
           </div>
-
-          {this.props.type == 'table' &&
-            <div className="col-lg-2 mb-2">
-              <label className="sr-only" htmlFor={"identifierHeaderKey" + this.props.id}>Headerkey</label>
-              <div className="input-group">
-                <input
-                  onChange={this.updateHeaderKey}
-                  type="text"
-                  placeholder={'Header key'}
-                  className="form-control form-control-sm"
-                  id={"identifierHeaderKey" + this.props.id}
-                  value={this.props.headerKey}
-                />
-              </div>
-            </div>
-          }
-
+        </div>
+        <div className="form-row align-items-center">
+          <div className="col-lg-4 mb-2">
+            <label className="sr-only" htmlFor={`outputTableIndexSelect${index}`}>Output table</label>
+            <select className="form-control form-control-sm" id={`outputTableIndexSelect${index}`}
+                    onChange={(event) => updateIdentifier(index, { outputTableIndex: parseInt(event.target.value, 10) })}>
+              <option value="">---</option>
+              {
+                tables.map((outputTable, outputTableIndex) => <option key={outputTableIndex} value={outputTableIndex}>Output table #{outputTableIndex}</option>)
+              }
+            </select>
+          </div>
+          <div className="col-lg-3 mb-2">
+            <label className="sr-only" htmlFor={`outputLayerInput${index}`}>Line</label>
+            <input
+              type="text"
+              id={`outputLayerInput${index}`}
+              className="form-control form-control-sm"
+              placeholder={'Output layer'}
+              value={identifier.outputLayer}
+              onChange={(event) => updateIdentifier(index, { outputLayer: event.target.value })}
+            />
+          </div>
+          <div className="col-lg-3 mb-2">
+            <label className="sr-only" htmlFor={`outputKeyInput${index}`}>Line</label>
+            <input
+              type="text"
+              id={`outputKeyInput${index}`}
+              className="form-control form-control-sm"
+              placeholder={'Output key'}
+              value={identifier.outputKey}
+              onChange={(event) => updateIdentifier(index, { outputKey: event.target.value })}
+            />
+          </div>
           <div className="col-lg-2 mb-2">
-            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={this.removeIdentifier}>Remove</button>
+            <button type="button" className="btn btn-danger btn-sm btn-block" onClick={() => removeIdentifier(index)}>Remove</button>
           </div>
         </div>
       </form>
