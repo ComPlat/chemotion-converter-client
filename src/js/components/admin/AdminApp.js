@@ -276,10 +276,8 @@ class AdminApp extends Component {
       if (type === 'fileMetadata') {
         identifier['key'] = Object.keys(tableData.metadata)[0]
         identifier['value'] = tableData.metadata[identifier['key']]
-      }
-      if (type === 'tableMetadata') {
+      } else if (type === 'tableMetadata') {
         identifier['tableIndex'] = 0
-
         if (tableData.tables.length > 0 && tableData.tables[0].metadata !== undefined) {
           identifier['key'] = Object.keys(tableData.tables[0].metadata)[0]
           identifier['value'] = tableData.tables[0].metadata[identifier['key']]
@@ -287,13 +285,28 @@ class AdminApp extends Component {
           identifier['key'] = ''
           identifier['value'] = ''
         }
-
-      }
-      if (type === 'tableHeader') {
+      } else if (type === 'tableHeader') {
         identifier['tableIndex'] = 0
         identifier['lineNumber'] = ''
         identifier['value'] = ''
       }
+    } else {
+      if (type === 'fileMetadata') {
+        identifier['key'] = ''
+        identifier['value'] = ''
+      } else if (type === 'tableMetadata') {
+        identifier['tableIndex'] = 0
+        identifier['key'] = ''
+        identifier['value'] = ''
+        identifier['outputTableIndex'] = ''
+      } else if (type === 'tableHeader') {
+        identifier['tableIndex'] = 0
+        identifier['lineNumber'] = ''
+        identifier['value'] = ''
+      }
+      identifier['outputTableIndex'] = ''
+      identifier['outputLayer'] = ''
+      identifier['outputKey'] = ''
     }
 
     identifiers.push(identifier)

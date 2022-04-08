@@ -19,7 +19,6 @@ class IdentifierForm extends Component {
               return <IdentifierInput
                 key={index}
                 index={index}
-                type={type}
                 identifier={identifier}
                 tableData={tableData}
                 tables={tables}
