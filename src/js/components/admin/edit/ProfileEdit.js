@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 
-import FirstRowIsHeaderInput from './FirstRowIsHeaderInput'
 import HeaderForm from './HeaderForm'
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
@@ -16,7 +15,7 @@ class ProfileEdit extends Component {
             addTable, updateTable, removeTable, addHeader, updateHeader, removeHeader,
             addOperation, updateOperation, removeOperation,
             addIdentifier, updateIdentifier, removeIdentifier,
-            toggleFirstRowIsHeader, updateProfile } = this.props
+            updateProfile } = this.props
 
     return (
       <div>
@@ -77,25 +76,6 @@ class ProfileEdit extends Component {
         <div className="text-center mt-2">
           <button type="button" className="btn btn-success" onClick={addTable}>Add table</button>
         </div>
-        <div className="card rounded-0 mt-3">
-          <div className="card-header">
-            <div>First row are column names</div>
-          </div>
-          <div className="card-body">
-            {
-              this.props.firstRowIsHeader.map((checked, index) => {
-                return <FirstRowIsHeaderInput
-                  key={index}
-                  title={'Table #' + index}
-                  checked={checked}
-                  index={index}
-                  updateFirstRowIsHeader={this.props.updateFirstRowIsHeader}
-                />
-              })
-            }
-          </div>
-        </div>
-
         <div className="card rounded-0 mt-3">
           <div className="card-header">
             <div>Identifiers</div>

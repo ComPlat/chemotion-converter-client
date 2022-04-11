@@ -63,7 +63,7 @@ class ProfileCreate extends Component {
     const { tableData, columnList, headerOptions, title, description, identifiers, tables,
             updateTitle, updateDescription, addTable, updateHeader, updateTable, addOperation,
             updateOperation, removeOperation, removeTable, addIdentifier, updateIdentifier, removeIdentifier,
-            toggleFirstRowIsHeader, createProfile } = this.props
+            createProfile } = this.props
 
     return (
       <div className="row">
@@ -112,15 +112,7 @@ class ProfileCreate extends Component {
                         table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
                         <div>
                           <h4>Input table data</h4>
-
                           {this.renderDataGrid(table)}
-
-                          <div className="form-group form-check mt-3">
-                            <input type="checkbox" checked={table.firstRowIsHeader || false}
-                              onChange={e => toggleFirstRowIsHeader(index)}
-                              className="form-check-input" id="first_row_is_header" />
-                            <label className="form-check-label" htmlFor="first_row_is_header">First row are column names</label>
-                          </div>
                           <hr />
                         </div>
                       }
