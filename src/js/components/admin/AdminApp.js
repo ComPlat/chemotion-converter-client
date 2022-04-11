@@ -262,23 +262,51 @@ class AdminApp extends Component {
   }
 
   addIdentifier(type) {
-    const { identifiers } = this.state
-
-    let metadataKey = ''
-    let value = ''
-    if (type === 'metadata' && this.state.status == 'create') {
-      metadataKey = Object.keys(this.state.tableData.metadata)[0]
-      value = this.state.tableData.metadata[metadataKey]
-    }
+    const { identifiers, tableData } = this.state
 
     const identifier = {
       type: type,
-      tableIndex: 0,
-      lineNumber: '',
-      metadataKey: metadataKey,
-      headerKey: '',
-      value: value,
-      isRegex: false
+      isRegex: false,
+      outputTableIndex: null,
+      outputLayer: '',
+      outputKey: ''
+    }
+
+    if (this.state.status == 'create') {
+      if (type === 'fileMetadata') {
+        identifier['key'] = Object.keys(tableData.metadata)[0]
+        identifier['value'] = tableData.metadata[identifier['key']]
+      } else if (type === 'tableMetadata') {
+        identifier['tableIndex'] = 0
+        if (tableData.tables.length > 0 && tableData.tables[0].metadata !== undefined) {
+          identifier['key'] = Object.keys(tableData.tables[0].metadata)[0]
+          identifier['value'] = tableData.tables[0].metadata[identifier['key']]
+        } else {
+          identifier['key'] = ''
+          identifier['value'] = ''
+        }
+      } else if (type === 'tableHeader') {
+        identifier['tableIndex'] = 0
+        identifier['lineNumber'] = ''
+        identifier['value'] = ''
+      }
+    } else {
+      if (type === 'fileMetadata') {
+        identifier['key'] = ''
+        identifier['value'] = ''
+      } else if (type === 'tableMetadata') {
+        identifier['tableIndex'] = 0
+        identifier['key'] = ''
+        identifier['value'] = ''
+        identifier['outputTableIndex'] = ''
+      } else if (type === 'tableHeader') {
+        identifier['tableIndex'] = 0
+        identifier['lineNumber'] = ''
+        identifier['value'] = ''
+      }
+      identifier['outputTableIndex'] = ''
+      identifier['outputLayer'] = ''
+      identifier['outputKey'] = ''
     }
 
     identifiers.push(identifier)
@@ -445,7 +473,7 @@ class AdminApp extends Component {
           const columnList = tableData.data.reduce((accumulator, table, tableIndex) => {
             const tableColumns = table.columns.map((tableColumn, columnIndex) => {
               return Object.assign({}, tableColumn, {
-                label: `Table #${tableIndex} Column #${columnIndex}`,
+                label: `Input table #${tableIndex} Column #${columnIndex}`,
                 value: {
                   tableIndex: tableIndex,
                   columnIndex: columnIndex

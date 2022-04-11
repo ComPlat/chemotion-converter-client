@@ -12,9 +12,11 @@ class ProfileEdit extends Component {
   }
 
   render() {
-    const { id, title, description, updateTitle, updateDescription, addTable, updateTable, removeTable,
-            addHeader, updateHeader, removeHeader, addOperation, updateOperation, removeOperation,
-            addIdentifier, updateIdentifier, removeIdentifier, toggleFirstRowIsHeader, updateProfile } = this.props
+    const { id, title, description, tables, updateTitle, updateDescription,
+            addTable, updateTable, removeTable, addHeader, updateHeader, removeHeader,
+            addOperation, updateOperation, removeOperation,
+            addIdentifier, updateIdentifier, removeIdentifier,
+            toggleFirstRowIsHeader, updateProfile } = this.props
 
     return (
       <div>
@@ -42,7 +44,7 @@ class ProfileEdit extends Component {
         </div>
 
         {
-          this.props.tables.map((table, index) => {
+          tables.map((table, index) => {
             return (
               <React.Fragment key={index}>
                 <div className="card rounded-0 mt-3">
@@ -99,23 +101,32 @@ class ProfileEdit extends Component {
             <div>Identifiers</div>
           </div>
           <div className="card-body">
-            <label>Based on metadata</label>
+            <label>Based on file metadata</label>
             <IdentifierForm
-              type="metadata"
+              type="fileMetadata"
               identifiers={this.props.identifiers}
+              tables={tables}
               addIdentifier={this.props.addIdentifier}
               updateIdentifier={this.props.updateIdentifier}
               removeIdentifier={this.props.removeIdentifier}
-              data={[]}
+            />
+            <label>Based on table metadata</label>
+            <IdentifierForm
+              type="tableMetadata"
+              identifiers={this.props.identifiers}
+              tables={tables}
+              addIdentifier={this.props.addIdentifier}
+              updateIdentifier={this.props.updateIdentifier}
+              removeIdentifier={this.props.removeIdentifier}
             />
             <label>Based on table headers</label>
             <IdentifierForm
-              type="table"
+              type="tableHeader"
               identifiers={this.props.identifiers}
+              tables={tables}
               addIdentifier={this.props.addIdentifier}
               updateIdentifier={this.props.updateIdentifier}
               removeIdentifier={this.props.removeIdentifier}
-              data={[]}
             />
           </div>
         </div>
