@@ -1,41 +1,43 @@
 import React, { Component } from "react"
 
-import KeySelect from '../common/KeySelect'
-import TableIndexSelect from '../common/TableIndexSelect'
+import KeyInput from '../common/KeyInput'
+import TableIndexInput from '../common/TableIndexInput'
 import LineNumberInput from '../common/LineNumberInput'
 import ValueInput from '../common/ValueInput'
 import RegexCheckbox from '../common/RegexCheckbox'
-import OutputTableIndexSelect from '../common/OutputTableIndexSelect'
+import OutputTableIndexInput from '../common/OutputTableIndexInput'
 import OutputLayerInput from '../common/OutputLayerInput'
 import OutputKeyInput from '../common/OutputKeyInput'
 import RemoveButton from '../common/RemoveButton'
 
+class IdentifierInput extends Component {
 
-class IndentifierInput extends Component {
+  constructor(props) {
+    super(props)
+  }
 
   render() {
-    const { index, identifier, tableData, tables, updateIdentifier, removeIdentifier } = this.props
+    const { index, identifier, tables, updateIdentifier, removeIdentifier } = this.props
+    const valueDisabled = (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') && !identifier.isRegex
 
     return (
       <form>
-        <div className="form-row align-items-center">
+        <div className="form-row">
+          {
+            (identifier.type == 'tableMetadata' || identifier.type == 'tableHeader') &&
+            <div className="col-lg-2 mb-2">
+              <TableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+            </div>
+          }
           {
             (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
-            <div className="col-lg-4 mb-2">
-              <KeySelect index={index} identifier={identifier} tableData={tableData}
-                         updateIdentifier={updateIdentifier} />
+            <div className={(identifier.type == 'tableMetadata' ? 'col-lg-2' : 'col-lg-4') + ' mb-2'}>
+              <KeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           }
           {
             (identifier.type == 'tableHeader') &&
-            <div className="col-lg-3 mb-2">
-              <TableIndexSelect index={index} identifier={identifier} tableData={tableData}
-                                updateIdentifier={updateIdentifier} />
-            </div>
-          }
-          {
-            (identifier.type == 'tableHeader') &&
-            <div className="col-lg-1 mb-2">
+            <div className="col-lg-2 mb-2">
               <LineNumberInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           }
@@ -51,15 +53,14 @@ class IndentifierInput extends Component {
         </div>
         {
           identifier.optional &&
-          <div className="form-row align-items-center">
-            <div className="col-lg-4 mb-2">
-              <OutputTableIndexSelect index={index} identifier={identifier} tables={tables}
-                                      updateIdentifier={updateIdentifier} />
+          <div className="form-row">
+            <div className="col-lg-2 mb-2">
+              <OutputTableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
-            <div className="col-lg-4 mb-2">
+            <div className="col-lg-5 mb-2">
               <OutputLayerInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
-            <div className="col-lg-4 mb-2">
+            <div className="col-lg-5 mb-2">
               <OutputKeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           </div>
@@ -69,4 +70,4 @@ class IndentifierInput extends Component {
   }
 }
 
-export default IndentifierInput
+export default IdentifierInput

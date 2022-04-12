@@ -76,40 +76,62 @@ class ProfileEdit extends Component {
         <div className="text-center mt-2">
           <button type="button" className="btn btn-success" onClick={addTable}>Add table</button>
         </div>
-        <div className="card rounded-0 mt-3">
-          <div className="card-header">
-            <div>Identifiers</div>
+
+        <div className="row">
+          <div className="col-lg-6">
+            <div className="card rounded-0 mt-3">
+              <div className="card-header">
+                <div>Identifiers</div>
+              </div>
+              <div className="card-body">
+                {
+                  [['Based on file metadata', 'fileMetadata'],
+                   ['Based on table metadata', 'tableMetadata'],
+                   ['Based on table headers', 'tableHeader']].map(([label, type]) => (
+                    <IdentifierForm
+                      key={type}
+                      label={label}
+                      type={type}
+                      optional={false}
+                      identifiers={this.props.identifiers}
+                      tables={tables}
+                      addIdentifier={this.props.addIdentifier}
+                      updateIdentifier={this.props.updateIdentifier}
+                      removeIdentifier={this.props.removeIdentifier}
+                    />
+                  ))
+                }
+              </div>
+            </div>
           </div>
-          <div className="card-body">
-            <label>Based on file metadata</label>
-            <IdentifierForm
-              type="fileMetadata"
-              identifiers={this.props.identifiers}
-              tables={tables}
-              addIdentifier={this.props.addIdentifier}
-              updateIdentifier={this.props.updateIdentifier}
-              removeIdentifier={this.props.removeIdentifier}
-            />
-            <label>Based on table metadata</label>
-            <IdentifierForm
-              type="tableMetadata"
-              identifiers={this.props.identifiers}
-              tables={tables}
-              addIdentifier={this.props.addIdentifier}
-              updateIdentifier={this.props.updateIdentifier}
-              removeIdentifier={this.props.removeIdentifier}
-            />
-            <label>Based on table headers</label>
-            <IdentifierForm
-              type="tableHeader"
-              identifiers={this.props.identifiers}
-              tables={tables}
-              addIdentifier={this.props.addIdentifier}
-              updateIdentifier={this.props.updateIdentifier}
-              removeIdentifier={this.props.removeIdentifier}
-            />
+          <div className="col-lg-6">
+            <div className="card rounded-0 mt-3">
+              <div className="card-header">
+                <div>Metadata</div>
+              </div>
+              <div className="card-body">
+                {
+                  [['Based on file metadata', 'fileMetadata'],
+                   ['Based on table metadata', 'tableMetadata'],
+                   ['Based on table headers', 'tableHeader']].map(([label, type]) => (
+                    <IdentifierForm
+                      key={type}
+                      label={label}
+                      type={type}
+                      optional={true}
+                      identifiers={this.props.identifiers}
+                      tables={tables}
+                      addIdentifier={this.props.addIdentifier}
+                      updateIdentifier={this.props.updateIdentifier}
+                      removeIdentifier={this.props.removeIdentifier}
+                    />
+                  ))
+                }
+              </div>
+            </div>
           </div>
         </div>
+
         <div className="text-center mb-5">
           <button onClick={updateProfile} className="btn btn-primary mt-3">Save profile</button>
         </div>

@@ -256,15 +256,13 @@ class AdminApp extends Component {
     }
   }
 
-  addIdentifier(type) {
+  addIdentifier(type, optional) {
     const { identifiers, tableData } = this.state
 
     const identifier = {
       type: type,
+      optional: optional,
       isRegex: false,
-      outputTableIndex: null,
-      outputLayer: '',
-      outputKey: ''
     }
 
     if (this.state.status == 'create') {
@@ -293,12 +291,14 @@ class AdminApp extends Component {
         identifier['tableIndex'] = 0
         identifier['key'] = ''
         identifier['value'] = ''
-        identifier['outputTableIndex'] = ''
       } else if (type === 'tableHeader') {
         identifier['tableIndex'] = 0
         identifier['lineNumber'] = ''
         identifier['value'] = ''
       }
+    }
+
+    if (optional) {
       identifier['outputTableIndex'] = ''
       identifier['outputLayer'] = ''
       identifier['outputKey'] = ''
