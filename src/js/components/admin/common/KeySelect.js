@@ -30,7 +30,7 @@ const KeySelect = ({ index, identifier, tableData, updateIdentifier }) => {
           key,
           tableIndex,
           value: table.metadata[key],
-          label: `Input table ${tableIndex} ${key}` })))
+          label: `Input table #${tableIndex} ${key}` })))
       } else {
         return acc
       }
