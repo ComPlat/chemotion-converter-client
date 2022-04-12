@@ -299,7 +299,7 @@ class AdminApp extends Component {
     }
 
     if (optional) {
-      identifier['outputTableIndex'] = ''
+      identifier['outputTableIndex'] = null
       identifier['outputLayer'] = ''
       identifier['outputKey'] = ''
     }
