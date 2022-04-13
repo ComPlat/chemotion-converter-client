@@ -63,7 +63,7 @@ class ProfileCreate extends Component {
     const { tableData, columnList, headerOptions, title, description, identifiers, tables,
             updateTitle, updateDescription, addTable, updateHeader, updateTable, addOperation,
             updateOperation, removeOperation, removeTable, addIdentifier, updateIdentifier, removeIdentifier,
-            toggleFirstRowIsHeader, createProfile } = this.props
+            createProfile } = this.props
 
     return (
       <div className="row">
@@ -112,15 +112,7 @@ class ProfileCreate extends Component {
                         table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
                         <div>
                           <h4>Input table data</h4>
-
                           {this.renderDataGrid(table)}
-
-                          <div className="form-group form-check mt-3">
-                            <input type="checkbox" checked={table.firstRowIsHeader || false}
-                              onChange={e => toggleFirstRowIsHeader(index)}
-                              className="form-check-input" id="first_row_is_header" />
-                            <label className="form-check-label" htmlFor="first_row_is_header">First row are column names</label>
-                          </div>
                           <hr />
                         </div>
                       }
@@ -194,47 +186,69 @@ class ProfileCreate extends Component {
             <div className="card rounded-0 mt-3">
               <div className="card-header">Identifiers</div>
               <div className="card-body">
-                <label>Based on file metadata</label>
-                <IdentifierForm
-                  type="fileMetadata"
-                  identifiers={identifiers}
-                  tableData={tableData}
-                  tables={tables}
-                  addIdentifier={addIdentifier}
-                  updateIdentifier={updateIdentifier}
-                  removeIdentifier={removeIdentifier}
-                />
-
-                <label>Based on Table metadata</label>
-                <IdentifierForm
-                  type="tableMetadata"
-                  identifiers={identifiers}
-                  tableData={tableData}
-                  tables={tables}
-                  addIdentifier={addIdentifier}
-                  updateIdentifier={updateIdentifier}
-                  removeIdentifier={removeIdentifier}
-                />
-
-                <label>Based on table headers</label>
-                <IdentifierForm
-                  type="tableHeader"
-                  identifiers={identifiers}
-                  tableData={tableData}
-                  tables={tables}
-                  addIdentifier={addIdentifier}
-                  updateIdentifier={updateIdentifier}
-                  removeIdentifier={removeIdentifier}
-                />
+                {
+                  [['Based on file metadata', 'fileMetadata'],
+                   ['Based on table metadata', 'tableMetadata'],
+                   ['Based on table headers', 'tableHeader']].map(([label, type]) => (
+                    <IdentifierForm
+                      key={type}
+                      label={label}
+                      type={type}
+                      optional={false}
+                      identifiers={identifiers}
+                      tableData={tableData}
+                      tables={tables}
+                      addIdentifier={addIdentifier}
+                      updateIdentifier={updateIdentifier}
+                      removeIdentifier={removeIdentifier}
+                    />
+                  ))
+                }
                 <small>
                   <p className="text-muted">
-                    The identifiers you create here are used to find the correct profile for uploaded files, and they are used to extract metadata and add it to the output tables.
+                    The identifiers you create here are used to find the correct profile for uploaded files.
                   </p>
                   <ul className="text-muted mb-0">
                     <li>
                       The <code>Value</code> will be compared to the selected metadata or to the header of a table. If you select <code>Regex</code>, you can enter a regular expression as value.
                     </li>
                     <li>If you provide a line number, only this line of the header will be used. If line number is ommited, the whole header is compared (or searched with the Regex).
+                    </li>
+                  </ul>
+                </small>
+              </div>
+            </div>
+
+            <div className="card rounded-0 mt-3">
+              <div className="card-header">Metadata</div>
+              <div className="card-body">
+                {
+                  [['Based on file metadata', 'fileMetadata'],
+                   ['Based on table metadata', 'tableMetadata'],
+                   ['Based on table headers', 'tableHeader']].map(([label, type]) => (
+                    <IdentifierForm
+                      key={type}
+                      label={label}
+                      type={type}
+                      optional={true}
+                      identifiers={identifiers}
+                      tableData={tableData}
+                      tables={tables}
+                      addIdentifier={addIdentifier}
+                      updateIdentifier={updateIdentifier}
+                      removeIdentifier={removeIdentifier}
+                    />
+                  ))
+                }
+                <small>
+                  <p className="text-muted">
+                    The metadata you define here are extracted from the input file and added to the output tables.
+                  </p>
+                  <ul className="text-muted mb-0">
+                    <li>
+                      As above, the <code>Value</code> will be compared to the selected metadata or to the header of a table. If you select <code>Regex</code>, you can enter a regular expression as value.
+                    </li>
+                    <li>Also, if you provide a line number, only this line of the header will be used. If line number is ommited, the whole header is compared (or searched with the Regex).
                     </li>
                     <li>
                       If groups are used in the regular expression (e.g. <code>Key: (.*?)</code>) only the first group will be extracted as metadata.

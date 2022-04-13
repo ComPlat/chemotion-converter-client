@@ -27,7 +27,6 @@ class AdminApp extends Component {
       description: '',
       tables: [],
       identifiers: [],
-      firstRowIsHeader: [],
       currentIdentifier: '',
       currentIndex: -1,
       deleteIdentifier: '',
@@ -57,9 +56,6 @@ class AdminApp extends Component {
     this.addIdentifier = this.addIdentifier.bind(this)
     this.updateIdentifier = this.updateIdentifier.bind(this)
     this.removeIdentifier = this.removeIdentifier.bind(this)
-
-    this.toggleFirstRowIsHeader = this.toggleFirstRowIsHeader.bind(this)
-    this.updateFirstRowIsHeader = this.updateFirstRowIsHeader.bind(this)
 
     this.createProfile = this.createProfile.bind(this)
     this.updateProfile = this.updateProfile.bind(this)
@@ -110,7 +106,6 @@ class AdminApp extends Component {
       identifiers: currentProfile.identifiers,
       header: currentProfile.header,
       tables: currentProfile.tables,
-      firstRowIsHeader: currentProfile.firstRowIsHeader
     })
   }
 
@@ -261,15 +256,13 @@ class AdminApp extends Component {
     }
   }
 
-  addIdentifier(type) {
+  addIdentifier(type, optional) {
     const { identifiers, tableData } = this.state
 
     const identifier = {
       type: type,
+      optional: optional,
       isRegex: false,
-      outputTableIndex: null,
-      outputLayer: '',
-      outputKey: ''
     }
 
     if (this.state.status == 'create') {
@@ -298,13 +291,15 @@ class AdminApp extends Component {
         identifier['tableIndex'] = 0
         identifier['key'] = ''
         identifier['value'] = ''
-        identifier['outputTableIndex'] = ''
       } else if (type === 'tableHeader') {
         identifier['tableIndex'] = 0
         identifier['lineNumber'] = ''
         identifier['value'] = ''
       }
-      identifier['outputTableIndex'] = ''
+    }
+
+    if (optional) {
+      identifier['outputTableIndex'] = null
       identifier['outputLayer'] = ''
       identifier['outputKey'] = ''
     }
@@ -331,53 +326,15 @@ class AdminApp extends Component {
     }
   }
 
-  updateFirstRowIsHeader(index, checked) {
-    const firstRowIsHeader = [...this.state.firstRowIsHeader]
-    firstRowIsHeader[index] = checked
-    this.setState({ firstRowIsHeader })
-  }
-
-  toggleFirstRowIsHeader(index) {
-    const { tableData } = this.state
-    const table = tableData.data[index]
-
-    if (table.firstRowIsHeader) {
-      table.firstRowIsHeader = false
-      table.columns = table._columns
-      table.rows.splice(0, 0, table._first)
-      table._columns = null
-      table._first = null
-    } else {
-      table.firstRowIsHeader = true
-      table._columns = table.columns
-      table._first = table.rows.shift()
-      table.columns = table._first.map((value, idx) => {
-        const originalName = table._columns[idx].name
-
-        return {
-          key: idx.toString(),
-          name: value + ` (${originalName})`
-        }
-      })
-    }
-
-    const firstRowIsHeader = tableData.data.map(table => {
-      return table.firstRowIsHeader || false
-    })
-
-    this.setState({ tableData, firstRowIsHeader });
-  }
-
   createProfile(event) {
     event.preventDefault()
 
-    const { title, description, tables, identifiers, tableData, firstRowIsHeader } = this.state
+    const { title, description, tables, identifiers, tableData } = this.state
     const profile = {
       title,
       description,
       tables,
-      identifiers,
-      firstRowIsHeader
+      identifiers
     }
 
     ConverterApi.createProfile(profile)
@@ -394,14 +351,13 @@ class AdminApp extends Component {
   }
 
   updateProfile() {
-    const { id, title, description, tables, identifiers, tableData, firstRowIsHeader } = this.state
+    const { id, title, description, tables, identifiers, tableData } = this.state
     const profile = {
       id,
       title,
       description,
       tables,
-      identifiers,
-      firstRowIsHeader
+      identifiers
     }
 
     ConverterApi.updateProfile(profile, this.state.currentIdentifier)
@@ -491,7 +447,6 @@ class AdminApp extends Component {
             headerOptions: tableData.options,
             tables: [this.initTable(tableData)],
             identifiers: [],
-            firstRowIsHeader: tableData.data.map(table => false),
             error: false,
             errorMessage: ''
           })
@@ -570,7 +525,6 @@ class AdminApp extends Component {
           description={this.state.description}
           tables={this.state.tables}
           identifiers={this.state.identifiers}
-          firstRowIsHeader={this.state.firstRowIsHeader}
           updateTitle={this.updateTitle}
           updateDescription={this.updateDescription}
           addTable={this.addTable}
@@ -585,7 +539,6 @@ class AdminApp extends Component {
           addIdentifier={this.addIdentifier}
           updateIdentifier={this.updateIdentifier}
           removeIdentifier={this.removeIdentifier}
-          updateFirstRowIsHeader={this.updateFirstRowIsHeader}
           updateProfile={this.updateProfile}
         />
       )
@@ -606,7 +559,6 @@ class AdminApp extends Component {
           <ProfileCreate
             tableData={this.state.tableData}
             columnList={this.state.columnList}
-            toggleFirstRowIsHeader={this.toggleFirstRowIsHeader}
             headerOptions={this.state.headerOptions}
             title={this.state.title}
             description={this.state.description}
