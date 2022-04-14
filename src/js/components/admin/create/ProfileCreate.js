@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import ReactDataGrid from "react-data-grid"
+import { AgGridReact } from 'ag-grid-react';
 
 import HeaderForm from './HeaderForm'
 import TableForm from './TableForm'
@@ -43,20 +43,33 @@ class ProfileCreate extends Component {
   }
 
   renderDataGrid(table) {
-    const rows = table.rows.map(row => {
+    const columnDefs = table.columns.map(column => ({
+      field: column.key,
+      headerName: column.name
+    }))
+
+    const defaultColDef = {
+        resizable: true,
+        lockPosition: true
+    };
+
+    const rowData = table.rows.map(row => {
       return Object.fromEntries(row.map((value, idx) => {
         return [idx, value]
       }))
     })
 
-    return <ReactDataGrid
-      columns={table.columns}
-      rowGetter={i => rows[i]}
-      rowsCount={rows.length}
-      enableCellAutoFocus={false}
-      minColumnWidth={140}
-      minHeight={410}
-      nativeScroll={true} />
+    return (
+      <div className="ag-theme-alpine">
+        <AgGridReact
+          columnDefs={columnDefs}
+          rowData={rowData}
+          defaultColDef={defaultColDef}
+          domLayout='autoHeight'
+          suppressRowHoverHighlight={true}
+        />
+      </div>
+    )
   }
 
   render() {
