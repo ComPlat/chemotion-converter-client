@@ -1,8 +1,14 @@
 {
   "name": "chemotion-converter-client",
-  "version": "0.1.0",
+  "version": "0.1.28",
+  "main": "./public/bundle.js",
+  "files": [
+    "public",
+    "README.md"
+  ],
   "scripts": {
     "build:prod": "webpack --config webpack/prod.config.js --mode production",
+    "pack": "webpack --config webpack/pack.config.js --mode production",
     "build": "webpack --config webpack/dev.config.js --mode development",
     "watch": "webpack --config webpack/dev.config.js --watch --mode development",
     "serve": "webpack-dev-server --config webpack/dev.config.js --open --mode development"
@@ -14,30 +20,45 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "ag-grid-community": "^25.1.0",
-    "ag-grid-react": "^25.1.0",
     "bootstrap": "^4.6.1",
     "jquery": "^3.4.0",
     "popper.js": "^1.16.0",
-    "prop-types": "^15.8.1",
+    "prop-types": "^15.8.1"
+  },
+  "peerDependencies": {
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "react-bootstrap": "~0.33.1",
+    "ag-grid-community": "^25.1.0",
+    "ag-grid-react": "^25.1.0"
   },
   "devDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-bootstrap": "~0.33.1",
+    "ag-grid-community": "^25.1.0",
+    "ag-grid-react": "^25.1.0",
     "@babel/cli": "^7.17.6",
     "@babel/core": "^7.7.5",
     "@babel/preset-env": "^7.7.6",
     "@babel/preset-react": "^7.7.4",
     "babel-loader": "^8.0.6",
     "copy-webpack-plugin": "^5.1.0",
-    "css-loader": "^2.1.1",
-    "file-loader": "^4.3.0",
-    "mini-css-extract-plugin": "^0.6.0",
+    "css-loader": "^6.7.1",
+    "postcss": "^8.4.8",
+    "postcss-cli": "^9.1.0",
+    "postcss-loader": "^6.2.1",
+    "postcss-nested": "^5.0.6",
+    "postcss-preset-env": "^7.4.3",
+    "file-loader": "^6.2.0",
+    "mini-css-extract-plugin": "^2.6.0",
     "node-sass": "^4.14.1",
-    "sass-loader": "^7.1.0",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.11.0",
-    "webpack-merge": "4.2.1"
+    "sass": "^1.49.10",
+    "sass-loader": "^12.6.0",
+    "style-loader": "^3.3.1",
+    "webpack": "5.72.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4",
+    "webpack-merge": "5.8.0"
   }
 }

@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import { AgGridReact } from 'ag-grid-react';
+import { Tabs, Tab } from 'react-bootstrap';
 
 import HeaderForm from './HeaderForm'
 import TableForm from './TableForm'
@@ -8,7 +9,12 @@ import IdentifierForm from './IdentifierForm'
 class ProfileCreate extends Component {
 
   constructor(props) {
-    super(props)
+    super(props);
+    this.onGridReady = this.onGridReady.bind(this);
+  }
+
+  onGridReady(params) {
+    this.api = params.api;
   }
 
   renderMetadata(metadata) {
@@ -62,11 +68,13 @@ class ProfileCreate extends Component {
     return (
       <div className="ag-theme-alpine">
         <AgGridReact
+          enableColResize
           columnDefs={columnDefs}
           rowData={rowData}
           defaultColDef={defaultColDef}
           domLayout='autoHeight'
           suppressRowHoverHighlight={true}
+          onGridReady={this.onGridReady}
         />
       </div>
     )
@@ -78,67 +86,52 @@ class ProfileCreate extends Component {
             updateOperation, removeOperation, removeTable, addIdentifier, updateIdentifier, removeIdentifier,
             createProfile } = this.props
 
+    const tabContents = [];
+    tableData.data.forEach((table, idx) => {
+      tabContents.push(
+        <Tab eventKey={idx} title={`Input table # ${idx}`}>
+          {
+            table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
+            <div>
+              <h4>Input table metadata</h4>
+              {this.renderMetadata(table.metadata)}
+              <hr />
+            </div>
+          }
+          {
+            table.header !== undefined && table.header.length > 0 &&
+            <div>
+              <h4>Input table header</h4>
+              {this.renderHeader(table.header)}
+              <hr />
+            </div>
+          }
+          {
+            table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
+            <div>
+              <h4>Input table data</h4>
+              {this.renderDataGrid(table)}
+              <hr />
+            </div>
+          }
+        </Tab>
+      );
+    });
     return (
       <div className="row">
-        <div className="col-md-7 scroll">
-          <div className="mb-5">
+        <div className="col-md-7">
+          <div className="mb-5 mb-5-scroll">
             <hr />
             <h4>Input file metadata</h4>
             {Object.keys(tableData.metadata).length > 0 && this.renderMetadata(tableData.metadata)}
             <hr />
-
-            <ul className="nav nav-tabs" id="Tabs" role="tablist">
-              {tableData.data.map((table, index) => {
-                return (
-                  <li key={index} className="nav-item" role="presentation">
-                    <a className={`nav-link ${index == 0 ? "active" : ""}`} id="table-data-tab" href={'#table-data-' + index}
-                      data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">Input table #{index}</a>
-                  </li>
-                )
-              })}
-            </ul>
-
-            <div className="tab-content pt-3" id="Tabs">
-              {
-                tableData.data.map((table, index) => {
-                  return (
-                    <div key={index} className={`tab-pane fade ${index == 0 ? "active show" : ""}`} id={'table-data-' + index}
-                      role="tabpanel" aria-labelledby="table-data-tab">
-
-                      {
-                        table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
-                        <div>
-                          <h4>Input table metadata</h4>
-                          {this.renderMetadata(table.metadata)}
-                          <hr />
-                        </div>
-                      }
-                      {
-                        table.header !== undefined && table.header.length > 0 &&
-                        <div>
-                          <h4>Input table header</h4>
-                          {this.renderHeader(table.header)}
-                          <hr />
-                        </div>
-                      }
-                      {
-                        table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
-                        <div>
-                          <h4>Input table data</h4>
-                          {this.renderDataGrid(table)}
-                          <hr />
-                        </div>
-                      }
-                    </div>
-                  )
-                })
-              }
-            </div>
+            <Tabs defaultActiveKey={0} id="uncontrolled-tab-example">
+              {tabContents}
+            </Tabs>
           </div>
         </div>
-        <div className="col-md-5 scroll">
-          <div className="mb-5">
-
+        <div className="col-md-5">
+          <div className="mb-5 mb-5-scroll">
             <div className="card rounded-0 mt-3">
               <div className="card-header">
                 <div>Profile</div>
@@ -164,7 +157,7 @@ class ProfileCreate extends Component {
                     <div className="card rounded-0 mt-3">
                       <div className="card-header">
                         <div className="form-row">
-                          <div className="col-lg-10">
+                          <div className="col-lg-10 card-heade">
                             Output table #{index}
                           </div>
                           <div className="col-lg-2">
