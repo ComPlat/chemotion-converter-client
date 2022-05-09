@@ -5,7 +5,6 @@ import { sortBy } from 'lodash';
 const OutputLayerInput = ({ index, identifier, updateIdentifier, dataset }) => {
 
   if (dataset && dataset['layers']) {
-    console.log(dataset['layers']);
     const sls = sortBy(dataset['layers'], l => l.position);
     const dsOpt = sls && sls.map(e => ({ value: e.key, label: e.label }));
 
