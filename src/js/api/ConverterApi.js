@@ -132,6 +132,22 @@ class ConverterApi {
         return 'success'
       })
   }
+
+  static fetchDatasets () {
+
+    const requestOptions = {
+      method: 'GET'
+    }
+
+    return fetch(converter_app_url + '/datasets', requestOptions)
+      .then(response => {
+        if (!response.ok) { throw response }
+        return response.json()
+      })
+      .then(data => {
+        return data
+      })
+  }
 }
 
 export default ConverterApi

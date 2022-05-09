@@ -48,11 +48,11 @@ class ProfileEdit extends Component {
               <React.Fragment key={index}>
                 <div className="card rounded-0 mt-3">
                   <div className="card-header">
-                    <div className="form-row">
-                      <div className="col-lg-11">
+                    <div className="form-row-item">
+                      <div className="col-lg-10">
                         Table #{index}
                       </div>
-                      <div className="col-lg-1">
+                      <div className="col-lg-2">
                         <button type="button" className="btn btn-danger btn-sm btn-block float-right" onClick={removeTable}>Remove</button>
                       </div>
                     </div>
