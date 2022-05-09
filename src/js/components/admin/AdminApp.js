@@ -17,6 +17,7 @@ class AdminApp extends Component {
       status: 'list',
       selectedFile: null,
       profiles: [],
+      datasets:[],
       tableData: null,
       columnList: null,
       headerOptions: [],
@@ -25,6 +26,7 @@ class AdminApp extends Component {
       errorMessage: '',
       title: '',
       description: '',
+      ols: '',
       tables: [],
       identifiers: [],
       currentIdentifier: '',
@@ -42,6 +44,7 @@ class AdminApp extends Component {
 
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
+    this.updateOls = this.updateOls.bind(this)
 
     this.addTable = this.addTable.bind(this)
     this.updateTable = this.updateTable.bind(this)
@@ -76,6 +79,13 @@ class AdminApp extends Component {
           profiles: profiles
         })
       })
+
+      ConverterApi.fetchDatasets()
+      .then(datasets => {
+        this.setState({
+          datasets: datasets
+        })
+      })
   }
 
   componentDidUpdate() {
@@ -103,6 +113,7 @@ class AdminApp extends Component {
       id: currentProfile.id,
       title: currentProfile.title,
       description: currentProfile.description,
+      ols: currentProfile.ols,
       identifiers: currentProfile.identifiers,
       header: currentProfile.header,
       tables: currentProfile.tables,
@@ -134,6 +145,13 @@ class AdminApp extends Component {
   updateDescription(description) {
     this.setState({
       description: description
+    })
+  }
+
+  updateOls(ols) {
+    console.log(ols);
+    this.setState({
+      ols: ols
     })
   }
 
@@ -329,10 +347,11 @@ class AdminApp extends Component {
   createProfile(event) {
     event.preventDefault()
 
-    const { title, description, tables, identifiers, tableData } = this.state
+    const { title, description, ols, tables, identifiers, tableData } = this.state
     const profile = {
       title,
       description,
+      ols,
       tables,
       identifiers
     }
@@ -561,11 +580,14 @@ class AdminApp extends Component {
             columnList={this.state.columnList}
             headerOptions={this.state.headerOptions}
             title={this.state.title}
+            datasets={this.state.datasets}
             description={this.state.description}
+            ols={this.state.ols}
             identifiers={this.state.identifiers}
             tables={this.state.tables}
             updateTitle={this.updateTitle}
             updateDescription={this.updateDescription}
+            updateOls={this.updateOls}
             addTable={this.addTable}
             updateTable={this.updateTable}
             removeTable={this.removeTable}

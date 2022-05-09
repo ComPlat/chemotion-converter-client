@@ -1,6 +1,6 @@
 {
   "name": "chemotion-converter-client",
-  "version": "0.1.28",
+  "version": "0.1.30",
   "main": "./public/bundle.js",
   "files": [
     "public",
@@ -8,7 +8,6 @@
   ],
   "scripts": {
     "build:prod": "webpack --config webpack/prod.config.js --mode production",
-    "pack": "webpack --config webpack/pack.config.js --mode production",
     "build": "webpack --config webpack/dev.config.js --mode development",
     "watch": "webpack --config webpack/dev.config.js --watch --mode development",
     "serve": "webpack-dev-server --config webpack/dev.config.js --open --mode development"
@@ -22,7 +21,9 @@
     "@fortawesome/fontawesome-free": "^5.15.4",
     "bootstrap": "^4.6.1",
     "jquery": "^3.4.0",
+    "react-select": "5.2.2",
     "popper.js": "^1.16.0",
+    "lodash": "^4.17.21",
     "prop-types": "^15.8.1"
   },
   "peerDependencies": {

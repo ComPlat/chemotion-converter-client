@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { AgGridReact } from 'ag-grid-react';
 import { Tabs, Tab } from 'react-bootstrap';
+import Select from 'react-select';
 
 import HeaderForm from './HeaderForm'
 import TableForm from './TableForm'
@@ -10,7 +11,11 @@ class ProfileCreate extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      dataset: {}
+    }
     this.onGridReady = this.onGridReady.bind(this);
+    this.onSelectDS = this.onSelectDS.bind(this);
   }
 
   onGridReady(params) {
@@ -25,8 +30,8 @@ class ProfileCreate extends Component {
             Object.keys(metadata).map((key, index) => {
               return (
                 <React.Fragment key={index}>
-                  <dt className="col-sm-3">{key}:</dt>
-                  <dd className="col-sm-9 mb-0">{metadata[key]}</dd>
+                  <dt className="col-sm-3" style={{ minHeight: '15' }}>{key}:</dt>
+                  <dd className="col-sm-9 mb-0" style={{ minHeight: '15' }}>{metadata[key] || ' '}</dd>
                 </React.Fragment>
               )
             })
@@ -80,16 +85,52 @@ class ProfileCreate extends Component {
     )
   }
 
+  onSelectDS(e) {
+    const { datasets, ols } = this.props;
+    const ds = datasets && datasets.find(o => o['ols'] === e.value) || {};
+    this.setState({ ols: e.value, dataset: ds })
+    this.props.updateOls(e.value)
+  }
+
   render() {
-    const { tableData, columnList, headerOptions, title, description, identifiers, tables,
-            updateTitle, updateDescription, addTable, updateHeader, updateTable, addOperation,
+    const { tableData, columnList, headerOptions, title, description, ols, identifiers, tables, datasets,
+            updateTitle, updateDescription, updateOls, addTable, updateHeader, updateTable, addOperation,
             updateOperation, removeOperation, removeTable, addIdentifier, updateIdentifier, removeIdentifier,
             createProfile } = this.props
+
+    const { dataset } = this.state;
+
+    const dsOpt = datasets && datasets.map(ds => {
+      return { value: ds['ols'], label: ds['name'] }
+    })
+
+    let datasetList = (<span />);
+    datasetList = (
+      <div className="card rounded-0 mt-3">
+      <div className="card-header">
+        <div>Dataset</div>
+      </div>
+      <div className="card-body">
+        <div>
+          <label>Datasets</label>
+          <Select
+            isDisabled={false}
+            isLoading={false}
+            isClearable={false}
+            isRtl={false}
+            name="dataset"
+            options={dsOpt}
+            onChange={e => this.onSelectDS(e)}
+          />
+        </div>
+      </div>
+    </div>
+    );
 
     const tabContents = [];
     tableData.data.forEach((table, idx) => {
       tabContents.push(
-        <Tab eventKey={idx} title={`Input table # ${idx}`}>
+        <Tab key={`tableTab${idx}`} eventKey={idx} title={`Input table # ${idx}`}>
           {
             table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
             <div>
@@ -149,15 +190,14 @@ class ProfileCreate extends Component {
                 </div>
               </div>
             </div>
-
             {
               this.props.tables.map((table, index) => {
                 return (
                   <React.Fragment key={index}>
                     <div className="card rounded-0 mt-3">
                       <div className="card-header">
-                        <div className="form-row">
-                          <div className="col-lg-10 card-heade">
+                        <div className="form-row-item">
+                          <div className="col-lg-10 card-header">
                             Output table #{index}
                           </div>
                           <div className="col-lg-2">
@@ -204,6 +244,7 @@ class ProfileCreate extends Component {
                       identifiers={identifiers}
                       tableData={tableData}
                       tables={tables}
+                      dataset={dataset}
                       addIdentifier={addIdentifier}
                       updateIdentifier={updateIdentifier}
                       removeIdentifier={removeIdentifier}
@@ -224,6 +265,7 @@ class ProfileCreate extends Component {
                 </small>
               </div>
             </div>
+            { datasetList }
 
             <div className="card rounded-0 mt-3">
               <div className="card-header">Metadata</div>
@@ -240,6 +282,7 @@ class ProfileCreate extends Component {
                       identifiers={identifiers}
                       tableData={tableData}
                       tables={tables}
+                      dataset={dataset}
                       addIdentifier={addIdentifier}
                       updateIdentifier={updateIdentifier}
                       removeIdentifier={removeIdentifier}

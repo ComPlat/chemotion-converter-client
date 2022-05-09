@@ -19,10 +19,9 @@ class IdentifierInput extends Component {
   render() {
     const { index, identifier, tables, updateIdentifier, removeIdentifier } = this.props
     const valueDisabled = (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') && !identifier.isRegex
-
     return (
       <form>
-        <div className="form-row">
+        <div className="form-row-item">
           {
             (identifier.type == 'tableMetadata' || identifier.type == 'tableHeader') &&
             <div className="col-lg-2 mb-2">
@@ -53,7 +52,7 @@ class IdentifierInput extends Component {
         </div>
         {
           identifier.optional &&
-          <div className="form-row">
+          <div className="form-row-item">
             <div className="col-lg-2 mb-2">
               <OutputTableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>

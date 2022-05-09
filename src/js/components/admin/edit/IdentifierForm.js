@@ -11,7 +11,6 @@ class IdentifierForm extends Component {
   render() {
     const { label, type, optional, identifiers, tableData, tables,
             addIdentifier, updateIdentifier, removeIdentifier } = this.props
-
     return (
       <div className="mb-4">
         <label>{label}</label>

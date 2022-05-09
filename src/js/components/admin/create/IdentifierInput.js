@@ -14,11 +14,11 @@ import RemoveButton from '../common/RemoveButton'
 class IndentifierInput extends Component {
 
   render() {
-    const { index, identifier, tableData, tables, updateIdentifier, removeIdentifier } = this.props
+    const { index, identifier, tableData, tables, updateIdentifier, removeIdentifier, dataset } = this.props
 
     return (
       <form>
-        <div className="form-row align-items-center">
+        <div className="form-row-item align-items-center-item">
           {
             (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
             <div className="col-lg-4 mb-2">
@@ -51,16 +51,16 @@ class IndentifierInput extends Component {
         </div>
         {
           identifier.optional &&
-          <div className="form-row align-items-center">
+          <div className="form-row-item align-items-center-item">
             <div className="col-lg-4 mb-2">
               <OutputTableIndexSelect index={index} identifier={identifier} tables={tables}
                                       updateIdentifier={updateIdentifier} />
             </div>
             <div className="col-lg-4 mb-2">
-              <OutputLayerInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+              <OutputLayerInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} dataset={dataset} />
             </div>
             <div className="col-lg-4 mb-2">
-              <OutputKeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+              <OutputKeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} dataset={dataset} />
             </div>
           </div>
         }
