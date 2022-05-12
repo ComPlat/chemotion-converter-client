@@ -8,7 +8,7 @@ class HeaderForm extends Component {
 
   render() {
     return (
-      <div className="mb-3">
+      <div className="mb-20">
         <div>
           <label>Table header</label>
         </div>

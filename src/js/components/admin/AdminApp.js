@@ -658,15 +658,15 @@ class AdminApp extends Component {
             }
           </nav>
 
-          <div className="mt-auto">
+          <div>
             {this.state.status == "list" &&
-              <div className="float-right">
-                <button type="button" onClick={this.showImportView} className="btn btn-success mr-2">Import profile</button>
+              <div className="pull-right">
+                <button type="button" onClick={this.showImportView} className="btn btn-success mr-10">Import profile</button>
                 <button type="button" onClick={this.showUpdateView} className="btn btn-primary">Create new profile</button>
               </div>
             }
 
-            <h2 className="mb-0">{this.getTitleforStatus()}</h2>
+            <h2>{this.getTitleforStatus()}</h2>
           </div>
         </header>
 

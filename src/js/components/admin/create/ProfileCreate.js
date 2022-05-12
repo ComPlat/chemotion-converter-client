@@ -24,19 +24,21 @@ class ProfileCreate extends Component {
 
   renderMetadata(metadata) {
     return (
-      <div className="">
-        <dl className="row">
-          {
-            Object.keys(metadata).map((key, index) => {
-              return (
-                <React.Fragment key={index}>
-                  <dt className="col-sm-3" style={{ minHeight: '15' }}>{key}:</dt>
-                  <dd className="col-sm-9 mb-0" style={{ minHeight: '15' }}>{metadata[key] || ' '}</dd>
-                </React.Fragment>
-              )
-            })
-          }
-        </dl>
+      <div className="panel panel-default">
+        <div className="panel-body">
+          <dl className="dl-horizontal mb-0">
+            {
+              Object.keys(metadata).map((key, index) => {
+                return (
+                  <React.Fragment key={index}>
+                    <dt>{key}:</dt>
+                    <dd>{metadata[key] || ' '}</dd>
+                  </React.Fragment>
+                )
+              })
+            }
+          </dl>
+        </div>
       </div>
     )
   }
@@ -106,11 +108,11 @@ class ProfileCreate extends Component {
 
     let datasetList = (<span />);
     datasetList = (
-      <div className="card rounded-0 mt-3">
-      <div className="card-header">
+      <div className="panel panel-default">
+      <div className="panel-heading">
         <div>Dataset</div>
       </div>
-      <div className="card-body">
+      <div className="panel-body">
         <div>
           <label>Datasets</label>
           <Select
@@ -133,57 +135,54 @@ class ProfileCreate extends Component {
         <Tab key={`tableTab${idx}`} eventKey={idx} title={`Input table # ${idx}`}>
           {
             table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
-            <div>
+            <div className="mt-20">
               <h4>Input table metadata</h4>
               {this.renderMetadata(table.metadata)}
-              <hr />
             </div>
           }
           {
             table.header !== undefined && table.header.length > 0 &&
-            <div>
+            <div className="mt-20">
               <h4>Input table header</h4>
               {this.renderHeader(table.header)}
-              <hr />
             </div>
           }
           {
             table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
-            <div>
+            <div className="mt-20">
               <h4>Input table data</h4>
               {this.renderDataGrid(table)}
-              <hr />
             </div>
           }
         </Tab>
       );
     });
+
     return (
       <div className="row">
         <div className="col-md-7">
-          <div className="mb-5 mb-5-scroll">
-            <hr />
+          <div className="scroll">
             <h4>Input file metadata</h4>
             {Object.keys(tableData.metadata).length > 0 && this.renderMetadata(tableData.metadata)}
-            <hr />
+            <h4>Input tables</h4>
             <Tabs defaultActiveKey={0} id="uncontrolled-tab-example">
               {tabContents}
             </Tabs>
           </div>
         </div>
         <div className="col-md-5">
-          <div className="mb-5 mb-5-scroll">
-            <div className="card rounded-0 mt-3">
-              <div className="card-header">
-                <div>Profile</div>
+          <div className="scroll">
+            <div className="panel panel-default">
+              <div className="panel-heading">
+                Profile
               </div>
-              <div className="card-body">
+              <div className="panel-body">
                 <div>
                   <label>Title</label>
                   <input type="text" className="form-control form-control-sm" onChange={event => updateTitle(event.currentTarget.value)} value={title} />
                   <small className="text-muted">Please add a title for this profile.</small>
                 </div>
-                <div className="mt-3">
+                <div className="mt-10">
                   <label>Description</label>
                   <textarea className="form-control" rows="3" onChange={event => updateDescription(event.currentTarget.value)} value={description} />
                   <small className="text-muted">Please add a description for this profile.</small>
@@ -194,18 +193,12 @@ class ProfileCreate extends Component {
               this.props.tables.map((table, index) => {
                 return (
                   <React.Fragment key={index}>
-                    <div className="card rounded-0 mt-3">
-                      <div className="card-header">
-                        <div className="form-row-item">
-                          <div className="col-lg-10 card-header">
-                            Output table #{index}
-                          </div>
-                          <div className="col-lg-2">
-                            <button type="button" className="btn btn-danger btn-sm btn-block float-right" onClick={removeTable}>Remove</button>
-                          </div>
-                        </div>
+                    <div className="panel panel-default">
+                      <div className="panel-heading">
+                        <button type="button" className="btn btn-danger btn-xs pull-right" onClick={removeTable}>Remove</button>
+                        Output table #{index}
                       </div>
-                      <div className="card-body">
+                      <div className="panel-body">
                         <HeaderForm
                           headerOptions={headerOptions}
                           updateHeader={(key, value) => updateHeader(index, key, value)}
@@ -225,13 +218,13 @@ class ProfileCreate extends Component {
               })
             }
 
-            <div className="mt-3">
+            <div className="mb-20">
               <button type="button" className="btn btn-success btn-sm" onClick={addTable}>Add table</button>
             </div>
 
-            <div className="card rounded-0 mt-3">
-              <div className="card-header">Identifiers</div>
-              <div className="card-body">
+            <div className="panel panel-default">
+              <div className="panel-heading">Identifiers</div>
+              <div className="panel-body">
                 {
                   [['Based on file metadata', 'fileMetadata'],
                    ['Based on table metadata', 'tableMetadata'],
@@ -255,7 +248,7 @@ class ProfileCreate extends Component {
                   <p className="text-muted">
                     The identifiers you create here are used to find the correct profile for uploaded files.
                   </p>
-                  <ul className="text-muted mb-0">
+                  <ul className="text-muted">
                     <li>
                       The <code>Value</code> will be compared to the selected metadata or to the header of a table. If you select <code>Regex</code>, you can enter a regular expression as value.
                     </li>
@@ -267,9 +260,9 @@ class ProfileCreate extends Component {
             </div>
             { datasetList }
 
-            <div className="card rounded-0 mt-3">
-              <div className="card-header">Metadata</div>
-              <div className="card-body">
+            <div className="panel panel-default">
+              <div className="panel-heading">Metadata</div>
+              <div className="panel-body">
                 {
                   [['Based on file metadata', 'fileMetadata'],
                    ['Based on table metadata', 'tableMetadata'],
@@ -293,7 +286,7 @@ class ProfileCreate extends Component {
                   <p className="text-muted">
                     The metadata you define here are extracted from the input file and added to the output tables.
                   </p>
-                  <ul className="text-muted mb-0">
+                  <ul className="text-muted">
                     <li>
                       As above, the <code>Value</code> will be compared to the selected metadata or to the header of a table. If you select <code>Regex</code>, you can enter a regular expression as value.
                     </li>
@@ -313,11 +306,9 @@ class ProfileCreate extends Component {
               </div>
             </div>
 
-            <div className="row justify-content-center mt-3">
-              <form>
-                <button type="submit" className="btn btn-primary" onClick={createProfile}>Create profile</button>
-              </form>
-            </div>
+            <form>
+              <button type="submit" className="btn btn-primary" onClick={createProfile}>Create profile</button>
+            </form>
           </div>
         </div>
       </div>

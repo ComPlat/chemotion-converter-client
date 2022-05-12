@@ -18,8 +18,7 @@
     "url": "https://github.com/ComPlat/converter-client"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.15.4",
-    "bootstrap": "^4.6.1",
+    "bootstrap": "^3.3.7",
     "jquery": "^3.4.0",
     "react-select": "5.2.2",
     "popper.js": "^1.16.0",

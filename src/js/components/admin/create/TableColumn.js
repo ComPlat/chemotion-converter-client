@@ -45,19 +45,19 @@ class TableColumn extends Component {
                   />
                 </div>
               }
-              <div className="col-sm-2">
-                <button type="button" className="btn btn-danger btn-sm" onClick={event => removeOperation(operationsKey, index)}>
-                  Remove
+              <div className="col-sm-2 text-right">
+                <button type="button" className="btn btn-danger" onClick={event => removeOperation(operationsKey, index)}>
+                  &times;
                 </button>
               </div>
             </div>
           ))
         }
-        <div className="mb-3">
-          <button type="button" className="btn btn-success btn-sm mr-2" onClick={event => addOperation(operationsKey, 'column')}>
+        <div className="mb-20">
+          <button type="button" className="btn btn-success btn-xs mr-10" onClick={event => addOperation(operationsKey, 'column')}>
             Add column operation
           </button>
-          <button type="button" className="btn btn-success btn-sm" onClick={event => addOperation(operationsKey, 'value')}>
+          <button type="button" className="btn btn-success btn-xs" onClick={event => addOperation(operationsKey, 'value')}>
             Add scalar operation
           </button>
         </div>

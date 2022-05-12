@@ -19,22 +19,22 @@ class ProfileEdit extends Component {
 
     return (
       <div>
-        <div className="card rounded-0 mt-3">
+        <div className="card rounded-0 mt-10">
           <div className="card-header">
             <div>Profile</div>
           </div>
           <div className="card-body">
-            <div className="mt-3">
+            <div className="mt-10">
               <label>Title</label>
               <input type="text" className="form-control form-control-sm" onChange={event => updateTitle(event.currentTarget.value)} value={title} />
               <small className="text-muted">Please add a title for this profile.</small>
             </div>
-            <div className="mt-3">
+            <div className="mt-10">
               <label>Description</label>
               <textarea className="form-control" rows="3" onChange={event => updateDescription(event.currentTarget.value)} value={description} />
               <small className="text-muted">Please add a description for this profile.</small>
             </div>
-            <div className="mt-3">
+            <div className="mt-10">
               <label>Unique ID</label>
               <div><code>{id}</code></div>
               <small className="text-muted">The unique id for this profile.</small>
@@ -46,13 +46,13 @@ class ProfileEdit extends Component {
           tables.map((table, index) => {
             return (
               <React.Fragment key={index}>
-                <div className="card rounded-0 mt-3">
+                <div className="card rounded-0 mt-10">
                   <div className="card-header">
                     <div className="form-row-item">
-                      <div className="col-lg-10">
+                      <div className="col-md-10">
                         Table #{index}
                       </div>
-                      <div className="col-lg-2">
+                      <div className="col-md-2">
                         <button type="button" className="btn btn-danger btn-sm btn-block float-right" onClick={removeTable}>Remove</button>
                       </div>
                     </div>
@@ -73,13 +73,13 @@ class ProfileEdit extends Component {
             )
           })
         }
-        <div className="text-center mt-2">
+        <div className="text-center mt-10">
           <button type="button" className="btn btn-success" onClick={addTable}>Add table</button>
         </div>
 
         <div className="row">
-          <div className="col-lg-6">
-            <div className="card rounded-0 mt-3">
+          <div className="col-md-6">
+            <div className="card rounded-0 mt-10">
               <div className="card-header">
                 <div>Identifiers</div>
               </div>
@@ -104,8 +104,8 @@ class ProfileEdit extends Component {
               </div>
             </div>
           </div>
-          <div className="col-lg-6">
-            <div className="card rounded-0 mt-3">
+          <div className="col-md-6">
+            <div className="card rounded-0 mt-10">
               <div className="card-header">
                 <div>Metadata</div>
               </div>
@@ -132,8 +132,8 @@ class ProfileEdit extends Component {
           </div>
         </div>
 
-        <div className="text-center mb-5">
-          <button onClick={updateProfile} className="btn btn-primary mt-3">Save profile</button>
+        <div className="text-center mb-20">
+          <button onClick={updateProfile} className="btn btn-primary mt-10">Save profile</button>
         </div>
       </div>
     )

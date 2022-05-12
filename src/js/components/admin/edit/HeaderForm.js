@@ -9,7 +9,7 @@ class HeaderForm extends Component {
   render() {
     const { header, addHeader, updateHeader, removeHeader } = this.props
     return (
-      <div className="mb-3">
+      <div className="mb-20">
         <div>
           <label>Table header</label>
         </div>
@@ -19,7 +19,7 @@ class HeaderForm extends Component {
 
             return (
               <div key={index} className="form-row-item align-items-center">
-                <div className="col-lg-2 mb-2">
+                <div className="col-md-2 mb-10">
                   <input
                     type="text"
                     className="form-control form-control-sm"
@@ -27,7 +27,7 @@ class HeaderForm extends Component {
                     value={key}
                   />
                 </div>
-                <div className="col-lg-8 mb-2">
+                <div className="col-md-8 mb-10">
                   <input
                     type="text"
                     className="form-control form-control-sm"
@@ -35,14 +35,14 @@ class HeaderForm extends Component {
                     value={value}
                   />
                 </div>
-                <div className="col-lg-2 mb-2">
+                <div className="col-md-2 mb-10">
                   <button type="button" className="btn btn-danger btn-sm btn-block" onClick={() => removeHeader(key)}>Remove</button>
                 </div>
               </div>
             )
           })
         }
-        <div className="mb-2">
+        <div className="mb-10">
           <button type="button" className="btn btn-success btn-sm" onClick={addHeader}>Add header value</button>
         </div>
         <div>

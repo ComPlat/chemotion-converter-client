@@ -63,35 +63,33 @@ class App extends Component {
 
   render() {
     return(
-      <div className='container'>
-          <div className='row justify-content-center'>
-              <h1 className="p-5">Chemotion file converter</h1>
+      <div className="container">
+        <div className="row">
+          <div className="col-md-6 col-md-offset-3">
+            <h1 className="text-center p-5">Chemotion file converter</h1>
           </div>
-          <div>
-            <div className='row justify-content-center'>
-              <div className='col-6'>
-                <p className="text-center">Please upload a file.</p>
+          <div className="col-md-4 col-md-offset-4">
+            <p className="text-center">Please upload a file.</p>
+            <form>
+              <div className="form-group">
+                <input type="file" className="form-control form-control-file" id="fileUpload" onChange={this.onFileChangeHandler}/>
               </div>
-            </div>
-            <div className='row justify-content-center'>
-              <form>
-                <div className="form-group">
-                  <input type="file" className="form-control form-control-file" id="fileUpload" onChange={this.onFileChangeHandler}/>
-                </div>
+              <p>
                 <button type="button" className="btn btn-primary btn-lg btn-block" onClick={this.onSubmitFileHandler}>Upload</button>
-                {this.state.error &&
-                  <div className="alert alert-danger mt-2">{ this.state.errorMessage }</div>
-                }
-                {this.state.isLoading &&
-                <div className="d-flex justify-content-center mt-3">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="sr-only">Loading...</span>
-                  </div>
+              </p>
+              {this.state.error &&
+                <div className="alert alert-danger">{ this.state.errorMessage }</div>
+              }
+              {this.state.isLoading &&
+              <div className="">
+                <div className="text-primary text-center" role="status">
+                  <span>Loading...</span>
                 </div>
-                }
-              </form>
-            </div>
+              </div>
+              }
+            </form>
           </div>
+        </div>
       </div>
     )
   }

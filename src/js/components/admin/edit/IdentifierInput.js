@@ -24,42 +24,42 @@ class IdentifierInput extends Component {
         <div className="form-row-item">
           {
             (identifier.type == 'tableMetadata' || identifier.type == 'tableHeader') &&
-            <div className="col-lg-2 mb-2">
+            <div className="col-md-2 mb-10">
               <TableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           }
           {
             (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
-            <div className={(identifier.type == 'tableMetadata' ? 'col-lg-2' : 'col-lg-4') + ' mb-2'}>
+            <div className={(identifier.type == 'tableMetadata' ? 'col-md-2' : 'col-md-4') + ' mb-10'}>
               <KeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           }
           {
             (identifier.type == 'tableHeader') &&
-            <div className="col-lg-2 mb-2">
+            <div className="col-md-2 mb-10">
               <LineNumberInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           }
-          <div className="col-lg-4 mb-2">
+          <div className="col-md-4 mb-10">
             <ValueInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
           </div>
-          <div className="col-lg-2 mb-2">
+          <div className="col-md-2 mb-10">
             <RegexCheckbox index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
           </div>
-          <div className="col-lg-2 mb-2">
+          <div className="col-md-2 mb-10">
             <RemoveButton index={index} removeIdentifier={removeIdentifier} />
           </div>
         </div>
         {
           identifier.optional &&
           <div className="form-row-item">
-            <div className="col-lg-2 mb-2">
+            <div className="col-md-2 mb-10">
               <OutputTableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
-            <div className="col-lg-5 mb-2">
+            <div className="col-md-5 mb-10">
               <OutputLayerInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
-            <div className="col-lg-5 mb-2">
+            <div className="col-md-5 mb-10">
               <OutputKeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           </div>

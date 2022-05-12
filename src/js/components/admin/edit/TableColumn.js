@@ -27,9 +27,9 @@ class TableColumn extends Component {
 
     return (
       <div>
-        <label className="mb-2">{label}</label>
+        <label className="mb-10">{label}</label>
         <div className="form-group form-row">
-          <div className="col-lg-6">
+          <div className="col-md-6">
             <input
               type="number"
               className="form-control form-control-sm"
@@ -41,7 +41,7 @@ class TableColumn extends Component {
             />
             <small>Table Index</small>
           </div>
-          <div className="col-lg-6">
+          <div className="col-md-6">
             <input
               type="number"
               className="form-control form-control-sm"
@@ -65,7 +65,7 @@ class TableColumn extends Component {
                 operation.type == 'column' &&
                 <div className="col-sm-8">
                   <div className="form-row">
-                    <div className="col-sm-6 mb-2">
+                    <div className="col-sm-6 mb-10">
                       <input
                         type="number"
                         className="form-control form-control-sm"
@@ -77,7 +77,7 @@ class TableColumn extends Component {
                       />
                       <small>Table Index</small>
                     </div>
-                    <div className="col-sm-6 mb-2">
+                    <div className="col-sm-6 mb-10">
                       <input
                         type="number"
                         className="form-control form-control-sm"
@@ -109,8 +109,8 @@ class TableColumn extends Component {
             </div>
           ))
         }
-        <div className="mb-2">
-          <button type="button" className="btn btn-success btn-sm mr-2" onClick={event => addOperation(operationsKey, 'column')}>
+        <div className="mb-10">
+          <button type="button" className="btn btn-success btn-sm mr-10" onClick={event => addOperation(operationsKey, 'column')}>
             Add column operation
           </button>
           <button type="button" className="btn btn-success btn-sm" onClick={event => addOperation(operationsKey, 'value')}>

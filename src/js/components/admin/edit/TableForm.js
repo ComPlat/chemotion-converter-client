@@ -17,12 +17,12 @@ class TableForm extends Component {
           <label>Table columns</label>
         </div>
         <div className="row">
-          <div className="col-lg-6 mb-2">
+          <div className="col-md-6 mb-10">
             <TableColumn table={table} label="x-values"
                          columnKey="xColumn" operationsKey="xOperations" updateTable={updateTable}
                          addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
           </div>
-          <div className="col-lg-6 mb-2">
+          <div className="col-md-6 mb-10">
             <TableColumn table={table} label="y-values"
                          columnKey="yColumn" operationsKey="yOperations" updateTable={updateTable}
                          addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>

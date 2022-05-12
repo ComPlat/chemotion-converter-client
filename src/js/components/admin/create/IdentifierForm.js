@@ -13,7 +13,7 @@ class IdentifierForm extends Component {
             addIdentifier, updateIdentifier, removeIdentifier } = this.props
 
     return (
-      <div className="mb-4">
+      <div className="mb-20">
         <label>{label}</label>
         {
           identifiers.map((identifier, index) => {

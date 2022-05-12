@@ -8,7 +8,7 @@ class ProfileList extends Component {
     const { profiles, deleteProfile, editProfile, downloadProfile } = this.props
 
     return (
-      <ul className="list-group mb-5">
+      <ul className="list-group mb-20">
         {
           profiles.map((profile, index) => {
             return (
