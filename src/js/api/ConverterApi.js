@@ -2,21 +2,7 @@ const converter_app_url = process.env.CONVERTER_APP_URL
 
 class ConverterApi {
 
-  static deleteProfile (identifier) {
-
-    const requestOptions = {
-      method: 'DELETE'
-    }
-
-    return fetch(converter_app_url + '/profiles/' + identifier, requestOptions)
-      .then(response => {
-        if (!response.ok) { throw response }
-          return response
-      })
-  }
-
   static fetchProfiles () {
-
     const requestOptions = {
       method: 'GET'
     }
@@ -50,10 +36,10 @@ class ConverterApi {
       })
   }
 
-  static createProfile(data) {
+  static createProfile(profile) {
     const requestOptions = {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(profile),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -74,17 +60,17 @@ class ConverterApi {
       })
   }
 
-  static updateProfile(data, identifier) {
+  static updateProfile(profile) {
     const requestOptions = {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(profile),
       headers: {
         'Content-Type': 'application/json'
       }
     }
 
     let ok
-    return fetch(converter_app_url + '/profiles/' + identifier, requestOptions)
+    return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
       .then(response => {
         ok = response.ok
         return response.json()
@@ -95,6 +81,18 @@ class ConverterApi {
         } else {
           throw new Error(data)
         }
+      })
+  }
+
+  static deleteProfile (profile) {
+    const requestOptions = {
+      method: 'DELETE'
+    }
+
+    return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
+      .then(response => {
+        if (!response.ok) { throw response }
+          return response
       })
   }
 
@@ -148,6 +146,23 @@ class ConverterApi {
         return data
       })
   }
+
+  static fetchOptions () {
+
+    const requestOptions = {
+      method: 'GET'
+    }
+
+    return fetch(converter_app_url + '/options', requestOptions)
+      .then(response => {
+        if (!response.ok) { throw response }
+        return response.json()
+      })
+      .then(data => {
+        return data
+      })
+  }
+
 }
 
 export default ConverterApi

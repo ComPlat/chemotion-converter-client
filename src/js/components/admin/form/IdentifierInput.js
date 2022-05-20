@@ -1,20 +1,23 @@
 import React, { Component } from "react"
 
-import KeySelect from '../common/KeySelect'
-import TableIndexSelect from '../common/TableIndexSelect'
-import LineNumberInput from '../common/LineNumberInput'
-import ValueInput from '../common/ValueInput'
-import RegexCheckbox from '../common/RegexCheckbox'
-import OutputTableIndexSelect from '../common/OutputTableIndexSelect'
-import OutputLayerInput from '../common/OutputLayerInput'
-import OutputKeyInput from '../common/OutputKeyInput'
-import RemoveButton from '../common/RemoveButton'
+import KeyInput from './identifier/KeyInput'
+import KeySelect from './identifier/KeySelect'
+import LineNumberInput from './identifier/LineNumberInput'
+import OutputKeyInput from './identifier/OutputKeyInput'
+import OutputLayerInput from './identifier/OutputLayerInput'
+import OutputTableIndexSelect from './identifier/OutputTableIndexSelect'
+import RegexCheckbox from './identifier/RegexCheckbox'
+import RemoveButton from './identifier/RemoveButton'
+import TableIndexInput from './identifier/TableIndexInput'
+import TableIndexSelect from './identifier/TableIndexSelect'
+import ValueInput from './identifier/ValueInput'
 
 
 class IndentifierInput extends Component {
 
   render() {
-    const { index, identifier, tableData, tables, updateIdentifier, removeIdentifier, dataset } = this.props
+    const { index, identifier, data, tables, updateIdentifier, removeIdentifier, dataset } = this.props
+    const valueDisabled = data && (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') && !identifier.isRegex
 
     return (
       <form>
@@ -22,25 +25,29 @@ class IndentifierInput extends Component {
           {
             (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
             <div className="col-md-4 mb-10">
-              <KeySelect index={index} identifier={identifier} tableData={tableData}
-                         updateIdentifier={updateIdentifier} />
+              {
+                data ? <KeySelect index={index} identifier={identifier} data={data} updateIdentifier={updateIdentifier} />
+                     : <KeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+              }
             </div>
           }
           {
             (identifier.type == 'tableHeader') &&
             <div className="col-md-3 mb-10">
-              <TableIndexSelect index={index} identifier={identifier} tableData={tableData}
-                                updateIdentifier={updateIdentifier} />
+              {
+                data ? <TableIndexSelect index={index} identifier={identifier} data={data} updateIdentifier={updateIdentifier} />
+                     : <TableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+              }
             </div>
           }
           {
             (identifier.type == 'tableHeader') &&
-            <div className="col-md-1 mb-10">
+            <div className="col-md-2 mb-10">
               <LineNumberInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           }
-          <div className="col-md-4 mb-10">
-            <ValueInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+          <div className={identifier.type == 'tableHeader' ? 'col-md-3 mb-10' : 'col-md-4 mb-10'}>
+            <ValueInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} disabled={valueDisabled} />
           </div>
           <div className="col-md-2 mb-10">
             <RegexCheckbox index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
@@ -67,6 +74,7 @@ class IndentifierInput extends Component {
       </form>
     )
   }
+
 }
 
 export default IndentifierInput

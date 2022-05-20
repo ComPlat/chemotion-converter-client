@@ -5,7 +5,7 @@ import ProfileListItem from './ProfileListItem'
 class ProfileList extends Component {
 
   render () {
-    const { profiles, deleteProfile, editProfile, downloadProfile } = this.props
+    const { profiles, updateProfile, deleteProfile, downloadProfile } = this.props
 
     return (
       <ul className="list-group mb-20">
@@ -17,9 +17,9 @@ class ProfileList extends Component {
                 id={profile.id}
                 title={profile.title}
                 description={profile.description}
-                deleteProfile={() => deleteProfile(index, profile.id)}
-                editProfile={() => editProfile(index, profile.id)}
-                downloadProfile={() => downloadProfile(index, profile.id)} />
+                updateProfile={() => updateProfile(profile)}
+                deleteProfile={() => deleteProfile(profile)}
+                downloadProfile={() => downloadProfile(profile)} />
             )
           })
         }

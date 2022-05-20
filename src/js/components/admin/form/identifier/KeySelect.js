@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 
-const KeySelect = ({ index, identifier, tableData, updateIdentifier }) => {
-
+const KeySelect = ({ index, identifier, data, updateIdentifier }) => {
   const updateKey = (option) => {
     const identifierData = {
       key: option.key
@@ -18,13 +17,13 @@ const KeySelect = ({ index, identifier, tableData, updateIdentifier }) => {
 
   let keyOptions = []
   if (identifier.type == 'fileMetadata') {
-    keyOptions = Object.keys(tableData.metadata).map(key => ({
+    keyOptions = Object.keys(data.metadata).map(key => ({
       key,
       label: key,
-      value: tableData.metadata[key]
+      value: data.metadata[key]
     }))
   } else if (identifier.type == 'tableMetadata') {
-    keyOptions = tableData.tables.reduce((acc, table, tableIndex) => {
+    keyOptions = data.tables.reduce((acc, table, tableIndex) => {
       if (table.metadata !== undefined) {
         return acc.concat(Object.keys(table.metadata).map(key => ({
           key,

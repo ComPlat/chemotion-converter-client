@@ -9,8 +9,9 @@ class IdentifierForm extends Component {
   }
 
   render() {
-    const { label, type, optional, identifiers, tableData, tables,
+    const { label, type, optional, identifiers, data, tables, dataset,
             addIdentifier, updateIdentifier, removeIdentifier } = this.props
+
     return (
       <div className="mb-20">
         <label>{label}</label>
@@ -22,8 +23,9 @@ class IdentifierForm extends Component {
                 index={index}
                 optional={optional}
                 identifier={identifier}
-                tableData={tableData}
+                data={data}
                 tables={tables}
+                dataset={dataset}
                 removeIdentifier={removeIdentifier}
                 updateIdentifier={updateIdentifier}
               />
@@ -40,6 +42,7 @@ class IdentifierForm extends Component {
       </div>
     )
   }
+
 }
 
 export default IdentifierForm

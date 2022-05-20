@@ -32,7 +32,7 @@ const OutputLayerInput = ({ index, identifier, updateIdentifier, dataset }) => {
         type="text"
         id={`outputLayerInput${index}`}
         className="form-control form-control-sm"
-        value={identifier.outputLayer}
+        value={identifier.outputLayer || ''}
         onChange={(event) => updateIdentifier(index, { outputLayer: event.target.value })}
       />
       <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output layer</small></label>

@@ -71,7 +71,7 @@ class App extends Component {
           <div className="col-md-4 col-md-offset-4">
             <p className="text-center">Please upload a file.</p>
             <form>
-              <div className="form-group">
+              <div className="form-group mb-10">
                 <input type="file" className="form-control form-control-file" id="fileUpload" onChange={this.onFileChangeHandler}/>
               </div>
               <p>

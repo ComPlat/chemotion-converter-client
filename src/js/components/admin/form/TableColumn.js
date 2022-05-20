@@ -1,7 +1,8 @@
 import React, { Component } from "react"
 
-import ColumnSelect from '../common/ColumnSelect'
-import OperatorSelect from '../common/OperatorSelect'
+import ColumnInput from './table/ColumnInput'
+import ColumnSelect from './table/ColumnSelect'
+import OperatorSelect from './table/OperatorSelect'
 
 
 class TableColumn extends Component {
@@ -18,9 +19,13 @@ class TableColumn extends Component {
       <React.Fragment>
         <div className="form-group">
           <label>{label}</label>
-          <ColumnSelect column={table[columnKey]}
-                        columnList={columnList}
-                        onChange={column => updateTable(columnKey, column)} />
+          {
+            columnList === null ? <ColumnInput column={table[columnKey]}
+                                               onChange={column => updateTable(columnKey, column)} />
+                                : <ColumnSelect column={table[columnKey]}
+                                                columnList={columnList}
+                                                onChange={column => updateTable(columnKey, column)} />
+          }
         </div>
         {
           table[operationsKey] && table[operationsKey].map((operation, index) => (
@@ -32,9 +37,13 @@ class TableColumn extends Component {
               {
                 operation.type == 'column' &&
                 <div className="col-sm-8">
-                  <ColumnSelect column={operation.column}
-                                columnList={columnList}
-                                onChange={column => updateOperation(operationsKey, index, 'column', column)} />
+                  {
+                    columnList === null ? <ColumnInput column={operation.column}
+                                                       onChange={column => updateOperation(operationsKey, index, 'column', column)} />
+                                        : <ColumnSelect column={table[columnKey]}
+                                                        columnList={columnList}
+                                                        onChange={column => updateOperation(operationsKey, index, 'column', column)} />
+                  }
                 </div>
               }
               {
@@ -64,6 +73,7 @@ class TableColumn extends Component {
       </React.Fragment>
     )
   }
+
 }
 
 export default TableColumn

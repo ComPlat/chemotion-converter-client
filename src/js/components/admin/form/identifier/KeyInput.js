@@ -7,7 +7,7 @@ const KeyInput = ({ index, identifier, updateIdentifier }) => {
         type="text"
         id={`keyInput${index}`}
         className="form-control form-control-sm"
-        value={identifier.key}
+        value={identifier.key || ''}
         onChange={(event) => updateIdentifier(index, { key: event.target.value })}
       />
       <label className="mb-0" htmlFor={`keyInput${index}`}><small>Key</small></label>
