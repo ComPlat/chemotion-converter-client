@@ -74,7 +74,7 @@ class ProfileForm extends Component {
   }
 
   addTable() {
-    const { options } = this.props.options
+    const { options } = this.props
     const header = {}
     if (options) {
       for (let key in options) {
@@ -419,7 +419,7 @@ class ProfileForm extends Component {
                         <TableForm
                           table={table}
                           columnList={columnList}
-                          headerOptions={options}
+                          options={options}
                           updateHeader={(key, value) => this.updateHeader(index, key, value)}
                           updateTable={(key, value) => this.updateTable(index, key, value)}
                           addOperation={(key, type) => this.addOperation(index, key, type)}

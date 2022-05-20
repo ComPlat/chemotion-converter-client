@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 
+import HeaderInput from './table/HeaderInput'
 import TableColumn from './TableColumn'
 
 class TableForm extends Component {
@@ -9,32 +10,19 @@ class TableForm extends Component {
   }
 
   render() {
-    const { table, columnList, headerOptions, updateTable, updateHeader, addOperation, updateOperation, removeOperation } = this.props
+    const { table, columnList, options, updateTable, updateHeader, addOperation, updateOperation, removeOperation } = this.props
 
     return (
       <div>
         <div>
           <label>Table header</label>
         </div>
+
         {
-          Object.keys(headerOptions).map((option, index) => {
-            return (
-              <div key={index} className="form-group row">
-                <label htmlFor={option} className="col-sm-4 col-form-label">{option}</label>
-                <div className="col-sm-8">
-                  <select className="form-control form-control-sm" id={option} value={table.header[option]}
-                          onChange={e => updateHeader(option, e.target.value)}>
-                    {
-                      headerOptions[option].map((select, selectIndex) => {
-                        return <option value={select} key={selectIndex}>{select}</option>
-                      })
-                    }
-                  </select>
-                </div>
-              </div>
-            )
-          }
-        )}
+          Object.keys(options).map((option, index) => (
+            <HeaderInput key={index} option={option} value={table.header[option]} values={options[option]} updateHeader={updateHeader} />
+          ))
+        }
 
         <div>
           <label>Table columns</label>
