@@ -3,6 +3,9 @@ import { AgGridReact } from 'ag-grid-react';
 import { Tabs, Tab } from 'react-bootstrap';
 import Select from 'react-select';
 
+import { getDataset, getInputTables, getInputColumns,
+         getFileMetadataOptions, getTableMetadataOptions } from '../../../utils/profileUtils'
+
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
 
@@ -10,15 +13,14 @@ class ProfileForm extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      dataset: {}
-    }
+
     this.onGridReady = this.onGridReady.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
 
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
     this.updateOls = this.updateOls.bind(this)
+    this.toggleMatchTables = this.toggleMatchTables.bind(this)
 
     this.addTable = this.addTable.bind(this)
     this.updateTable = this.updateTable.bind(this)
@@ -63,13 +65,14 @@ class ProfileForm extends Component {
   }
 
   updateOls(ols) {
-    const { datasets } = this.props;
     const profile = Object.assign({}, this.props.profile)
     profile.ols = ols
+    this.props.updateProfile(profile)
+  }
 
-    const ds = datasets && datasets.find(o => o['ols'] === ols) || {};
-    this.setState({ dataset: ds })
-
+  toggleMatchTables() {
+    const profile = Object.assign({}, this.props.profile)
+    profile.matchTables = !profile.matchTables
     this.props.updateProfile(profile)
   }
 
@@ -82,11 +85,19 @@ class ProfileForm extends Component {
       }
     }
 
+    const inputColumns = getInputColumns(this.props.profile)
+    const table = {}
+    if (inputColumns.length > 2) {
+      table.xColumn = inputColumns[0].value
+      table.yColumn = inputColumns[1].value
+    }
+
     const profile = Object.assign({}, this.props.profile)
     profile.tables.push({
       header: header,
-      table: {}
+      table: table
     })
+
     this.props.updateProfile(profile)
   }
 
@@ -195,6 +206,31 @@ class ProfileForm extends Component {
       type: type,
       optional: optional,
       isRegex: false,
+      value: ''
+    }
+
+    if (type == 'fileMetadata') {
+      const fileMetadataOptions = getFileMetadataOptions(profile)
+      if (fileMetadataOptions) {
+        identifier.key = fileMetadataOptions[0].key
+        identifier.value = fileMetadataOptions[0].value
+      }
+    } else if (type == 'tableMetadata') {
+      const tableMetadataOptions = getTableMetadataOptions(profile)
+      if (tableMetadataOptions) {
+        identifier.key = tableMetadataOptions[0].key
+        identifier.tableIndex = tableMetadataOptions[0].tableIndex
+        identifier.value = tableMetadataOptions[0].value
+      }
+    } else if (type == 'tableHeader'){
+      identifier.tableIndex = 0
+      identifier.lineNumber = ''
+    }
+
+    if (optional) {
+      identifier.outputTableIndex = 0
+      identifier.outputLayer = ''
+      identifier.outputKey = ''
     }
 
     profile.identifiers.push(identifier)
@@ -294,28 +330,19 @@ class ProfileForm extends Component {
 
   render() {
     const { status, profile, options, datasets } = this.props
-    const { dataset } = this.state;
 
-    // create a flat list of all columns
-    let columnList = null
-    if (profile.data) {
-      columnList = profile.data.tables.reduce((accumulator, table, tableIndex) => {
-        const tableColumns = table.columns.map((tableColumn, columnIndex) => {
-          return Object.assign({}, tableColumn, {
-            label: `Input table #${tableIndex} Column #${columnIndex}`,
-            value: {
-              tableIndex: tableIndex,
-              columnIndex: columnIndex
-            }
-          })
-        })
-        return accumulator.concat(tableColumns)
-      }, [])
-    }
+    const dataset = getDataset(profile, datasets)
+    const inputTables = getInputTables(profile)
+    const inputColumns = getInputColumns(profile)
+    const fileMetadataOptions = getFileMetadataOptions(profile)
+    const tableMetadataOptions = getTableMetadataOptions(profile)
 
-    const dsOpt = datasets && datasets.map(ds => {
+    const datasetOptions = datasets && datasets.map(ds => {
       return { value: ds['ols'], label: ds['name'] }
     })
+    const datasetValue = {
+      value: dataset['ols'], label: dataset['name']
+    }
 
     let datasetList = (<span />);
     datasetList = (
@@ -332,7 +359,8 @@ class ProfileForm extends Component {
             isClearable={false}
             isRtl={false}
             name="dataset"
-            options={dsOpt}
+            options={datasetOptions}
+            value={datasetValue}
             onChange={event => this.updateOls(event.value)}
           />
         </div>
@@ -404,6 +432,19 @@ class ProfileForm extends Component {
                   <textarea className="form-control" rows="3" onChange={event => this.updateDescription(event.currentTarget.value)} value={profile.description} />
                   <small className="text-muted">Please add a description for this profile.</small>
                 </div>
+                {
+                  profile.tables.length == 1 &&
+                  <div className="checkbox mb-0 mt-10">
+                    <label htmlFor="match-tables-checkbox">
+                      <input type="checkbox"
+                        id="match-tables-checkbox"
+                        checked={profile.matchTables || false}
+                        onChange={this.toggleMatchTables}
+                      />
+                      Configure only one output table and use it for each input table.
+                    </label>
+                  </div>
+                }
               </div>
             </div>
             {
@@ -412,13 +453,14 @@ class ProfileForm extends Component {
                   <React.Fragment key={index}>
                     <div className="panel panel-default">
                       <div className="panel-heading">
-                        <button type="button" className="btn btn-danger btn-xs pull-right" onClick={() => this.removeTable()}>Remove</button>
+                        <button type="button" className="btn btn-danger btn-xs pull-right"
+                                onClick={() => this.removeTable()}>Remove</button>
                         Output table #{index}
                       </div>
                       <div className="panel-body">
                         <TableForm
                           table={table}
-                          columnList={columnList}
+                          inputColumns={inputColumns}
                           options={options}
                           updateHeader={(key, value) => this.updateHeader(index, key, value)}
                           updateTable={(key, value) => this.updateTable(index, key, value)}
@@ -434,7 +476,9 @@ class ProfileForm extends Component {
             }
 
             <div className="mb-20">
-              <button type="button" className="btn btn-success btn-sm" onClick={() => this.addTable()}>Add table</button>
+              <button type="button" className="btn btn-success btn-sm"
+                      disabled={profile.matchTables}
+                      onClick={() => this.addTable()}>Add table</button>
             </div>
 
             <div className="panel panel-default">
@@ -450,8 +494,10 @@ class ProfileForm extends Component {
                       type={type}
                       optional={false}
                       identifiers={profile.identifiers}
-                      data={profile.data}
-                      tables={profile.tables}
+                      fileMetadataOptions={fileMetadataOptions}
+                      tableMetadataOptions={tableMetadataOptions}
+                      inputTables={inputTables}
+                      outputTables={profile.tables}
                       dataset={dataset}
                       addIdentifier={this.addIdentifier}
                       updateIdentifier={this.updateIdentifier}
@@ -488,8 +534,10 @@ class ProfileForm extends Component {
                       type={type}
                       optional={true}
                       identifiers={profile.identifiers}
-                      data={profile.data}
-                      tables={profile.tables}
+                      fileMetadataOptions={fileMetadataOptions}
+                      tableMetadataOptions={tableMetadataOptions}
+                      inputTables={inputTables}
+                      outputTables={profile.tables}
                       dataset={dataset}
                       addIdentifier={this.addIdentifier}
                       updateIdentifier={this.updateIdentifier}

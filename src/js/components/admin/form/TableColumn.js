@@ -12,7 +12,7 @@ class TableColumn extends Component {
   }
 
   render() {
-    const { table, label, columnKey, operationsKey, columnList, updateTable,
+    const { table, label, columnKey, operationsKey, inputColumns, updateTable,
                       addOperation, updateOperation, removeOperation } = this.props
 
     return (
@@ -20,11 +20,11 @@ class TableColumn extends Component {
         <div className="form-group">
           <label>{label}</label>
           {
-            columnList === null ? <ColumnInput column={table[columnKey]}
-                                               onChange={column => updateTable(columnKey, column)} />
-                                : <ColumnSelect column={table[columnKey]}
-                                                columnList={columnList}
-                                                onChange={column => updateTable(columnKey, column)} />
+            inputColumns.length > 0 ? <ColumnSelect column={table[columnKey]}
+                                                    columnList={inputColumns}
+                                                    onChange={column => updateTable(columnKey, column)} />
+                                    : <ColumnInput column={table[columnKey]}
+                                                   onChange={column => updateTable(columnKey, column)} />
           }
         </div>
         {
@@ -38,11 +38,11 @@ class TableColumn extends Component {
                 operation.type == 'column' &&
                 <div className="col-sm-8">
                   {
-                    columnList === null ? <ColumnInput column={operation.column}
-                                                       onChange={column => updateOperation(operationsKey, index, 'column', column)} />
-                                        : <ColumnSelect column={table[columnKey]}
-                                                        columnList={columnList}
-                                                        onChange={column => updateOperation(operationsKey, index, 'column', column)} />
+                    inputColumns.length > 0 ? <ColumnSelect column={table[columnKey]}
+                                                            columnList={inputColumns}
+                                                            onChange={column => updateOperation(operationsKey, index, 'column', column)} />
+                                            : <ColumnInput column={operation.column}
+                                                           onChange={column => updateOperation(operationsKey, index, 'column', column)} />
                   }
                 </div>
               }

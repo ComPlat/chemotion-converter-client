@@ -1,49 +1,39 @@
 import React, { Component } from "react"
 
-const KeySelect = ({ index, identifier, data, updateIdentifier }) => {
-  const updateKey = (option) => {
-    const identifierData = {
+const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOptions, updateIdentifier }) => {
+  const options = (identifier.type == 'fileMetadata') ? fileMetadataOptions : tableMetadataOptions
+
+  const getOptionIndex = identifier => {
+    if (identifier.type == 'fileMetadata') {
+      return options.findIndex(option => option.key == identifier.key)
+    } else {
+      return options.findIndex(option => (option.key == identifier.key && option.tableIndex == identifier.tableIndex))
+    }
+  }
+
+  const onChange = (optionIndex) => {
+    const option = options[optionIndex]
+    const data = {
       key: option.key
     }
     if (identifier.type == 'tableMetadata') {
-      identifierData.tableIndex = option.tableIndex
+      data.tableIndex = option.tableIndex
     }
     if (!identifier.isRegex) {
-      identifierData.value = option.value
+      data.value = option.value
     }
 
-    updateIdentifier(index, identifierData)
-  }
-
-  let keyOptions = []
-  if (identifier.type == 'fileMetadata') {
-    keyOptions = Object.keys(data.metadata).map(key => ({
-      key,
-      label: key,
-      value: data.metadata[key]
-    }))
-  } else if (identifier.type == 'tableMetadata') {
-    keyOptions = data.tables.reduce((acc, table, tableIndex) => {
-      if (table.metadata !== undefined) {
-        return acc.concat(Object.keys(table.metadata).map(key => ({
-          key,
-          tableIndex,
-          value: table.metadata[key],
-          label: `Input table #${tableIndex} ${key}` })))
-      } else {
-        return acc
-      }
-    }, [])
+    updateIdentifier(index, data)
   }
 
   return (
     <React.Fragment>
       <label className="sr-only" htmlFor={`keySelect${index}`}>Key</label>
-      <select className="form-control form-control-sm" id={`keySelect${index}`}
-              onChange={(event) => updateKey(keyOptions[event.target.value])}>
+      <select className="form-control form-control-sm" id={`keySelect${index}`} value={getOptionIndex(identifier)}
+              onChange={(event) => onChange(event.target.value)} >
         {
-          keyOptions.map((option, i) => (
-            <option key={i} value={i}>{option.label}</option>
+          options.map((option, optionIndex) => (
+            <option key={optionIndex} value={optionIndex}>{option.label}</option>
           ))
         }
       </select>

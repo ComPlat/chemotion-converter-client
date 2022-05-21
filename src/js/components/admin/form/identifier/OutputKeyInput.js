@@ -18,6 +18,7 @@ const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
           name="s-dataset"
           onChange={(event) => updateIdentifier(index, { outputKey: event.value })}
           options={dsOpt}
+          value={dsOpt.find(o => o.value == identifier.outputKey)}
         />
         <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output key</small></label>
       </React.Fragment>

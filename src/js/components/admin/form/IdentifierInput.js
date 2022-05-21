@@ -16,8 +16,9 @@ import ValueInput from './identifier/ValueInput'
 class IndentifierInput extends Component {
 
   render() {
-    const { index, identifier, data, tables, updateIdentifier, removeIdentifier, dataset } = this.props
-    const valueDisabled = data && (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') && !identifier.isRegex
+    const { index, identifier, fileMetadataOptions, tableMetadataOptions,
+            inputTables, outputTables, updateIdentifier, removeIdentifier, dataset } = this.props
+    const valueDisabled = fileMetadataOptions && (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') && !identifier.isRegex
 
     return (
       <form>
@@ -26,8 +27,11 @@ class IndentifierInput extends Component {
             (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
             <div className="col-md-4 mb-10">
               {
-                data ? <KeySelect index={index} identifier={identifier} data={data} updateIdentifier={updateIdentifier} />
-                     : <KeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+                fileMetadataOptions ? <KeySelect index={index} identifier={identifier}
+                                                 fileMetadataOptions={fileMetadataOptions}
+                                                 tableMetadataOptions={tableMetadataOptions}
+                                                 updateIdentifier={updateIdentifier} />
+                                    : <KeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
               }
             </div>
           }
@@ -35,8 +39,8 @@ class IndentifierInput extends Component {
             (identifier.type == 'tableHeader') &&
             <div className="col-md-3 mb-10">
               {
-                data ? <TableIndexSelect index={index} identifier={identifier} data={data} updateIdentifier={updateIdentifier} />
-                     : <TableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+                inputTables.length > 0 ? <TableIndexSelect index={index} identifier={identifier} tables={inputTables} updateIdentifier={updateIdentifier} />
+                                       : <TableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
               }
             </div>
           }
@@ -60,7 +64,7 @@ class IndentifierInput extends Component {
           identifier.optional &&
           <div className="row">
             <div className="col-md-4 mb-10">
-              <OutputTableIndexSelect index={index} identifier={identifier} tables={tables}
+              <OutputTableIndexSelect index={index} identifier={identifier} tables={outputTables}
                                       updateIdentifier={updateIdentifier} />
             </div>
             <div className="col-md-4 mb-10">

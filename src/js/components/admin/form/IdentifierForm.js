@@ -9,7 +9,8 @@ class IdentifierForm extends Component {
   }
 
   render() {
-    const { label, type, optional, identifiers, data, tables, dataset,
+    const { label, type, optional, identifiers, fileMetadataOptions,
+            tableMetadataOptions, inputTables, outputTables, dataset,
             addIdentifier, updateIdentifier, removeIdentifier } = this.props
 
     return (
@@ -23,8 +24,10 @@ class IdentifierForm extends Component {
                 index={index}
                 optional={optional}
                 identifier={identifier}
-                data={data}
-                tables={tables}
+                fileMetadataOptions={fileMetadataOptions}
+                tableMetadataOptions={tableMetadataOptions}
+                inputTables={inputTables}
+                outputTables={outputTables}
                 dataset={dataset}
                 removeIdentifier={removeIdentifier}
                 updateIdentifier={updateIdentifier}

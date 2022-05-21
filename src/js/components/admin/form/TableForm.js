@@ -10,7 +10,7 @@ class TableForm extends Component {
   }
 
   render() {
-    const { table, columnList, options, updateTable, updateHeader, addOperation, updateOperation, removeOperation } = this.props
+    const { table, inputColumns, options, updateTable, updateHeader, addOperation, updateOperation, removeOperation } = this.props
 
     return (
       <div>
@@ -29,10 +29,10 @@ class TableForm extends Component {
         </div>
 
         <TableColumn table={table.table} label="Which column should be used as x-values?"
-                     columnKey="xColumn" operationsKey="xOperations" columnList={columnList} updateTable={updateTable}
+                     columnKey="xColumn" operationsKey="xOperations" inputColumns={inputColumns} updateTable={updateTable}
                      addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
         <TableColumn table={table.table} label="Which column should be used as y-values?"
-                     columnKey="yColumn" operationsKey="yOperations" columnList={columnList} updateTable={updateTable}
+                     columnKey="yColumn" operationsKey="yOperations" inputColumns={inputColumns} updateTable={updateTable}
                      addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
 
         <small className="text-muted">The data you pick will determine which table columns are going to converted.</small>
