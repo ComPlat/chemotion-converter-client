@@ -433,19 +433,19 @@ class ProfileForm extends Component {
                   <textarea className="form-control" rows="3" onChange={event => this.updateDescription(event.currentTarget.value)} value={profile.description} />
                   <small className="text-muted">Please add a description for this profile.</small>
                 </div>
-                {
-                  profile.tables.length == 1 &&
-                  <div className="checkbox mb-0 mt-10">
-                    <label htmlFor="match-tables-checkbox">
-                      <input type="checkbox"
-                        id="match-tables-checkbox"
-                        checked={profile.matchTables || false}
-                        onChange={this.toggleMatchTables}
-                      />
+                <div className="checkbox mb-0 mt-10">
+                  <label htmlFor="match-tables-checkbox">
+                    <input type="checkbox"
+                      id="match-tables-checkbox"
+                      checked={profile.matchTables || false}
+                      onChange={this.toggleMatchTables}
+                      disabled={profile.tables.length != 1}
+                    />
+                    <span className={profile.tables.length != 1 ? 'text-muted' : ''}>
                       Configure only one output table and use it for each input table.
-                    </label>
-                  </div>
-                }
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
             {
