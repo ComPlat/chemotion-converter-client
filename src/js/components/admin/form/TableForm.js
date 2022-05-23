@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 import HeaderInput from './table/HeaderInput'
 import TableColumn from './TableColumn'
@@ -19,8 +20,8 @@ class TableForm extends Component {
         </div>
 
         {
-          Object.keys(options).map((option, index) => (
-            <HeaderInput key={index} option={option} value={table.header[option]} values={options[option]} updateHeader={updateHeader} />
+          Object.keys(options).map((optionKey, index) => (
+            <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={options[optionKey]} updateHeader={updateHeader} />
           ))
         }
 
@@ -40,6 +41,17 @@ class TableForm extends Component {
     )
   }
 
+}
+
+TableForm.propTypes = {
+  table: PropTypes.object,
+  inputColumns: PropTypes.array,
+  options: PropTypes.object,
+  updateTable: PropTypes.func,
+  updateHeader: PropTypes.func,
+  addOperation: PropTypes.func,
+  updateOperation: PropTypes.func,
+  removeOperation: PropTypes.func
 }
 
 export default TableForm

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { sortBy } from 'lodash';
 
@@ -37,6 +38,13 @@ const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
       <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output key</small></label>
     </React.Fragment>
   )
+}
+
+OutputKeyInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  updateIdentifier: PropTypes.func,
+  dataset: PropTypes.object
 }
 
 export default OutputKeyInput

@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const TableIndexInput = ({ index, identifier, updateIdentifier }) => {
   return (
@@ -13,6 +14,12 @@ const TableIndexInput = ({ index, identifier, updateIdentifier }) => {
       <label className="mb-0" htmlFor={`tableIndexInput${index}`}><small>Input table</small></label>
     </React.Fragment>
   )
+}
+
+TableIndexInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  updateIdentifier: PropTypes.func
 }
 
 export default TableIndexInput

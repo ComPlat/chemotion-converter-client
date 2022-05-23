@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOptions, updateIdentifier }) => {
   const options = (identifier.type == 'fileMetadata') ? fileMetadataOptions : tableMetadataOptions
@@ -40,6 +41,14 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
       <label className="mb-0" htmlFor={`keyInput${index}`}><small>Key</small></label>
     </React.Fragment>
   )
+}
+
+KeySelect.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  fileMetadataOptions: PropTypes.array,
+  tableMetadataOptions: PropTypes.array,
+  updateIdentifier: PropTypes.func
 }
 
 export default KeySelect

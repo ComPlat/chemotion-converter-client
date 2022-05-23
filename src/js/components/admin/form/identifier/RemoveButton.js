@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const RemoveButton = ({ index, removeIdentifier }) => {
   return (
@@ -8,6 +9,11 @@ const RemoveButton = ({ index, removeIdentifier }) => {
       <small>&nbsp;</small>
     </div>
   )
+}
+
+RemoveButton.propTypes = {
+  index: PropTypes.number,
+  removeIdentifier: PropTypes.func
 }
 
 export default RemoveButton

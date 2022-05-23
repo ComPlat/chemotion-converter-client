@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
 import { Tabs, Tab } from 'react-bootstrap';
 import Select from 'react-select';
@@ -581,6 +582,15 @@ class ProfileForm extends Component {
     )
   }
 
+}
+
+ProfileForm.propTypes = {
+  status: PropTypes.string,
+  profile: PropTypes.object,
+  options: PropTypes.object,
+  datasets: PropTypes.array,
+  updateProfile: PropTypes.func,
+  storeProfile: PropTypes.func
 }
 
 export default ProfileForm

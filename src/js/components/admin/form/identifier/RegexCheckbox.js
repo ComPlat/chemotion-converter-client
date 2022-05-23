@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const RegexCheckbox = ({ index, identifier, updateIdentifier }) => {
   return (
@@ -17,6 +18,12 @@ const RegexCheckbox = ({ index, identifier, updateIdentifier }) => {
       <small>&nbsp;</small>
     </React.Fragment>
   )
+}
+
+RegexCheckbox.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  updateIdentifier: PropTypes.func
 }
 
 export default RegexCheckbox

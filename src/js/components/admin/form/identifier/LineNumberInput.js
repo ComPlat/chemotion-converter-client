@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const LineNumberInput = ({ index, identifier, updateIdentifier }) => {
 
@@ -26,6 +27,12 @@ const LineNumberInput = ({ index, identifier, updateIdentifier }) => {
       <label className="mb-0" htmlFor={`lineNumberInput${index}`}><small>Line</small></label>
     </React.Fragment>
   )
+}
+
+LineNumberInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  updateIdentifier: PropTypes.func
 }
 
 export default LineNumberInput

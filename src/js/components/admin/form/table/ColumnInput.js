@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const ColumnInput = ({ column, onChange }) => {
   // a column list is not available
@@ -43,6 +44,11 @@ const ColumnInput = ({ column, onChange }) => {
       </div>
     </div>
   )
+}
+
+ColumnInput.propTypes = {
+  column: PropTypes.object,
+  onChange: PropTypes.func
 }
 
 export default ColumnInput

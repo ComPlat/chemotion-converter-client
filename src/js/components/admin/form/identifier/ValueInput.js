@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const ValueInput = ({ index, identifier, updateIdentifier, disabled }) => {
   return (
@@ -14,6 +15,13 @@ const ValueInput = ({ index, identifier, updateIdentifier, disabled }) => {
       <label className="mb-0" htmlFor={`valueInput${index}`}><small>Value</small></label>
     </React.Fragment>
   )
+}
+
+ValueInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  updateIdentifier: PropTypes.func,
+  disabled: PropTypes.bool
 }
 
 export default ValueInput

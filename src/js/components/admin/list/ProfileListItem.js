@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 class ProfileListItem extends Component {
 
@@ -25,6 +26,15 @@ class ProfileListItem extends Component {
     )
   }
 
+}
+
+ProfileListItem.propTypes = {
+  id: PropTypes.string,
+  title: PropTypes.string,
+  description: PropTypes.string,
+  updateProfile: PropTypes.func,
+  deleteProfile: PropTypes.func,
+  downloadProfile: PropTypes.func
 }
 
 export default ProfileListItem

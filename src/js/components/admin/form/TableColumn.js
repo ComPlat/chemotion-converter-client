@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 import ColumnInput from './table/ColumnInput'
 import ColumnSelect from './table/ColumnSelect'
@@ -74,6 +75,19 @@ class TableColumn extends Component {
     )
   }
 
+}
+
+TableColumn.propTypes = {
+  table: PropTypes.object,
+  label: PropTypes.string,
+  columnKey: PropTypes.string,
+  operationsKey: PropTypes.string,
+  inputColumns: PropTypes.array,
+  updateTable: PropTypes.func,
+  updateHeader: PropTypes.func,
+  addOperation: PropTypes.func,
+  updateOperation: PropTypes.func,
+  removeOperation: PropTypes.func
 }
 
 export default TableColumn

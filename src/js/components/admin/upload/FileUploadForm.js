@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 class FileUploadForm extends Component {
 
@@ -31,6 +32,15 @@ class FileUploadForm extends Component {
     )
   }
 
+}
+
+FileUploadForm.propTypes = {
+  disabled: PropTypes.bool,
+  isLoading: PropTypes.bool,
+  onFileChangeHandler: PropTypes.func,
+  onSubmitFileHandler: PropTypes.func,
+  error: PropTypes.bool,
+  errorMessage: PropTypes.string
 }
 
 export default FileUploadForm

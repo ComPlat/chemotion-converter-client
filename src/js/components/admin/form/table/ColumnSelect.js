@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const ColumnSelect = ({ column, columnList, onChange }) => {
 
@@ -36,6 +37,12 @@ const ColumnSelect = ({ column, columnList, onChange }) => {
       }
     </select>
   )
+}
+
+ColumnSelect.propTypes = {
+  column: PropTypes.object,
+  columnList: PropTypes.array,
+  onChange: PropTypes.func
 }
 
 export default ColumnSelect

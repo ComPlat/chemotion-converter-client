@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const KeyInput = ({ index, identifier, updateIdentifier }) => {
   return (
@@ -13,6 +14,12 @@ const KeyInput = ({ index, identifier, updateIdentifier }) => {
       <label className="mb-0" htmlFor={`keyInput${index}`}><small>Key</small></label>
     </React.Fragment>
   )
+}
+
+KeyInput.propTypes = {
+  index: PropTypes.integer,
+  identifier: PropTypes.object,
+  updateIdentifier: PropTypes.func
 }
 
 export default KeyInput

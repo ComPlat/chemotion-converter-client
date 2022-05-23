@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 import KeyInput from './identifier/KeyInput'
 import KeySelect from './identifier/KeySelect'
@@ -79,6 +80,18 @@ class IndentifierInput extends Component {
     )
   }
 
+}
+
+IndentifierInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  fileMetadataOptions: PropTypes.array,
+  tableMetadataOptions: PropTypes.array,
+  inputTables: PropTypes.array,
+  outputTables: PropTypes.array,
+  dataset: PropTypes.object,
+  updateIdentifier: PropTypes.func,
+  removeIdentifier: PropTypes.func
 }
 
 export default IndentifierInput
