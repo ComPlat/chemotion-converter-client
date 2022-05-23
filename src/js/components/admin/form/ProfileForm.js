@@ -48,8 +48,8 @@ class ProfileForm extends Component {
     this.api = params.api;
   }
 
-  onSubmit(e) {
-    e.preventDefault()
+  onSubmit(event) {
+    event.preventDefault()
     this.props.storeProfile()
   }
 
@@ -332,42 +332,42 @@ class ProfileForm extends Component {
   render() {
     const { status, profile, options, datasets } = this.props
 
-    const dataset = getDataset(profile, datasets)
     const inputTables = getInputTables(profile)
     const inputColumns = getInputColumns(profile)
     const fileMetadataOptions = getFileMetadataOptions(profile)
     const tableMetadataOptions = getTableMetadataOptions(profile)
 
-    const datasetOptions = datasets && datasets.map(ds => {
-      return { value: ds['ols'], label: ds['name'] }
-    })
-    const datasetValue = {
-      value: dataset['ols'], label: dataset['name']
-    }
+    let dataset = {}
+    let datasetList = (<span />)
+    if (datasets.length > 0) {
+      dataset = getDataset(profile, datasets)
 
-    let datasetList = (<span />);
-    datasetList = (
-      <div className="panel panel-default">
-      <div className="panel-heading">
-        <div>Dataset</div>
-      </div>
-      <div className="panel-body">
-        <div>
-          <label>Datasets</label>
-          <Select
-            isDisabled={false}
-            isLoading={false}
-            isClearable={false}
-            isRtl={false}
-            name="dataset"
-            options={datasetOptions}
-            value={datasetValue}
-            onChange={event => this.updateOls(event.value)}
-          />
+      const dsOpt = datasets.map(ds => { return { value: ds['ols'], label: ds['name'] } })
+      const dsValue = dataset !== null ? { value: dataset['ols'], label: dataset['name']} : ''
+
+      datasetList = (
+        <div className="panel panel-default">
+          <div className="panel-heading">
+            <div>Dataset</div>
+          </div>
+          <div className="panel-body">
+            <div>
+              <label>Datasets</label>
+              <Select
+                isDisabled={false}
+                isLoading={false}
+                isClearable={true}
+                isRtl={false}
+                name="dataset"
+                options={dsOpt}
+                value={dsValue}
+                onChange={event => this.updateOls(event === null ? null : event.value)}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    );
+      );
+    }
 
     const tabContents = [];
     if (profile.data) {

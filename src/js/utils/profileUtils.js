@@ -2,7 +2,7 @@ function getDataset(profile, datasets) {
   if (datasets && profile.ols) {
     return datasets.find(o => o['ols'] === profile.ols)
   } else {
-    return {}
+    return null
   }
 }
 
