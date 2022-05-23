@@ -39,7 +39,7 @@ class TableColumn extends Component {
                 operation.type == 'column' &&
                 <div className="col-sm-8">
                   {
-                    inputColumns.length > 0 ? <ColumnSelect column={table[columnKey]}
+                    inputColumns.length > 0 ? <ColumnSelect column={operation.column}
                                                             columnList={inputColumns}
                                                             onChange={column => updateOperation(operationsKey, index, 'column', column)} />
                                             : <ColumnInput column={operation.column}
