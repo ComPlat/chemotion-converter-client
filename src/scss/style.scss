@@ -1,4 +1,4 @@
-@import '~bootstrap/scss/bootstrap';
+@import '~bootstrap/dist/css/bootstrap.css';
 @import '~ag-grid-community/dist/styles/ag-grid.css';
 @import '~ag-grid-community/dist/styles/ag-theme-alpine.css';
 @import 'components/modal';
@@ -6,3 +6,4 @@
 @import 'components/pre';
 @import 'components/forms';
 @import 'components/table';
+@import 'components/utils';

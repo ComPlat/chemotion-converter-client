@@ -6,20 +6,12 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 module.exports = {
   entry: {
     index: [
-      '@fortawesome/fontawesome-free/scss/fontawesome.scss',
-      '@fortawesome/fontawesome-free/scss/brands.scss',
-      '@fortawesome/fontawesome-free/scss/regular.scss',
-      '@fortawesome/fontawesome-free/scss/solid.scss',
       './src/scss/style.scss',
       './src/js/index.js',
       'popper.js',
       'bootstrap'
     ],
     'admin/index': [
-      '@fortawesome/fontawesome-free/scss/fontawesome.scss',
-      '@fortawesome/fontawesome-free/scss/brands.scss',
-      '@fortawesome/fontawesome-free/scss/regular.scss',
-      '@fortawesome/fontawesome-free/scss/solid.scss',
       './src/scss/style.scss',
       './src/js/admin.js',
       'popper.js',

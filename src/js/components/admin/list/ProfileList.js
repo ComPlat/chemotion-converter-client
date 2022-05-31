@@ -1,14 +1,15 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 import ProfileListItem from './ProfileListItem'
 
 class ProfileList extends Component {
 
   render () {
-    const { profiles, deleteProfile, editProfile, downloadProfile } = this.props
+    const { profiles, updateProfile, deleteProfile, downloadProfile } = this.props
 
     return (
-      <ul className="list-group mb-5">
+      <ul className="list-group mb-20">
         {
           profiles.map((profile, index) => {
             return (
@@ -17,9 +18,9 @@ class ProfileList extends Component {
                 id={profile.id}
                 title={profile.title}
                 description={profile.description}
-                deleteProfile={() => deleteProfile(index, profile.id)}
-                editProfile={() => editProfile(index, profile.id)}
-                downloadProfile={() => downloadProfile(index, profile.id)} />
+                updateProfile={() => updateProfile(profile)}
+                deleteProfile={() => deleteProfile(profile)}
+                downloadProfile={() => downloadProfile(profile)} />
             )
           })
         }
@@ -27,6 +28,13 @@ class ProfileList extends Component {
     )
   }
 
+}
+
+ProfileList.propTypes = {
+  profiles: PropTypes.array,
+  updateProfile: PropTypes.func,
+  deleteProfile: PropTypes.func,
+  downloadProfile: PropTypes.func
 }
 
 export default ProfileList

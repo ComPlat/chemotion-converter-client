@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { sortBy } from 'lodash';
 
@@ -20,6 +21,7 @@ const OutputLayerInput = ({ index, identifier, updateIdentifier, dataset }) => {
           name="s-dataset"
           onChange={(event) => updateIdentifier(index, { outputLayer: event.value })}
           options={dsOpt}
+          value={dsOpt.find(o => o.value == identifier.outputLayer)}
         />
         <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output layer</small></label>
       </React.Fragment>
@@ -32,12 +34,19 @@ const OutputLayerInput = ({ index, identifier, updateIdentifier, dataset }) => {
         type="text"
         id={`outputLayerInput${index}`}
         className="form-control form-control-sm"
-        value={identifier.outputLayer}
+        value={identifier.outputLayer || ''}
         onChange={(event) => updateIdentifier(index, { outputLayer: event.target.value })}
       />
       <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output layer</small></label>
     </React.Fragment>
   )
+}
+
+OutputLayerInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  updateIdentifier: PropTypes.func,
+  dataset: PropTypes.object
 }
 
 export default OutputLayerInput

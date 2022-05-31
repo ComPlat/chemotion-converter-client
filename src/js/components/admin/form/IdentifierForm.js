@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 import IdentifierInput from './IdentifierInput'
 
@@ -9,10 +10,12 @@ class IdentifierForm extends Component {
   }
 
   render() {
-    const { label, type, optional, identifiers, tableData, tables,
+    const { label, type, optional, identifiers, fileMetadataOptions,
+            tableMetadataOptions, inputTables, outputTables, dataset,
             addIdentifier, updateIdentifier, removeIdentifier } = this.props
+
     return (
-      <div className="mb-4">
+      <div className="mb-20">
         <label>{label}</label>
         {
           identifiers.map((identifier, index) => {
@@ -22,8 +25,11 @@ class IdentifierForm extends Component {
                 index={index}
                 optional={optional}
                 identifier={identifier}
-                tableData={tableData}
-                tables={tables}
+                fileMetadataOptions={fileMetadataOptions}
+                tableMetadataOptions={tableMetadataOptions}
+                inputTables={inputTables}
+                outputTables={outputTables}
+                dataset={dataset}
                 removeIdentifier={removeIdentifier}
                 updateIdentifier={updateIdentifier}
               />
@@ -40,6 +46,22 @@ class IdentifierForm extends Component {
       </div>
     )
   }
+
+}
+
+IdentifierForm.propTypes = {
+  label: PropTypes.string,
+  type: PropTypes.string,
+  optional: PropTypes.bool,
+  identifiers: PropTypes.array,
+  fileMetadataOptions: PropTypes.array,
+  tableMetadataOptions: PropTypes.array,
+  inputTables: PropTypes.array,
+  outputTables: PropTypes.array,
+  dataset: PropTypes.object,
+  addIdentifier: PropTypes.func,
+  updateIdentifier: PropTypes.func,
+  removeIdentifier: PropTypes.func
 }
 
 export default IdentifierForm

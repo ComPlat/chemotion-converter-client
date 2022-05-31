@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import PropTypes from 'prop-types';
 
 const OperatorSelect = ({ value, onChange }) => (
   <select className="form-control form-control-sm" value={value} onChange={event => onChange(event.target.value)}>
@@ -8,5 +9,10 @@ const OperatorSelect = ({ value, onChange }) => (
     <option value=":">:</option>
   </select>
 )
+
+OperatorSelect.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func
+}
 
 export default OperatorSelect
