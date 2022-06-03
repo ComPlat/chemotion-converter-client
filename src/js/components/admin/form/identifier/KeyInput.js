@@ -17,7 +17,7 @@ const KeyInput = ({ index, identifier, updateIdentifier }) => {
 }
 
 KeyInput.propTypes = {
-  index: PropTypes.integer,
+  index: PropTypes.number,
   identifier: PropTypes.object,
   updateIdentifier: PropTypes.func
 }
