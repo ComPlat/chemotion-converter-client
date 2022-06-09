@@ -39,7 +39,7 @@ function getFileMetadataOptions(profile) {
       value: profile.data.metadata[key]
     }))
   } else {
-    return {}
+    return []
   }
 }
 
@@ -59,7 +59,7 @@ function getTableMetadataOptions(profile) {
       }
     }, [])
   } else {
-    return {}
+    return []
   }
 }
 

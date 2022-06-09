@@ -28,11 +28,12 @@ class IndentifierInput extends Component {
             (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
             <div className="col-md-4 mb-10">
               {
-                fileMetadataOptions ? <KeySelect index={index} identifier={identifier}
-                                                 fileMetadataOptions={fileMetadataOptions}
-                                                 tableMetadataOptions={tableMetadataOptions}
-                                                 updateIdentifier={updateIdentifier} />
-                                    : <KeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+                fileMetadataOptions.length > 0 ? <KeySelect index={index} identifier={identifier}
+                                                            fileMetadataOptions={fileMetadataOptions}
+                                                            tableMetadataOptions={tableMetadataOptions}
+                                                            updateIdentifier={updateIdentifier} />
+                                               : <KeyInput index={index} identifier={identifier}
+                                                           updateIdentifier={updateIdentifier} />
               }
             </div>
           }

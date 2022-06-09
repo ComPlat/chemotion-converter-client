@@ -7,15 +7,11 @@ module.exports = {
   entry: {
     index: [
       './src/scss/style.scss',
-      './src/js/index.js',
-      'popper.js',
-      'bootstrap'
+      './src/js/index.js'
     ],
     'admin/index': [
       './src/scss/style.scss',
-      './src/js/admin.js',
-      'popper.js',
-      'bootstrap'
+      './src/js/admin.js'
     ],
   },
   resolve: { extensions: ["*", ".js", ".jsx"] },
@@ -59,12 +55,6 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery',
-      'window.jQuery': 'jquery',
-      Popper: ['popper.js', 'default']
-    }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css'

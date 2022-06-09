@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import { Modal, Button } from 'react-bootstrap';
 
 import ConverterApi from '../../api/ConverterApi'
 
@@ -21,12 +22,16 @@ class AdminApp extends Component {
       error: false,
       errorMessage: '',
       isLoading: false,
-      showAlert: false
+      createdModal: false,
+      deleteModal: false
     }
 
     this.showCreateView = this.showCreateView.bind(this)
     this.showUpdateView = this.showUpdateView.bind(this)
     this.showImportView = this.showImportView.bind(this)
+
+    this.showCreatedModal = this.showCreatedModal.bind(this)
+    this.hideCreatedModal = this.hideCreatedModal.bind(this)
 
     this.showDeleteModal = this.showDeleteModal.bind(this)
     this.hideDeleteModal = this.hideDeleteModal.bind(this)
@@ -79,16 +84,28 @@ class AdminApp extends Component {
     })
   }
 
-  showDeleteModal(profile) {
-    $('#delete-modal').show()
+  showCreatedModal() {
     this.setState({
+      createdModal: true
+    })
+  }
+
+  hideCreatedModal() {
+    this.setState({
+      createdModal: false
+    })
+  }
+
+  showDeleteModal(profile) {
+    this.setState({
+      deleteModal: true,
       profile: Object.assign({}, profile),
     })
   }
 
   hideDeleteModal() {
-    $('#delete-modal').hide()
     this.setState({
+      deleteModal: false,
       profile: null
     })
   }
@@ -108,8 +125,7 @@ class AdminApp extends Component {
             status: 'list',
             profiles: profiles,
             profile: null
-          })
-          $('#modal').show()
+          }, this.showCreatedModal())
         })
     } else if (status == 'update') {
       ConverterApi.updateProfile(this.state.profile)
@@ -136,8 +152,7 @@ class AdminApp extends Component {
           status: 'list',
           profiles: profiles,
           profile: null
-        })
-        $('#delete-modal').hide()
+        }, this.hideDeleteModal())
       }
     )
   }
@@ -226,8 +241,7 @@ class AdminApp extends Component {
             status: 'list',
             profiles: profiles,
             profile: null
-          })
-          $('#modal').show()
+          }, this.showCreatedModal())
         })
         .catch(errors => {
           this.setState({
@@ -344,33 +358,25 @@ class AdminApp extends Component {
           {this.dispatchView()}
         </main>
 
-        <div className="modal modal-backdrop" data-backdrop="static" id="modal" tabIndex="-1">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-body">
-                <div className="alert alert-success" role="alert">Profile successfully created!</div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={e => $('#modal').hide()} data-bs-dismiss="modal">Back to profiles list</button>
-                <a href="/" className="btn btn-primary">Upload file and use profile</a>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Modal show={this.state.createdModal}>
+          <Modal.Header>
+            <Modal.Title>Profile successfully created!</Modal.Title>
+          </Modal.Header>
 
-        <div className="modal modal-backdrop" data-backdrop="static" id="delete-modal" tabIndex="-1">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Do you really want to delete this profile?</h5>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-danger" onClick={this.deleteProfile}>Delete profile</button>
-                <button type="button" className="btn btn-secondary" onClick={this.hideDeleteModal} data-bs-dismiss="modal">Cancel</button>
-              </div>
-            </div>
-          </div>
-        </div>
+          <Modal.Footer>
+            <Button bsStyle="primary" onClick={this.hideCreatedModal}>Great!</Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={this.state.deleteModal}>
+          <Modal.Header>
+            <Modal.Title>Do you really want to delete this profile?</Modal.Title>
+          </Modal.Header>
+          <Modal.Footer>
+            <Button bsStyle="default" onClick={this.hideDeleteModal}>Cancel</Button>
+            <Button bsStyle="danger" onClick={this.deleteProfile}>Delete profile</Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     )
   }

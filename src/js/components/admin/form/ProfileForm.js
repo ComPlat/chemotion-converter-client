@@ -212,16 +212,21 @@ class ProfileForm extends Component {
 
     if (type == 'fileMetadata') {
       const fileMetadataOptions = getFileMetadataOptions(profile)
-      if (fileMetadataOptions) {
+      if (fileMetadataOptions.length > 0) {
         identifier.key = fileMetadataOptions[0].key
         identifier.value = fileMetadataOptions[0].value
+      } else {
+        identifier.key = ''
       }
     } else if (type == 'tableMetadata') {
       const tableMetadataOptions = getTableMetadataOptions(profile)
-      if (tableMetadataOptions) {
+      if (tableMetadataOptions.length > 0) {
         identifier.key = tableMetadataOptions[0].key
         identifier.tableIndex = tableMetadataOptions[0].tableIndex
         identifier.value = tableMetadataOptions[0].value
+      } else {
+        identifier.key = ''
+        identifier.tableIndex = 0
       }
     } else if (type == 'tableHeader'){
       identifier.tableIndex = 0
