@@ -96,9 +96,10 @@ class ConverterApi {
       })
   }
 
-  static fetchConversion(file) {
+  static fetchConversion(file, format) {
     const data = new FormData()
     data.append('file', file)
+    data.append('format', format)
 
     const requestOptions = {
       method: 'POST',

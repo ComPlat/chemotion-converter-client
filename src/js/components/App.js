@@ -12,10 +12,12 @@ class App extends Component {
       error: false,
       errorMessage: '',
       isLoading: false,
+      format: 'jcampzip'
     }
 
     this.onFileChangeHandler = this.onFileChangeHandler.bind(this)
     this.onSubmitFileHandler = this.onSubmitFileHandler.bind(this)
+    this.onFormatChangeHandler = this.onFormatChangeHandler.bind(this)
   }
 
   onFileChangeHandler(event) {
@@ -27,6 +29,12 @@ class App extends Component {
     })
   }
 
+  onFormatChangeHandler(event) {
+    this.setState({
+      format: event.target.value
+    })
+  }
+
   onSubmitFileHandler() {
     const { selectedFile } = this.state
 
@@ -34,7 +42,7 @@ class App extends Component {
       isLoading: true
     })
 
-    ConverterApi.fetchConversion(selectedFile)
+    ConverterApi.fetchConversion(selectedFile, this.state.format)
       .then(message => {
         if (message === 'success') {
           this.setState({
@@ -76,6 +84,13 @@ class App extends Component {
               </div>
               <p>
                 <button type="button" className="btn btn-primary btn-lg btn-block" onClick={this.onSubmitFileHandler}>Upload</button>
+              </p>
+              <p className="mt-20">
+                <strong>Conversion format</strong>
+                <select className="form-control" value={this.state.format} onChange={this.onFormatChangeHandler}>
+                  <option value="jcampzip">Zip file containing JCAMP files</option>
+                  <option value="jcamp">Single JCAMP file</option>
+                </select>
               </p>
               {this.state.error &&
                 <div className="alert alert-danger">{ this.state.errorMessage }</div>
