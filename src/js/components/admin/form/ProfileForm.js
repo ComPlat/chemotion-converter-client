@@ -67,8 +67,10 @@ class ProfileForm extends Component {
 
   updateOls(ols) {
     const profile = Object.assign({}, this.props.profile)
-    profile.ols = ols
-    this.props.updateProfile(profile)
+    if (typeof profile != 'undefined' && profile !== null && typeof ols !== 'undefined' && ols != null) {
+      profile.ols = ols
+      this.props.updateProfile(profile)
+    }
   }
 
   toggleMatchTables() {
@@ -347,8 +349,8 @@ class ProfileForm extends Component {
     if (datasets.length > 0) {
       dataset = getDataset(profile, datasets)
 
-      const dsOpt = datasets.map(ds => { return { value: ds['ols'], label: ds['name'] } })
-      const dsValue = dataset !== null ? { value: dataset['ols'], label: dataset['name']} : ''
+      const dsOpt = datasets.map(ds => { return { value: ds?.ols, label: ds?.name } })
+      const dsValue = (dataset !== null && typeof dataset !== 'undefined') ? { value: dataset?.ols, label: dataset?.name } : ''
 
       datasetList = (
         <div className="panel panel-default">
