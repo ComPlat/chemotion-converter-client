@@ -20,7 +20,7 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
     if (identifier.type == 'tableMetadata') {
       data.tableIndex = option.tableIndex
     }
-    if (!identifier.isRegex) {
+    if (!identifier.match == 'regex') {
       data.value = option.value
     }
 
