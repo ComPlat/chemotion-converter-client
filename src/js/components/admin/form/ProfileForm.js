@@ -208,7 +208,7 @@ class ProfileForm extends Component {
     const identifier = {
       type: type,
       optional: optional,
-      isRegex: false,
+      match: optional ? 'any' : 'exact',
       value: ''
     }
 
