@@ -15,15 +15,12 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
   const onChange = (optionIndex) => {
     const option = options[optionIndex]
     const data = {
-      key: option.key
+      key: option.key,
+      value: option.value
     }
     if (identifier.type == 'tableMetadata') {
       data.tableIndex = option.tableIndex
     }
-    if (!identifier.match == 'regex') {
-      data.value = option.value
-    }
-
     updateIdentifier(index, data)
   }
 
