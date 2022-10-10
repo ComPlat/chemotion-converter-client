@@ -209,7 +209,8 @@ class ProfileForm extends Component {
       type: type,
       optional: optional,
       match: optional ? 'any' : 'exact',
-      value: ''
+      value: '',
+      show: true
     }
 
     if (type == 'fileMetadata') {

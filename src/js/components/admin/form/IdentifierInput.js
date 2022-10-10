@@ -8,7 +8,6 @@ import MatchSelect from './identifier/MatchSelect'
 import OutputKeyInput from './identifier/OutputKeyInput'
 import OutputLayerInput from './identifier/OutputLayerInput'
 import OutputTableIndexSelect from './identifier/OutputTableIndexSelect'
-import RemoveButton from './identifier/RemoveButton'
 import TableIndexInput from './identifier/TableIndexInput'
 import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
@@ -22,11 +21,11 @@ class IndentifierInput extends Component {
     const valueDisabled = identifier.match == 'any'
 
     return (
-      <form>
+      <form className="mt-15">
         <div className="row">
           {
             (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
-            <div className="col-md-8 mb-10">
+            <div className="col-md-12 mb-10">
               {
                 fileMetadataOptions.length > 0 ? <KeySelect index={index} identifier={identifier}
                                                             fileMetadataOptions={fileMetadataOptions}
@@ -39,7 +38,7 @@ class IndentifierInput extends Component {
           }
           {
             (identifier.type == 'tableHeader') &&
-            <div className="col-md-6 mb-10">
+            <div className="col-md-10 mb-10">
               {
                 inputTables.length > 0 ? <TableIndexSelect index={index} identifier={identifier} tables={inputTables} updateIdentifier={updateIdentifier} />
                                        : <TableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
@@ -52,9 +51,6 @@ class IndentifierInput extends Component {
               <LineNumberInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>
           }
-          <div className="col-md-4 mb-10">
-            <RemoveButton index={index} removeIdentifier={removeIdentifier} />
-          </div>
         </div>
         <div className="row">
           <div className="col-md-4 mb-10">
