@@ -115,12 +115,16 @@ class AdminApp extends Component {
   }
 
   storeProfile() {
-    const { status } = this.state
+    const { status, profile } = this.state
+
+    // remove show flag
+    delete profile.show
+
     if (status == 'create') {
-      ConverterApi.createProfile(this.state.profile)
-        .then(profile => {
+      ConverterApi.createProfile(profile)
+        .then(response => {
           const profiles = [...this.state.profiles]
-          profiles.push(profile)
+          profiles.push(response)
           this.setState({
             status: 'list',
             profiles: profiles,
@@ -128,11 +132,11 @@ class AdminApp extends Component {
           }, this.showCreatedModal())
         })
     } else if (status == 'update') {
-      ConverterApi.updateProfile(this.state.profile)
-        .then((profile) => {
+      ConverterApi.updateProfile(profile)
+        .then((response) => {
           const profiles = [...this.state.profiles]
-          const index = profiles.findIndex(p => (p.id == profile.id))
-          profiles[index] = profile
+          const index = profiles.findIndex(p => (p.id == response.id))
+          profiles[index] = response
           this.setState({
             status: 'list',
             profiles: profiles,

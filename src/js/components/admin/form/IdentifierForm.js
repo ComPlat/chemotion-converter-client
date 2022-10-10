@@ -2,40 +2,66 @@ import React, { Component } from "react"
 import PropTypes from 'prop-types';
 
 import IdentifierInput from './IdentifierInput'
+import IdentifierHeader from './IdentifierHeader'
 
 class IdentifierForm extends Component {
-
-  constructor(props) {
-    super(props)
-  }
 
   render() {
     const { label, type, optional, identifiers, fileMetadataOptions,
             tableMetadataOptions, inputTables, outputTables, dataset,
             addIdentifier, updateIdentifier, removeIdentifier } = this.props
 
+    const toggleIdentifier = (index) => {
+      updateIdentifier(index, { show: !identifiers[index].show})
+    }
+
     return (
-      <div className="mb-20">
-        <label>{label}</label>
-        {
-          identifiers.map((identifier, index) => {
-            if (identifier.type === type && identifier.optional == optional) {
-              return <IdentifierInput
-                key={index}
-                index={index}
-                optional={optional}
-                identifier={identifier}
-                fileMetadataOptions={fileMetadataOptions}
-                tableMetadataOptions={tableMetadataOptions}
-                inputTables={inputTables}
-                outputTables={outputTables}
-                dataset={dataset}
-                removeIdentifier={removeIdentifier}
-                updateIdentifier={updateIdentifier}
-              />
-            }
-          })
-        }
+      <div className="mb-10">
+        <ul className="list-group mb-10">
+          <label>{label}</label>
+          {
+            identifiers.map((identifier, index) => {
+              if (identifier.type === type && identifier.optional == optional) {
+                if (identifier.show) {
+                  return (
+                    <li className="list-group-item" key={index}>
+                      <IdentifierHeader
+                        identifier={identifier}
+                        show={true}
+                        onToggle={() => toggleIdentifier(index)}
+                        onRemove={() => removeIdentifier(index)}
+                      />
+                      <IdentifierInput
+                        key={index}
+                        index={index}
+                        optional={optional}
+                        identifier={identifier}
+                        fileMetadataOptions={fileMetadataOptions}
+                        tableMetadataOptions={tableMetadataOptions}
+                        inputTables={inputTables}
+                        outputTables={outputTables}
+                        dataset={dataset}
+                        removeIdentifier={removeIdentifier}
+                        updateIdentifier={updateIdentifier}
+                      />
+                    </li>
+                  )
+                } else {
+                  return (
+                    <li key={index} className="list-group-item">
+                      <IdentifierHeader
+                        identifier={identifier}
+                        show={false}
+                        onToggle={() => toggleIdentifier(index)}
+                        onRemove={() => removeIdentifier(index)}
+                      />
+                    </li>
+                  )
+                }
+              }
+            })
+          }
+        </ul>
         <form>
             <div className="form">
               <button type="button" className="btn btn-success btn-sm" onClick={event => addIdentifier(type, optional)}>
