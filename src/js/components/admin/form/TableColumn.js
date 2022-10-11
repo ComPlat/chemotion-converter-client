@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import ColumnInput from './table/ColumnInput'
 import ColumnSelect from './table/ColumnSelect'
-import OperatorSelect from './table/OperatorSelect'
+import OperatorSelect from './common/OperatorSelect'
 
 
 class TableColumn extends Component {

@@ -118,7 +118,11 @@ class AdminApp extends Component {
     const { status, profile } = this.state
 
     // remove show flag
-    delete profile.show
+    if (Array.isArray(profile.identifiers)) {
+      profile.identifiers.forEach(identifier => {
+        delete identifier.show
+      })
+    }
 
     if (status == 'create') {
       ConverterApi.createProfile(profile)

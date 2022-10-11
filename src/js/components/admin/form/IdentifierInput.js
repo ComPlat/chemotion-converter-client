@@ -5,6 +5,7 @@ import KeyInput from './identifier/KeyInput'
 import KeySelect from './identifier/KeySelect'
 import LineNumberInput from './identifier/LineNumberInput'
 import MatchSelect from './identifier/MatchSelect'
+import OperatorSelect from './common/OperatorSelect'
 import OutputKeyInput from './identifier/OutputKeyInput'
 import OutputLayerInput from './identifier/OutputLayerInput'
 import OutputTableIndexSelect from './identifier/OutputTableIndexSelect'
@@ -12,16 +13,16 @@ import TableIndexInput from './identifier/TableIndexInput'
 import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
 
-
 class IndentifierInput extends Component {
 
   render() {
     const { index, identifier, fileMetadataOptions, tableMetadataOptions,
-            inputTables, outputTables, updateIdentifier, removeIdentifier, dataset } = this.props
+            inputTables, outputTables, updateIdentifier, removeIdentifier,
+            updateIdentifierOperation, removeIdentifierOperation, dataset } = this.props
     const valueDisabled = identifier.match == 'any'
 
     return (
-      <form className="mt-15">
+      <form className="mt-15 mb-0">
         <div className="row">
           {
             (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
@@ -74,6 +75,26 @@ class IndentifierInput extends Component {
               <OutputKeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} dataset={dataset} />
             </div>
           </div>
+        }
+        {
+          Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
+            <div key={opIndex} className="row">
+              <div className="col-sm-2 mb-10">
+                <OperatorSelect value={operation.operator}
+                                onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)} />
+              </div>
+              <div className="col-sm-8 mb-10">
+                <input type="text" className="form-control form-control-sm" value={operation.value || ''}
+                       onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
+                />
+              </div>
+              <div className="col-sm-2 mb-10 text-right">
+                <button type="button" className="btn btn-danger" onClick={event => removeIdentifierOperation(index, opIndex)}>
+                  &times;
+                </button>
+              </div>
+            </div>
+          ))
         }
       </form>
     )

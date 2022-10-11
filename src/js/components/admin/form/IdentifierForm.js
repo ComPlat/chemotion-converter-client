@@ -9,7 +9,8 @@ class IdentifierForm extends Component {
   render() {
     const { label, type, optional, identifiers, fileMetadataOptions,
             tableMetadataOptions, inputTables, outputTables, dataset,
-            addIdentifier, updateIdentifier, removeIdentifier } = this.props
+            addIdentifier, updateIdentifier, removeIdentifier,
+            addIdentifierOperation, updateIdentifierOperation, removeIdentifierOperation } = this.props
 
     const toggleIdentifier = (index) => {
       updateIdentifier(index, { show: !identifiers[index].show})
@@ -41,9 +42,19 @@ class IdentifierForm extends Component {
                         inputTables={inputTables}
                         outputTables={outputTables}
                         dataset={dataset}
-                        removeIdentifier={removeIdentifier}
                         updateIdentifier={updateIdentifier}
+                        removeIdentifier={removeIdentifier}
+                        updateIdentifierOperation={updateIdentifierOperation}
+                        removeIdentifierOperation={removeIdentifierOperation}
                       />
+                      {
+                        identifier.optional &&
+                        <div className="mb-10">
+                          <button type="button" className="btn btn-success btn-xs" onClick={event => addIdentifierOperation(index)}>
+                            Add scalar operation
+                          </button>
+                        </div>
+                      }
                     </li>
                   )
                 } else {
@@ -87,7 +98,10 @@ IdentifierForm.propTypes = {
   dataset: PropTypes.object,
   addIdentifier: PropTypes.func,
   updateIdentifier: PropTypes.func,
-  removeIdentifier: PropTypes.func
+  removeIdentifier: PropTypes.func,
+  addIdentifierOperation: PropTypes.func,
+  updateIdentifierOperation: PropTypes.func,
+  removeIdentifierOperation: PropTypes.func
 }
 
 export default IdentifierForm

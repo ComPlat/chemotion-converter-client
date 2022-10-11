@@ -39,6 +39,10 @@ class ProfileForm extends Component {
     this.updateIdentifier = this.updateIdentifier.bind(this)
     this.removeIdentifier = this.removeIdentifier.bind(this)
 
+    this.addIdentifierOperation = this.addIdentifierOperation.bind(this)
+    this.updateIdentifierOperation = this.updateIdentifierOperation.bind(this)
+    this.removeIdentifierOperation = this.removeIdentifierOperation.bind(this)
+
     if (this.props.status == 'create') {
       this.addTable()
     }
@@ -258,6 +262,42 @@ class ProfileForm extends Component {
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
       profile.identifiers.splice(index, 1)
+      this.props.updateProfile(profile)
+    }
+  }
+
+  addIdentifierOperation(index) {
+    const profile = Object.assign({}, this.props.profile)
+    if (index !== -1) {
+      const operation = {
+        operator: '+'
+      }
+      if (profile.identifiers[index].operations === undefined) {
+        profile.identifiers[index].operations = []
+      }
+      profile.identifiers[index].operations.push(operation)
+      this.props.updateProfile(profile)
+    }
+  }
+
+  updateIdentifierOperation(index, opIndex, opKey, value) {
+    const profile = Object.assign({}, this.props.profile)
+    if (index !== -1) {
+      profile.identifiers[index].operations[opIndex][opKey] = value
+      this.props.updateProfile(profile)
+    }
+  }
+
+  removeIdentifierOperation(index, opIndex) {
+    const profile = Object.assign({}, this.props.profile)
+    if (index !== -1) {
+      profile.identifiers[index].operations.splice(opIndex, 1)
+
+      // remove operations if it is empty
+      if (profile.identifiers[index].operations.length == 0) {
+        delete profile.identifiers[index].operations
+      }
+
       this.props.updateProfile(profile)
     }
   }
@@ -511,6 +551,9 @@ class ProfileForm extends Component {
                       addIdentifier={this.addIdentifier}
                       updateIdentifier={this.updateIdentifier}
                       removeIdentifier={this.removeIdentifier}
+                      addIdentifierOperation={this.addIdentifierOperation}
+                      updateIdentifierOperation={this.updateIdentifierOperation}
+                      removeIdentifierOperation={this.removeIdentifierOperation}
                     />
                   ))
                 }
@@ -551,6 +594,9 @@ class ProfileForm extends Component {
                       addIdentifier={this.addIdentifier}
                       updateIdentifier={this.updateIdentifier}
                       removeIdentifier={this.removeIdentifier}
+                      addIdentifierOperation={this.addIdentifierOperation}
+                      updateIdentifierOperation={this.updateIdentifierOperation}
+                      removeIdentifierOperation={this.removeIdentifierOperation}
                     />
                   ))
                 }
