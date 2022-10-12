@@ -20,7 +20,7 @@ const LineNumberInput = ({ index, identifier, updateIdentifier }) => {
       <input
         type="text"
         id={`lineNumberInput${index}`}
-        className="form-control form-control-sm"
+        className="form-control input-sm"
         value={identifier.lineNumber || ''}
         onChange={(event) => updateLineNumber(event.target.value)}
       />

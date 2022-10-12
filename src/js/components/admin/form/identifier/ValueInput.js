@@ -7,7 +7,7 @@ const ValueInput = ({ index, identifier, updateIdentifier, disabled }) => {
       <input
         type="text"
         id={`valueInput${index}`}
-        className="form-control form-control-sm"
+        className="form-control input-sm"
         value={identifier.value || ''}
         onChange={(event) => updateIdentifier(index, { value: event.target.value })}
         disabled={disabled}

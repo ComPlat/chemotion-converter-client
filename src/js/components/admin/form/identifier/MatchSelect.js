@@ -22,7 +22,7 @@ const MatchSelect = ({ index, identifier, updateIdentifier }) => {
 
   return (
     <React.Fragment>
-      <select className="form-control form-control-sm" id={`matchSelect${index}`}
+      <select className="form-control input-sm" id={`matchSelect${index}`}
               value={identifier.match}
               onChange={(event) => updateIdentifier(index, { match: event.target.value })}>
         {

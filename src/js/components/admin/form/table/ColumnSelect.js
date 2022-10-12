@@ -28,7 +28,7 @@ const ColumnSelect = ({ column, columnList, onChange }) => {
   }
 
   return (
-    <select className="form-control form-control-sm" value={getColumn(column)} onChange={handleChange}>
+    <select className="form-control input-sm" value={getColumn(column)} onChange={handleChange}>
       <option value={null}>-----------</option>
       {
         columnList.map((item, index) => {

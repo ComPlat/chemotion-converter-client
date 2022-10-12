@@ -473,7 +473,7 @@ class ProfileForm extends Component {
               <div className="panel-body">
                 <div>
                   <label>Title</label>
-                  <input type="text" className="form-control form-control-sm" onChange={event => this.updateTitle(event.currentTarget.value)} value={profile.title} />
+                  <input type="text" className="form-control input-sm" onChange={event => this.updateTitle(event.currentTarget.value)} value={profile.title} />
                   <small className="text-muted">Please add a title for this profile.</small>
                 </div>
                 <div className="mt-10">

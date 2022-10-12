@@ -21,7 +21,7 @@ const ColumnInput = ({ column, onChange }) => {
       <div className="col-md-6">
         <input
           type="number"
-          className="form-control form-control-sm"
+          className="form-control input-sm"
           onChange={event => onChange({
             tableIndex: parseInt(event.target.value),
             columnIndex: getIndex(column, 'columnIndex')
@@ -33,7 +33,7 @@ const ColumnInput = ({ column, onChange }) => {
       <div className="col-md-6">
         <input
           type="number"
-          className="form-control form-control-sm"
+          className="form-control input-sm"
           onChange={event => onChange({
             tableIndex: getIndex(column, 'tableIndex'),
             columnIndex: parseInt(event.target.value)

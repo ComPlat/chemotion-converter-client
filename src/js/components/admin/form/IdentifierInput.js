@@ -86,12 +86,12 @@ class IndentifierInput extends Component {
               </div>
               <div className="col-sm-6 mb-10">
                 <input type="text" id={`identifierOperationValue${index}${opIndex}`}
-                       className="form-control form-control-sm" value={operation.value || ''}
+                       className="form-control input-sm" value={operation.value || ''}
                        onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)} />
                 <label className="mb-0" htmlFor={`identifierOperationValue${index}${opIndex}`}><small>Value</small></label>
               </div>
               <div className="col-sm-2 mb-10 text-right">
-                <button type="button" className="btn btn-danger" onClick={event => removeIdentifierOperation(index, opIndex)}>
+                <button type="button" className="btn btn-danger btn-sm" onClick={event => removeIdentifierOperation(index, opIndex)}>
                   &times;
                 </button>
               </div>
