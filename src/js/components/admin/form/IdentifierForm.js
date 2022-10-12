@@ -11,6 +11,7 @@ class IdentifierForm extends Component {
             tableMetadataOptions, inputTables, outputTables, dataset,
             addIdentifier, updateIdentifier, removeIdentifier,
             addIdentifierOperation, updateIdentifierOperation, removeIdentifierOperation } = this.props
+    const filteredIdentifiers = identifiers.filter(identifier => (identifier.type === type && identifier.optional == optional))
 
     const toggleIdentifier = (index) => {
       updateIdentifier(index, { show: !identifiers[index].show})
@@ -18,11 +19,12 @@ class IdentifierForm extends Component {
 
     return (
       <div className="mb-10">
-        <ul className="list-group mb-10">
-          <label>{label}</label>
-          {
-            identifiers.map((identifier, index) => {
-              if (identifier.type === type && identifier.optional == optional) {
+        <label>{label}</label>
+        {
+          filteredIdentifiers.length > 0 &&
+          <ul className="list-group mb-10">
+            {
+              filteredIdentifiers.map((identifier, index) => {
                 if (identifier.show) {
                   return (
                     <li className="list-group-item" key={index}>
@@ -69,10 +71,10 @@ class IdentifierForm extends Component {
                     </li>
                   )
                 }
-              }
-            })
-          }
-        </ul>
+              })
+            }
+          </ul>
+        }
         <form>
             <div className="form">
               <button type="button" className="btn btn-success btn-xs" onClick={event => addIdentifier(type, optional)}>
