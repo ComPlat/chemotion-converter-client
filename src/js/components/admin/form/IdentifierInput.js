@@ -79,14 +79,16 @@ class IndentifierInput extends Component {
         {
           Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
             <div key={opIndex} className="row">
-              <div className="col-sm-2 mb-10">
-                <OperatorSelect value={operation.operator}
+              <div className="col-sm-4 mb-10">
+                <OperatorSelect value={operation.operator} id={`identifierOperationOperator${index}${opIndex}`}
                                 onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)} />
+                <label className="mb-0" htmlFor={`identifierOperationOperator${index}${opIndex}`}><small>Operator</small></label>
               </div>
-              <div className="col-sm-8 mb-10">
-                <input type="text" className="form-control form-control-sm" value={operation.value || ''}
-                       onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
-                />
+              <div className="col-sm-6 mb-10">
+                <input type="text" id={`identifierOperationValue${index}${opIndex}`}
+                       className="form-control form-control-sm" value={operation.value || ''}
+                       onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)} />
+                <label className="mb-0" htmlFor={`identifierOperationValue${index}${opIndex}`}><small>Value</small></label>
               </div>
               <div className="col-sm-2 mb-10 text-right">
                 <button type="button" className="btn btn-danger" onClick={event => removeIdentifierOperation(index, opIndex)}>
