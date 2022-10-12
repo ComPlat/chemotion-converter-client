@@ -75,7 +75,7 @@ class IdentifierForm extends Component {
         </ul>
         <form>
             <div className="form">
-              <button type="button" className="btn btn-success btn-sm" onClick={event => addIdentifier(type, optional)}>
+              <button type="button" className="btn btn-success btn-xs" onClick={event => addIdentifier(type, optional)}>
                 {optional ? 'Add metadata' : 'Add Identifier'}
               </button>
             </div>

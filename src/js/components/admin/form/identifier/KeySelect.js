@@ -27,7 +27,7 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
   return (
     <React.Fragment>
       <label className="sr-only" htmlFor={`keySelect${index}`}>Key</label>
-      <select className="form-control form-control-sm" id={`keySelect${index}`} value={getOptionIndex(identifier)}
+      <select className="form-control input-sm" id={`keySelect${index}`} value={getOptionIndex(identifier)}
               onChange={(event) => onChange(event.target.value)} >
         {
           options.map((option, optionIndex) => (

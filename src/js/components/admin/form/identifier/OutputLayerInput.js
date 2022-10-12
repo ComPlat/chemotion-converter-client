@@ -33,7 +33,7 @@ const OutputLayerInput = ({ index, identifier, updateIdentifier, dataset }) => {
       <input
         type="text"
         id={`outputLayerInput${index}`}
-        className="form-control form-control-sm"
+        className="form-control input-sm"
         value={identifier.outputLayer || ''}
         onChange={(event) => updateIdentifier(index, { outputLayer: event.target.value })}
       />

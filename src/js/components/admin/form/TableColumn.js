@@ -50,13 +50,13 @@ class TableColumn extends Component {
               {
                 operation.type == 'value' &&
                 <div className="col-sm-8">
-                  <input type="text" className="form-control form-control-sm" value={operation.value || ''}
+                  <input type="text" className="form-control input-sm" value={operation.value || ''}
                          onChange={event => updateOperation(operationsKey, index, 'value', event.target.value)}
                   />
                 </div>
               }
               <div className="col-sm-2 text-right">
-                <button type="button" className="btn btn-danger" onClick={event => removeOperation(operationsKey, index)}>
+                <button type="button" className="btn btn-danger btn-sm" onClick={event => removeOperation(operationsKey, index)}>
                   &times;
                 </button>
               </div>

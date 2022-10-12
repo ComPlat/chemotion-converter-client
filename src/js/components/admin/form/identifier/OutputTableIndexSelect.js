@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const OutputTableIndexSelect = ({ index, identifier, tables, updateIdentifier }) => {
   return (
     <React.Fragment>
-      <select className="form-control form-control-sm" id={`outputTableIndexSelect${index}`}
+      <select className="form-control input-sm" id={`outputTableIndexSelect${index}`}
               value={identifier.outputTableIndex === null ? '' : identifier.outputTableIndex}
               onChange={(event) => updateIdentifier(index, { outputTableIndex: parseInt(event.target.value, 10) })}>
         <option value="">Add to all output tables</option>

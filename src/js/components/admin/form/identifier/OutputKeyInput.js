@@ -31,7 +31,7 @@ const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
       <input
         type="text"
         id={`outputKeyInput${index}`}
-        className="form-control form-control-sm"
+        className="form-control input-sm"
         value={identifier.outputKey || ''}
         onChange={(event) => updateIdentifier(index, { outputKey: event.target.value })}
       />
