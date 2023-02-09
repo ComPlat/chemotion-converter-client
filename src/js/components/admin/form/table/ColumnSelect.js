@@ -29,7 +29,7 @@ const ColumnSelect = ({ column, columnList, onChange }) => {
 
   return (
     <select className="form-control input-sm" value={getColumn(column)} onChange={handleChange}>
-      <option value={null}>-----------</option>
+      <option value="">---</option>
       {
         columnList.map((item, index) => {
           return <option value={index} key={index}>{item.label}</option>
