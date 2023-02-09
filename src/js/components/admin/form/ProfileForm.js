@@ -113,8 +113,11 @@ class ProfileForm extends Component {
     if (index !== -1) {
       profile.tables[index].table[key] = value
 
+      // remove the column if it set to null
+      if (profile.tables[index].table[key] === null) {
+        delete profile.tables[index].table[key]
       // remove the column if tableIndex and columnIndex is null
-      if (Object.values(profile.tables[index].table[key]).every(value => (value === null || isNaN(value)))) {
+      } else if (Object.values(profile.tables[index].table[key]).every(value => (value === null || isNaN(value)))) {
         delete profile.tables[index].table[key]
       }
 
