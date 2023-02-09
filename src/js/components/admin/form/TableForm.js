@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 
 import HeaderInput from './table/HeaderInput'
 import TableColumn from './TableColumn'
+import TableIdentifier from './TableIdentifier'
+
 
 class TableForm extends Component {
 
@@ -11,12 +13,15 @@ class TableForm extends Component {
   }
 
   render() {
-    const { table, inputColumns, options, updateTable, updateHeader, addOperation, updateOperation, removeOperation } = this.props
+    const { table, inputTables, inputColumns, options,
+            updateTable, updateHeader,
+            addOperation, updateOperation, removeOperation,
+            fileMetadataOptions, tableMetadataOptions } = this.props
 
     return (
       <div>
-        <div>
-          <label>Table header</label>
+        <div className="mb-10">
+          <strong>Table header</strong>
         </div>
 
         {
@@ -25,13 +30,32 @@ class TableForm extends Component {
           ))
         }
 
-        <div>
-          <label>Table columns</label>
+        <div className="mb-10">
+          <strong>Table columns</strong>
         </div>
+        {
+          (table.header['DATA CLASS'] == 'XYDATA') &&
+          <div>
+            <div className="mb-10">
+              Which metadata should be used for the x-values?
+            </div>
+            {
+              ['FIRSTX', 'LASTX', 'DELTAX'].map((headerKey, index) => (
+                <TableIdentifier key={index} index={index + 1000} headerKey={headerKey} table={table}
+                                 inputTables={inputTables} updateHeader={updateHeader}
+                                 fileMetadataOptions={fileMetadataOptions}
+                                 tableMetadataOptions={tableMetadataOptions} />
+              ))
+            }
+          </div>
+        }
+        {
+          (table.header['DATA CLASS'] != 'XYDATA') &&
+          <TableColumn table={table.table} label="Which column should be used as x-values?"
+                       columnKey="xColumn" operationsKey="xOperations" inputColumns={inputColumns} updateTable={updateTable}
+                       addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
+        }
 
-        <TableColumn table={table.table} label="Which column should be used as x-values?"
-                     columnKey="xColumn" operationsKey="xOperations" inputColumns={inputColumns} updateTable={updateTable}
-                     addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
         <TableColumn table={table.table} label="Which column should be used as y-values?"
                      columnKey="yColumn" operationsKey="yOperations" inputColumns={inputColumns} updateTable={updateTable}
                      addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
@@ -45,13 +69,16 @@ class TableForm extends Component {
 
 TableForm.propTypes = {
   table: PropTypes.object,
+  inputTables: PropTypes.array,
   inputColumns: PropTypes.array,
   options: PropTypes.object,
   updateTable: PropTypes.func,
   updateHeader: PropTypes.func,
   addOperation: PropTypes.func,
   updateOperation: PropTypes.func,
-  removeOperation: PropTypes.func
+  removeOperation: PropTypes.func,
+  fileMetadataOptions: PropTypes.array,
+  tableMetadataOptions: PropTypes.array
 }
 
 export default TableForm

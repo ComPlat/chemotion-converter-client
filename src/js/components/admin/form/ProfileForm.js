@@ -139,20 +139,39 @@ class ProfileForm extends Component {
 
   updateHeader(index, key, value, oldKey) {
     const profile = Object.assign({}, this.props.profile)
+    const header = Object.assign({}, profile.tables[index].header)
+
     if (index !== -1) {
       if (oldKey === undefined) {
-        profile.tables[index].header[key] = value
+        header[key] = value
       } else {
         // create a new header to preserve the order
-        profile.tables[index].header = Object.keys(profile.tables[index].header).reduce((agg, cur) => {
+        header = Object.keys(header).reduce((agg, cur) => {
           if (cur == oldKey) {
             agg[key] = value
           } else {
-            agg[cur] = profile.tables[index].header[cur]
+            agg[cur] = header[cur]
           }
           return agg
         }, {})
       }
+
+      if (header['DATA CLASS'] == 'XYDATA') {
+        ['FIRSTX', 'LASTX', 'DELTAX'].forEach(headerKey => {
+          // ensure headerKeys are there if XYDATA is selected
+          if (header[headerKey] === undefined) {
+            header[headerKey] = this.initIdentifier(profile, 'fileMetadata')
+          }
+
+          // update header identifiers if the type changed
+          if (headerKey == key &&
+              profile.tables[index].header[headerKey].type != header[headerKey].type) {
+            header[headerKey] = this.initIdentifier(profile, header[headerKey].type)
+          }
+        })
+      }
+
+      profile.tables[index].header = header
       this.props.updateProfile(profile)
     }
   }
@@ -207,17 +226,14 @@ class ProfileForm extends Component {
     }
   }
 
-  addIdentifier(type, optional) {
-    const profile = Object.assign({}, this.props.profile)
+  initIdentifier(profile, type) {
     const identifier = {
       type: type,
-      optional: optional,
-      match: optional ? 'any' : 'exact',
-      value: '',
-      show: true
+      match: 'any',
+      value: ''
     }
 
-    if (type == 'fileMetadata') {
+    if (identifier.type == 'fileMetadata') {
       const fileMetadataOptions = getFileMetadataOptions(profile)
       if (fileMetadataOptions.length > 0) {
         identifier.key = fileMetadataOptions[0].key
@@ -225,7 +241,7 @@ class ProfileForm extends Component {
       } else {
         identifier.key = ''
       }
-    } else if (type == 'tableMetadata') {
+    } else if (identifier.type == 'tableMetadata') {
       const tableMetadataOptions = getTableMetadataOptions(profile)
       if (tableMetadataOptions.length > 0) {
         identifier.key = tableMetadataOptions[0].key
@@ -235,15 +251,26 @@ class ProfileForm extends Component {
         identifier.key = ''
         identifier.tableIndex = 0
       }
-    } else if (type == 'tableHeader'){
+    } else if (identifier.type == 'tableHeader'){
       identifier.tableIndex = 0
       identifier.lineNumber = ''
     }
 
-    if (optional) {
+    return identifier
+  }
+
+  addIdentifier(type, optional) {
+    const profile = Object.assign({}, this.props.profile)
+    const identifier = this.initIdentifier(profile, type)
+    identifier.show = true
+    identifier.optional = optional
+
+    if (identifier.optional) {
       identifier.outputTableIndex = 0
       identifier.outputLayer = ''
       identifier.outputKey = ''
+    } else {
+      identifier.match = 'exact'
     }
 
     profile.identifiers.push(identifier)
@@ -509,6 +536,7 @@ class ProfileForm extends Component {
                       <div className="panel-body">
                         <TableForm
                           table={table}
+                          inputTables={inputTables}
                           inputColumns={inputColumns}
                           options={options}
                           updateHeader={(key, value) => this.updateHeader(index, key, value)}
@@ -516,6 +544,8 @@ class ProfileForm extends Component {
                           addOperation={(key, type) => this.addOperation(index, key, type)}
                           updateOperation={(key, opIndex, opKey, value) => this.updateOperation(index, key, opIndex, opKey, value)}
                           removeOperation={(key, opIndex) => this.removeOperation(index, key, opIndex)}
+                          fileMetadataOptions={fileMetadataOptions}
+                          tableMetadataOptions={tableMetadataOptions}
                         />
                       </div>
                     </div>
