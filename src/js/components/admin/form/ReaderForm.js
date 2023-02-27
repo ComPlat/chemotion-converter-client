@@ -73,7 +73,9 @@ class ReaderForm extends Component {
         }
 
         fr.readAsText(event.target.files[0]);
-    }Noname
+    }
+
+    Noname
 
 
     updateStartTable(index, valueMap) {
@@ -210,7 +212,12 @@ class ReaderForm extends Component {
                                         <small className="text-muted">Optional add a title for this reader.</small>
                                         <small>
                                             <p className="text-muted">
-                                                A reader is a component in the converter that performs an initial parsing of the input file. Consequently, each reader can be used by several converter profiles. The task of the reader is to extract the necessary metadata and the data tables from the file.  The metadata should be available in a key value system and all data tables should be numerically evaluable.
+                                                A reader is a component in the converter that performs an initial
+                                                parsing of the input file. Consequently, each reader can be used by
+                                                several converter profiles. The task of the reader is to extract the
+                                                necessary metadata and the data tables from the file. The metadata
+                                                should be available in a key value system and all data tables should be
+                                                numerically evaluable.
                                             </p>
                                         </small>
                                     </div>
@@ -253,18 +260,27 @@ class ReaderForm extends Component {
                                     }
                                     <small>
                                         <p className="text-muted">
-                                            Whether a reader is used for a file is decided by the identifiers. On the one hand on the basis of the file extension. On the other hand on the basis of the content in specific lines.
+                                            Whether a reader is used for a file is decided by the identifiers. On the
+                                            one hand on the basis of the file extension. On the other hand on the basis
+                                            of the content in specific lines.
                                         </p>
                                         <ul className="text-muted">
                                             <li>
-                                                The file extensions <code>{reader.identifiers.meta.file_extension}</code> should be a comma seperated list of all allowed file extentions.
+                                                The file
+                                                extensions <code>{reader.identifiers.meta.file_extension}</code> should
+                                                be a comma seperated list of all allowed file extentions.
                                             </li>
                                             <li>
                                                 The content based identifier must be all satisfied.
                                                 <ul className="text-muted">
-                                                    <li><code>Any value</code> can be used to have amin number of lines.</li>
-                                                    <li><code>Regex</code> can be selected to use rearguard expressions <a href="https://regex101.com/" target="_blank">(help)</a>.</li>
-                                                    <li><code>Exect value</code> should be an exact match of the line.</li>
+                                                    <li><code>Any value</code> can be used to have amin number of lines.
+                                                    </li>
+                                                    <li><code>Regex</code> can be selected to use rearguard
+                                                        expressions <a href="https://regex101.com/"
+                                                                       target="_blank">(help)</a>.
+                                                    </li>
+                                                    <li><code>Exect value</code> should be an exact match of the line.
+                                                    </li>
                                                 </ul>
                                             </li>
                                         </ul>
@@ -378,7 +394,10 @@ class ReaderForm extends Component {
                                     </fieldset>
                                     <small>
                                         <p className="text-muted">
-                                            There are two types of delimiters. The <code>Table Delimiter</code> is an identifier to separate the file in different Tables. The <code>Line Delimiter</code> is used to separate rows into keys and values, and to separate values for data table rows.
+                                            There are two types of delimiters. The <code>Table Delimiter</code> is an
+                                            identifier to separate the file in different Tables. The <code>Line
+                                            Delimiter</code> is used to separate rows into keys and values, and to
+                                            separate values for data table rows.
                                         </p>
                                     </small>
                                 </div>
@@ -405,7 +424,8 @@ class ReaderForm extends Component {
                                     />
                                     <small>
                                         <p className="text-muted">
-                                            Everything that comes after a line-commend identifier in a line is ignored. Leave the entry empty if the file type has no line-commend identifiers.
+                                            Everything that comes after a line-commend identifier in a line is ignored.
+                                            Leave the entry empty if the file type has no line-commend identifiers.
                                         </p>
                                     </small>
                                     <legend>Multi-line-commend start symbol</legend>
@@ -442,9 +462,13 @@ class ReaderForm extends Component {
                                     />
                                     <small>
                                         <p className="text-muted">
-                                            Everything that comes inbetween the start multi-line-commend identifier and the end multi-line-commend identifier is ignored.
-                                            The only exception is if the lines between the multi-line-commend identifier fit a data table. Leave both entry empty if the file type has no multy-line-commend identifiers.
-                                            If the start multi-line-commend identifier and the end multi-line-commend are equal you can leave the end multi-line-commend identifier empty.
+                                            Everything that comes inbetween the start multi-line-commend identifier and
+                                            the end multi-line-commend identifier is ignored.
+                                            The only exception is if the lines between the multi-line-commend identifier
+                                            fit a data table. Leave both entry empty if the file type has no
+                                            multy-line-commend identifiers.
+                                            If the start multi-line-commend identifier and the end multi-line-commend
+                                            are equal you can leave the end multi-line-commend identifier empty.
                                         </p>
                                     </small>
 
@@ -468,19 +492,36 @@ class ReaderForm extends Component {
                                         <div>
                                             <small>
                                                 <p className="text-muted">
-                                                    To simplify the creating of converter profiles, a so-called reader
-                                                    can
-                                                    be
-                                                    created here. A reader can be used for several profiles. If the
-                                                    rules
-                                                    defined in the identifier apply to a file, the reader is applied.
+                                                    In addition to metadata, a reader also extracts so called table
+                                                    data. In order to extract table data, you need to create table
+                                                    template descriptions.
                                                 </p>
+                                                <p className="text-muted">Each template includes</p>
                                                 <ul className="text-muted">
                                                     <li>
-                                                        Each can consists of delimiters and several table types.
+                                                            <code>Min. number of columns</code>: A minimum number of columns, i.e. the number of values after separating the input row by the delimiters.<br/>Empty values are ignored if <code>Can the table include empty values</code> is unchecked.
+
                                                     </li>
-                                                    <li> Each time such a table type
-                                                        matches a section of a file, it is used to create a new table.
+                                                    <li>
+                                                            <code>Max. number of columns</code>: A maximum number of columns, i.e. the number of values after separating the input row by the delimiters.<br/>Empty values are ignored if <code>Can the table include empty values</code> is unchecked.
+                                                    </li>
+                                                    <li>
+                                                            <code>Columns with string values</code>: Usually all values should be numeric. This value is comma seperated list of values in the tables which are not numeric.
+                                                    </li>
+                                                    <li>
+                                                            <code>Number Regular Expression</code>: This input needs you to input a regular expression to parse the numeric values within a table. All values must fit to this expression except the ons in <code>Columns with string values</code>. The value in the first regex group will be used in the table. Click here if you need <a target="_blank" href="https://regex101.com/">help</a>
+                                                    </li>
+                                                    <li>
+                                                            <code>Does the table have a column header row?</code>: If the first row of the table are the header you need to check this box.
+                                                    </li>
+                                                    <li>
+                                                            <code>Does the table have a row header column?</code>: If the first column of the table are the header of the rows you need to check this box.
+                                                    </li>
+                                                    <li>
+                                                            <code>Can the table include empty values?</code>: If checked all empty values between the delimiters are ignored.
+                                                    </li>
+                                                    <li>
+                                                            <code>Check if the table has a start identifier</code>: If tables have start identifier check this box. the identifier are not included into the table
                                                     </li>
                                                 </ul>
                                             </small>
@@ -579,9 +620,8 @@ class ReaderForm extends Component {
                                                                            table.has_col_header_row = event.target.checked
                                                                            this.props.updateReader(reader)
                                                                        }}
-                                                                       id={`${table_idx}_has_col_header_row_id`}/>Is
-                                                                there a
-                                                                column header row
+                                                                       id={`${table_idx}_has_col_header_row_id`}/>
+                                                                Does the table have a column header row?
                                                             </label>
                                                         </div>
                                                         <div className="checkbox">
@@ -592,10 +632,8 @@ class ReaderForm extends Component {
                                                                            table.has_row_header_col = event.target.checked
                                                                            this.props.updateReader(reader)
                                                                        }}
-                                                                       id={`${table_idx}_has_row_header_col_id`}/>Is
-                                                                there a
-                                                                row
-                                                                header column
+                                                                       id={`${table_idx}_has_row_header_col_id`}/>
+                                                                Does the table have a row header column?
                                                             </label>
                                                         </div>
                                                         <div className="checkbox">
@@ -606,9 +644,8 @@ class ReaderForm extends Component {
                                                                            table.allow_empty_col = event.target.checked
                                                                            this.props.updateReader(reader)
                                                                        }}
-                                                                       id={`${table_idx}_allow_empty_col_id`}/>Are there
-                                                                empty
-                                                                columns
+                                                                       id={`${table_idx}_allow_empty_col_id`}/>
+                                                                Can the table include empty values?
                                                             </label>
                                                         </div>
                                                     </div>
@@ -624,13 +661,15 @@ class ReaderForm extends Component {
                                                     </div>
 
                                                     <div className="col-sm-4">
-                                                        <small>This input contains all index of columns with string
-                                                            values.
-                                                            The
-                                                            first column has the index 0. If <code>Is there a row header
-                                                                column</code> is checked the first index in this list is
-                                                            used as
-                                                            column header</small>
+                                                        <small>
+                                                            <p className="text-muted">
+                                                                This input contains all index of columns with string
+                                                                values. The first column has the index 0. If <code>Is
+                                                                there a row header column</code>
+                                                                is checked the first index in this list is used as
+                                                                column header.
+                                                            </p>
+                                                        </small>
                                                     </div>
 
                                                 </div>
@@ -703,7 +742,6 @@ class ReaderForm extends Component {
             </div>
         </div>)
     }
-
 }
 
 ReaderForm.propTypes = {
