@@ -9,3 +9,7 @@ __pycache__/
 
 /public
 /node_modules
+
+playground.py
+
+.idea/

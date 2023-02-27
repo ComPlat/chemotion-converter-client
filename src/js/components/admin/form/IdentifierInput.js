@@ -19,13 +19,13 @@ class IndentifierInput extends Component {
     const { index, identifier, fileMetadataOptions, tableMetadataOptions,
             inputTables, outputTables, updateIdentifier, removeIdentifier,
             updateIdentifierOperation, removeIdentifierOperation, dataset } = this.props
-    const valueDisabled = identifier.match == 'any'
+    const valueDisabled = identifier.match === 'any'
 
     return (
       <form className="mt-15 mb-0">
         <div className="row">
           {
-            (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
+            (identifier.type === 'fileMetadata' || identifier.type === 'tableMetadata') &&
             <div className="col-md-12 mb-10">
               {
                 fileMetadataOptions.length > 0 ? <KeySelect index={index} identifier={identifier}
@@ -38,7 +38,7 @@ class IndentifierInput extends Component {
             </div>
           }
           {
-            (identifier.type == 'tableHeader') &&
+            (identifier.type === 'tableHeader') &&
             <div className="col-md-10 mb-10">
               {
                 inputTables.length > 0 ? <TableIndexSelect index={index} identifier={identifier} tables={inputTables} updateIdentifier={updateIdentifier} />
@@ -47,7 +47,7 @@ class IndentifierInput extends Component {
             </div>
           }
           {
-            (identifier.type == 'tableHeader') &&
+            (identifier.type === 'tableHeader' || identifier.type === 'file') &&
             <div className="col-md-2 mb-10">
               <LineNumberInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
             </div>

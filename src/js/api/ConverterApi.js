@@ -17,6 +17,21 @@ class ConverterApi {
       })
   }
 
+  static fetchReader () {
+    const requestOptions = {
+      method: 'GET'
+    }
+
+    return fetch(converter_app_url + '/reader', requestOptions)
+      .then(response => {
+        if (!response.ok) { throw response }
+        return response.json()
+      })
+      .then(data => {
+        return data
+      })
+  }
+
   static fetchTables(file) {
     const data = new FormData()
     data.append('file', file)
@@ -84,12 +99,85 @@ class ConverterApi {
       })
   }
 
+  static updateReader(reader) {
+    const requestOptions = {
+      method: 'PUT',
+      body: JSON.stringify(reader),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    let ok
+    return fetch(converter_app_url + '/readers/' + reader.id, requestOptions)
+      .then(response => {
+        ok = response.ok
+        return response.json()
+      })
+      .then(data => {
+        if (ok) {
+          return data
+        } else {
+          throw new Error(data)
+        }
+      })
+  }
+
+
+  static createReader(profile) {
+    const requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(profile),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+
+    let ok
+    return fetch(converter_app_url + '/reader', requestOptions)
+      .then(response => {
+        ok = response.ok
+        return response.json()
+      })
+      .then(data => {
+        if (ok) {
+          return data
+        } else {
+          throw new Error(data)
+        }
+      })
+  }
+
   static deleteProfile (profile) {
     const requestOptions = {
       method: 'DELETE'
     }
 
     return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
+      .then(response => {
+        if (!response.ok) { throw response }
+          return response
+      })
+  }
+
+  static deleteProfile (profile) {
+    const requestOptions = {
+      method: 'DELETE'
+    }
+
+    return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
+      .then(response => {
+        if (!response.ok) { throw response }
+          return response
+      })
+  }
+
+  static deleteReader (reader) {
+    const requestOptions = {
+      method: 'DELETE'
+    }
+
+    return fetch(converter_app_url + '/readers/' + reader.id, requestOptions)
       .then(response => {
         if (!response.ok) { throw response }
           return response

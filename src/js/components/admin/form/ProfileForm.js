@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
 import { Tabs, Tab } from 'react-bootstrap';
 import Select from 'react-select';
+import RenderDataViewer from '../form/common/ReaderDataViewer'
 
 import { getDataset, getInputTables, getInputColumns,
          getFileMetadataOptions, getTableMetadataOptions } from '../../../utils/profileUtils'
@@ -14,9 +15,8 @@ class ProfileForm extends Component {
 
   constructor(props) {
     super(props);
-
-    this.onGridReady = this.onGridReady.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
+    this.onGridReady = this.onGridReady.bind(this)
 
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
@@ -217,7 +217,7 @@ class ProfileForm extends Component {
       show: true
     }
 
-    if (type == 'fileMetadata') {
+    if (type === 'fileMetadata') {
       const fileMetadataOptions = getFileMetadataOptions(profile)
       if (fileMetadataOptions.length > 0) {
         identifier.key = fileMetadataOptions[0].key
@@ -225,7 +225,7 @@ class ProfileForm extends Component {
       } else {
         identifier.key = ''
       }
-    } else if (type == 'tableMetadata') {
+    } else if (type === 'tableMetadata') {
       const tableMetadataOptions = getTableMetadataOptions(profile)
       if (tableMetadataOptions.length > 0) {
         identifier.key = tableMetadataOptions[0].key
@@ -235,7 +235,7 @@ class ProfileForm extends Component {
         identifier.key = ''
         identifier.tableIndex = 0
       }
-    } else if (type == 'tableHeader'){
+    } else if (type === 'tableHeader'){
       identifier.tableIndex = 0
       identifier.lineNumber = ''
     }
@@ -294,7 +294,7 @@ class ProfileForm extends Component {
       profile.identifiers[index].operations.splice(opIndex, 1)
 
       // remove operations if it is empty
-      if (profile.identifiers[index].operations.length == 0) {
+      if (profile.identifiers[index].operations.length === 0) {
         delete profile.identifiers[index].operations
       }
 
@@ -312,71 +312,6 @@ class ProfileForm extends Component {
     }
   }
 
-  renderMetadata(metadata) {
-    return (
-      <div className="panel panel-default">
-        <div className="panel-body">
-          <dl className="dl-horizontal mb-0">
-            {
-              Object.keys(metadata).map((key, index) => {
-                return (
-                  <React.Fragment key={index}>
-                    <dt>{key}:</dt>
-                    <dd>{metadata[key] || ' '}</dd>
-                  </React.Fragment>
-                )
-              })
-            }
-          </dl>
-        </div>
-      </div>
-    )
-  }
-
-  renderHeader(header) {
-    return (
-      <pre>
-        {
-          header.map((line, index) => {
-            return <code key={index}>{line}</code>
-          })
-        }
-      </pre>
-    )
-  }
-
-  renderDataGrid(table) {
-    const columnDefs = table.columns.map(column => ({
-      field: column.key,
-      headerName: column.name
-    }))
-
-    const defaultColDef = {
-        resizable: true,
-        lockPosition: true
-    };
-
-    const rowData = table.rows.map(row => {
-      return Object.fromEntries(row.map((value, idx) => {
-        return [idx, value]
-      }))
-    })
-
-    return (
-      <div className="ag-theme-alpine">
-        <AgGridReact
-          enableColResize
-          columnDefs={columnDefs}
-          rowData={rowData}
-          defaultColDef={defaultColDef}
-          domLayout='autoHeight'
-          suppressRowHoverHighlight={true}
-          onGridReady={this.onGridReady}
-        />
-      </div>
-    )
-  }
-
   render() {
     const { status, profile, options, datasets } = this.props
 
@@ -384,6 +319,8 @@ class ProfileForm extends Component {
     const inputColumns = getInputColumns(profile)
     const fileMetadataOptions = getFileMetadataOptions(profile)
     const tableMetadataOptions = getTableMetadataOptions(profile)
+
+
 
     let dataset = {}
     let datasetList = (<span />)
@@ -417,52 +354,12 @@ class ProfileForm extends Component {
       );
     }
 
-    const tabContents = [];
-    if (profile.data) {
-      profile.data.tables.forEach((table, idx) => {
-        tabContents.push(
-          <Tab key={`tableTab${idx}`} eventKey={idx} title={`Input table # ${idx}`}>
-            {
-              table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
-              <div className="mt-20">
-                <h4>Input table metadata</h4>
-                {this.renderMetadata(table.metadata)}
-              </div>
-            }
-            {
-              table.header !== undefined && table.header.length > 0 &&
-              <div className="mt-20">
-                <h4>Input table header</h4>
-                {this.renderHeader(table.header)}
-              </div>
-            }
-            {
-              table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
-              <div className="mt-20">
-                <h4>Input table data</h4>
-                {this.renderDataGrid(table)}
-              </div>
-            }
-          </Tab>
-        );
-      });
-    }
-
     return (
       <div className="row">
         <div className="col-md-7">
-          {
-            profile.data ? <div className="scroll">
-              <h4>Input file metadata</h4>
-              {Object.keys(profile.data.metadata).length > 0 && this.renderMetadata(profile.data.metadata)}
-              <h4>Input tables</h4>
-              <Tabs defaultActiveKey={0} id="uncontrolled-tab-example">
-                {tabContents}
-              </Tabs>
-            </div> : <p>
-              <em>The profile does not contain the initial uploaded data.</em>
-            </p>
-          }
+          <div className="scroll">
+          <RenderDataViewer profile_data={profile.data} onGridReady={this.onGridReady}/>
+          </div>
         </div>
         <div className="col-md-5">
           <div className="scroll">
@@ -487,9 +384,9 @@ class ProfileForm extends Component {
                       id="match-tables-checkbox"
                       checked={profile.matchTables || false}
                       onChange={this.toggleMatchTables}
-                      disabled={profile.tables.length != 1}
+                      disabled={profile.tables.length !== 1}
                     />
-                    <span className={profile.tables.length != 1 ? 'text-muted' : ''}>
+                    <span className={profile.tables.length !== 1 ? 'text-muted' : ''}>
                       Configure only one output table and use it for each input table.
                     </span>
                   </label>

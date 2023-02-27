@@ -16,9 +16,9 @@ class IdentifierForm extends Component {
       updateIdentifier(index, { show: !identifiers[index].show})
     }
 
-    const hasIdentifiers = identifiers.some(identifier => (identifier.type === type && identifier.optional == optional))
+    const hasIdentifiers = identifiers.some(identifier => (identifier.type === type && identifier.optional === optional))
 
-    return (
+      return (
       <div className="mb-10">
         <label>{label}</label>
         {
