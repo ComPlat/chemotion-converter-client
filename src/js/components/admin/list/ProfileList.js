@@ -6,7 +6,7 @@ import ProfileListItem from './ProfileListItem'
 class ProfileList extends Component {
 
   render () {
-    const { profiles, updateProfile, deleteProfile, downloadProfile } = this.props
+    const { profiles, updateProfile, deleteProfile, downloadProfile, isAdmin } = this.props
 
     return (
       <ul className="list-group mb-20">
@@ -17,6 +17,7 @@ class ProfileList extends Component {
                 key={index}
                 id={profile.id}
                 title={profile.title}
+                isAdmin={isAdmin}
                 description={profile.description}
                 updateProfile={() => updateProfile(profile)}
                 deleteProfile={() => deleteProfile(profile)}
@@ -34,7 +35,12 @@ ProfileList.propTypes = {
   profiles: PropTypes.array,
   updateProfile: PropTypes.func,
   deleteProfile: PropTypes.func,
-  downloadProfile: PropTypes.func
+  downloadProfile: PropTypes.func,
+  isAdmin: PropTypes.bool
 }
+
+ProfileList.defaultProps = {
+  isAdmin: false
+};
 
 export default ProfileList

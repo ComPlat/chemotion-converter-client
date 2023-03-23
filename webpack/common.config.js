@@ -59,18 +59,15 @@ module.exports = {
       filename: '[name].css',
       chunkFilename: '[id].css'
     }),
-    new CopyWebpackPlugin([
-      {
-        from: '**/*',
-        to: './/',
-        context: './src/html/',
-      },
-      {
-        from: '**/*',
-        to: './/images/',
-        context: '../src/images/',
-      }
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: '**/*',
+          to: './/',
+          context: './src/html/',
+        }
+      ]
+    }),
     new webpack.EnvironmentPlugin({
       'CONVERTER_APP_URL': 'http://127.0.0.1:5000'
     })

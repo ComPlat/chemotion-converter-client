@@ -1,17 +1,17 @@
-import React, { Component } from "react"
+import React, { Component } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 
-import ConverterApi from '../../api/ConverterApi'
+import ConverterApi from '../../api/ConverterApi';
 
-import ProfileList from './list/ProfileList'
-import ProfileForm from './form/ProfileForm'
-import FileUploadForm from './upload/FileUploadForm'
+import ProfileList from './list/ProfileList';
+import ProfileForm from './form/ProfileForm';
+import FileUploadForm from './upload/FileUploadForm';
 
 
 class AdminApp extends Component {
 
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       status: 'list',
       selectedFile: null,
@@ -24,28 +24,28 @@ class AdminApp extends Component {
       isLoading: false,
       createdModal: false,
       deleteModal: false
-    }
+    };
 
-    this.showCreateView = this.showCreateView.bind(this)
-    this.showUpdateView = this.showUpdateView.bind(this)
-    this.showImportView = this.showImportView.bind(this)
+    this.showCreateView = this.showCreateView.bind(this);
+    this.showUpdateView = this.showUpdateView.bind(this);
+    this.showImportView = this.showImportView.bind(this);
 
-    this.showCreatedModal = this.showCreatedModal.bind(this)
-    this.hideCreatedModal = this.hideCreatedModal.bind(this)
+    this.showCreatedModal = this.showCreatedModal.bind(this);
+    this.hideCreatedModal = this.hideCreatedModal.bind(this);
 
-    this.showDeleteModal = this.showDeleteModal.bind(this)
-    this.hideDeleteModal = this.hideDeleteModal.bind(this)
+    this.showDeleteModal = this.showDeleteModal.bind(this);
+    this.hideDeleteModal = this.hideDeleteModal.bind(this);
 
-    this.updateProfile = this.updateProfile.bind(this)
-    this.storeProfile = this.storeProfile.bind(this)
-    this.deleteProfile = this.deleteProfile.bind(this)
-    this.downloadProfile = this.downloadProfile.bind(this)
+    this.updateProfile = this.updateProfile.bind(this);
+    this.storeProfile = this.storeProfile.bind(this);
+    this.deleteProfile = this.deleteProfile.bind(this);
+    this.downloadProfile = this.downloadProfile.bind(this);
 
-    this.updateFile = this.updateFile.bind(this)
-    this.uploadFile = this.uploadFile.bind(this)
-    this.importFile = this.importFile.bind(this)
+    this.updateFile = this.updateFile.bind(this);
+    this.uploadFile = this.uploadFile.bind(this);
+    this.importFile = this.importFile.bind(this);
 
-    this.dispatchView = this.dispatchView.bind(this)
+    this.dispatchView = this.dispatchView.bind(this);
   }
 
   componentDidMount() {
@@ -270,6 +270,7 @@ class AdminApp extends Component {
       return (
         <ProfileList
           profiles={this.state.profiles}
+          isAdmin
           updateProfile={this.showUpdateView}
           deleteProfile={this.showDeleteModal}
           downloadProfile={this.downloadProfile}
