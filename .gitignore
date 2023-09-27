@@ -9,3 +9,5 @@ __pycache__/
 
 /public
 /node_modules
+/chemotion-converter-client.iml
+/.idea
