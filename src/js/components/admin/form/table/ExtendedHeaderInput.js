@@ -1,8 +1,9 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 
-const HeaderInput = ({ optionKey, value, values, updateHeader }) => {
+
+const ExtendedHeaderInput = ({ optionKey, value, values, updateHeader }) => {
     let idx = values.indexOf(value);
     values = values.map((x) => {  return { 'value': x, 'label': x}});
     if(idx === -1) {
@@ -14,7 +15,7 @@ const HeaderInput = ({ optionKey, value, values, updateHeader }) => {
         <div className="form-group row">
             <label htmlFor={optionKey} className="col-sm-4 col-form-label">{optionKey}</label>
             <div className="col-sm-8">
-                <Select
+                <CreatableSelect
                     options={values}
                     defaultValue={values[idx]}
                     onChange={(v) => {updateHeader(optionKey, v.value)}}/>
@@ -23,11 +24,11 @@ const HeaderInput = ({ optionKey, value, values, updateHeader }) => {
     )
 }
 
-HeaderInput.propTypes = {
+ExtendedHeaderInput.propTypes = {
   optionKey: PropTypes.string,
   value: PropTypes.string,
   values: PropTypes.array,
   updateHeader: PropTypes.func
 }
 
-export default HeaderInput
+export default ExtendedHeaderInput
