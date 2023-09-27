@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import HeaderInput from './table/HeaderInput'
 import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
+import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
 
 
 class TableForm extends Component {
@@ -18,6 +19,14 @@ class TableForm extends Component {
             addOperation, updateOperation, removeOperation,
             fileMetadataOptions, tableMetadataOptions } = this.props
 
+      const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
+
+      const herder_options = Object.keys(options).reduce(function (filtered, key) {
+          if (!(key in xy_units)) filtered[key] = options[key];
+          return filtered;
+      }, {});
+
+
     return (
       <div>
         <div className="mb-10">
@@ -25,10 +34,16 @@ class TableForm extends Component {
         </div>
 
         {
-          Object.keys(options).map((optionKey, index) => (
-            <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={options[optionKey]} updateHeader={updateHeader} />
+          Object.keys(herder_options).map((optionKey, index) => (
+            <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={herder_options[optionKey]} updateHeader={updateHeader} />
           ))
         }
+
+          {
+              Object.keys(xy_units).map((optionKey, index) => (
+                  <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={xy_units[optionKey]} updateHeader={updateHeader} />
+              ))
+          }
 
         <div className="mb-10">
           <strong>Table columns</strong>
