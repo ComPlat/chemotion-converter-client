@@ -21,7 +21,7 @@ class TableForm extends Component {
 
       const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
 
-      const herder_options = Object.keys(options).reduce(function (filtered, key) {
+      const headerOptions = Object.keys(options).reduce(function (filtered, key) {
           if (!(key in xy_units)) filtered[key] = options[key];
           return filtered;
       }, {});
@@ -34,8 +34,8 @@ class TableForm extends Component {
         </div>
 
         {
-          Object.keys(herder_options).map((optionKey, index) => (
-            <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={herder_options[optionKey]} updateHeader={updateHeader} />
+          Object.keys(headerOptions).map((optionKey, index) => (
+            <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={headerOptions[optionKey]} updateHeader={updateHeader} />
           ))
         }
 
@@ -49,7 +49,7 @@ class TableForm extends Component {
           <strong>Table columns</strong>
         </div>
         {
-          (table.header['DATA CLASS'] == 'XYDATA') &&
+          (table.header['DATA CLASS'] === 'XYDATA') &&
           <div>
             <div className="mb-10">
               Which metadata should be used for the x-values?
@@ -65,7 +65,7 @@ class TableForm extends Component {
           </div>
         }
         {
-          (table.header['DATA CLASS'] != 'XYDATA') &&
+          (table.header['DATA CLASS'] !== 'XYDATA') &&
           <TableColumn table={table.table} label="Which column should be used as x-values?"
                        columnKey="xColumn" operationsKey="xOperations" inputColumns={inputColumns} updateTable={updateTable}
                        addOperation={addOperation} updateOperation={updateOperation} removeOperation={removeOperation}/>
