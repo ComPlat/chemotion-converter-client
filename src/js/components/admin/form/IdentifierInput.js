@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Button, Col, Form, Row } from 'react-bootstrap';
 
 import KeyInput from './identifier/KeyInput'
 import KeySelect from './identifier/KeySelect'
@@ -16,88 +17,107 @@ import ValueInput from './identifier/ValueInput'
 class IndentifierInput extends Component {
 
   render() {
-    const { index, identifier, fileMetadataOptions, tableMetadataOptions,
-            inputTables, outputTables, updateIdentifier, removeIdentifier,
-            updateIdentifierOperation, removeIdentifierOperation, dataset } = this.props
+    const {
+      index, identifier, fileMetadataOptions, tableMetadataOptions,
+      inputTables, outputTables, updateIdentifier, removeIdentifier,
+      updateIdentifierOperation, removeIdentifierOperation, dataset
+    } = this.props
     const valueDisabled = identifier.match == 'any'
 
     return (
-      <form className="mt-15 mb-0">
-        <div className="row">
-          {
-            (identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') &&
-            <div className="col-md-12 mb-10">
-              {
-                fileMetadataOptions.length > 0 ? <KeySelect index={index} identifier={identifier}
-                                                            fileMetadataOptions={fileMetadataOptions}
-                                                            tableMetadataOptions={tableMetadataOptions}
-                                                            updateIdentifier={updateIdentifier} />
-                                               : <KeyInput index={index} identifier={identifier}
-                                                           updateIdentifier={updateIdentifier} />
-              }
-            </div>
-          }
-          {
-            (identifier.type == 'tableHeader') &&
-            <div className="col-md-10 mb-10">
-              {
-                inputTables.length > 0 ? <TableIndexSelect index={index} identifier={identifier} tables={inputTables} updateIdentifier={updateIdentifier} />
-                                       : <TableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
-              }
-            </div>
-          }
-          {
-            (identifier.type == 'tableHeader') &&
-            <div className="col-md-2 mb-10">
+      <form>
+        <Row className="mb-3">
+          {(identifier.type == 'fileMetadata' || identifier.type == 'tableMetadata') && (
+            <Col>
+              {fileMetadataOptions.length > 0 ? (
+                <KeySelect
+                  index={index}
+                  identifier={identifier}
+                  fileMetadataOptions={fileMetadataOptions}
+                  tableMetadataOptions={tableMetadataOptions}
+                  updateIdentifier={updateIdentifier}
+                />
+              ) : (
+                <KeyInput
+                  index={index}
+                  identifier={identifier}
+                  updateIdentifier={updateIdentifier}
+                />
+              )}
+            </Col>
+          )}
+        </Row>
+
+        {(identifier.type == 'tableHeader') && (
+          <Row className="mb-3">
+            <Col md={10}>
+              {inputTables.length > 0 ? (
+                <TableIndexSelect index={index} identifier={identifier} tables={inputTables} updateIdentifier={updateIdentifier} />
+              ) : (
+                <TableIndexInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
+              )}
+            </Col>
+
+            <Col md={2}>
               <LineNumberInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
-            </div>
-          }
-        </div>
-        <div className="row">
-          <div className="col-md-4 mb-10">
+            </Col>
+          </Row>
+        )}
+
+        <Row className="mb-3">
+          <Col md={4}>
             <MatchSelect index={index} identifier={identifier} updateIdentifier={updateIdentifier} />
-          </div>
-          <div className="col-md-8 mb-10">
+          </Col>
+          <Col md={8}>
             <ValueInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} disabled={valueDisabled} />
-          </div>
-        </div>
-        {
-          identifier.optional &&
-          <div className="row">
-            <div className="col-md-4 mb-10">
-              <OutputTableIndexSelect index={index} identifier={identifier} tables={outputTables}
-                                      updateIdentifier={updateIdentifier} />
-            </div>
-            <div className="col-md-4 mb-10">
+          </Col>
+        </Row>
+
+        {identifier.optional && (
+          <Row className="mb-3">
+            <Col sm={4}>
+              <OutputTableIndexSelect
+                index={index}
+                identifier={identifier}
+                tables={outputTables}
+                updateIdentifier={updateIdentifier}
+              />
+            </Col>
+            <Col sm={4}>
               <OutputLayerInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} dataset={dataset} />
-            </div>
-            <div className="col-md-4 mb-10">
+            </Col>
+            <Col sm={4}>
               <OutputKeyInput index={index} identifier={identifier} updateIdentifier={updateIdentifier} dataset={dataset} />
-            </div>
-          </div>
-        }
-        {
-          Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
-            <div key={opIndex} className="row">
-              <div className="col-sm-4 mb-10">
-                <OperatorSelect value={operation.operator} id={`identifierOperationOperator${index}${opIndex}`}
-                                onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)} />
-                <label className="mb-0" htmlFor={`identifierOperationOperator${index}${opIndex}`}><small>Operator</small></label>
-              </div>
-              <div className="col-sm-6 mb-10">
-                <input type="text" id={`identifierOperationValue${index}${opIndex}`}
-                       className="form-control input-sm" value={operation.value || ''}
-                       onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)} />
-                <label className="mb-0" htmlFor={`identifierOperationValue${index}${opIndex}`}><small>Value</small></label>
-              </div>
-              <div className="col-sm-2 mb-10 text-right">
-                <button type="button" className="btn btn-danger btn-sm" onClick={event => removeIdentifierOperation(index, opIndex)}>
-                  &times;
-                </button>
-              </div>
-            </div>
-          ))
-        }
+            </Col>
+          </Row>
+        )}
+
+        {Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
+          <Row key={opIndex} className="mb-3">
+            <Form.Group as={Col} sm={4} controlId={`identifierOperationOperator${index}${opIndex}`}>
+              <Form.Label>Operator</Form.Label>
+              <OperatorSelect
+                value={operation.operator}
+                onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)}
+              />
+            </Form.Group>
+
+            <Form.Group as={Col} sm={7} controlId={`identifierOperationValue${index}${opIndex}`}>
+              <Form.Label>Value</Form.Label>
+              <Form.Control
+                size="sm"
+                value={operation.value || ''}
+                onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
+              />
+            </Form.Group>
+
+            <Col sm={1} className="d-flex align-items-end justify-content-end">
+              <Button variant="danger" size="sm" onClick={() => removeIdentifierOperation(index, opIndex)}>
+                &times;
+              </Button>
+            </Col>
+          </Row>
+        ))}
       </form>
     )
   }
