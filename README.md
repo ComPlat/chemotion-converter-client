@@ -6,7 +6,7 @@ React client for the [converter-app](https://github.com/ComPlat/converter-app).
 Development setup
 -----------------
 
-We recomment to use the [nove version manager](https://github.com/nvm-sh/nvm) to install node.js and npm:
+We recomment to use the [node version manager](https://github.com/nvm-sh/nvm) to install node.js and npm:
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
