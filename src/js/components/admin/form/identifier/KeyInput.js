@@ -1,18 +1,17 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap';
 
 const KeyInput = ({ index, identifier, updateIdentifier }) => {
   return (
-    <React.Fragment>
-      <input
-        type="text"
-        id={`keyInput${index}`}
-        className="form-control input-sm"
+    <Form.Group controlId={`keyInput${index}`}>
+      <Form.Label>Key</Form.Label>
+      <Form.Control
+        size="sm"
         value={identifier.key || ''}
         onChange={(event) => updateIdentifier(index, { key: event.target.value })}
       />
-      <label className="mb-0" htmlFor={`keyInput${index}`}><small>Key</small></label>
-    </React.Fragment>
+    </Form.Group>
   )
 }
 

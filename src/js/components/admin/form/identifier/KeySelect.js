@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap';
 
 const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOptions, updateIdentifier }) => {
   const options = (identifier.type == 'fileMetadata') ? fileMetadataOptions : tableMetadataOptions
@@ -25,18 +26,18 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
   }
 
   return (
-    <React.Fragment>
-      <label className="sr-only" htmlFor={`keySelect${index}`}>Key</label>
-      <select className="form-control input-sm" id={`keySelect${index}`} value={getOptionIndex(identifier)}
-              onChange={(event) => onChange(event.target.value)} >
-        {
-          options.map((option, optionIndex) => (
-            <option key={optionIndex} value={optionIndex}>{option.label}</option>
-          ))
-        }
-      </select>
-      <label className="mb-0" htmlFor={`keyInput${index}`}><small>Key</small></label>
-    </React.Fragment>
+    <Form.Group controlId={`keySelect${index}`}>
+      <Form.Label>Key</Form.Label>
+      <Form.Select
+        size="sm"
+        value={getOptionIndex(identifier)}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map((option, optionIndex) => (
+          <option key={optionIndex} value={optionIndex}>{option.label}</option>
+        ))}
+      </Form.Select>
+    </Form.Group>
   )
 }
 

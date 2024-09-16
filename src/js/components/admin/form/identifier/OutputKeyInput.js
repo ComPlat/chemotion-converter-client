@@ -1,42 +1,39 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap';
 import Select from 'react-select';
 import { sortBy } from 'lodash';
 
 const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
-  if (identifier.outputLayer && dataset && dataset['layers'] && dataset['layers'][identifier.outputLayer] && dataset['layers'][identifier.outputLayer]['fields']) {
-    const dsOpt = dataset && dataset['layers'] &&  dataset['layers'][identifier.outputLayer] &&  dataset['layers'][identifier.outputLayer]['fields'] &&  dataset['layers'][identifier.outputLayer]['fields'].map(e => ({ value: e.field, label: e.label }));
+  const fields = (dataset?.layers ?? {})[identifier.outputLayer]?.fields
+  console.log(fields)
 
-    return (
-      <React.Fragment>
-        <label className="sr-only" htmlFor={`outputLayerInput${index}`}>Output key</label>
+  return (
+    <Form.Group controlId={`outputKeyInput${index}`}>
+      <Form.Label>Output key</Form.Label>
+      {fields !== undefined ? (
         <Select
-          id={`outputKeyInput${index}`}
           isDisabled={false}
           isLoading={false}
           isClearable={false}
           isRtl={false}
           name="s-dataset"
-          onChange={(event) => updateIdentifier(index, { outputKey: event.value })}
-          options={dsOpt}
-          value={dsOpt.find(o => o.value == identifier.outputKey)}
+          onChange={(event) =>
+            updateIdentifier(index, { outputKey: event.value })
+          }
+          options={fields.map((e) => ({ value: e.field, label: e.label }))}
+          value={identifier.outputKey}
         />
-        <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output key</small></label>
-      </React.Fragment>
-    )
-  }
-
-  return (
-    <React.Fragment>
-      <input
-        type="text"
-        id={`outputKeyInput${index}`}
-        className="form-control input-sm"
-        value={identifier.outputKey || ''}
-        onChange={(event) => updateIdentifier(index, { outputKey: event.target.value })}
-      />
-      <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output key</small></label>
-    </React.Fragment>
+      ) : (
+        <Form.Control
+          size="sm"
+          value={identifier.outputKey || ""}
+          onChange={(event) =>
+            updateIdentifier(index, { outputKey: event.target.value })
+          }
+        />
+      )}
+    </Form.Group>
   )
 }
 

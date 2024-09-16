@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap';
 import Select from 'react-select';
 import { sortBy } from 'lodash';
 
@@ -10,8 +11,8 @@ const OutputLayerInput = ({ index, identifier, updateIdentifier, dataset }) => {
     const dsOpt = sls && sls.map(e => ({ value: e.key, label: e.label }));
 
     return (
-      <React.Fragment>
-        <label className="sr-only" htmlFor={`outputLayerInput${index}`}>Output layer</label>
+      <Form.Group controlId={`outputLayerInput${index}`}>
+        <Form.Label>Output layer</Form.Label>
         <Select
           id={`outputLayerInput${index}`}
           isDisabled={false}
@@ -23,22 +24,19 @@ const OutputLayerInput = ({ index, identifier, updateIdentifier, dataset }) => {
           options={dsOpt}
           value={dsOpt.find(o => o.value == identifier.outputLayer)}
         />
-        <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output layer</small></label>
-      </React.Fragment>
+      </Form.Group>
     )
   }
+
   return (
-    <React.Fragment>
-      <label className="sr-only" htmlFor={`outputLayerInput${index}`}>Output layer</label>
-      <input
-        type="text"
-        id={`outputLayerInput${index}`}
-        className="form-control input-sm"
+    <Form.Group controlId={`outputLayerInput${index}`}>
+      <Form.Label>Output layer</Form.Label>
+      <Form.Control
+        size="sm"
         value={identifier.outputLayer || ''}
         onChange={(event) => updateIdentifier(index, { outputLayer: event.target.value })}
       />
-      <label className="mb-0" htmlFor={`outputLayerInput${index}`}><small>Output layer</small></label>
-    </React.Fragment>
+    </Form.Group>
   )
 }
 
