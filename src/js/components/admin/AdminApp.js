@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Breadcrumb, Button, Col, Container, Modal, Row } from 'react-bootstrap';
 
 import ConverterApi from '../../api/ConverterApi';
 
@@ -26,6 +26,7 @@ class AdminApp extends Component {
       deleteModal: false
     };
 
+    this.showListView = this.showListView.bind(this);
     this.showCreateView = this.showCreateView.bind(this);
     this.showUpdateView = this.showUpdateView.bind(this);
     this.showImportView = this.showImportView.bind(this);
@@ -58,6 +59,13 @@ class AdminApp extends Component {
       this.setState({
         profiles, datasets, options
       })
+    })
+  }
+
+  showListView() {
+    this.setState({
+      status: 'list',
+      profile: null
     })
   }
 
@@ -161,8 +169,7 @@ class AdminApp extends Component {
           profiles: profiles,
           profile: null
         }, this.hideDeleteModal())
-      }
-    )
+      })
   }
 
   downloadProfile(profile) {
@@ -289,15 +296,15 @@ class AdminApp extends Component {
       )
     } else if (this.state.status == 'upload') {
       return (
-          <FileUploadForm
-            onFileChangeHandler={this.updateFile}
-            onSubmitFileHandler={this.uploadFile}
-            errorMessage={this.state.errorMessage}
-            error={this.state.error}
-            isLoading={this.state.isLoading}
-            disabled={this.state.selectedFile === null}
-          />
-        )
+        <FileUploadForm
+          onFileChangeHandler={this.updateFile}
+          onSubmitFileHandler={this.uploadFile}
+          errorMessage={this.state.errorMessage}
+          error={this.state.error}
+          isLoading={this.state.isLoading}
+          disabled={this.state.selectedFile === null}
+        />
+      )
     } else {
       return (
         <ProfileForm
@@ -314,54 +321,47 @@ class AdminApp extends Component {
 
   render() {
     return (
-      <div className={['create', 'update'].includes(this.state.status) ? 'container-fluid' : 'container'}>
-        <header>
-          <nav aria-label="breadcrumb">
-            {this.state.status == 'list' &&
-              <ol className="breadcrumb">
-                <li className="breadcrumb-item active" aria-current="page">Chemotion file converter admin</li>
-              </ol>
-            }
-            {['upload', 'create'].includes(this.state.status) &&
-              <ol className="breadcrumb">
-                <li className="breadcrumb-item" aria-current="page"><a href="">Chemotion file converter admin</a></li>
-                <li className="breadcrumb-item active" aria-current="page">{'Create Profile'}</li>
-              </ol>
-            }
-            {this.state.status == 'update' &&
-              <ol className="breadcrumb">
-                <li className="breadcrumb-item" aria-current="page"><a href="">Chemotion file converter admin</a></li>
-                <li className="breadcrumb-item active" aria-current="page">{'Edit Profile: ' + this.state.title}</li>
-              </ol>
-            }
-            {this.state.status == 'import' &&
-              <ol className="breadcrumb">
-                <li className="breadcrumb-item" aria-current="page"><a href="">Chemotion file converter admin</a></li>
-                <li className="breadcrumb-item active" aria-current="page">{'Import Profile'}</li>
-              </ol>
-            }
-          </nav>
+      <Container fluid={['create', 'update'].includes(this.state.status)}>
+        <Breadcrumb className="mt-4">
+          <Breadcrumb.Item
+            onClick={this.showListView}
+            active={this.state.status == 'list'}
+          >
+            Chemotion file converter admin
+          </Breadcrumb.Item>
 
-          <div>
-            {this.state.status == "list" &&
-              <div className="pull-right">
-                <button type="button" onClick={this.showImportView} className="btn btn-success mr-10">
-                  Import profile
-                </button>
-                <button type="button" onClick={this.showCreateView} className="btn btn-primary">
-                  Create new profile
-                </button>
-              </div>
-            }
+          {['upload', 'create'].includes(this.state.status) && (
+            <Breadcrumb.Item active>Create Profile</Breadcrumb.Item>
+          )}
+          {this.state.status == 'update' && (
+            <Breadcrumb.Item active>{'Edit Profile: ' + this.state.title}</Breadcrumb.Item>
+          )}
+          {this.state.status == 'import' && (
+            <Breadcrumb.Item active>Import Profile</Breadcrumb.Item>
+          )}
+        </Breadcrumb>
 
+        <Row className="mb-3">
+          <Col>
             <h2>
               {this.state.status == 'list' && 'Profiles List'}
               {['upload', 'create'].includes(this.state.status) && 'Create Profile'}
               {this.state.status == 'update' && 'Edit Profile'}
               {this.state.status == 'import' && 'Import Profile'}
             </h2>
-          </div>
-        </header>
+          </Col>
+
+          {this.state.status == "list" &&
+            <Col md={4} className="d-flex justify-content-end gap-2">
+              <Button variant="success" onClick={this.showImportView}>
+                Import profile
+              </Button>
+              <Button variant="primary" onClick={this.showCreateView}>
+                Create new profile
+              </Button>
+            </Col>
+          }
+        </Row>
 
         <main>
           {this.dispatchView()}
@@ -373,7 +373,7 @@ class AdminApp extends Component {
           </Modal.Header>
 
           <Modal.Footer>
-            <Button bsStyle="primary" onClick={this.hideCreatedModal}>Great!</Button>
+            <Button variant="primary" onClick={this.hideCreatedModal}>Great!</Button>
           </Modal.Footer>
         </Modal>
 
@@ -382,11 +382,11 @@ class AdminApp extends Component {
             <Modal.Title>Do you really want to delete this profile?</Modal.Title>
           </Modal.Header>
           <Modal.Footer>
-            <Button bsStyle="default" onClick={this.hideDeleteModal}>Cancel</Button>
-            <Button bsStyle="danger" onClick={this.deleteProfile}>Delete profile</Button>
+            <Button variant="default" onClick={this.hideDeleteModal}>Cancel</Button>
+            <Button variant="danger" onClick={this.deleteProfile}>Delete profile</Button>
           </Modal.Footer>
         </Modal>
-      </div>
+      </Container>
     )
   }
 
