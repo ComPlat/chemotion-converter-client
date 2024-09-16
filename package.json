@@ -18,24 +18,22 @@
     "url": "https://github.com/ComPlat/chemotion-converter-client"
   },
   "dependencies": {
-    "bootstrap": "^3.3.7",
-    "jquery": "^3.4.0",
-    "react-select": "5.2.2",
-    "popper.js": "^1.16.0",
+    "bootstrap": "^5.3.3",
     "lodash": "^4.17.21",
-    "prop-types": "^15.8.1"
+    "prop-types": "^15.8.1",
+    "react-select": "5.2.2"
   },
   "peerDependencies": {
     "ag-grid-community": "^32.0.1",
     "ag-grid-react": "^32.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-bootstrap": "~0.33.1"
+    "react-bootstrap": "~2.10.2"
   },
   "devDependencies": {
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-bootstrap": "~0.33.1",
+    "react-bootstrap": "~2.10.2",
     "ag-grid-community": "^32.0.1",
     "ag-grid-react": "^32.0.1",
     "@babel/cli": "^7.17.6",
@@ -48,6 +46,9 @@
     "file-loader": "^6.2.0",
     "mini-css-extract-plugin": "^2.6.0",
     "node-sass": "^9.0.0",
+    "react": "^17.0.2",
+    "react-bootstrap": "~2.10.2",
+    "react-dom": "^17.0.2",
     "sass": "^1.49.10",
     "sass-loader": "^16.0.1",
     "webpack": "5.94.0",
