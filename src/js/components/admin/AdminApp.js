@@ -334,7 +334,7 @@ class AdminApp extends Component {
             <Breadcrumb.Item active>Create Profile</Breadcrumb.Item>
           )}
           {this.state.status == 'update' && (
-            <Breadcrumb.Item active>{'Edit Profile: ' + this.state.title}</Breadcrumb.Item>
+            <Breadcrumb.Item active>{'Edit Profile: ' + this.state.profile.title}</Breadcrumb.Item>
           )}
           {this.state.status == 'import' && (
             <Breadcrumb.Item active>Import Profile</Breadcrumb.Item>
