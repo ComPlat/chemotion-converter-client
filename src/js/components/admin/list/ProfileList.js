@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { ListGroup } from 'react-bootstrap';
 
 import ProfileListItem from './ProfileListItem'
 
@@ -9,23 +10,19 @@ class ProfileList extends Component {
     const { profiles, updateProfile, deleteProfile, downloadProfile, isAdmin } = this.props
 
     return (
-      <ul className="list-group mb-20">
-        {
-          profiles.map((profile, index) => {
-            return (
-              <ProfileListItem
-                key={index}
-                id={profile.id}
-                title={profile.title}
-                isAdmin={isAdmin}
-                description={profile.description}
-                updateProfile={() => updateProfile(profile)}
-                deleteProfile={() => deleteProfile(profile)}
-                downloadProfile={() => downloadProfile(profile)} />
-            )
-          })
-        }
-      </ul>
+      <ListGroup>
+        {profiles.map((profile) => (
+          <ProfileListItem
+            key={profile.id}
+            id={profile.id}
+            title={profile.title}
+            isAdmin={isAdmin}
+            description={profile.description}
+            updateProfile={() => updateProfile(profile)}
+            deleteProfile={() => deleteProfile(profile)}
+            downloadProfile={() => downloadProfile(profile)} />
+        ))}
+      </ListGroup>
     )
   }
 

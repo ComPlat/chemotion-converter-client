@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Button, ListGroup } from 'react-bootstrap';
 
 class ProfileListItem extends Component {
 
@@ -7,22 +8,23 @@ class ProfileListItem extends Component {
     const { id, title, description, updateProfile, deleteProfile, downloadProfile, isAdmin } = this.props
 
     return (
-      <li className="list-group-item">
-        <div className="row">
-          <div className="col-md-6">
-            <div>
-              <strong>{title}</strong>
+      <ListGroup.Item>
+        <div className="d-flex justify-content-between">
+          <div>
+            <div className="fw-bold">
+              {title}
             </div>
             {description}
           </div>
-          <div className="col-md-6 text-right">
-            <code className="mr-10">{id}</code>
-            <span className="btn btn-success btn-sm mr-10" disabled={!isAdmin} onClick={isAdmin ? downloadProfile : () => {}}>Download</span>
-            <span className="btn btn-primary btn-sm mr-10" disabled={!isAdmin} onClick={isAdmin ? updateProfile : () => {}}>Edit</span>
-            <span className="btn btn-danger btn-sm"  disabled={!isAdmin} onClick={isAdmin ? deleteProfile : () => {}}>Delete</span>
+
+          <div className="d-flex align-items-center gap-2">
+            <code>{id}</code>
+            <Button variant="success" size="sm" disabled={!isAdmin} onClick={downloadProfile}>Download</Button>
+            <Button variant="primary" size="sm" disabled={!isAdmin} onClick={updateProfile}>Edit</Button>
+            <Button variant="danger" size="sm" disabled={!isAdmin} onClick={deleteProfile}>Delete</Button>
           </div>
         </div>
-      </li>
+      </ListGroup.Item>
     )
   }
 
