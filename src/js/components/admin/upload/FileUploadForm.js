@@ -1,34 +1,38 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Alert, Button, Form, Spinner } from 'react-bootstrap';
 
 class FileUploadForm extends Component {
 
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return (
-      <form>
-        {this.props.error &&
-          <div className="alert alert-danger mt-10">{this.props.errorMessage}</div>
-        }
-        <div className="form-group">
-          <input type="file" className="form-control form-control-file" id="fileUpload" onChange={this.props.onFileChangeHandler} />
+      <Form>
+        {this.props.error && (
+          <Alert variant="danger">{this.props.errorMessage}</Alert>
+        )}
+
+        <Form.Group>
+          <Form.Control type="file" id="fileUpload" onChange={this.props.onFileChangeHandler} />
+        </Form.Group>
+
+        <div className="d-flex justify-content-end mt-4">
+          <Button
+            variant="primary"
+            onClick={this.props.onSubmitFileHandler}
+            disabled={this.props.disabled}
+          >
+            Upload
+          </Button>
         </div>
-        <button type="button" className="btn btn-primary float-right"
-                onClick={this.props.onSubmitFileHandler}
-                disabled={this.props.disabled}>
-          Upload
-        </button>
+
         {this.props.isLoading &&
           <div className="d-flex justify-content-center mt-10">
-            <div className="spinner-border text-primary" role="status">
-              <span className="sr-only">Loading...</span>
-            </div>
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
           </div>
         }
-      </form>
+      </Form>
     )
   }
 
