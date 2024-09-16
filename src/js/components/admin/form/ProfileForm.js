@@ -1,11 +1,16 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
-import { Tabs, Tab } from 'react-bootstrap';
+import { Button, Card, Col, Form, Row, Tabs, Tab } from 'react-bootstrap';
 import Select from 'react-select';
 
-import { getDataset, getInputTables, getInputColumns,
-         getFileMetadataOptions, getTableMetadataOptions } from '../../../utils/profileUtils'
+import {
+  getDataset,
+  getFileMetadataOptions,
+  getInputColumns,
+  getInputTables,
+  getTableMetadataOptions
+} from '../../../utils/profileUtils'
 
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
@@ -344,33 +349,27 @@ class ProfileForm extends Component {
 
   renderMetadata(metadata) {
     return (
-      <div className="panel panel-default">
-        <div className="panel-body">
-          <dl className="dl-horizontal mb-0">
-            {
-              Object.keys(metadata).map((key, index) => {
-                return (
-                  <React.Fragment key={index}>
-                    <dt>{key}:</dt>
-                    <dd>{metadata[key] || ' '}</dd>
-                  </React.Fragment>
-                )
-              })
-            }
-          </dl>
-        </div>
-      </div>
+      <Card>
+        <Card.Body>
+          <Row as="dl">
+            {Object.keys(metadata).map((key, index) => (
+              <React.Fragment key={index}>
+                <Col as="dt" lg={3}>{key}:</Col>
+                <Col as="dd" lg={9}>{metadata[key] || ' '}</Col>
+              </React.Fragment>
+            ))}
+          </Row>
+        </Card.Body>
+      </Card>
     )
   }
 
   renderHeader(header) {
     return (
       <pre>
-        {
-          header.map((line, index) => {
-            return <code key={index}>{line}</code>
-          })
-        }
+        {header.map((line, index) => (
+          <code key={index}>{line}</code>
+        ))}
       </pre>
     )
   }
@@ -386,11 +385,9 @@ class ProfileForm extends Component {
         lockPosition: true
     };
 
-    const rowData = table.rows.map(row => {
-      return Object.fromEntries(row.map((value, idx) => {
-        return [idx, value]
-      }))
-    })
+    const rowData = table.rows.map(row =>
+      Object.fromEntries(row.map((value, idx) => [idx, value]))
+    )
 
     return (
       <div className="ag-theme-alpine">
@@ -416,7 +413,7 @@ class ProfileForm extends Component {
     const tableMetadataOptions = getTableMetadataOptions(profile)
 
     let dataset = {}
-    let datasetList = (<span />)
+    let datasetList = null;
     if (datasets.length > 0) {
       dataset = getDataset(profile, datasets)
 
@@ -424,13 +421,13 @@ class ProfileForm extends Component {
       const dsValue = (dataset !== null && typeof dataset !== 'undefined') ? { value: dataset?.ols, label: dataset?.name } : ''
 
       datasetList = (
-        <div className="panel panel-default">
-          <div className="panel-heading">
-            <div>Dataset</div>
-          </div>
-          <div className="panel-body">
-            <div>
-              <label>Datasets</label>
+        <Card className="mt-3">
+          <Card.Header>
+            Dataset
+          </Card.Header>
+          <Card.Body>
+            <Form.Group>
+              <Form.Label>Datasets</Form.Label>
               <Select
                 isDisabled={false}
                 isLoading={false}
@@ -441,9 +438,9 @@ class ProfileForm extends Component {
                 value={dsValue}
                 onChange={event => this.updateOls(event === null ? null : event.value)}
               />
-            </div>
-          </div>
-        </div>
+            </Form.Group>
+          </Card.Body>
+        </Card>
       );
     }
 
@@ -454,21 +451,21 @@ class ProfileForm extends Component {
           <Tab key={`tableTab${idx}`} eventKey={idx} title={`Input table # ${idx}`}>
             {
               table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
-              <div className="mt-20">
+              <div className="mt-3">
                 <h4>Input table metadata</h4>
                 {this.renderMetadata(table.metadata)}
               </div>
             }
             {
               table.header !== undefined && table.header.length > 0 &&
-              <div className="mt-20">
+              <div className="mt-3">
                 <h4>Input table header</h4>
                 {this.renderHeader(table.header)}
               </div>
             }
             {
               table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
-              <div className="mt-20">
+              <div className="mt-3">
                 <h4>Input table data</h4>
                 {this.renderDataGrid(table)}
               </div>
@@ -479,93 +476,99 @@ class ProfileForm extends Component {
     }
 
     return (
-      <div className="row">
-        <div className="col-md-7">
-          {
-            profile.data ? <div className="scroll">
-              <h4>Input file metadata</h4>
-              {Object.keys(profile.data.metadata).length > 0 && this.renderMetadata(profile.data.metadata)}
-              <h4>Input tables</h4>
-              <Tabs defaultActiveKey={0} id="uncontrolled-tab-example">
-                {tabContents}
-              </Tabs>
-            </div> : <p>
-              <em>The profile does not contain the initial uploaded data.</em>
-            </p>
-          }
-        </div>
-        <div className="col-md-5">
+      <Row>
+        <Col md={7}>
+          {profile.data
+            ? (
+              <div className="scroll">
+                <h4>Input file metadata</h4>
+                {Object.keys(profile.data.metadata).length > 0 && this.renderMetadata(profile.data.metadata)}
+                <h4 className="mt-3">Input tables</h4>
+                <Tabs defaultActiveKey={0} id="uncontrolled-tab-example">
+                  {tabContents}
+                </Tabs>
+              </div>
+            ) : (
+              <p>
+                <em>The profile does not contain the initial uploaded data.</em>
+              </p>
+            )}
+        </Col>
+
+        <Col md={5}>
           <div className="scroll">
-            <div className="panel panel-default">
-              <div className="panel-heading">
+            <Card>
+              <Card.Header>
                 Profile
-              </div>
-              <div className="panel-body">
-                <div>
-                  <label>Title</label>
-                  <input type="text" className="form-control input-sm" onChange={event => this.updateTitle(event.currentTarget.value)} value={profile.title} />
-                  <small className="text-muted">Please add a title for this profile.</small>
-                </div>
-                <div className="mt-10">
-                  <label>Description</label>
-                  <textarea className="form-control" rows="3" onChange={event => this.updateDescription(event.currentTarget.value)} value={profile.description} />
-                  <small className="text-muted">Please add a description for this profile.</small>
-                </div>
-                <div className="checkbox mb-0 mt-10">
-                  <label htmlFor="match-tables-checkbox">
-                    <input type="checkbox"
-                      id="match-tables-checkbox"
-                      checked={profile.matchTables || false}
-                      onChange={this.toggleMatchTables}
-                      disabled={profile.tables.length != 1}
-                    />
-                    <span className={profile.tables.length != 1 ? 'text-muted' : ''}>
-                      Configure only one output table and use it for each input table.
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            {
-              profile.tables.map((table, index) => {
-                return (
-                  <React.Fragment key={index}>
-                    <div className="panel panel-default">
-                      <div className="panel-heading">
-                        <button type="button" className="btn btn-danger btn-xs pull-right"
-                                onClick={() => this.removeTable()}>Remove</button>
-                        Output table #{index}
-                      </div>
-                      <div className="panel-body">
-                        <TableForm
-                          table={table}
-                          inputTables={inputTables}
-                          inputColumns={inputColumns}
-                          options={options}
-                          updateHeader={(key, value) => this.updateHeader(index, key, value)}
-                          updateTable={(key, value) => this.updateTable(index, key, value)}
-                          addOperation={(key, type) => this.addOperation(index, key, type)}
-                          updateOperation={(key, opIndex, opKey, value) => this.updateOperation(index, key, opIndex, opKey, value)}
-                          removeOperation={(key, opIndex) => this.removeOperation(index, key, opIndex)}
-                          fileMetadataOptions={fileMetadataOptions}
-                          tableMetadataOptions={tableMetadataOptions}
-                        />
-                      </div>
-                    </div>
-                  </React.Fragment>
-                )
-              })
-            }
+              </Card.Header>
+              <Card.Body>
+                <Form.Group controlId="profile-title">
+                  <Form.Label>Title</Form.Label>
+                  <Form.Control size="sm" onChange={event => this.updateTitle(event.currentTarget.value)} value={profile.title} />
+                  <Form.Text>Please add a title for this profile.</Form.Text>
+                </Form.Group>
 
-            <div className="mb-20">
-              <button type="button" className="btn btn-success btn-sm"
-                      disabled={profile.matchTables}
-                      onClick={() => this.addTable()}>Add table</button>
+                <Form.Group controlId="profile-description" className="mt-3">
+                  <Form.Label>Description</Form.Label>
+                  <Form.Control as="textarea" size="sm" rows="3" onChange={event => this.updateDescription(event.currentTarget.value)} value={profile.description} />
+                  <Form.Text>Please add a description for this profile.</Form.Text>
+                </Form.Group>
+
+                <Form.Check
+                  className="mt-3"
+                  id="match-tables-checkbox"
+                  checked={profile.matchTables || false}
+                  onChange={this.toggleMatchTables}
+                  disabled={profile.tables.length != 1}
+                  label="Configure only one output table and use it for each input table."
+                />
+              </Card.Body>
+            </Card>
+
+            {profile.tables.map((table, index) => (
+              <Card key={index} className="mt-3">
+                <Card.Header className="d-flex align-items-baseline justify-content-between">
+                  Output table #{index}
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => this.removeTable()}
+                  >
+                    Remove
+                  </Button>
+                </Card.Header>
+                <Card.Body>
+                  <TableForm
+                    table={table}
+                    inputTables={inputTables}
+                    inputColumns={inputColumns}
+                    options={options}
+                    updateHeader={(key, value) => this.updateHeader(index, key, value)}
+                    updateTable={(key, value) => this.updateTable(index, key, value)}
+                    addOperation={(key, type) => this.addOperation(index, key, type)}
+                    updateOperation={(key, opIndex, opKey, value) => this.updateOperation(index, key, opIndex, opKey, value)}
+                    removeOperation={(key, opIndex) => this.removeOperation(index, key, opIndex)}
+                    fileMetadataOptions={fileMetadataOptions}
+                    tableMetadataOptions={tableMetadataOptions}
+                  />
+                </Card.Body>
+              </Card>
+            ))}
+
+            <div className="mt-2">
+              <Button
+                variant="success"
+                size="sm"
+                disabled={profile.matchTables}
+                onClick={() => this.addTable()}
+              >
+                Add table
+              </Button>
             </div>
 
-            <div className="panel panel-default">
-              <div className="panel-heading">Identifiers</div>
-              <div className="panel-body">
+            <Card className="mt-3">
+              <Card.Header>Identifiers</Card.Header>
+              <Card.Body>
                 {
                   [['Based on file metadata', 'fileMetadata'],
                    ['Based on table metadata', 'tableMetadata'],
@@ -602,13 +605,14 @@ class ProfileForm extends Component {
                     </li>
                   </ul>
                 </small>
-              </div>
-            </div>
+              </Card.Body>
+            </Card>
+
             { datasetList }
 
-            <div className="panel panel-default">
-              <div className="panel-heading">Metadata</div>
-              <div className="panel-body">
+            <Card className="mt-3">
+              <Card.Header>Metadata</Card.Header>
+              <Card.Body>
                 {
                   [['Based on file metadata', 'fileMetadata'],
                    ['Based on table metadata', 'tableMetadata'],
@@ -654,18 +658,16 @@ class ProfileForm extends Component {
                     </li>
                   </ul>
                 </small>
-              </div>
-            </div>
+              </Card.Body>
+            </Card>
 
-            <form>
-              <button type="submit" className="btn btn-primary" onClick={this.onSubmit}>
-                {status == 'create' && 'Create profile'}
-                {status == 'update' && 'Update profile'}
-              </button>
-            </form>
+            <Button className="mt-3" variant="primary" onClick={this.onSubmit}>
+              {status == 'create' && 'Create profile'}
+              {status == 'update' && 'Update profile'}
+            </Button>
           </div>
-        </div>
-      </div>
+        </Col>
+      </Row>
     )
   }
 
