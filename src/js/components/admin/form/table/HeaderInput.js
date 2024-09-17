@@ -1,26 +1,27 @@
-import React, { Component } from "react"
+import React from 'react'
 import PropTypes from 'prop-types';
+import { Col, Form, Row } from 'react-bootstrap';
 import Select from 'react-select';
 
 const HeaderInput = ({ optionKey, value, values, updateHeader }) => {
-    let idx = values.indexOf(value);
-    values = values.map((x) => {  return { 'value': x, 'label': x}});
-    if(idx === -1) {
-        if(value) values.unshift({ 'value': value, 'label': value});
-        idx = 0;
-    }
+  let idx = values.indexOf(value);
+  const options = values.map((x) => ({ value: x, label: x }));
+  if (idx === -1) {
+    if (value) options.unshift({ value: value, label: value });
+    idx = 0;
+  }
 
-    return (
-        <div className="form-group row">
-            <label htmlFor={optionKey} className="col-sm-4 col-form-label">{optionKey}</label>
-            <div className="col-sm-8">
-                <Select
-                    options={values}
-                    defaultValue={values[idx]}
-                    onChange={(v) => {updateHeader(optionKey, v.value)}}/>
-            </div>
-        </div>
-    )
+  return (
+    <Form.Group as={Row} controlId={optionKey} className="align-items-baseline mb-1">
+      <Form.Label as={Col} sm={4}>{optionKey}</Form.Label>
+      <Col sm={8}>
+        <Select
+          options={options}
+          defaultValue={options[idx]}
+          onChange={(v) => { updateHeader(optionKey, v.value) }} />
+      </Col>
+    </Form.Group>
+  )
 }
 
 HeaderInput.propTypes = {
