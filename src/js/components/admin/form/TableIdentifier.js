@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Col, Form, Row } from 'react-bootstrap';
 
 import TypeSelect from './identifier/TypeSelect'
 import IdentifierInput from './IdentifierInput'
@@ -21,20 +22,25 @@ class TableIdentifier extends Component {
   }
 
   render() {
-    const { index, headerKey, table, inputTables,
-            fileMetadataOptions, tableMetadataOptions } = this.props
+    const {
+      index, headerKey, table, inputTables,
+      fileMetadataOptions, tableMetadataOptions
+    } = this.props
 
     return (
       <div>
-        <div className="row">
-          <div className="col-md-2 mb-10">
-            <p className="form-control-static">{headerKey}</p>
-          </div>
-          <div className="col-md-10 mb-10">
-            <TypeSelect index={index} identifier={table.header[headerKey]}
-                        updateIdentifier={this.updateTableIdentifier} />
-          </div>
-        </div>
+        <Form.Group as={Row}>
+          <Form.Label as={Col} md={2} className="fw-bold">
+            {headerKey}
+          </Form.Label>
+          <Col md={10}>
+            <TypeSelect
+              index={index}
+              identifier={table.header[headerKey]}
+              updateIdentifier={this.updateTableIdentifier} />
+          </Col>
+        </Form.Group>
+
         <IdentifierInput
           index={index}
           identifier={table.header[headerKey]}

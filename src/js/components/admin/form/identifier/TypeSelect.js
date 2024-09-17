@@ -1,14 +1,18 @@
-import React, { Component } from "react"
+import React from "react"
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap';
 
 const TypeSelect = ({ index, identifier, updateIdentifier }) => {
   return (
-    <select className="form-control input-sm" value={identifier.type}
-            onChange={(event) => updateIdentifier(index, { type: event.target.value })}>
+    <Form.Select
+      size="sm"
+      value={identifier.type}
+      onChange={(event) => updateIdentifier(index, { type: event.target.value })}
+    >
       <option value="fileMetadata">Based on file metadata</option>
       <option value="tableMetadata">Based on table metadata</option>
       <option value="tableHeader">Based on table headers</option>
-    </select>
+    </Form.Select>
   )
 }
 
