@@ -1,6 +1,6 @@
 {
-  "name": "chemotion-converter-client",
-  "version": "0.2.0",
+  "name": "@complat/chemotion-converter-client",
+  "version": "0.5.0",
   "main": "./public/bundle.js",
   "files": [
     "public",
@@ -12,10 +12,10 @@
     "watch": "webpack --config webpack/dev.config.js --watch --mode development",
     "serve": "webpack-dev-server --config webpack/dev.config.js --open --mode development"
   },
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ComPlat/converter-client"
+    "url": "https://github.com/ComPlat/chemotion-converter-client"
   },
   "dependencies": {
     "bootstrap": "^3.3.7",
@@ -54,5 +54,8 @@
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4",
     "webpack-merge": "5.8.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
