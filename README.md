@@ -42,6 +42,11 @@ After building the production setup, the files in `public` can be copied to the 
 rsync -av public/ user@example.com:/var/www/public/
 ```
 
+npm package
+-----------
+
+For use of components as npm package there is src/bundle.js that can be built using `npm run build:bundle`.
+
 ## Acknowledgments
 
 This project has been funded by the **[DFG]**.

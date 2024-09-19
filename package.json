@@ -1,13 +1,15 @@
 {
   "name": "@complat/chemotion-converter-client",
-  "version": "0.10.0",
-  "main": "./public/bundle.js",
+  "version": "0.11.0",
+  "main": "./dist/bundle.js",
   "files": [
+    "dist",
     "public",
     "README.md"
   ],
   "scripts": {
     "build:prod": "webpack --config webpack/prod.config.js --mode production",
+    "build:bundle": "webpack --config webpack/lib.config.js --mode production",
     "build": "webpack --config webpack/dev.config.js --mode development",
     "watch": "webpack --config webpack/dev.config.js --watch --mode development",
     "serve": "webpack-dev-server --config webpack/dev.config.js --open --mode development"
