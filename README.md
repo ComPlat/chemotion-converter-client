@@ -1,7 +1,7 @@
 converter-client
 ================
 
-React client for the [converter-app](https://github.com/ComPlat/converter-app).
+React client for the [converter-app](https://github.com/ComPlat/chemotion-converter-app).
 
 Development setup
 -----------------
@@ -29,7 +29,7 @@ npm run serve
 Production setup
 ----------------
 
-For the production setup, the URL of the running [converter-app](https://github.com/ComPlat/converter-app) needs to be provided as environment variable:
+For the production setup, the URL of the running [converter-app](https://github.com/ComPlat/chemotion-converter-app) needs to be provided as environment variable:
 
 ```bash
 nvm use
