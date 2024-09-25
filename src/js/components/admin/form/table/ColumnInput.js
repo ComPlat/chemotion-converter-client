@@ -1,5 +1,6 @@
-import React, { Component } from "react"
+import React from "react"
 import PropTypes from 'prop-types';
+import { Col, Form, Row } from 'react-bootstrap';
 
 const ColumnInput = ({ column, onChange }) => {
   // a column list is not available
@@ -17,22 +18,25 @@ const ColumnInput = ({ column, onChange }) => {
   }
 
   return (
-    <div className="row">
-      <div className="col-md-6">
-        <input
+    <Row>
+      <Form.Group as={Col} md={6}>
+        <Form.Label>Table Index</Form.Label>
+        <Form.Control
           type="number"
-          className="form-control input-sm"
+          size="sm"
           onChange={event => onChange({
             tableIndex: parseInt(event.target.value),
             columnIndex: getIndex(column, 'columnIndex')
           })}
           value={getValue(column, 'tableIndex')}
         />
-        <small>Table Index</small>
-      </div>
-      <div className="col-md-6">
-        <input
+      </Form.Group>
+
+      <Form.Group as={Col} md={6}>
+        <Form.Label>Column Index</Form.Label>
+        <Form.Control
           type="number"
+          size="sm"
           className="form-control input-sm"
           onChange={event => onChange({
             tableIndex: getIndex(column, 'tableIndex'),
@@ -40,9 +44,8 @@ const ColumnInput = ({ column, onChange }) => {
           })}
           value={getValue(column, 'columnIndex')}
         />
-        <small>Column Index</small>
-      </div>
-    </div>
+      </Form.Group>
+    </Row>
   )
 }
 

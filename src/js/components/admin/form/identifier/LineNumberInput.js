@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap';
 
 const LineNumberInput = ({ index, identifier, updateIdentifier }) => {
 
@@ -16,16 +17,14 @@ const LineNumberInput = ({ index, identifier, updateIdentifier }) => {
   }
 
   return (
-    <React.Fragment>
-      <input
-        type="text"
-        id={`lineNumberInput${index}`}
-        className="form-control input-sm"
+    <Form.Group controlId={`lineNumberInput${index}`}>
+      <Form.Label>Line</Form.Label>
+      <Form.Control
+        size="sm"
         value={identifier.lineNumber || ''}
         onChange={(event) => updateLineNumber(event.target.value)}
       />
-      <label className="mb-0" htmlFor={`lineNumberInput${index}`}><small>Line</small></label>
-    </React.Fragment>
+    </Form.Group>
   )
 }
 

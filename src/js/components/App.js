@@ -1,4 +1,5 @@
-import React, { Component} from "react"
+import React, { Component } from 'react'
+import { Alert, Button, Col, Container, Form, Row } from 'react-bootstrap';
 
 import ConverterApi from '../api/ConverterApi'
 
@@ -70,42 +71,42 @@ class App extends Component {
   }
 
   render() {
-    return(
-      <div className="container">
-        <div className="row">
-          <div className="col-md-6 col-md-offset-3">
+    return (
+      <Container>
+        <Row>
+          <Col md={{ span: 6, offset: 3 }}>
             <h1 className="text-center p-5">Chemotion file converter</h1>
-          </div>
-          <div className="col-md-4 col-md-offset-4">
+          </Col>
+        </Row>
+        <Row>
+          <Col md={{ span: 4, offset: 4 }}>
             <p className="text-center">Please upload a file.</p>
-            <form>
-              <div className="form-group mb-10">
-                <input type="file" className="form-control form-control-file" id="fileUpload" onChange={this.onFileChangeHandler}/>
+            <Form>
+              <Form.Group className="mb-2">
+                <Form.Control type="file" id="fileUpload" onChange={this.onFileChangeHandler}/>
+              </Form.Group>
+              <div className="d-grid gap-2">
+                <Button variant="primary" size="lg" onClick={this.onSubmitFileHandler}>Upload</Button>
               </div>
-              <p>
-                <button type="button" className="btn btn-primary btn-lg btn-block" onClick={this.onSubmitFileHandler}>Upload</button>
-              </p>
-              <p className="mt-20">
-                <strong>Conversion format</strong>
-                <select className="form-control" value={this.state.format} onChange={this.onFormatChangeHandler}>
+              <Form.Group controlId="format-select" className="mt-3">
+                <Form.Label>Conversion format</Form.Label>
+                <Form.Select value={this.state.format} onChange={this.onFormatChangeHandler}>
                   <option value="jcampzip">Zip file containing JCAMP files</option>
                   <option value="jcamp">Single JCAMP file</option>
-                </select>
-              </p>
-              {this.state.error &&
-                <div className="alert alert-danger">{ this.state.errorMessage }</div>
-              }
-              {this.state.isLoading &&
-              <div className="">
-                <div className="text-primary text-center" role="status">
-                  <span>Loading...</span>
-                </div>
+                </Form.Select>
+              </Form.Group>
+            </Form>
+            {this.state.error && (
+              <Alert variant="danger" className="mt-3">{this.state.errorMessage}</Alert>
+            )}
+            {this.state.isLoading && (
+              <div className="text-primary text-center" role="status">
+                <span>Loading...</span>
               </div>
-              }
-            </form>
-          </div>
-        </div>
-      </div>
+            )}
+          </Col>
+        </Row>
+      </Container>
     )
   }
 }

@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import Select from 'react-select';
+import { Form } from 'react-bootstrap';
 import { sortBy } from 'lodash';
 
 const MatchSelect = ({ index, identifier, updateIdentifier }) => {
@@ -21,18 +21,18 @@ const MatchSelect = ({ index, identifier, updateIdentifier }) => {
   ]
 
   return (
-    <React.Fragment>
-      <select className="form-control input-sm" id={`matchSelect${index}`}
-              value={identifier.match}
-              onChange={(event) => updateIdentifier(index, { match: event.target.value })}>
-        {
-          options.map(option => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))
-        }
-      </select>
-      <label className="mb-0" htmlFor={`outputTableIndexSelect${index}`}><small>Match</small></label>
-    </React.Fragment>
+    <Form.Group controlId={`matchSelect${index}`}>
+      <Form.Label>Match</Form.Label>
+      <Form.Select
+        size="sm"
+        value={identifier.match}
+        onChange={(event) => updateIdentifier(index, { match: event.target.value })}
+      >
+        {options.map(option => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
+      </Form.Select>
+    </Form.Group>
   )
 }
 

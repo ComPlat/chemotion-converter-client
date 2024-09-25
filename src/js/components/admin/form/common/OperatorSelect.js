@@ -1,13 +1,18 @@
-import React, { Component } from "react"
+import React from "react"
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap';
 
 const OperatorSelect = ({ value, onChange }) => (
-  <select className="form-control input-sm" value={value} onChange={event => onChange(event.target.value)}>
+  <Form.Select
+    size="sm"
+    value={value}
+    onChange={event => onChange(event.target.value)}
+  >
     <option value="+">+</option>
     <option value="-">-</option>
     <option value="*">*</option>
     <option value=":">:</option>
-  </select>
+  </Form.Select>
 )
 
 OperatorSelect.propTypes = {

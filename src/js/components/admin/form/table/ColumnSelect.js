@@ -1,5 +1,6 @@
-import React, { Component } from "react"
+import React from "react"
 import PropTypes from 'prop-types';
+import { Form } from 'react-bootstrap'
 
 const ColumnSelect = ({ column, columnList, onChange }) => {
 
@@ -16,7 +17,7 @@ const ColumnSelect = ({ column, columnList, onChange }) => {
     if (column) {
       return columnList.reduce((agg, cur, idx) => {
         if (cur.value.tableIndex == column.tableIndex &&
-            cur.value.columnIndex == column.columnIndex) {
+          cur.value.columnIndex == column.columnIndex) {
           return idx
         } else {
           return agg
@@ -28,14 +29,16 @@ const ColumnSelect = ({ column, columnList, onChange }) => {
   }
 
   return (
-    <select className="form-control input-sm" value={getColumn(column)} onChange={handleChange}>
+    <Form.Select
+      size="sm"
+      value={getColumn(column)}
+      onChange={handleChange}
+    >
       <option value="">---</option>
-      {
-        columnList.map((item, index) => {
-          return <option value={index} key={index}>{item.label}</option>
-        })
-      }
-    </select>
+      {columnList.map((item, index) => (
+        <option value={index} key={index}>{item.label}</option>
+      ))}
+    </Form.Select>
   )
 }
 

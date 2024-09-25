@@ -1,29 +1,11 @@
-$header-height: 120px; // static height, manually computed
+$header-height: 130px; // static height, manually computed
 $break-point: 990px;
 
-header {
-    height: $header-height;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
-
-.container-fluid {
-    @media (min-width: $break-point) {
-        overflow: hidden;
-        height: 100%;
-    }
-}
-
 .scroll {
-    @media (min-width: $break-point) {
-        height: calc(100vh - #{$header-height});
-        overflow-y: auto;
-        padding-right: 10px;
-        padding-bottom: 40px;
-    }
-}
-
-.tab-pane {
-    padding: 1px;
+  @media (min-width: $break-point) {
+    height: calc(100vh - #{$header-height});
+    overflow-y: auto;
+    padding-right: 10px;
+    padding-bottom: 40px;
+  }
 }

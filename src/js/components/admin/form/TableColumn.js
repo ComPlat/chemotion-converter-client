@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
+import { Button, Col, Form, Row } from 'react-bootstrap';
 
 import ColumnInput from './table/ColumnInput'
 import ColumnSelect from './table/ColumnSelect'
@@ -8,70 +9,93 @@ import OperatorSelect from './common/OperatorSelect'
 
 class TableColumn extends Component {
 
-  constructor(props) {
-    super(props)
-  }
-
   render() {
-    const { table, label, columnKey, operationsKey, inputColumns, updateTable,
-                      addOperation, updateOperation, removeOperation } = this.props
+    const {
+      table, label, columnKey, operationsKey, inputColumns, updateTable,
+      addOperation, updateOperation, removeOperation
+    } = this.props
 
     return (
-      <React.Fragment>
-        <div className="form-group">
-          <label>{label}</label>
-          {
-            inputColumns.length > 0 ? <ColumnSelect column={table[columnKey]}
-                                                    columnList={inputColumns}
-                                                    onChange={column => updateTable(columnKey, column)} />
-                                    : <ColumnInput column={table[columnKey]}
-                                                   onChange={column => updateTable(columnKey, column)} />
-          }
-        </div>
-        {
-          table[operationsKey] && table[operationsKey].map((operation, index) => (
-            <div key={index} className="form-group row">
-              <div className="col-sm-2">
-                <OperatorSelect value={operation.operator}
-                                onChange={value => updateOperation(operationsKey, index, 'operator', value)} />
-              </div>
-              {
-                operation.type == 'column' &&
-                <div className="col-sm-8">
-                  {
-                    inputColumns.length > 0 ? <ColumnSelect column={operation.column}
-                                                            columnList={inputColumns}
-                                                            onChange={column => updateOperation(operationsKey, index, 'column', column)} />
-                                            : <ColumnInput column={operation.column}
-                                                           onChange={column => updateOperation(operationsKey, index, 'column', column)} />
-                  }
-                </div>
-              }
-              {
-                operation.type == 'value' &&
-                <div className="col-sm-8">
-                  <input type="text" className="form-control input-sm" value={operation.value || ''}
-                         onChange={event => updateOperation(operationsKey, index, 'value', event.target.value)}
+      <>
+        <Form.Group className="mb-2">
+          <Form.Label>{label}</Form.Label>
+          {inputColumns.length > 0 ? (
+            <ColumnSelect
+              column={table[columnKey]}
+              columnList={inputColumns}
+              onChange={column => updateTable(columnKey, column)}
+            />
+          ) : (
+            <ColumnInput
+              column={table[columnKey]}
+              onChange={column => updateTable(columnKey, column)}
+            />
+          )}
+        </Form.Group>
+
+        {table[operationsKey] && table[operationsKey].map((operation, index) => (
+          <Row key={index} className="mb-2 align-items-end">
+            <Col sm={2}>
+              <OperatorSelect value={operation.operator}
+                onChange={value => updateOperation(operationsKey, index, 'operator', value)} />
+            </Col>
+
+            {operation.type == 'column' && (
+              <Col sm={9}>
+                {inputColumns.length > 0 ? (
+                  <ColumnSelect
+                    column={operation.column}
+                    columnList={inputColumns}
+                    onChange={column => updateOperation(operationsKey, index, 'column', column)}
                   />
-                </div>
-              }
-              <div className="col-sm-2 text-right">
-                <button type="button" className="btn btn-danger btn-sm" onClick={event => removeOperation(operationsKey, index)}>
-                  &times;
-                </button>
-              </div>
-            </div>
-          ))
-        }
-        <div className="mb-20">
-          <button type="button" className="btn btn-success btn-xs mr-10" onClick={event => addOperation(operationsKey, 'column')}>
+                ) : (
+                  <ColumnInput
+                    column={operation.column}
+                    onChange={column => updateOperation(operationsKey, index, 'column', column)}
+                  />
+                )}
+              </Col>
+            )}
+
+            {operation.type == 'value' && (
+              <Col sm={9}>
+                <Form.Control
+                  size="sm"
+                  value={operation.value || ''}
+                  onChange={event => updateOperation(operationsKey, index, 'value', event.target.value)}
+                />
+              </Col>
+            )}
+
+            <Col sm={1} className="d-flex align-items-start justify-content-end">
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => removeOperation(operationsKey, index)}
+              >
+                &times;
+              </Button>
+            </Col>
+          </Row>
+        ))}
+
+        <div className="d-flex gap-2 mt-1 mb-3">
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() => addOperation(operationsKey, 'column')}
+          >
             Add column operation
-          </button>
-          <button type="button" className="btn btn-success btn-xs" onClick={event => addOperation(operationsKey, 'value')}>
+          </Button>
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() => addOperation(operationsKey, 'value')}
+          >
             Add scalar operation
-          </button>
+          </Button>
         </div>
-      </React.Fragment>
+      </>
     )
   }
 
