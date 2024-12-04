@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
-import { Button, Card, Col, Form, Row, Tabs, Tab } from 'react-bootstrap';
+import { Button, Card, Col, Form, Row, Tabs, Tab, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Select from 'react-select';
 
 import {
@@ -349,18 +349,42 @@ class ProfileForm extends Component {
 
   renderMetadata(metadata) {
     return (
+    <>
+      <style type="text/css">
+      {`
+        .tooltip-inner {
+            max-width: none !important;
+        }
+        .div-nowrap {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        }
+      `}
+      </style>
       <Card>
         <Card.Body>
           <Row as="dl">
             {Object.keys(metadata).map((key, index) => (
               <React.Fragment key={index}>
-                <Col as="dt" lg={3}>{key}:</Col>
-                <Col as="dd" lg={9}>{metadata[key] || ' '}</Col>
+              {key.length > window.innerWidth / 50 ? (  // only show tooltip if key is long (compared on window size)
+              <OverlayTrigger placement="top-start"
+                overlay={
+                <Tooltip id={`tooltip-${index}`}>
+                    {key}
+                </Tooltip>
+                }
+              >
+                <Col as="dt" lg={5}><div class='div-nowrap'>{key}:</div></Col>
+              </OverlayTrigger> ) : (<Col as="dt" lg={5}><div class='div-nowrap'>{key}:</div></Col>) }
+              <Col as="dd" lg={7}>{metadata[key] || ' '}</Col>
               </React.Fragment>
             ))}
           </Row>
         </Card.Body>
       </Card>
+    </>
     )
   }
 
