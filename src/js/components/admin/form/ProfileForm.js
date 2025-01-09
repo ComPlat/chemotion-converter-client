@@ -349,21 +349,7 @@ class ProfileForm extends Component {
 
   renderMetadata(metadata) {
     return (
-    <>
-      <style type="text/css">
-      {`
-        .tooltip-inner {
-            max-width: none !important;
-        }
-        .div-nowrap {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        }
-      `}
-      </style>
-      <Card>
+     <Card>
         <Card.Body>
           <Row as="dl">
             {Object.keys(metadata).map((key, index) => (
@@ -383,8 +369,7 @@ class ProfileForm extends Component {
             ))}
           </Row>
         </Card.Body>
-      </Card>
-    </>
+     </Card>
     )
   }
 
