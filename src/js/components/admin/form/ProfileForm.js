@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
-import { Button, Card, Col, Form, Row, Tabs, Tab, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Form, Row, Tabs, Tab } from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
 
