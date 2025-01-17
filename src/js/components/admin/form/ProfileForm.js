@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
 import { Button, Card, Col, Form, Row, Tabs, Tab } from 'react-bootstrap';
 import Select from 'react-select';
+import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
 
 import {
   getDataset,
@@ -349,18 +350,18 @@ class ProfileForm extends Component {
 
   renderMetadata(metadata) {
     return (
-      <Card>
+     <Card>
         <Card.Body>
           <Row as="dl">
             {Object.keys(metadata).map((key, index) => (
               <React.Fragment key={index}>
-                <Col as="dt" lg={3}>{key}:</Col>
-                <Col as="dd" lg={9}>{metadata[key] || ' '}</Col>
+              <TruncatedTextWithTooltip text={key} />
+              <Col as="dd" lg={7}>{metadata[key] || ' '}</Col>
               </React.Fragment>
             ))}
           </Row>
         </Card.Body>
-      </Card>
+     </Card>
     )
   }
 
