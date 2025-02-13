@@ -72,6 +72,7 @@ class TableForm extends Component {
             addOperation={addOperation}
             updateOperation={updateOperation}
             removeOperation={removeOperation}
+            tableMetadataOptions={tableMetadataOptions}
           />
         )}
 

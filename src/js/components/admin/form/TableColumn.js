@@ -12,7 +12,7 @@ class TableColumn extends Component {
   render() {
     const {
       table, label, columnKey, operationsKey, inputColumns, updateTable,
-      addOperation, updateOperation, removeOperation
+      addOperation, updateOperation, removeOperation, tableMetadataOptions
     } = this.props
 
     return (
@@ -67,6 +67,20 @@ class TableColumn extends Component {
               </Col>
             )}
 
+            {operation.type == 'metadata_value' && (
+              <Col sm={9}>
+                <Form.Select
+                    size="sm"
+                    value={operation.value || ''}
+                    onChange={event => updateOperation(operationsKey, index, 'value', event.target.value)}
+                  >
+                    {tableMetadataOptions.map((option, optionIndex) => (
+                      <option key={optionIndex} value={option.value}>{option.label}</option>
+                    ))}
+                </Form.Select>
+              </Col>
+            )}
+
             <Col sm={1} className="d-flex align-items-start justify-content-end">
               <Button
                 variant="danger"
@@ -94,6 +108,13 @@ class TableColumn extends Component {
           >
             Add scalar operation
           </Button>
+          <Button
+            variant="dark"
+            size="sm"
+            onClick={() => addOperation(operationsKey, 'metadata_value')}
+          >
+            Add table metadata operation
+          </Button>
         </div>
       </>
     )
@@ -111,7 +132,8 @@ TableColumn.propTypes = {
   updateHeader: PropTypes.func,
   addOperation: PropTypes.func,
   updateOperation: PropTypes.func,
-  removeOperation: PropTypes.func
+  removeOperation: PropTypes.func,
+  tableMetadataOptions: PropTypes.array
 }
 
 export default TableColumn
