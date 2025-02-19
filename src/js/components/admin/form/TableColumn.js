@@ -12,7 +12,7 @@ class TableColumn extends Component {
   render() {
     const {
       table, label, columnKey, operationsKey, inputColumns, updateTable,
-      addOperation, updateOperation, removeOperation, tableMetadataOptions
+      addOperation, updateOperation, removeOperation, tableMetadataOptions, inputTables
     } = this.props
 
     return (
@@ -81,6 +81,47 @@ class TableColumn extends Component {
               </Col>
             )}
 
+            {(operation.type == 'header_value') && (
+            <>
+              <Col sm={3}>
+                <Form.Select
+                size="sm"
+                value={operation.table || ''}
+                onChange={event => {
+                    updateOperation(operationsKey, index, 'table', event.target.value);
+                  }
+                }
+              >
+                {inputTables.map((table, tableIndex) => (
+                  <option key={tableIndex} value={tableIndex}>Input table #{tableIndex}</option>
+                ))}
+              </Form.Select>
+              </Col>
+              <Col sm={3}>
+                <Form.Control
+                  size="sm"
+                  value={operation.line || ''}
+                  placeholder='Line'
+                  onChange={event => {
+                      updateOperation(operationsKey, index, 'line', event.target.value);
+                    }
+                  }
+                />
+              </Col>
+              <Col sm={3}>
+                <Form.Control
+                  size="sm"
+                  value={operation.regex || ''}
+                  placeholder='Regex'
+                  onChange={event => {
+                      updateOperation(operationsKey, index, 'regex', event.target.value);
+                    }
+                  }
+                />
+              </Col>
+            </>
+            )}
+
             <Col sm={1} className="d-flex align-items-start justify-content-end">
               <Button
                 variant="danger"
@@ -115,6 +156,13 @@ class TableColumn extends Component {
           >
             Add table metadata operation
           </Button>
+          <Button
+            variant="dark"
+            size="sm"
+            onClick={() => addOperation(operationsKey, 'header_value')}
+          >
+            Add table header operation
+          </Button>
         </div>
       </>
     )
@@ -133,7 +181,8 @@ TableColumn.propTypes = {
   addOperation: PropTypes.func,
   updateOperation: PropTypes.func,
   removeOperation: PropTypes.func,
-  tableMetadataOptions: PropTypes.array
+  tableMetadataOptions: PropTypes.array,
+  inputTables: PropTypes.array
 }
 
 export default TableColumn

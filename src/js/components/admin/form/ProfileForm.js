@@ -58,8 +58,34 @@ class ProfileForm extends Component {
     this.api = params.api;
   }
 
+  get_value_from_regex(operator, table, line, regex) {
+    let value = null;
+    if (table == null) table = 0;
+    if (line != null && regex != null) {
+        const { header } = this.props.profile.data.tables[table];
+        const reg_exp = new RegExp(regex, "g");
+        value = reg_exp.exec(header[line-1]);
+        value = (value != null && !isNaN(value)) ? value[0] : null
+    }
+
+    if (value == null) {
+        value = (operator === '+' || operator === '-') ? 0 : 1
+    }
+
+    return value;
+  }
+
   onSubmit(event) {
     event.preventDefault()
+    const { tables } = this.props.profile
+    tables.forEach((table) => {
+        table.table['xOperations']?.filter((op) => op.type === 'header_value')
+            .map((hv) => hv.value = this.get_value_from_regex(hv.operator, hv.table, hv. line, hv.regex))
+    })
+    tables.forEach((table) => {
+        table.table['yOperations']?.filter((op) => op.type === 'header_value')
+            .map((hv) => hv.value = this.get_value_from_regex(hv.operator, hv.table, hv. line, hv.regex))
+    })
     this.props.storeProfile()
   }
 
