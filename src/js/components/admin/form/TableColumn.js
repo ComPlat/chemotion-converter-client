@@ -71,11 +71,15 @@ class TableColumn extends Component {
               <Col sm={9}>
                 <Form.Select
                     size="sm"
-                    value={operation.value || ''}
-                    onChange={event => updateOperation(operationsKey, index, 'value', event.target.value)}
+                    value={operation.metadata || ''}
+                    onChange={event => {
+                            updateOperation(operationsKey, index, 'metadata',
+                                `${event.target.value}:${tableMetadataOptions[event.target.value].value}`);
+                        }
+                    }
                   >
                     {tableMetadataOptions.map((option, optionIndex) => (
-                      <option key={optionIndex} value={option.value}>{option.label}</option>
+                      <option key={optionIndex} value={optionIndex}>{option.label}</option>
                     ))}
                 </Form.Select>
               </Col>

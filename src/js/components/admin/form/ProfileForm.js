@@ -65,7 +65,10 @@ class ProfileForm extends Component {
         const { header } = this.props.profile.data.tables[table];
         const reg_exp = new RegExp(regex, "g");
         value = reg_exp.exec(header[line-1]);
-        value = (value != null && !isNaN(value)) ? value[0] : null
+        if (value != null) {
+            value = value[1] == null ? value[0] : value[1] // value[1] first group; value[0] no groups
+            if (isNaN(value)) value = null
+        }
     }
 
     if (value == null) {
@@ -240,6 +243,11 @@ class ProfileForm extends Component {
   }
 
   updateOperation(index, key, opIndex, opKey, value) {
+    if (opKey === 'metadata') {
+        const data = value.split(':');
+        this.updateOperation(index, key, opIndex, 'value', data[1]);
+        value = data[0];
+    }
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
       profile.tables[index].table[key][opIndex][opKey] = value
