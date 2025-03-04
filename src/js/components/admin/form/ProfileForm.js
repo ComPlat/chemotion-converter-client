@@ -245,7 +245,8 @@ class ProfileForm extends Component {
   updateOperation(index, key, opIndex, opKey, value) {
     if (opKey === 'metadata') {
         const data = value.split(':');
-        this.updateOperation(index, key, opIndex, 'value', data[1]);
+        this.updateOperation(index, key, opIndex, 'value', data[1].trim());
+        this.updateOperation(index, key, opIndex, 'table', data[2]);
         value = data[0];
     }
     const profile = Object.assign({}, this.props.profile)

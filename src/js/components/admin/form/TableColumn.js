@@ -74,7 +74,8 @@ class TableColumn extends Component {
                     value={operation.metadata || ''}
                     onChange={event => {
                             updateOperation(operationsKey, index, 'metadata',
-                                `${event.target.value}:${tableMetadataOptions[event.target.value].value}`);
+                                `${event.target.value}:${tableMetadataOptions[event.target.value].key}
+                                :${tableMetadataOptions[event.target.value].tableIndex}`);
                         }
                     }
                   >
