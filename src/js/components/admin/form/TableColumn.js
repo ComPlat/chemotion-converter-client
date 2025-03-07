@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import { Button, Col, Form, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 import ColumnInput from './table/ColumnInput'
 import ColumnSelect from './table/ColumnSelect'
@@ -12,7 +12,7 @@ class TableColumn extends Component {
   render() {
     const {
       table, label, columnKey, operationsKey, inputColumns, updateTable,
-      addOperation, updateOperation, removeOperation
+      addOperation, updateOperation, removeOperation, tableMetadataOptions, inputTables
     } = this.props
 
     return (
@@ -67,6 +67,66 @@ class TableColumn extends Component {
               </Col>
             )}
 
+            {operation.type == 'metadata_value' && (
+              <Col sm={9}>
+                <Form.Select
+                    size="sm"
+                    value={operation.metadata || ''}
+                    onChange={event => {
+                            updateOperation(operationsKey, index, 'metadata',
+                                `${event.target.value}:${tableMetadataOptions[event.target.value].key}
+                                :${tableMetadataOptions[event.target.value].tableIndex}`);
+                        }
+                    }
+                  >
+                    {tableMetadataOptions.map((option, optionIndex) => (
+                      <option key={optionIndex} value={optionIndex}>{option.label}</option>
+                    ))}
+                </Form.Select>
+              </Col>
+            )}
+
+            {(operation.type == 'header_value') && (
+            <>
+              <Col sm={3}>
+                <Form.Select
+                size="sm"
+                value={operation.table || ''}
+                onChange={event => {
+                    updateOperation(operationsKey, index, 'table', event.target.value);
+                  }
+                }
+              >
+                {inputTables.map((table, tableIndex) => (
+                  <option key={tableIndex} value={tableIndex}>Input table #{tableIndex}</option>
+                ))}
+              </Form.Select>
+              </Col>
+              <Col sm={3}>
+                <Form.Control
+                  size="sm"
+                  value={operation.line || ''}
+                  placeholder='Line'
+                  onChange={event => {
+                      updateOperation(operationsKey, index, 'line', event.target.value);
+                    }
+                  }
+                />
+              </Col>
+              <Col sm={3}>
+                <Form.Control
+                  size="sm"
+                  value={operation.regex || ''}
+                  placeholder='Regex'
+                  onChange={event => {
+                      updateOperation(operationsKey, index, 'regex', event.target.value);
+                    }
+                  }
+                />
+              </Col>
+            </>
+            )}
+
             <Col sm={1} className="d-flex align-items-start justify-content-end">
               <Button
                 variant="danger"
@@ -94,6 +154,34 @@ class TableColumn extends Component {
           >
             Add scalar operation
           </Button>
+          <OverlayTrigger
+            placement="bottom"
+            overlay={<Tooltip id="button-tooltip-2">
+              The calculation will be ignored if the value is not available
+            </Tooltip>}
+          >
+            <Button
+                variant="warning"
+                size="sm"
+                onClick={() => addOperation(operationsKey, 'metadata_value')}
+            >
+                Add table metadata operation
+            </Button>
+          </OverlayTrigger>
+          <OverlayTrigger
+            placement="bottom"
+            overlay={<Tooltip id="button-tooltip-2">
+              The calculation will be ignored if the value is not available
+            </Tooltip>}
+          >
+            <Button
+              variant="warning"
+              size="sm"
+              onClick={() => addOperation(operationsKey, 'header_value')}
+            >
+              Add table header operation
+            </Button>
+          </OverlayTrigger>
         </div>
       </>
     )
@@ -111,7 +199,9 @@ TableColumn.propTypes = {
   updateHeader: PropTypes.func,
   addOperation: PropTypes.func,
   updateOperation: PropTypes.func,
-  removeOperation: PropTypes.func
+  removeOperation: PropTypes.func,
+  tableMetadataOptions: PropTypes.array,
+  inputTables: PropTypes.array
 }
 
 export default TableColumn
