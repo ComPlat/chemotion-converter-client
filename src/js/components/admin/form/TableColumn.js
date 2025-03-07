@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import { Button, Col, Form, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 import ColumnInput from './table/ColumnInput'
 import ColumnSelect from './table/ColumnSelect'
@@ -154,20 +154,34 @@ class TableColumn extends Component {
           >
             Add scalar operation
           </Button>
-          <Button
-            variant="dark"
-            size="sm"
-            onClick={() => addOperation(operationsKey, 'metadata_value')}
+          <OverlayTrigger
+            placement="bottom"
+            overlay={<Tooltip id="button-tooltip-2">
+              The calculation will be ignored if the value is not available
+            </Tooltip>}
           >
-            Add table metadata operation
-          </Button>
-          <Button
-            variant="dark"
-            size="sm"
-            onClick={() => addOperation(operationsKey, 'header_value')}
+            <Button
+                variant="warning"
+                size="sm"
+                onClick={() => addOperation(operationsKey, 'metadata_value')}
+            >
+                Add table metadata operation
+            </Button>
+          </OverlayTrigger>
+          <OverlayTrigger
+            placement="bottom"
+            overlay={<Tooltip id="button-tooltip-2">
+              The calculation will be ignored if the value is not available
+            </Tooltip>}
           >
-            Add table header operation
-          </Button>
+            <Button
+              variant="warning"
+              size="sm"
+              onClick={() => addOperation(operationsKey, 'header_value')}
+            >
+              Add table header operation
+            </Button>
+          </OverlayTrigger>
         </div>
       </>
     )
