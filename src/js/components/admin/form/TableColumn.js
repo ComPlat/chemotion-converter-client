@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import { Button, Col, Form, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import {Button, Col, Form, Row, OverlayTrigger, Popover, Alert} from 'react-bootstrap';
 
 import ColumnInput from './table/ColumnInput'
 import ColumnSelect from './table/ColumnSelect'
@@ -35,6 +35,10 @@ class TableColumn extends Component {
 
         {table[operationsKey] && table[operationsKey].map((operation, index) => (
           <Row key={index} className="mb-2 align-items-end">
+            {(operation.type === 'metadata_value' || operation.type === 'header_value') && (
+              <Alert variant="warning">
+                Please note that the following calculation will be ignored if the value is not available!
+              </Alert>)}
             <Col sm={2}>
               <OperatorSelect value={operation.operator}
                 onChange={value => updateOperation(operationsKey, index, 'operator', value)} />
@@ -156,9 +160,13 @@ class TableColumn extends Component {
           </Button>
           <OverlayTrigger
             placement="bottom"
-            overlay={<Tooltip id="button-tooltip-2">
-              The calculation will be ignored if the value is not available
-            </Tooltip>}
+            overlay={<Popover id="metadata-popover">
+              <Popover.Header as="h3"> Attention: Use with caution! </Popover.Header>
+              <Popover.Body>
+                There is a risk of data corruption when using user-provided or free-text metadata for calculations.
+                We recommend using only unmodifiable metadata, such as numerical result fields directly from the device.
+              </Popover.Body>
+            </Popover>}
           >
             <Button
                 variant="warning"
@@ -170,9 +178,13 @@ class TableColumn extends Component {
           </OverlayTrigger>
           <OverlayTrigger
             placement="bottom"
-            overlay={<Tooltip id="button-tooltip-2">
-              The calculation will be ignored if the value is not available
-            </Tooltip>}
+            overlay={<Popover  id="header-popover">
+              <Popover.Header as="h3"> Attention: Use with caution! </Popover.Header>
+              <Popover.Body>
+                There is a risk of data corruption when using user-provided or free-text metadata for calculations.
+                We recommend using only unmodifiable metadata, such as numerical result fields directly from the device.
+              </Popover.Body>
+            </Popover>}
           >
             <Button
               variant="warning"
