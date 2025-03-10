@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import {Button, Col, Form, Row, OverlayTrigger, Popover, Alert} from 'react-bootstrap';
 
 import ColumnInput from './table/ColumnInput'
 import ColumnSelect from './table/ColumnSelect'
@@ -12,7 +12,7 @@ class TableColumn extends Component {
   render() {
     const {
       table, label, columnKey, operationsKey, inputColumns, updateTable,
-      addOperation, updateOperation, removeOperation
+      addOperation, updateOperation, removeOperation, tableMetadataOptions, inputTables
     } = this.props
 
     return (
@@ -35,6 +35,10 @@ class TableColumn extends Component {
 
         {table[operationsKey] && table[operationsKey].map((operation, index) => (
           <Row key={index} className="mb-2 align-items-end">
+            {(operation.type === 'metadata_value' || operation.type === 'header_value') && (
+              <Alert variant="warning">
+                Please note that the following calculation will be ignored if the value is not available!
+              </Alert>)}
             <Col sm={2}>
               <OperatorSelect value={operation.operator}
                 onChange={value => updateOperation(operationsKey, index, 'operator', value)} />
@@ -67,6 +71,66 @@ class TableColumn extends Component {
               </Col>
             )}
 
+            {operation.type == 'metadata_value' && (
+              <Col sm={9}>
+                <Form.Select
+                    size="sm"
+                    value={operation.metadata || ''}
+                    onChange={event => {
+                            updateOperation(operationsKey, index, 'metadata',
+                                `${event.target.value}:${tableMetadataOptions[event.target.value].key}
+                                :${tableMetadataOptions[event.target.value].tableIndex}`);
+                        }
+                    }
+                  >
+                    {tableMetadataOptions.map((option, optionIndex) => (
+                      <option key={optionIndex} value={optionIndex}>{option.label}</option>
+                    ))}
+                </Form.Select>
+              </Col>
+            )}
+
+            {(operation.type == 'header_value') && (
+            <>
+              <Col sm={3}>
+                <Form.Select
+                size="sm"
+                value={operation.table || ''}
+                onChange={event => {
+                    updateOperation(operationsKey, index, 'table', event.target.value);
+                  }
+                }
+              >
+                {inputTables.map((table, tableIndex) => (
+                  <option key={tableIndex} value={tableIndex}>Input table #{tableIndex}</option>
+                ))}
+              </Form.Select>
+              </Col>
+              <Col sm={3}>
+                <Form.Control
+                  size="sm"
+                  value={operation.line || ''}
+                  placeholder='Line'
+                  onChange={event => {
+                      updateOperation(operationsKey, index, 'line', event.target.value);
+                    }
+                  }
+                />
+              </Col>
+              <Col sm={3}>
+                <Form.Control
+                  size="sm"
+                  value={operation.regex || ''}
+                  placeholder='Regex'
+                  onChange={event => {
+                      updateOperation(operationsKey, index, 'regex', event.target.value);
+                    }
+                  }
+                />
+              </Col>
+            </>
+            )}
+
             <Col sm={1} className="d-flex align-items-start justify-content-end">
               <Button
                 variant="danger"
@@ -94,6 +158,42 @@ class TableColumn extends Component {
           >
             Add scalar operation
           </Button>
+          <OverlayTrigger
+            placement="bottom"
+            overlay={<Popover id="metadata-popover">
+              <Popover.Header as="h3"> Attention: Use with caution! </Popover.Header>
+              <Popover.Body>
+                There is a risk of data corruption when using user-provided or free-text metadata for calculations.
+                We recommend using only unmodifiable metadata, such as numerical result fields directly from the device.
+              </Popover.Body>
+            </Popover>}
+          >
+            <Button
+                variant="warning"
+                size="sm"
+                onClick={() => addOperation(operationsKey, 'metadata_value')}
+            >
+                Add table metadata operation
+            </Button>
+          </OverlayTrigger>
+          <OverlayTrigger
+            placement="bottom"
+            overlay={<Popover  id="header-popover">
+              <Popover.Header as="h3"> Attention: Use with caution! </Popover.Header>
+              <Popover.Body>
+                There is a risk of data corruption when using user-provided or free-text metadata for calculations.
+                We recommend using only unmodifiable metadata, such as numerical result fields directly from the device.
+              </Popover.Body>
+            </Popover>}
+          >
+            <Button
+              variant="warning"
+              size="sm"
+              onClick={() => addOperation(operationsKey, 'header_value')}
+            >
+              Add table header operation
+            </Button>
+          </OverlayTrigger>
         </div>
       </>
     )
@@ -111,7 +211,9 @@ TableColumn.propTypes = {
   updateHeader: PropTypes.func,
   addOperation: PropTypes.func,
   updateOperation: PropTypes.func,
-  removeOperation: PropTypes.func
+  removeOperation: PropTypes.func,
+  tableMetadataOptions: PropTypes.array,
+  inputTables: PropTypes.array
 }
 
 export default TableColumn

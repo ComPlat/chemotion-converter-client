@@ -72,6 +72,8 @@ class TableForm extends Component {
             addOperation={addOperation}
             updateOperation={updateOperation}
             removeOperation={removeOperation}
+            tableMetadataOptions={tableMetadataOptions}
+            inputTables={inputTables}
           />
         )}
 
@@ -85,6 +87,8 @@ class TableForm extends Component {
           addOperation={addOperation}
           updateOperation={updateOperation}
           removeOperation={removeOperation}
+          tableMetadataOptions={tableMetadataOptions}
+          inputTables={inputTables}
         />
 
         <small className="text-muted">The data you pick will determine which table columns are going to converted.</small>
