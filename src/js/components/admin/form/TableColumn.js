@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import {Button, Col, Form, Row, OverlayTrigger, Popover, Alert} from 'react-bootstrap';
+import {Button, Col, Form, Row, OverlayTrigger, Popover} from 'react-bootstrap';
 
 import ColumnInput from './table/ColumnInput'
 import ColumnSelect from './table/ColumnSelect'
@@ -9,16 +9,39 @@ import OperatorSelect from './common/OperatorSelect'
 
 class TableColumn extends Component {
 
+  updateRegex(idx, regexPattern, line) {
+    const {inputTables} = this.props;
+
+    line = parseInt(line)
+    let header = inputTables[idx]['header']
+    if (!isNaN(line) && header.length > line) {
+      header = header[line - 1]
+    }
+    try {
+      const regex = new RegExp(regexPattern);
+      const match = regex.exec(header);
+      let matchStr = regex.exec(header);
+      if (match.length > 1) {
+        matchStr = match[1]
+      }
+      const val = parseFloat(matchStr)
+      if (!isNaN(val)) {
+        return val
+      }
+    } catch {}
+    return ''
+  }
+
   render() {
     const {
       table, label, columnKey, operationsKey, inputColumns, updateTable,
       addOperation, updateOperation, removeOperation, tableMetadataOptions, inputTables
     } = this.props
-
+    const is_extra_type = (operation) => operation.type === 'metadata_value' || operation.type === 'header_value'
     return (
       <>
         <Form.Group className="mb-2">
-          <Form.Label>{label}</Form.Label>
+          <Form.Label column="lg">{label}</Form.Label>
           {inputColumns.length > 0 ? (
             <ColumnSelect
               column={table[columnKey]}
@@ -34,17 +57,17 @@ class TableColumn extends Component {
         </Form.Group>
 
         {table[operationsKey] && table[operationsKey].map((operation, index) => (
-          <Row key={index} className="mb-2 align-items-end">
-            {(operation.type === 'metadata_value' || operation.type === 'header_value') && (
-              <Alert variant="warning">
+          <Row key={index} className={"mb-2 align-items-end alert" + (is_extra_type(operation)  ? " alert-warning": "")}>
+            {is_extra_type(operation) && (
+              <p>
                 Please note that the following calculation will be ignored if the value is not available!
-              </Alert>)}
+              </p>)}
             <Col sm={2}>
               <OperatorSelect value={operation.operator}
                 onChange={value => updateOperation(operationsKey, index, 'operator', value)} />
             </Col>
 
-            {operation.type == 'column' && (
+            {operation.type === 'column' && (
               <Col sm={9}>
                 {inputColumns.length > 0 ? (
                   <ColumnSelect
@@ -61,7 +84,7 @@ class TableColumn extends Component {
               </Col>
             )}
 
-            {operation.type == 'value' && (
+            {operation.type === 'value' && (
               <Col sm={9}>
                 <Form.Control
                   size="sm"
@@ -71,7 +94,7 @@ class TableColumn extends Component {
               </Col>
             )}
 
-            {operation.type == 'metadata_value' && (
+            {operation.type === 'metadata_value' && (
               <Col sm={9}>
                 <Form.Select
                     size="sm"
@@ -90,9 +113,9 @@ class TableColumn extends Component {
               </Col>
             )}
 
-            {(operation.type == 'header_value') && (
+            {(operation.type === 'header_value') && (
             <>
-              <Col sm={3}>
+              <Col sm={9}>
                 <Form.Select
                 size="sm"
                 value={operation.table || ''}
@@ -106,7 +129,7 @@ class TableColumn extends Component {
                 ))}
               </Form.Select>
               </Col>
-              <Col sm={3}>
+              <Col sm={5}>
                 <Form.Control
                   size="sm"
                   value={operation.line || ''}
@@ -117,7 +140,7 @@ class TableColumn extends Component {
                   }
                 />
               </Col>
-              <Col sm={3}>
+              <Col sm={6}>
                 <Form.Control
                   size="sm"
                   value={operation.regex || ''}
@@ -140,6 +163,17 @@ class TableColumn extends Component {
                 &times;
               </Button>
             </Col>
+
+
+            {(operation.type === 'header_value') && (<Col sm={12}>
+              <p><strong>Value:</strong> {this.updateRegex(operation.table, operation.regex, operation.line)}</p>
+            </Col>)}
+
+
+            {(operation.type === 'metadata_value' && tableMetadataOptions[operation.metadata]) && (<Col sm={12}>
+              <p><strong>Value:</strong> {parseFloat(tableMetadataOptions[operation.metadata].value)}</p>
+            </Col>)}
+
           </Row>
         ))}
 
