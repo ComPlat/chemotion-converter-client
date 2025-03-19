@@ -60,7 +60,8 @@ class TableColumn extends Component {
           <Row key={index} className={"mb-2 align-items-end alert" + (is_extra_type(operation)  ? " alert-warning": "")}>
             {is_extra_type(operation) && (
               <p>
-                Please note that the following calculation will be ignored if the value is not available!
+                Please note that, if the value is not available,
+                the following calculation could result in an unexpected outcome!
               </p>)}
             <Col sm={2}>
               <OperatorSelect value={operation.operator}
@@ -166,12 +167,35 @@ class TableColumn extends Component {
 
 
             {(operation.type === 'header_value') && (<Col sm={12}>
-              <p><strong>Value:</strong> {this.updateRegex(operation.table, operation.regex, operation.line)}</p>
-            </Col>)}
-
+                <Form.Check
+                  inline
+                  checked={operation.checkbox}
+                  id={`checkbox-${operation.type}`}
+                  label = {`If regex finds no number, use default value:
+                    ${(operation.operator === "+" || operation.operator === "-") ? "0" : "1"}`}
+                  onChange={event => {
+                      updateOperation(operationsKey, index, 'checkbox', event.target.checked);
+                    }}
+                />
+                <Form.Label column={true}>
+                  <strong>Current Value:</strong> {this.updateRegex(operation.table, operation.regex, operation.line)}
+                </Form.Label>
+              </Col>)}
 
             {(operation.type === 'metadata_value' && tableMetadataOptions[operation.metadata]) && (<Col sm={12}>
-              <p><strong>Value:</strong> {parseFloat(tableMetadataOptions[operation.metadata].value)}</p>
+                <Form.Check
+                  inline
+                  checked={operation.checkbox}
+                  id={`checkbox-${operation.type}`}
+                  label = {`If metadata finds no number, use default value:
+                    ${(operation.operator === "+" || operation.operator === "-") ? "0" : "1"}`}
+                  onChange={event => {
+                      updateOperation(operationsKey, index, 'checkbox', event.target.checked);
+                    }}
+                />
+               <Form.Label column={true}>
+                 <strong>Current Value:</strong> {parseFloat(tableMetadataOptions[operation.metadata].value)}
+               </Form.Label>
             </Col>)}
 
           </Row>
