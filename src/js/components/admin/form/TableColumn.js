@@ -14,7 +14,7 @@ class TableColumn extends Component {
 
     line = parseInt(line)
     let header = inputTables[idx]['header']
-    if (!isNaN(line) && header.length > line) {
+    if (!isNaN(line) && header.length + 1 > line) {
       header = header[line - 1]
     }
     try {
