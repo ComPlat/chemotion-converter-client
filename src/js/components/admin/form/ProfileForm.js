@@ -201,11 +201,13 @@ class ProfileForm extends Component {
 
       if (type === 'header_value') {
         operation.table = '0';
+        operation.ignore_missing_values = false;
       } else if (type === 'metadata_value') {
         const mdZero =  getTableMetadataOptions(profile)[0];
         operation.value = mdZero.key;
         operation.table = `${mdZero.tableIndex}`;
         operation.metadata = '0';
+        operation.ignore_missing_values = false;
       } else if (type === 'column') {
         operation['column'] = {
           tableIndex: null,

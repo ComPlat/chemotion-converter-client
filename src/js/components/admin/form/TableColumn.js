@@ -169,12 +169,11 @@ class TableColumn extends Component {
             {(operation.type === 'header_value') && (<Col sm={12}>
                 <Form.Check
                   inline
-                  checked={operation.checkbox}
+                  checked={operation.ignore_missing_values}
                   id={`checkbox-${operation.type}`}
-                  label = {`If regex finds no number, use default value:
-                    ${(operation.operator === "+" || operation.operator === "-") ? "0" : "1"}`}
+                  label = {`If selected, this operation will be ignored if the value cannot be found in the data file. Conversely, if the box is left unchecked and the value cannot be found, the missing data will result in an empty data results file.`}
                   onChange={event => {
-                      updateOperation(operationsKey, index, 'checkbox', event.target.checked);
+                      updateOperation(operationsKey, index, 'ignore_missing_values', event.target.checked);
                     }}
                 />
                 <Form.Label column={true}>
@@ -185,12 +184,11 @@ class TableColumn extends Component {
             {(operation.type === 'metadata_value' && tableMetadataOptions[operation.metadata]) && (<Col sm={12}>
                 <Form.Check
                   inline
-                  checked={operation.checkbox}
+                  checked={operation.ignore_missing_values}
                   id={`checkbox-${operation.type}`}
-                  label = {`If metadata finds no number, use default value:
-                    ${(operation.operator === "+" || operation.operator === "-") ? "0" : "1"}`}
+                  label = {`If selected, this operation will be ignored if the value cannot be found in the data file. Conversely, if the box is left unchecked and the value cannot be found, the missing data will result in an empty data results file.`}
                   onChange={event => {
-                      updateOperation(operationsKey, index, 'checkbox', event.target.checked);
+                      updateOperation(operationsKey, index, 'ignore_missing_values', event.target.checked);
                     }}
                 />
                <Form.Label column={true}>
