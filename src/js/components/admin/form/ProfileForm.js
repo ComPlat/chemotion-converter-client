@@ -39,6 +39,7 @@ class ProfileForm extends Component {
 
     this.addOperation = this.addOperation.bind(this)
     this.updateOperation = this.updateOperation.bind(this)
+    this.updateOperationDescription = this.updateOperationDescription.bind(this)
     this.removeOperation = this.removeOperation.bind(this)
 
     this.addIdentifier = this.addIdentifier.bind(this)
@@ -191,6 +192,57 @@ class ProfileForm extends Component {
     this.props.updateProfile(profile)
   }
 
+  additional_info(operation) {
+    switch (operation.type) {
+      case 'header_value':
+        let line = parseInt(operation.line);
+        if (!isNaN(line)) {
+            line = ` @line ${line}`;
+        } else {
+          line = '';
+        }
+        return  ` (Table # ${operation.table}${line}: Regex: "${operation.regex}")`;
+      case 'metadata_value':
+        return ` (Table # ${operation.table} ${operation.value})`;
+      case 'column':
+        return ` (Table # ${operation.column.tableIndex} Column # ${operation.column.columnIndex})`;
+      default:
+        return `: ${operation.value}`;
+    }
+  }
+
+  updateAutomatedOperationDescription(profile, index, key) {
+    const keyDescription = `${key}Description`;
+
+    let value = profile.tables[index].table[keyDescription] ?? ["",""];
+    const type_mapping = {
+      "header_value": "File regexp value",
+      "metadata_value": "Metadata value",
+      "column": "Table column",
+      "value": "Scalar value"
+    };
+    if(profile.tables[index].table[key]) {
+        const tmp_value = []
+        for (const op of profile.tables[index].table[key]) {
+            tmp_value.push(`${op.operator} [${type_mapping[op.type] ?? "??"}${this.additional_info(op)}]`);
+        }
+
+        value[0] = tmp_value.join(' ');
+    } else {
+        value[0] = ''
+    }
+    profile.tables[index].table[keyDescription]  = value;
+  }
+
+  updateOperationDescription(index, key, value) {
+    const keyDescription = `${key}Description`;
+    const profile = Object.assign({}, this.props.profile);
+    const prof_value = profile.tables[index].table[keyDescription] ?? ["",""];
+    prof_value[1] = value;
+    profile.tables[index].table[keyDescription] = prof_value;
+    this.props.updateProfile(profile);
+  }
+
   addOperation(index, key, type) {
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
@@ -201,6 +253,8 @@ class ProfileForm extends Component {
 
       if (type === 'header_value') {
         operation.table = '0';
+        operation.regex = '';
+        operation.line = '';
         operation.ignore_missing_values = false;
       } else if (type === 'metadata_value') {
         const mdZero =  getTableMetadataOptions(profile)[0];
@@ -212,18 +266,20 @@ class ProfileForm extends Component {
         operation['column'] = {
           tableIndex: null,
           columnIndex: null
-        }
+        };
       }
 
       if (profile.tables[index].table[key] === undefined) {
-        profile.tables[index].table[key] = []
+        profile.tables[index].table[key] = [];
       }
-      profile.tables[index].table[key].push(operation)
+      profile.tables[index].table[key].push(operation);
+      this.updateAutomatedOperationDescription(profile, index, key);
       this.props.updateProfile(profile)
     }
   }
 
   updateOperation(index, key, opIndex, opKey, value) {
+
     if (opKey === 'metadata') {
         const data = value.split(':');
         this.updateOperation(index, key, opIndex, 'value', data[1].trim());
@@ -232,21 +288,23 @@ class ProfileForm extends Component {
     }
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
-      profile.tables[index].table[key][opIndex][opKey] = value
-      this.props.updateProfile(profile)
+      profile.tables[index].table[key][opIndex][opKey] = value;
+      this.updateAutomatedOperationDescription(profile, index, key);
+      this.props.updateProfile(profile);
     }
   }
 
   removeOperation(index, key, opIndex) {
-    const profile = Object.assign({}, this.props.profile)
+    const profile = Object.assign({}, this.props.profile);
     if (index !== -1) {
       profile.tables[index].table[key].splice(opIndex, 1)
 
       // remove operations if it is empty
       if (profile.tables[index].table[key].length === 0) {
-        delete profile.tables[index].table[key]
+        delete profile.tables[index].table[key];
       }
 
+      this.updateAutomatedOperationDescription(profile, index, key);
       this.props.updateProfile(profile)
     }
   }
@@ -564,6 +622,7 @@ class ProfileForm extends Component {
                     updateTable={(key, value) => this.updateTable(index, key, value)}
                     addOperation={(key, type) => this.addOperation(index, key, type)}
                     updateOperation={(key, opIndex, opKey, value) => this.updateOperation(index, key, opIndex, opKey, value)}
+                    updateOperationDescription={(key, value) => this.updateOperationDescription(index, key, value)}
                     removeOperation={(key, opIndex) => this.removeOperation(index, key, opIndex)}
                     fileMetadataOptions={fileMetadataOptions}
                     tableMetadataOptions={tableMetadataOptions}

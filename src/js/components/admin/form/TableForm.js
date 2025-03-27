@@ -13,7 +13,7 @@ class TableForm extends Component {
     const {
       table, inputTables, inputColumns, options,
       updateTable, updateHeader,
-      addOperation, updateOperation, removeOperation,
+      addOperation, updateOperation, updateOperationDescription, removeOperation,
       fileMetadataOptions, tableMetadataOptions
     } = this.props
 
@@ -71,6 +71,7 @@ class TableForm extends Component {
             updateTable={updateTable}
             addOperation={addOperation}
             updateOperation={updateOperation}
+            updateOperationDescription={updateOperationDescription}
             removeOperation={removeOperation}
             tableMetadataOptions={tableMetadataOptions}
             inputTables={inputTables}
@@ -86,6 +87,7 @@ class TableForm extends Component {
           updateTable={updateTable}
           addOperation={addOperation}
           updateOperation={updateOperation}
+          updateOperationDescription={updateOperationDescription}
           removeOperation={removeOperation}
           tableMetadataOptions={tableMetadataOptions}
           inputTables={inputTables}
@@ -105,6 +107,7 @@ TableForm.propTypes = {
   options: PropTypes.object,
   updateTable: PropTypes.func,
   updateHeader: PropTypes.func,
+  updateOperationDescription: PropTypes.func,
   addOperation: PropTypes.func,
   updateOperation: PropTypes.func,
   removeOperation: PropTypes.func,
