@@ -84,9 +84,16 @@ class ProfileForm extends Component {
     }
   }
 
-  toggleMatchTables() {
+  toggleMatchTables(index) {
     const profile = Object.assign({}, this.props.profile)
-    profile.matchTables = !profile.matchTables
+    if (profile.matchTables) { // handling for old profiles
+      profile.matchTables = false
+      // profile.tables.forEach((table) => table.matchTables = true)
+      // profile.tables[index].matchTables = false
+    }
+    else {
+      profile.tables[index].matchTables = !profile.tables[index].matchTables
+    }
     this.props.updateProfile(profile)
   }
 
@@ -588,15 +595,6 @@ class ProfileForm extends Component {
                   <Form.Control as="textarea" size="sm" rows="3" onChange={event => this.updateDescription(event.currentTarget.value)} value={profile.description} />
                   <Form.Text>Please add a description for this profile.</Form.Text>
                 </Form.Group>
-
-                <Form.Check
-                  className="mt-3"
-                  id="match-tables-checkbox"
-                  checked={profile.matchTables || false}
-                  onChange={this.toggleMatchTables}
-                  disabled={profile.tables.length !== 1}
-                  label="Configure only one output table and use it for each input table."
-                />
               </Card.Body>
             </Card>
 
@@ -607,12 +605,19 @@ class ProfileForm extends Component {
                   <Button
                     variant="danger"
                     size="sm"
-                    onClick={() => this.removeTable()}
+                    onClick={() => this.removeTable(index)}
                   >
                     Remove
                   </Button>
                 </Card.Header>
                 <Card.Body>
+                  <Form.Check
+                    className="mt-3"
+                    id="match-tables-checkbox"
+                    checked={profile.matchTables || profile.tables[index].matchTables || false}
+                    onChange={() => this.toggleMatchTables(index)}
+                    label="Configure only one output table and use it for each input table."
+                  />
                   <TableForm
                     table={table}
                     inputTables={inputTables}
@@ -635,7 +640,6 @@ class ProfileForm extends Component {
               <Button
                 variant="success"
                 size="sm"
-                disabled={profile.matchTables}
                 onClick={() => this.addTable()}
               >
                 Add table
