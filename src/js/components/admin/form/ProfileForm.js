@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
-import { Button, Card, Col, Form, Row, Tabs, Tab } from 'react-bootstrap';
+import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
 
@@ -15,6 +15,7 @@ import {
 
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
+import ColumnSelect from "./table/ColumnSelect";
 
 class ProfileForm extends Component {
 
@@ -28,6 +29,7 @@ class ProfileForm extends Component {
     this.updateDescription = this.updateDescription.bind(this)
     this.updateOls = this.updateOls.bind(this)
     this.toggleMatchTables = this.toggleMatchTables.bind(this)
+    this.handleChangeLoop = this.handleChangeLoop.bind(this)
 
     this.addTable = this.addTable.bind(this)
     this.updateTable = this.updateTable.bind(this)
@@ -94,6 +96,12 @@ class ProfileForm extends Component {
     else {
       profile.tables[index].matchTables = !profile.tables[index].matchTables
     }
+    this.props.updateProfile(profile)
+  }
+
+  handleChangeLoop(value, index) {
+    const profile = Object.assign({}, this.props.profile)
+    profile.tables[index].loopType = value
     this.props.updateProfile(profile)
   }
 
@@ -255,7 +263,7 @@ class ProfileForm extends Component {
     if (index !== -1) {
       const operation = {
         type: type,
-        operator: '+'
+        operator: (key==='loop_header' ? '&' : '+')
       }
 
       if (type === 'header_value') {
@@ -611,13 +619,48 @@ class ProfileForm extends Component {
                   </Button>
                 </Card.Header>
                 <Card.Body>
-                  <Form.Check
-                    className="mt-3"
-                    id="match-tables-checkbox"
-                    checked={profile.matchTables || profile.tables[index].matchTables || false}
-                    onChange={() => this.toggleMatchTables(index)}
-                    label="Configure only one output table and use it for each input table."
-                  />
+                  Use this output table configuration for:
+                  <InputGroup>
+                    {profile.tables[index].loopType === "all" ? (
+                        <InputGroup.Checkbox
+                            id="match-tables-checkbox"
+                            checked={profile.matchTables || profile.tables[index].matchTables || false}
+                            disabled = {profile.tables[index].loopType !== "all"}
+                            onChange={() => this.toggleMatchTables(index)}
+                        />
+                    ) : (
+                        <Button
+                            variant="outline-success"
+                            onClick={() => this.addOperation(index, 'loop_header', 'column')}>
+                          +
+                        </Button>)}
+                  <Form.Select
+                      id="loop_select"
+                      aria-label="Select looping"
+                      value={profile.tables[index].loopType}
+                      onChange={(e) => this.handleChangeLoop(e.target.value, index)}
+                  >
+                    <option value="all">all input tables.</option>
+                    <option value="header">all input tables that have the same column header.</option>
+                  </Form.Select>
+                  </InputGroup>
+                  {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_header']
+                      && profile.tables[index].table['loop_header'].map((operation, op_index) => (
+                    <InputGroup>
+                      <InputGroup.Text>&#8627;</InputGroup.Text>
+                      <Button
+                          variant="outline-danger"
+                          onClick={() => this.removeOperation(index, 'loop_header', op_index)}
+                      >
+                        &times;
+                      </Button>
+                      <ColumnSelect
+                          column={operation.column}
+                          columnList={inputColumns}
+                          onChange={column => this.updateOperation(index, 'loop_header', op_index, 'column',column)}
+                       />
+                    </InputGroup>
+                  ))}
                   <TableForm
                     table={table}
                     inputTables={inputTables}

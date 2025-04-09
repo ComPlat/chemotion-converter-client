@@ -17,7 +17,7 @@ function getInputColumns(profile) {
     return inputTables.reduce((accumulator, table, tableIndex) => {
       const tableColumns = table.columns.map((tableColumn, columnIndex) => {
         return Object.assign({}, tableColumn, {
-          label: `Input table #${tableIndex} Column #${columnIndex}`,
+          label: `Input table #${tableIndex} ${tableColumn.name}`,
           value: {
             tableIndex: tableIndex,
             columnIndex: columnIndex
