@@ -39,6 +39,7 @@ class ProfileForm extends Component {
 
     this.addOperation = this.addOperation.bind(this)
     this.updateOperation = this.updateOperation.bind(this)
+    this.updateOperationDescription = this.updateOperationDescription.bind(this)
     this.removeOperation = this.removeOperation.bind(this)
 
     this.addIdentifier = this.addIdentifier.bind(this)
@@ -49,7 +50,7 @@ class ProfileForm extends Component {
     this.updateIdentifierOperation = this.updateIdentifierOperation.bind(this)
     this.removeIdentifierOperation = this.removeIdentifierOperation.bind(this)
 
-    if (this.props.status == 'create') {
+    if (this.props.status === 'create') {
       this.addTable()
     }
   }
@@ -148,7 +149,7 @@ class ProfileForm extends Component {
 
   updateHeader(index, key, value, oldKey) {
     const profile = Object.assign({}, this.props.profile)
-    const header = Object.assign({}, profile.tables[index].header)
+    let header = Object.assign({}, profile.tables[index].header)
 
     if (index !== -1) {
       if (oldKey === undefined) {
@@ -156,7 +157,7 @@ class ProfileForm extends Component {
       } else {
         // create a new header to preserve the order
         header = Object.keys(header).reduce((agg, cur) => {
-          if (cur == oldKey) {
+          if (cur === oldKey) {
             agg[key] = value
           } else {
             agg[cur] = header[cur]
@@ -165,7 +166,7 @@ class ProfileForm extends Component {
         }, {})
       }
 
-      if (header['DATA CLASS'] == 'XYDATA') {
+      if (header['DATA CLASS'] === 'XYDATA') {
         ['FIRSTX', 'LASTX', 'DELTAX'].forEach(headerKey => {
           // ensure headerKeys are there if XYDATA is selected
           if (header[headerKey] === undefined) {
@@ -173,8 +174,8 @@ class ProfileForm extends Component {
           }
 
           // update header identifiers if the type changed
-          if (headerKey == key &&
-              profile.tables[index].header[headerKey].type != header[headerKey].type) {
+          if (headerKey === key &&
+              profile.tables[index].header[headerKey].type !== header[headerKey].type) {
             header[headerKey] = this.initIdentifier(profile, header[headerKey].type)
           }
         })
@@ -191,6 +192,57 @@ class ProfileForm extends Component {
     this.props.updateProfile(profile)
   }
 
+  additional_info(operation) {
+    switch (operation.type) {
+      case 'header_value':
+        let line = parseInt(operation.line);
+        if (!isNaN(line)) {
+            line = ` @line ${line}`;
+        } else {
+          line = '';
+        }
+        return  ` (Table # ${operation.table}${line}: Regex: "${operation.regex}")`;
+      case 'metadata_value':
+        return ` (Table # ${operation.table} ${operation.value})`;
+      case 'column':
+        return ` (Table # ${operation.column.tableIndex} Column # ${operation.column.columnIndex})`;
+      default:
+        return `: ${operation.value}`;
+    }
+  }
+
+  updateAutomatedOperationDescription(profile, index, key) {
+    const keyDescription = `${key}Description`;
+
+    let value = profile.tables[index].table[keyDescription] ?? ["",""];
+    const type_mapping = {
+      "header_value": "File regexp value",
+      "metadata_value": "Metadata value",
+      "column": "Table column",
+      "value": "Scalar value"
+    };
+    if(profile.tables[index].table[key]) {
+        const tmp_value = []
+        for (const op of profile.tables[index].table[key]) {
+            tmp_value.push(`${op.operator} [${type_mapping[op.type] ?? "??"}${this.additional_info(op)}]`);
+        }
+
+        value[0] = tmp_value.join(' ');
+    } else {
+        value[0] = ''
+    }
+    profile.tables[index].table[keyDescription]  = value;
+  }
+
+  updateOperationDescription(index, key, value) {
+    const keyDescription = `${key}Description`;
+    const profile = Object.assign({}, this.props.profile);
+    const prof_value = profile.tables[index].table[keyDescription] ?? ["",""];
+    prof_value[1] = value;
+    profile.tables[index].table[keyDescription] = prof_value;
+    this.props.updateProfile(profile);
+  }
+
   addOperation(index, key, type) {
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
@@ -198,39 +250,61 @@ class ProfileForm extends Component {
         type: type,
         operator: '+'
       }
-      if (type == 'column') {
+
+      if (type === 'header_value') {
+        operation.table = '0';
+        operation.regex = '';
+        operation.line = '';
+        operation.ignore_missing_values = false;
+      } else if (type === 'metadata_value') {
+        const mdZero =  getTableMetadataOptions(profile)[0];
+        operation.value = mdZero.key;
+        operation.table = `${mdZero.tableIndex}`;
+        operation.metadata = '0';
+        operation.ignore_missing_values = false;
+      } else if (type === 'column') {
         operation['column'] = {
           tableIndex: null,
           columnIndex: null
-        }
+        };
       }
 
       if (profile.tables[index].table[key] === undefined) {
-        profile.tables[index].table[key] = []
+        profile.tables[index].table[key] = [];
       }
-      profile.tables[index].table[key].push(operation)
+      profile.tables[index].table[key].push(operation);
+      this.updateAutomatedOperationDescription(profile, index, key);
       this.props.updateProfile(profile)
     }
   }
 
   updateOperation(index, key, opIndex, opKey, value) {
+
+    if (opKey === 'metadata') {
+        const data = value.split(':');
+        this.updateOperation(index, key, opIndex, 'value', data[1].trim());
+        this.updateOperation(index, key, opIndex, 'table', data[2]);
+        value = data[0];
+    }
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
-      profile.tables[index].table[key][opIndex][opKey] = value
-      this.props.updateProfile(profile)
+      profile.tables[index].table[key][opIndex][opKey] = value;
+      this.updateAutomatedOperationDescription(profile, index, key);
+      this.props.updateProfile(profile);
     }
   }
 
   removeOperation(index, key, opIndex) {
-    const profile = Object.assign({}, this.props.profile)
+    const profile = Object.assign({}, this.props.profile);
     if (index !== -1) {
       profile.tables[index].table[key].splice(opIndex, 1)
 
       // remove operations if it is empty
-      if (profile.tables[index].table[key].length == 0) {
-        delete profile.tables[index].table[key]
+      if (profile.tables[index].table[key].length === 0) {
+        delete profile.tables[index].table[key];
       }
 
+      this.updateAutomatedOperationDescription(profile, index, key);
       this.props.updateProfile(profile)
     }
   }
@@ -242,7 +316,7 @@ class ProfileForm extends Component {
       value: ''
     }
 
-    if (identifier.type == 'fileMetadata') {
+    if (identifier.type === 'fileMetadata') {
       const fileMetadataOptions = getFileMetadataOptions(profile)
       if (fileMetadataOptions.length > 0) {
         identifier.key = fileMetadataOptions[0].key
@@ -250,7 +324,7 @@ class ProfileForm extends Component {
       } else {
         identifier.key = ''
       }
-    } else if (identifier.type == 'tableMetadata') {
+    } else if (identifier.type === 'tableMetadata') {
       const tableMetadataOptions = getTableMetadataOptions(profile)
       if (tableMetadataOptions.length > 0) {
         identifier.key = tableMetadataOptions[0].key
@@ -260,7 +334,7 @@ class ProfileForm extends Component {
         identifier.key = ''
         identifier.tableIndex = 0
       }
-    } else if (identifier.type == 'tableHeader'){
+    } else if (identifier.type === 'tableHeader'){
       identifier.tableIndex = 0
       identifier.lineNumber = ''
     }
@@ -330,7 +404,7 @@ class ProfileForm extends Component {
       profile.identifiers[index].operations.splice(opIndex, 1)
 
       // remove operations if it is empty
-      if (profile.identifiers[index].operations.length == 0) {
+      if (profile.identifiers[index].operations.length === 0) {
         delete profile.identifiers[index].operations
       }
 
@@ -428,7 +502,7 @@ class ProfileForm extends Component {
           </Card.Header>
           <Card.Body>
             <Form.Group>
-              <Form.Label>Datasets</Form.Label>
+              <Form.Label column="lg">Datasets</Form.Label>
               <Select
                 isDisabled={false}
                 isLoading={false}
@@ -465,7 +539,7 @@ class ProfileForm extends Component {
               </div>
             }
             {
-              table.rows !== undefined && table.rows !== undefined && table.rows.length > 0 &&
+              table.rows !== undefined && table.rows.length > 0 &&
               <div className="mt-3">
                 <h4>Input table data</h4>
                 {this.renderDataGrid(table)}
@@ -504,13 +578,13 @@ class ProfileForm extends Component {
               </Card.Header>
               <Card.Body>
                 <Form.Group controlId="profile-title">
-                  <Form.Label>Title</Form.Label>
+                  <Form.Label column="lg">Title</Form.Label>
                   <Form.Control size="sm" onChange={event => this.updateTitle(event.currentTarget.value)} value={profile.title} />
                   <Form.Text>Please add a title for this profile.</Form.Text>
                 </Form.Group>
 
                 <Form.Group controlId="profile-description" className="mt-3">
-                  <Form.Label>Description</Form.Label>
+                  <Form.Label column="lg">Description</Form.Label>
                   <Form.Control as="textarea" size="sm" rows="3" onChange={event => this.updateDescription(event.currentTarget.value)} value={profile.description} />
                   <Form.Text>Please add a description for this profile.</Form.Text>
                 </Form.Group>
@@ -520,7 +594,7 @@ class ProfileForm extends Component {
                   id="match-tables-checkbox"
                   checked={profile.matchTables || false}
                   onChange={this.toggleMatchTables}
-                  disabled={profile.tables.length != 1}
+                  disabled={profile.tables.length !== 1}
                   label="Configure only one output table and use it for each input table."
                 />
               </Card.Body>
@@ -548,6 +622,7 @@ class ProfileForm extends Component {
                     updateTable={(key, value) => this.updateTable(index, key, value)}
                     addOperation={(key, type) => this.addOperation(index, key, type)}
                     updateOperation={(key, opIndex, opKey, value) => this.updateOperation(index, key, opIndex, opKey, value)}
+                    updateOperationDescription={(key, value) => this.updateOperationDescription(index, key, value)}
                     removeOperation={(key, opIndex) => this.removeOperation(index, key, opIndex)}
                     fileMetadataOptions={fileMetadataOptions}
                     tableMetadataOptions={tableMetadataOptions}
@@ -663,8 +738,8 @@ class ProfileForm extends Component {
             </Card>
 
             <Button className="mt-3" variant="primary" onClick={this.onSubmit}>
-              {status == 'create' && 'Create profile'}
-              {status == 'update' && 'Update profile'}
+              {status === 'create' && 'Create profile'}
+              {status === 'update' && 'Update profile'}
             </Button>
           </div>
         </Col>
