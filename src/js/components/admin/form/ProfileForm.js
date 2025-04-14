@@ -263,7 +263,7 @@ class ProfileForm extends Component {
     if (index !== -1) {
       const operation = {
         type: type,
-        operator: (key==='loop_header' ? '&' : '+')
+        operator: (key.includes('loop') ? '&' : '+')
       }
 
       if (type === 'header_value') {
@@ -564,6 +564,7 @@ class ProfileForm extends Component {
         );
       });
     }
+    profile.tables.map((table) => table.loopType = table.loopType ?? "all")
 
     return (
       <Row>
@@ -631,7 +632,10 @@ class ProfileForm extends Component {
                     ) : (
                         <Button
                             variant="outline-success"
-                            onClick={() => this.addOperation(index, 'loop_header', 'column')}>
+                            onClick={() => this.addOperation(
+                                index, `loop_${profile.tables[index].loopType}`,
+                                profile.tables[index].loopType === 'metadata' ? 'metadata' : 'column'
+                            )}>
                           +
                         </Button>)}
                   <Form.Select
@@ -642,6 +646,7 @@ class ProfileForm extends Component {
                   >
                     <option value="all">all input tables.</option>
                     <option value="header">all input tables that have the same column header.</option>
+                    <option value="metadata">all input tables that have the same metadata.</option>
                   </Form.Select>
                   </InputGroup>
                   {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_header']
@@ -659,6 +664,32 @@ class ProfileForm extends Component {
                           columnList={inputColumns}
                           onChange={column => this.updateOperation(index, 'loop_header', op_index, 'column',column)}
                        />
+                    </InputGroup>
+                  ))}
+                  {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_metadata']
+                      && profile.tables[index].table['loop_metadata'].map((operation, op_index) => (
+                    <InputGroup>
+                      <InputGroup.Text>&#8627;</InputGroup.Text>
+                      <Button
+                          variant="outline-danger"
+                          onClick={() => this.removeOperation(index, 'loop_metadata', op_index)}
+                      >
+                        &times;
+                      </Button>
+                      <Form.Select
+                          size="sm"
+                          value={operation.metadata || ''}
+                          onChange={event => {
+                              this.updateOperation(index, 'loop_metadata', op_index, 'metadata',
+                                  `${event.target.value}:${tableMetadataOptions[event.target.value].key}
+                                  :${tableMetadataOptions[event.target.value].tableIndex}`);
+                            }
+                          }
+                      >
+                          {tableMetadataOptions.map((option, optionIndex) => (
+                              <option key={optionIndex} value={optionIndex}>{option.label}</option>
+                          ))}
+                      </Form.Select>
                     </InputGroup>
                   ))}
                   <TableForm
