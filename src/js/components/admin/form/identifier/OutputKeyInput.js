@@ -6,12 +6,12 @@ import { sortBy } from 'lodash';
 
 const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
   const fields = (dataset?.layers ?? {})[identifier.outputLayer]?.fields
-  console.log(fields)
+  const dsOpt = fields && fields.map((e) => ({ value: e.field, label: e.label }))
 
   return (
     <Form.Group controlId={`outputKeyInput${index}`}>
       <Form.Label>Output key</Form.Label>
-      {fields !== undefined ? (
+      {dsOpt ? (
         <Select
           isDisabled={false}
           isLoading={false}
@@ -21,8 +21,8 @@ const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
           onChange={(event) =>
             updateIdentifier(index, { outputKey: event.value })
           }
-          options={fields.map((e) => ({ value: e.field, label: e.label }))}
-          value={identifier.outputKey}
+          options={dsOpt}
+          value={dsOpt.find(o => o.value === identifier.outputKey)}
         />
       ) : (
         <Form.Control
