@@ -7,12 +7,11 @@ import { sortBy } from 'lodash';
 const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
   const fields = (dataset?.layers ?? {})[identifier.outputLayer]?.fields
   const dsOpt = fields && fields.map((e) => ({ value: e.field, label: e.label }))
-  console.log(fields)
 
   return (
     <Form.Group controlId={`outputKeyInput${index}`}>
       <Form.Label>Output key</Form.Label>
-      {fields ? (
+      {dsOpt ? (
         <Select
           isDisabled={false}
           isLoading={false}
