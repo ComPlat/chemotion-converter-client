@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
-import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup} from 'react-bootstrap';
+import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
 
@@ -86,15 +86,17 @@ class ProfileForm extends Component {
     }
   }
 
-  toggleMatchTables(index) {
+  toggleMatchTables(index, op_index=-1) {
     const profile = Object.assign({}, this.props.profile)
-    if (profile.matchTables) { // handling for old profiles
-      profile.matchTables = false
-      // profile.tables.forEach((table) => table.matchTables = true)
-      // profile.tables[index].matchTables = false
-    }
-    else {
-      profile.tables[index].matchTables = !profile.tables[index].matchTables
+    const profile_table = profile.tables[index]
+    if (op_index === -1) {
+      if (profile.matchTables) { // handling for old profiles
+        profile.matchTables = false
+      } else {
+        profile_table.matchTables = !profile_table.matchTables
+      }
+    } else {
+      profile_table.table.loop_metadata[op_index].ignoreValue = !profile_table.table.loop_metadata[op_index].ignoreValue
     }
     this.props.updateProfile(profile)
   }
@@ -626,7 +628,6 @@ class ProfileForm extends Component {
                         <InputGroup.Checkbox
                             id="match-tables-checkbox"
                             checked={profile.matchTables || profile.tables[index].matchTables || false}
-                            disabled = {profile.tables[index].loopType !== "all"}
                             onChange={() => this.toggleMatchTables(index)}
                         />
                     ) : (
@@ -690,6 +691,17 @@ class ProfileForm extends Component {
                               <option key={optionIndex} value={optionIndex}>{option.label}</option>
                           ))}
                       </Form.Select>
+                      <OverlayTrigger
+                        placement="bottom-end"
+                        overlay={<Tooltip>Ignore Value</Tooltip>}
+                      >
+                        <div className="input-group-text" style={{ cursor: 'pointer' }}>
+                          <input type="checkbox"
+                            checked={profile.tables[index].table.loop_metadata[op_index].ignoreValue || false}
+                            onChange={() => this.toggleMatchTables(index, op_index)}
+                          />
+                        </div>
+                      </OverlayTrigger>
                     </InputGroup>
                   ))}
                   <TableForm
