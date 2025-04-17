@@ -1,6 +1,6 @@
 {
   "name": "@complat/chemotion-converter-client",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "main": "./dist/bundle.js",
   "files": [
     "dist",
