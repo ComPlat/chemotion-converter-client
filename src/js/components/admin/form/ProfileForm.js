@@ -9,6 +9,7 @@ import {
   getDataset,
   getFileMetadataOptions,
   getInputColumns,
+  getDistInputColumns,
   getInputTables,
   getTableMetadataOptions
 } from '../../../utils/profileUtils'
@@ -501,6 +502,7 @@ class ProfileForm extends Component {
 
     const inputTables = getInputTables(profile)
     const inputColumns = getInputColumns(profile)
+    const distInputColumns = getDistInputColumns(profile)
     const fileMetadataOptions = getFileMetadataOptions(profile)
     const tableMetadataOptions = getTableMetadataOptions(profile)
 
@@ -662,7 +664,7 @@ class ProfileForm extends Component {
                       </Button>
                       <ColumnSelect
                           column={operation.column}
-                          columnList={inputColumns}
+                          columnList={distInputColumns}
                           onChange={column => this.updateOperation(index, 'loop_header', op_index, 'column',column)}
                        />
                     </InputGroup>

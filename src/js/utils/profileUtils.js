@@ -31,6 +31,31 @@ function getInputColumns(profile) {
   }
 }
 
+function getDistInputColumns(profile) {
+  const inputTables = getInputTables(profile);
+  const seenNames = new Set();
+
+  return inputTables.reduce((acc, table, tableIndex) => {
+    table.columns.filter((tableColumn, columnIndex) => {
+      if (seenNames.has(tableColumn.name)) return false;
+      seenNames.add(tableColumn.name);
+
+      acc.push({
+        ...tableColumn,
+        label: `Input table #${tableIndex} ${tableColumn.name}`,
+        value: {
+          tableIndex: tableIndex,
+          columnIndex: columnIndex
+        }
+      });
+
+      return false; // don't add anything from `filter` return, we're pushing manually
+    });
+
+    return acc;
+  }, []);
+}
+
 function getFileMetadataOptions(profile) {
   if (profile.data) {
     return Object.keys(profile.data.metadata).map(key => ({
@@ -63,4 +88,4 @@ function getTableMetadataOptions(profile) {
   }
 }
 
-export { getDataset, getInputTables, getInputColumns, getFileMetadataOptions, getTableMetadataOptions }
+export { getDataset, getInputTables, getInputColumns, getDistInputColumns, getFileMetadataOptions, getTableMetadataOptions }
