@@ -626,18 +626,28 @@ class ProfileForm extends Component {
                 <Card.Body>
                   Use this output table configuration for:
                   <InputGroup>
-                    {profile.tables[index].loopType === "all" ? (
+                    {profile.tables[index].loopType === "all" && (
                         <InputGroup.Checkbox
                             id="match-tables-checkbox"
                             checked={profile.matchTables || profile.tables[index].matchTables || false}
                             onChange={() => this.toggleMatchTables(index)}
                         />
+                    )}
+                    { profile.tables[index].loopType === "header" ? (
+                        <Button
+                            variant="outline-success"
+                            onClick={() => this.addOperation(
+                                index, 'loop_header',
+                                'column'
+                            )}>
+                          +
+                        </Button>
                     ) : (
                         <Button
                             variant="outline-success"
                             onClick={() => this.addOperation(
                                 index, `loop_${profile.tables[index].loopType}`,
-                                profile.tables[index].loopType === 'metadata' ? 'metadata' : 'column'
+                                profile.tables[index].loopType === 'metadata' ? 'metadata' : 'header_value'
                             )}>
                           +
                         </Button>)}
@@ -649,6 +659,7 @@ class ProfileForm extends Component {
                   >
                     <option value="all">all input tables.</option>
                     <option value="header">all input tables that have the same column header.</option>
+                    <option value="theader">all input tables that have the same table header.</option>
                     <option value="metadata">all input tables that have the same metadata.</option>
                   </Form.Select>
                   </InputGroup>
@@ -704,6 +715,32 @@ class ProfileForm extends Component {
                           />
                         </div>
                       </OverlayTrigger>
+                    </InputGroup>
+                  ))}
+                  {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_theader']
+                      && profile.tables[index].table['loop_theader'].map((operation, op_index) => (
+                    <InputGroup>
+                      <InputGroup.Text>&#8627;</InputGroup.Text>
+                      <Button
+                          variant="outline-danger"
+                          onClick={() => this.removeOperation(index, 'loop_theader', op_index)}
+                      >
+                        &times;
+                      </Button>
+                      <Form.Control
+                          value={operation.line || ''}
+                          placeholder='Line'
+                          onChange={event => {
+                            this.updateOperation(index, 'loop_theader', op_index, 'line', event.target.value)
+                          }}
+                      />
+                      <Form.Control
+                          value={operation.regex || ''}
+                          placeholder='Regex'
+                          onChange={event => {
+                            this.updateOperation(index, 'loop_theader', op_index, 'regex', event.target.value)
+                          }}
+                      />
                     </InputGroup>
                   ))}
                   <TableForm
