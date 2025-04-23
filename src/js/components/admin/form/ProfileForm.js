@@ -4,6 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
+import isEqual from 'lodash/isEqual';
 
 import {
   getDataset,
@@ -673,10 +674,23 @@ class ProfileForm extends Component {
                       >
                         &times;
                       </Button>
-                      <ColumnSelect
-                          column={operation.column}
-                          columnList={distInputColumns}
-                          onChange={column => this.updateOperation(index, 'loop_header', op_index, 'column',column)}
+                      <Select
+                        styles={{
+                            container: (base) => ({
+                              ...base,
+                              flex: "1 1 auto"
+                            }),
+                            control: (base) => ({
+                              ...base,
+                              minHeight: '38px' // match Bootstrap form height if needed
+                            })
+                          }}
+                          value={distInputColumns.flatMap(group => group.options)
+                              .find(col => isEqual(col.value, operation.column))}
+                          options={distInputColumns}
+                          onChange={selectedOption  =>
+                              this.updateOperation(index, 'loop_header', op_index, 'column',selectedOption.value)
+                          }
                        />
                     </InputGroup>
                   ))}

@@ -35,25 +35,25 @@ function getDistInputColumns(profile) {
   const inputTables = getInputTables(profile);
   const seenNames = new Set();
 
-  return inputTables.reduce((acc, table, tableIndex) => {
-    table.columns.filter((tableColumn, columnIndex) => {
-      if (seenNames.has(tableColumn.name)) return false;
+  return inputTables.map((table, tableIndex) => {
+    const columns = table.columns.map((tableColumn, columnIndex) => {
+      if (seenNames.has(tableColumn.name)) return null;
       seenNames.add(tableColumn.name);
 
-      acc.push({
-        ...tableColumn,
-        label: `Input table #${tableIndex} ${tableColumn.name}`,
+      return {
+        label: tableColumn.name,
         value: {
-          tableIndex: tableIndex,
-          columnIndex: columnIndex
+          tableIndex,
+          columnIndex
         }
-      });
+      };
+    }).filter(Boolean); // remove nulls
 
-      return false; // don't add anything from `filter` return, we're pushing manually
-    });
-
-    return acc;
-  }, []);
+    return {
+      label: `Table #${tableIndex}`,
+      options: columns
+    };
+  }).filter(group => group.options.length > 0); // remove empty groups
 }
 
 function getFileMetadataOptions(profile) {
