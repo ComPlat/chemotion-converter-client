@@ -8,7 +8,7 @@ class ProfileList extends Component {
 
   render () {
     const { profiles, updateProfile, deleteProfile, downloadProfile, isAdmin } = this.props
-
+    console.log(profiles);
     return (
       <ListGroup>
         {profiles.map((profile) => (
@@ -18,6 +18,7 @@ class ProfileList extends Component {
             title={profile.title}
             isAdmin={isAdmin}
             description={profile.description}
+            isDefaultProfile={profile.isDefaultProfile}
             updateProfile={() => updateProfile(profile)}
             deleteProfile={() => deleteProfile(profile)}
             downloadProfile={() => downloadProfile(profile)} />
