@@ -7,8 +7,7 @@ import ProfileListItem from './ProfileListItem'
 class ProfileList extends Component {
 
   render () {
-    const { profiles, updateProfile, deleteProfile, downloadProfile, isAdmin } = this.props
-    console.log(profiles);
+    const { profiles, updateProfile, deleteProfile, downloadProfile, isAdmin } = this.props;
     return (
       <ListGroup>
         {profiles.map((profile) => (
