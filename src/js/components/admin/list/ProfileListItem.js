@@ -1,48 +1,71 @@
-import React, { Component } from "react"
+import React, {Component} from "react"
 import PropTypes from 'prop-types';
-import { Button, ListGroup } from 'react-bootstrap';
+import {Button, ListGroup} from 'react-bootstrap';
 
 class ProfileListItem extends Component {
 
-  render () {
-    const { id, title, description, updateProfile, deleteProfile, downloadProfile, isAdmin, isDefaultProfile} = this.props
+    render() {
+        const {
+            id,
+            title,
+            description,
+            updateProfile,
+            deleteProfile,
+            downloadProfile,
+            isAdmin,
+            isDefaultProfile,
+            toggleDisableProfile,
+            isDisabled
+        } = this.props;
 
-    return (
-      <ListGroup.Item variant={isDefaultProfile ? "warning" : "light"}>
-        <div className="d-flex justify-content-between">
-          <div>
-            <div className="fw-bold">
-                {title} {isDefaultProfile && '[Default Profile]'}
-            </div>
-            {description}
-          </div>
+        const disabledButton = function () {
+            if (isDisabled) {
+                return <Button variant="danger" size="sm" disabled={!isAdmin}
+                               onClick={toggleDisableProfile}> Enable < /Button>;
+            }
+            return <Button variant="success" size="sm" disabled={!isAdmin}
+                           onClick={toggleDisableProfile}> Disable < /Button>;
+        }
+        return (
+            <ListGroup.Item variant={isDefaultProfile ? "warning" : "light"}>
+                <div className="d-flex justify-content-between">
+                    <div>
+                        <div className="fw-bold">
+                            {title} {isDefaultProfile && '[Default Profile]'}
+                        </div>
+                        {description}
+                    </div>
 
-          <div className="d-flex align-items-center gap-2">
-            <code>{id}</code>
-            <Button variant="success" size="sm" disabled={!isAdmin} onClick={downloadProfile}>Download</Button>
-            <Button variant="primary" size="sm" disabled={!isAdmin} onClick={updateProfile}>Edit</Button>
-              {!isDefaultProfile && <Button variant="danger" size="sm" disabled={!isAdmin} onClick={deleteProfile}>Delete</Button>}
-          </div>
-        </div>
-      </ListGroup.Item>
-    )
-  }
-
+                    <div className="d-flex align-items-center gap-2">
+                        <code>{id}</code>
+                        {disabledButton()}
+                        <Button variant="success" size="sm" disabled={!isAdmin}
+                                onClick={downloadProfile}>Download</Button>
+                        <Button variant="primary" size="sm" disabled={!isAdmin} onClick={updateProfile}>Edit</Button>
+                        {!isDefaultProfile && <Button variant="danger" size="sm" disabled={!isAdmin}
+                                                      onClick={deleteProfile}>Delete</Button>}
+                    </div>
+                </div>
+            </ListGroup.Item>
+        )
+    }
 }
 
 ProfileListItem.propTypes = {
-  id: PropTypes.string,
-  title: PropTypes.string,
-  description: PropTypes.string,
-  updateProfile: PropTypes.func,
-  deleteProfile: PropTypes.func,
-  downloadProfile: PropTypes.func,
-  isDefaultProfile: PropTypes.bool,
-  isAdmin: PropTypes.bool
+    id: PropTypes.string,
+    title: PropTypes.string,
+    description: PropTypes.string,
+    isDisabled: PropTypes.bool,
+    isDefaultProfile: PropTypes.bool,
+    toggleDisableProfile: PropTypes.func,
+    updateProfile: PropTypes.func,
+    deleteProfile: PropTypes.func,
+    downloadProfile: PropTypes.func,
+    isAdmin: PropTypes.bool
 }
 
 ProfileListItem.defaultProps = {
-  isAdmin: false
+    isAdmin: false
 };
 
 export default ProfileListItem
