@@ -13,25 +13,25 @@ class ProfileListItem extends Component {
             deleteProfile,
             downloadProfile,
             isAdmin,
+            isDefaultProfile,
             toggleDisableProfile,
             isDisabled
-        } = this.props
+        } = this.props;
 
         const disabledButton = function () {
             if (isDisabled) {
                 return <Button variant="danger" size="sm" disabled={!isAdmin}
-                                onClick={toggleDisableProfile}> Enable < /Button>;
+                               onClick={toggleDisableProfile}> Enable < /Button>;
             }
             return <Button variant="success" size="sm" disabled={!isAdmin}
                            onClick={toggleDisableProfile}> Disable < /Button>;
         }
-
         return (
-            <ListGroup.Item>
+            <ListGroup.Item variant={isDefaultProfile ? "warning" : "light"}>
                 <div className="d-flex justify-content-between">
                     <div>
                         <div className="fw-bold">
-                            {title}
+                            {title} {isDefaultProfile && '[Default Profile]'}
                         </div>
                         {description}
                     </div>
@@ -42,13 +42,13 @@ class ProfileListItem extends Component {
                         <Button variant="success" size="sm" disabled={!isAdmin}
                                 onClick={downloadProfile}>Download</Button>
                         <Button variant="primary" size="sm" disabled={!isAdmin} onClick={updateProfile}>Edit</Button>
-                        <Button variant="danger" size="sm" disabled={!isAdmin} onClick={deleteProfile}>Delete</Button>
+                        {!isDefaultProfile && <Button variant="danger" size="sm" disabled={!isAdmin}
+                                                      onClick={deleteProfile}>Delete</Button>}
                     </div>
                 </div>
             </ListGroup.Item>
         )
     }
-
 }
 
 ProfileListItem.propTypes = {
@@ -56,6 +56,7 @@ ProfileListItem.propTypes = {
     title: PropTypes.string,
     description: PropTypes.string,
     isDisabled: PropTypes.bool,
+    isDefaultProfile: PropTypes.bool,
     toggleDisableProfile: PropTypes.func,
     updateProfile: PropTypes.func,
     deleteProfile: PropTypes.func,

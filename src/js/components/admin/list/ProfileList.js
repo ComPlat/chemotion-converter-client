@@ -19,6 +19,7 @@ class ProfileList extends Component {
                         isAdmin={isAdmin}
                         description={profile.description}
                         isDisabled={profile.isDisabled ?? false}
+                        isDefaultProfile={profile.isDefaultProfile}
                         toggleDisableProfile={() => toggleDisableProfile(profile)}
                         updateProfile={() => updateProfile(profile)}
                         deleteProfile={() => deleteProfile(profile)}
@@ -27,7 +28,6 @@ class ProfileList extends Component {
             </ListGroup>
         )
     }
-
 }
 
 ProfileList.propTypes = {

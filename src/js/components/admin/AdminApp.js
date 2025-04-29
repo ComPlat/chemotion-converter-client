@@ -67,21 +67,21 @@ class AdminApp extends Component {
         this.setState({
             status: 'list',
             profile: null
-        })
+        });
     }
 
     showImportView() {
         this.setState({
             status: 'import',
             profile: null
-        })
+        });
     }
 
     showCreateView() {
         this.setState({
             status: 'upload',
             profile: null
-        })
+        });
     }
 
     showUpdateView(profile) {
@@ -90,47 +90,47 @@ class AdminApp extends Component {
             profile: Object.assign({}, profile),
             error: false,
             errorMessage: ''
-        })
+        });
     }
 
     showCreatedModal() {
         this.setState({
             createdModal: true
-        })
+        });
     }
 
     hideCreatedModal() {
         this.setState({
             createdModal: false
-        })
+        });
     }
 
     showDeleteModal(profile) {
         this.setState({
             deleteModal: true,
             profile: Object.assign({}, profile),
-        })
+        });
     }
 
     hideDeleteModal() {
         this.setState({
             deleteModal: false,
             profile: null
-        })
+        });
     }
 
     updateProfile(profile) {
-        this.setState({profile})
+        this.setState({profile});
     }
 
     storeProfile() {
-        const {status, profile} = this.state
+        const {status, profile} = this.state;
 
         // remove show flag
         if (Array.isArray(profile.identifiers)) {
             profile.identifiers.forEach(identifier => {
-                delete identifier.show
-            })
+                delete identifier.show;
+            });
         }
 
         if (status === 'create') {
@@ -148,8 +148,16 @@ class AdminApp extends Component {
                 this.setState({
                     status: 'list',
                     profiles: profiles,
-                    profile: null
-                }, this.showCreatedModal());
+                    profile: null,
+                    createdModal: true
+                });
+            })
+            .catch(errors => {
+                this.setState({
+                    error: true,
+                    errorMessage: Object.values(errors).join(', '),
+                    isLoading: false
+                });
             });
     }
 
@@ -167,20 +175,6 @@ class AdminApp extends Component {
             });
     }
 
-    deleteProfile() {
-        ConverterApi.deleteProfile(this.state.profile)
-            .then(() => {
-                const profiles = [...this.state.profiles]
-                const index = profiles.findIndex(p => (p.id == this.state.profile.id))
-                profiles.splice(index, 1)
-                this.setState({
-                    status: 'list',
-                    profiles: profiles,
-                    profile: null
-                }, this.hideDeleteModal())
-            })
-    }
-
     downloadProfile(profile) {
         const a = document.createElement('a')
         a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(profile, null, 2))
@@ -188,11 +182,6 @@ class AdminApp extends Component {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-    }
-
-    toggleDisableProfile(profile) {
-        profile.isDisabled = !profile.isDisabled;
-        this._saveProfile(profile);
     }
 
     updateFile(event) {
@@ -203,6 +192,26 @@ class AdminApp extends Component {
             error: false,
             errorMessage: ''
         })
+    }
+
+    toggleDisableProfile(profile) {
+        profile.isDisabled = !profile.isDisabled;
+        this._saveProfile(profile);
+    }
+
+    deleteProfile() {
+        ConverterApi.deleteProfile(this.state.profile)
+            .then(() => ConverterApi.fetchProfiles())
+            .then((profiles) => {
+                this.hideDeleteModal();
+                this.setState({
+                    status: 'list',
+                    profiles: profiles,
+                    profile: null
+                });
+            })
+
+
     }
 
     uploadFile() {
@@ -259,26 +268,9 @@ class AdminApp extends Component {
             isLoading: true
         })
 
-        const createProfile = e => {
-            const fileProfile = JSON.parse(e.target.result)
-
-            ConverterApi.createProfile(fileProfile)
-                .then(profile => {
-                    const profiles = [...this.state.profiles]
-                    profiles.push(profile)
-                    this.setState({
-                        status: 'list',
-                        profiles: profiles,
-                        profile: null
-                    }, this.showCreatedModal())
-                })
-                .catch(errors => {
-                    this.setState({
-                        error: true,
-                        errorMessage: Object.values(errors).join(', '),
-                        isLoading: false
-                    })
-                })
+        const createProfile = (e) => {
+            const fileProfile = JSON.parse(e.target.result);
+            this._createProfile(fileProfile);
         }
 
         const reader = new FileReader()
@@ -341,25 +333,24 @@ class AdminApp extends Component {
                     {['upload', 'create'].includes(this.state.status) && (
                         <Breadcrumb.Item active>Create Profile</Breadcrumb.Item>
                     )}
-                    {this.state.status == 'update' && (
+                    {this.state.status === 'update' && (
                         <Breadcrumb.Item active>{'Edit Profile: ' + this.state.profile.title}</Breadcrumb.Item>
                     )}
-                    {this.state.status == 'import' && (
+                    {this.state.status === 'import' && (
                         <Breadcrumb.Item active>Import Profile</Breadcrumb.Item>
                     )}
                 </Breadcrumb>
-
                 <Row className="mb-3">
                     <Col>
                         <h2>
-                            {this.state.status == 'list' && 'Profiles List'}
+                            {this.state.status === 'list' && 'Profiles List'}
                             {['upload', 'create'].includes(this.state.status) && 'Create Profile'}
-                            {this.state.status == 'update' && 'Edit Profile'}
-                            {this.state.status == 'import' && 'Import Profile'}
+                            {this.state.status === 'update' && 'Edit Profile'}
+                            {this.state.status === 'import' && 'Import Profile'}
                         </h2>
                     </Col>
 
-                    {this.state.status == "list" &&
+                    {this.state.status === "list" &&
                         <Col md={4} className="d-flex justify-content-end gap-2">
                             <Button variant="success" onClick={this.showImportView}>
                                 Import profile
