@@ -1,7 +1,6 @@
 import React, {Component} from "react"
 import PropTypes from 'prop-types';
 import {Button, ListGroup} from 'react-bootstrap';
-import {isDisabled} from "bootstrap/js/src/util";
 
 class ProfileListItem extends Component {
 
