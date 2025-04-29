@@ -5,14 +5,14 @@ import { Button, ListGroup } from 'react-bootstrap';
 class ProfileListItem extends Component {
 
   render () {
-    const { id, title, description, updateProfile, deleteProfile, downloadProfile, isAdmin } = this.props
+    const { id, title, description, updateProfile, deleteProfile, downloadProfile, isAdmin, isDefaultProfile} = this.props
 
     return (
-      <ListGroup.Item>
+      <ListGroup.Item variant={isDefaultProfile ? "warning" : "light"}>
         <div className="d-flex justify-content-between">
           <div>
             <div className="fw-bold">
-              {title}
+                {title} {isDefaultProfile && '[Default Profile]'}
             </div>
             {description}
           </div>
@@ -21,7 +21,7 @@ class ProfileListItem extends Component {
             <code>{id}</code>
             <Button variant="success" size="sm" disabled={!isAdmin} onClick={downloadProfile}>Download</Button>
             <Button variant="primary" size="sm" disabled={!isAdmin} onClick={updateProfile}>Edit</Button>
-            <Button variant="danger" size="sm" disabled={!isAdmin} onClick={deleteProfile}>Delete</Button>
+              {!isDefaultProfile && <Button variant="danger" size="sm" disabled={!isAdmin} onClick={deleteProfile}>Delete</Button>}
           </div>
         </div>
       </ListGroup.Item>
@@ -37,6 +37,7 @@ ProfileListItem.propTypes = {
   updateProfile: PropTypes.func,
   deleteProfile: PropTypes.func,
   downloadProfile: PropTypes.func,
+  isDefaultProfile: PropTypes.bool,
   isAdmin: PropTypes.bool
 }
 
