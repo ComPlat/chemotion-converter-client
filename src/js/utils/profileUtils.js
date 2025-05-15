@@ -17,7 +17,7 @@ function getInputColumns(profile) {
     return inputTables.reduce((accumulator, table, tableIndex) => {
       const tableColumns = table.columns.map((tableColumn, columnIndex) => {
         return Object.assign({}, tableColumn, {
-          label: `Input table #${tableIndex} Column #${columnIndex}`,
+          label: `Input table #${tableIndex} ${tableColumn.name}`,
           value: {
             tableIndex: tableIndex,
             columnIndex: columnIndex
@@ -29,6 +29,31 @@ function getInputColumns(profile) {
   } else {
     return []
   }
+}
+
+function getDistInputColumns(profile) {
+  const inputTables = getInputTables(profile);
+  const seenNames = new Set();
+
+  return inputTables.map((table, tableIndex) => {
+    const columns = table.columns.map((tableColumn, columnIndex) => {
+      if (seenNames.has(tableColumn.name)) return null;
+      seenNames.add(tableColumn.name);
+
+      return {
+        label: tableColumn.name,
+        value: {
+          tableIndex,
+          columnIndex
+        }
+      };
+    }).filter(Boolean); // remove nulls
+
+    return {
+      label: `Table #${tableIndex}`,
+      options: columns
+    };
+  }).filter(group => group.options.length > 0); // remove empty groups
 }
 
 function getFileMetadataOptions(profile) {
@@ -63,4 +88,4 @@ function getTableMetadataOptions(profile) {
   }
 }
 
-export { getDataset, getInputTables, getInputColumns, getFileMetadataOptions, getTableMetadataOptions }
+export { getDataset, getInputTables, getInputColumns, getDistInputColumns, getFileMetadataOptions, getTableMetadataOptions }
