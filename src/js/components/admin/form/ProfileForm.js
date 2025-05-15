@@ -643,7 +643,7 @@ class ProfileForm extends Component {
                             )}>
                           +
                         </Button>
-                    ) : (
+                    ) : (profile.tables[index].loopType !== "all" && (
                         <Button
                             variant="outline-success"
                             onClick={() => this.addOperation(
@@ -651,7 +651,7 @@ class ProfileForm extends Component {
                                 profile.tables[index].loopType === 'metadata' ? 'metadata' : 'header_value'
                             )}>
                           +
-                        </Button>)}
+                        </Button>))}
                   <Form.Select
                       id="loop_select"
                       aria-label="Select looping"
