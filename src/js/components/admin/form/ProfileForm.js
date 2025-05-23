@@ -1,20 +1,23 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
 import { AgGridReact } from 'ag-grid-react';
-import { Button, Card, Col, Form, Row, Tabs, Tab } from 'react-bootstrap';
+import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
+import isEqual from 'lodash/isEqual';
 
 import {
   getDataset,
   getFileMetadataOptions,
   getInputColumns,
+  getDistInputColumns,
   getInputTables,
   getTableMetadataOptions
 } from '../../../utils/profileUtils'
 
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
+import ColumnSelect from "./table/ColumnSelect";
 
 class ProfileForm extends Component {
 
@@ -28,6 +31,7 @@ class ProfileForm extends Component {
     this.updateDescription = this.updateDescription.bind(this)
     this.updateOls = this.updateOls.bind(this)
     this.toggleMatchTables = this.toggleMatchTables.bind(this)
+    this.handleChangeLoop = this.handleChangeLoop.bind(this)
 
     this.addTable = this.addTable.bind(this)
     this.updateTable = this.updateTable.bind(this)
@@ -84,9 +88,24 @@ class ProfileForm extends Component {
     }
   }
 
-  toggleMatchTables() {
+  toggleMatchTables(index, op_index=-1) {
     const profile = Object.assign({}, this.props.profile)
-    profile.matchTables = !profile.matchTables
+    const profile_table = profile.tables[index]
+    if (op_index === -1) {
+      if (profile.matchTables) { // handling for old profiles
+        profile.matchTables = false
+      } else {
+        profile_table.matchTables = !profile_table.matchTables
+      }
+    } else {
+      profile_table.table.loop_metadata[op_index].ignoreValue = !profile_table.table.loop_metadata[op_index].ignoreValue
+    }
+    this.props.updateProfile(profile)
+  }
+
+  handleChangeLoop(value, index) {
+    const profile = Object.assign({}, this.props.profile)
+    profile.tables[index].loopType = value
     this.props.updateProfile(profile)
   }
 
@@ -248,7 +267,7 @@ class ProfileForm extends Component {
     if (index !== -1) {
       const operation = {
         type: type,
-        operator: '+'
+        operator: (key.includes('loop') ? '&' : '+')
       }
 
       if (type === 'header_value') {
@@ -484,6 +503,7 @@ class ProfileForm extends Component {
 
     const inputTables = getInputTables(profile)
     const inputColumns = getInputColumns(profile)
+    const distInputColumns = getDistInputColumns(profile)
     const fileMetadataOptions = getFileMetadataOptions(profile)
     const tableMetadataOptions = getTableMetadataOptions(profile)
 
@@ -511,7 +531,7 @@ class ProfileForm extends Component {
                 name="dataset"
                 options={dsOpt}
                 value={dsValue}
-                onChange={event => this.updateOls(event === null ? null : event.value)}
+                onChange={(event) => this.updateOls(event === null ? null : event.value)}
               />
             </Form.Group>
           </Card.Body>
@@ -549,6 +569,7 @@ class ProfileForm extends Component {
         );
       });
     }
+    profile.tables.map((table) => table.loopType = table.loopType ?? "all")
 
     return (
       <Row>
@@ -579,24 +600,15 @@ class ProfileForm extends Component {
               <Card.Body>
                 <Form.Group controlId="profile-title">
                   <Form.Label column="lg">Title</Form.Label>
-                  <Form.Control size="sm" onChange={event => this.updateTitle(event.currentTarget.value)} value={profile.title} />
+                  <Form.Control size="sm" onChange={(event) => this.updateTitle(event.currentTarget.value)} value={profile.title} />
                   <Form.Text>Please add a title for this profile.</Form.Text>
                 </Form.Group>
 
                 <Form.Group controlId="profile-description" className="mt-3">
                   <Form.Label column="lg">Description</Form.Label>
-                  <Form.Control as="textarea" size="sm" rows="3" onChange={event => this.updateDescription(event.currentTarget.value)} value={profile.description} />
+                  <Form.Control as="textarea" size="sm" rows="3" onChange={(event) => this.updateDescription(event.currentTarget.value)} value={profile.description} />
                   <Form.Text>Please add a description for this profile.</Form.Text>
                 </Form.Group>
-
-                <Form.Check
-                  className="mt-3"
-                  id="match-tables-checkbox"
-                  checked={profile.matchTables || false}
-                  onChange={this.toggleMatchTables}
-                  disabled={profile.tables.length !== 1}
-                  label="Configure only one output table and use it for each input table."
-                />
               </Card.Body>
             </Card>
 
@@ -607,12 +619,144 @@ class ProfileForm extends Component {
                   <Button
                     variant="danger"
                     size="sm"
-                    onClick={() => this.removeTable()}
+                    onClick={() => this.removeTable(index)}
                   >
                     Remove
                   </Button>
                 </Card.Header>
                 <Card.Body>
+                  Use this output table configuration for:
+                  <InputGroup>
+                    {profile.tables[index].loopType === "all" && (
+                        <InputGroup.Checkbox
+                            id="match-tables-checkbox"
+                            checked={profile.matchTables || profile.tables[index].matchTables || false}
+                            onChange={() => this.toggleMatchTables(index)}
+                        />
+                    )}
+                    { profile.tables[index].loopType === "header" ? (
+                        <Button
+                            variant="outline-success"
+                            onClick={() => this.addOperation(
+                                index, 'loop_header',
+                                'column'
+                            )}>
+                          +
+                        </Button>
+                    ) : (profile.tables[index].loopType !== "all" && (
+                        <Button
+                            variant="outline-success"
+                            onClick={() => this.addOperation(
+                                index, `loop_${profile.tables[index].loopType}`,
+                                profile.tables[index].loopType === 'metadata' ? 'metadata' : 'header_value'
+                            )}>
+                          +
+                        </Button>))}
+                  <Form.Select
+                      id="loop_select"
+                      aria-label="Select looping"
+                      value={profile.tables[index].loopType}
+                      onChange={(e) => this.handleChangeLoop(e.target.value, index)}
+                  >
+                    <option value="all">all input tables.</option>
+                    <option value="header">all input tables that have the same column header.</option>
+                    <option value="theader">all input tables that have the same table header.</option>
+                    <option value="metadata">all input tables that have the same metadata.</option>
+                  </Form.Select>
+                  </InputGroup>
+                  {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_header']
+                      && profile.tables[index].table['loop_header'].map((operation, op_index) => (
+                    <InputGroup>
+                      <InputGroup.Text>&#8627;</InputGroup.Text>
+                      <Button
+                          variant="outline-danger"
+                          onClick={() => this.removeOperation(index, 'loop_header', op_index)}
+                      >
+                        &times;
+                      </Button>
+                      <Select
+                        styles={{
+                            container: (base) => ({
+                              ...base,
+                              flex: "1 1 auto"
+                            }),
+                            control: (base) => ({
+                              ...base,
+                              minHeight: '38px' // match Bootstrap form height if needed
+                            })
+                          }}
+                          value={distInputColumns.flatMap(group => group.options)
+                              .find(col => isEqual(col.value, operation.column))}
+                          options={distInputColumns}
+                          onChange={selectedOption  =>
+                              this.updateOperation(index, 'loop_header', op_index, 'column',selectedOption.value)
+                          }
+                       />
+                    </InputGroup>
+                  ))}
+                  {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_metadata']
+                      && profile.tables[index].table['loop_metadata'].map((operation, op_index) => (
+                    <InputGroup>
+                      <InputGroup.Text>&#8627;</InputGroup.Text>
+                      <Button
+                          variant="outline-danger"
+                          onClick={() => this.removeOperation(index, 'loop_metadata', op_index)}
+                      >
+                        &times;
+                      </Button>
+                      <Form.Select
+                          size="sm"
+                          value={operation.metadata || ''}
+                          onChange={(event) => {
+                              this.updateOperation(index, 'loop_metadata', op_index, 'metadata',
+                                  `${event.target.value}:${tableMetadataOptions[event.target.value].key}
+                                  :${tableMetadataOptions[event.target.value].tableIndex}`);
+                            }
+                          }
+                      >
+                          {tableMetadataOptions.map((option, optionIndex) => (
+                              <option key={optionIndex} value={optionIndex}>{option.label}</option>
+                          ))}
+                      </Form.Select>
+                      <OverlayTrigger
+                        placement="bottom-end"
+                        overlay={<Tooltip>Ignore Value</Tooltip>}
+                      >
+                        <div className="input-group-text" style={{ cursor: 'pointer' }}>
+                          <input type="checkbox"
+                            checked={profile.tables[index].table.loop_metadata[op_index].ignoreValue || false}
+                            onChange={() => this.toggleMatchTables(index, op_index)}
+                          />
+                        </div>
+                      </OverlayTrigger>
+                    </InputGroup>
+                  ))}
+                  {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_theader']
+                      && profile.tables[index].table['loop_theader'].map((operation, op_index) => (
+                    <InputGroup>
+                      <InputGroup.Text>&#8627;</InputGroup.Text>
+                      <Button
+                          variant="outline-danger"
+                          onClick={() => this.removeOperation(index, 'loop_theader', op_index)}
+                      >
+                        &times;
+                      </Button>
+                      <Form.Control
+                          value={operation.line || ''}
+                          placeholder='Line'
+                          onChange={(event) => {
+                            this.updateOperation(index, 'loop_theader', op_index, 'line', event.target.value)
+                          }}
+                      />
+                      <Form.Control
+                          value={operation.regex || ''}
+                          placeholder='Regex'
+                          onChange={(event) => {
+                            this.updateOperation(index, 'loop_theader', op_index, 'regex', event.target.value)
+                          }}
+                      />
+                    </InputGroup>
+                  ))}
                   <TableForm
                     table={table}
                     inputTables={inputTables}
@@ -635,7 +779,6 @@ class ProfileForm extends Component {
               <Button
                 variant="success"
                 size="sm"
-                disabled={profile.matchTables}
                 onClick={() => this.addTable()}
               >
                 Add table
