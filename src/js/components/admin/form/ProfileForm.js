@@ -531,7 +531,7 @@ class ProfileForm extends Component {
                 name="dataset"
                 options={dsOpt}
                 value={dsValue}
-                onChange={event => this.updateOls(event === null ? null : event.value)}
+                onChange={(event) => this.updateOls(event === null ? null : event.value)}
               />
             </Form.Group>
           </Card.Body>
@@ -600,13 +600,13 @@ class ProfileForm extends Component {
               <Card.Body>
                 <Form.Group controlId="profile-title">
                   <Form.Label column="lg">Title</Form.Label>
-                  <Form.Control size="sm" onChange={event => this.updateTitle(event.currentTarget.value)} value={profile.title} />
+                  <Form.Control size="sm" onChange={(event) => this.updateTitle(event.currentTarget.value)} value={profile.title} />
                   <Form.Text>Please add a title for this profile.</Form.Text>
                 </Form.Group>
 
                 <Form.Group controlId="profile-description" className="mt-3">
                   <Form.Label column="lg">Description</Form.Label>
-                  <Form.Control as="textarea" size="sm" rows="3" onChange={event => this.updateDescription(event.currentTarget.value)} value={profile.description} />
+                  <Form.Control as="textarea" size="sm" rows="3" onChange={(event) => this.updateDescription(event.currentTarget.value)} value={profile.description} />
                   <Form.Text>Please add a description for this profile.</Form.Text>
                 </Form.Group>
               </Card.Body>
@@ -707,7 +707,7 @@ class ProfileForm extends Component {
                       <Form.Select
                           size="sm"
                           value={operation.metadata || ''}
-                          onChange={event => {
+                          onChange={(event) => {
                               this.updateOperation(index, 'loop_metadata', op_index, 'metadata',
                                   `${event.target.value}:${tableMetadataOptions[event.target.value].key}
                                   :${tableMetadataOptions[event.target.value].tableIndex}`);
@@ -744,14 +744,14 @@ class ProfileForm extends Component {
                       <Form.Control
                           value={operation.line || ''}
                           placeholder='Line'
-                          onChange={event => {
+                          onChange={(event) => {
                             this.updateOperation(index, 'loop_theader', op_index, 'line', event.target.value)
                           }}
                       />
                       <Form.Control
                           value={operation.regex || ''}
                           placeholder='Regex'
-                          onChange={event => {
+                          onChange={(event) => {
                             this.updateOperation(index, 'loop_theader', op_index, 'regex', event.target.value)
                           }}
                       />
