@@ -20,7 +20,9 @@ class TableForm extends Component {
     const xy_units = { XUNITS: options.XUNITS, YUNITS: options.YUNITS }
 
     const headerOptions = Object.keys(options).reduce(function(filtered, key) {
-      if (!(key in xy_units)) filtered[key] = options[key];
+      if (!(key in xy_units) && key !== 'rdf' ){
+         filtered[key] = options[key];
+      }
       return filtered;
     }, {});
 
@@ -53,6 +55,7 @@ class TableForm extends Component {
                 key={index}
                 index={index + 1000}
                 headerKey={headerKey}
+                opitions={options}
                 table={table}
                 inputTables={inputTables}
                 updateHeader={updateHeader}

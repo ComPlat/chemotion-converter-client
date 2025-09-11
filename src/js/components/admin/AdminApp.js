@@ -6,6 +6,7 @@ import ConverterApi from '../../api/ConverterApi';
 import ProfileList from './list/ProfileList';
 import ProfileForm from './form/ProfileForm';
 import FileUploadForm from './upload/FileUploadForm';
+import {GENERIC_PREDICATE} from "./form/common/TibFetchService";
 
 
 class AdminApp extends Component {
@@ -230,6 +231,10 @@ class AdminApp extends Component {
                         tables: [],
                         identifiers: [],
                         data: data,
+                        subjects: [],
+                        predicates: [],
+                        objects: [],
+                        rootOntology: GENERIC_PREDICATE
                     }
 
                     this.setState({

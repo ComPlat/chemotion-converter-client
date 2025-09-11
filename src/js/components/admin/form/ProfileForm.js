@@ -1,6 +1,6 @@
-import React, { Component } from "react"
+import React, {Component} from "react"
 import PropTypes from 'prop-types';
-import { AgGridReact } from 'ag-grid-react';
+import {AgGridReact} from 'ag-grid-react';
 import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
@@ -17,45 +17,49 @@ import {
 
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
-import ColumnSelect from "./table/ColumnSelect";
+import OntologySubjectPredicateSelect from "./identifier/OntologySubjectPredicateSelect";
+import {addNamespaceToOntology, GENERIC_PREDICATE, GENERIC_SUBJECT_PREDICATE} from "./common/TibFetchService";
 
 class ProfileForm extends Component {
 
   constructor(props) {
     super(props);
 
-    this.onGridReady = this.onGridReady.bind(this)
-    this.onSubmit = this.onSubmit.bind(this)
+    this.onGridReady = this.onGridReady.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
 
-    this.updateTitle = this.updateTitle.bind(this)
-    this.updateDescription = this.updateDescription.bind(this)
-    this.updateOls = this.updateOls.bind(this)
-    this.toggleMatchTables = this.toggleMatchTables.bind(this)
-    this.handleChangeLoop = this.handleChangeLoop.bind(this)
+    this.updateTitle = this.updateTitle.bind(this);
+    this.updateDescription = this.updateDescription.bind(this);
+    this.updateOls = this.updateOls.bind(this);
+    this.toggleMatchTables = this.toggleMatchTables.bind(this);
+    this.handleChangeLoop = this.handleChangeLoop.bind(this);
 
-    this.addTable = this.addTable.bind(this)
-    this.updateTable = this.updateTable.bind(this)
-    this.removeTable = this.removeTable.bind(this)
+    this.addTable = this.addTable.bind(this);
+    this.updateTable = this.updateTable.bind(this);
+    this.removeTable = this.removeTable.bind(this);
 
-    this.addHeader = this.addHeader.bind(this)
-    this.updateHeader = this.updateHeader.bind(this)
-    this.removeHeader = this.removeHeader.bind(this)
+    this.addHeader = this.addHeader.bind(this);
+    this.updateHeader = this.updateHeader.bind(this);
+    this.removeHeader = this.removeHeader.bind(this);
 
-    this.addOperation = this.addOperation.bind(this)
-    this.updateOperation = this.updateOperation.bind(this)
-    this.updateOperationDescription = this.updateOperationDescription.bind(this)
-    this.removeOperation = this.removeOperation.bind(this)
+    this.addOperation = this.addOperation.bind(this);
+    this.updateOperation = this.updateOperation.bind(this);
+    this.updateOperationDescription = this.updateOperationDescription.bind(this);
+    this.removeOperation = this.removeOperation.bind(this);
 
-    this.addIdentifier = this.addIdentifier.bind(this)
-    this.updateIdentifier = this.updateIdentifier.bind(this)
-    this.removeIdentifier = this.removeIdentifier.bind(this)
+    this.addIdentifier = this.addIdentifier.bind(this);
+    this.updateIdentifier = this.updateIdentifier.bind(this);
+    this.updateIdentifierOntology = this.updateIdentifierOntology.bind(this);
+    this.removeIdentifier = this.removeIdentifier.bind(this);
 
-    this.addIdentifierOperation = this.addIdentifierOperation.bind(this)
-    this.updateIdentifierOperation = this.updateIdentifierOperation.bind(this)
-    this.removeIdentifierOperation = this.removeIdentifierOperation.bind(this)
+    this.addIdentifierOperation = this.addIdentifierOperation.bind(this);
+    this.updateIdentifierOperation = this.updateIdentifierOperation.bind(this);
+    this.removeIdentifierOperation = this.removeIdentifierOperation.bind(this);
+
+    this.updateSubjectInstances = this.updateSubjectInstances.bind(this);
 
     if (this.props.status === 'create') {
-      this.addTable()
+      this.addTable();
     }
   }
 
@@ -69,9 +73,9 @@ class ProfileForm extends Component {
   }
 
   updateTitle(title) {
-    const profile = Object.assign({}, this.props.profile)
-    profile.title = title
-    this.props.updateProfile(profile)
+    const profile = Object.assign({}, this.props.profile);
+    profile.title = title;
+    this.props.updateProfile(profile);
   }
 
   updateDescription(description) {
@@ -82,13 +86,47 @@ class ProfileForm extends Component {
 
   updateOls(ols) {
     const profile = Object.assign({}, this.props.profile)
-    if (typeof profile != 'undefined' && profile !== null && typeof ols !== 'undefined' && ols != null) {
-      profile.ols = ols
-      this.props.updateProfile(profile)
+    if (typeof profile != 'undefined' && profile !== null) {
+      if (!ols) {
+        profile.ols = null;
+        profile.rootOntology = GENERIC_PREDICATE;
+        this.props.updateProfile(profile);
+      } else {
+        profile.ols = ols;
+        fetch(`https://www.ebi.ac.uk/ols4/api/ontologies/CHMO/terms?obo_id=${ols}&lang=en`).then(async (res) => {
+          const {_embedded} = await res.json();
+          let {
+            iri,
+            ontology_name,
+            ontology_prefix,
+            short_form,
+            description,
+            id,
+            label,
+            obo_id,
+            type
+          } = _embedded.terms[0];
+          id = id ?? `${ontology_prefix}:properties:${iri}`;
+          type = type ?? 'class';
+          profile.rootOntology = addNamespaceToOntology({
+            iri,
+            ontology_name,
+            ontology_prefix,
+            short_form,
+            description,
+            id,
+            label,
+            obo_id,
+            type
+          });
+        }).finally(() => {
+          this.props.updateProfile(profile);
+        })
+      }
     }
   }
 
-  toggleMatchTables(index, op_index=-1) {
+  toggleMatchTables(index, op_index = -1) {
     const profile = Object.assign({}, this.props.profile)
     const profile_table = profile.tables[index]
     if (op_index === -1) {
@@ -110,7 +148,7 @@ class ProfileForm extends Component {
   }
 
   addTable() {
-    const { options } = this.props
+    const {options} = this.props
     const header = {}
     if (options) {
       for (let key in options) {
@@ -142,7 +180,7 @@ class ProfileForm extends Component {
       // remove the column if it set to null
       if (profile.tables[index].table[key] === null) {
         delete profile.tables[index].table[key]
-      // remove the column if tableIndex and columnIndex is null
+        // remove the column if tableIndex and columnIndex is null
       } else if (Object.values(profile.tables[index].table[key]).every(value => (value === null || isNaN(value)))) {
         delete profile.tables[index].table[key]
       }
@@ -194,7 +232,7 @@ class ProfileForm extends Component {
 
           // update header identifiers if the type changed
           if (headerKey === key &&
-              profile.tables[index].header[headerKey].type !== header[headerKey].type) {
+            profile.tables[index].header[headerKey].type !== header[headerKey].type) {
             header[headerKey] = this.initIdentifier(profile, header[headerKey].type)
           }
         })
@@ -216,11 +254,11 @@ class ProfileForm extends Component {
       case 'header_value':
         let line = parseInt(operation.line);
         if (!isNaN(line)) {
-            line = ` @line ${line}`;
+          line = ` @line ${line}`;
         } else {
           line = '';
         }
-        return  ` (Table # ${operation.table}${line}: Regex: "${operation.regex}")`;
+        return ` (Table # ${operation.table}${line}: Regex: "${operation.regex}")`;
       case 'metadata_value':
         return ` (Table # ${operation.table} ${operation.value})`;
       case 'column':
@@ -233,30 +271,30 @@ class ProfileForm extends Component {
   updateAutomatedOperationDescription(profile, index, key) {
     const keyDescription = `${key}Description`;
 
-    let value = profile.tables[index].table[keyDescription] ?? ["",""];
+    let value = profile.tables[index].table[keyDescription] ?? ["", ""];
     const type_mapping = {
       "header_value": "File regexp value",
       "metadata_value": "Metadata value",
       "column": "Table column",
       "value": "Scalar value"
     };
-    if(profile.tables[index].table[key]) {
-        const tmp_value = []
-        for (const op of profile.tables[index].table[key]) {
-            tmp_value.push(`${op.operator} [${type_mapping[op.type] ?? "??"}${this.additional_info(op)}]`);
-        }
+    if (profile.tables[index].table[key]) {
+      const tmp_value = []
+      for (const op of profile.tables[index].table[key]) {
+        tmp_value.push(`${op.operator} [${type_mapping[op.type] ?? "??"}${this.additional_info(op)}]`);
+      }
 
-        value[0] = tmp_value.join(' ');
+      value[0] = tmp_value.join(' ');
     } else {
-        value[0] = ''
+      value[0] = ''
     }
-    profile.tables[index].table[keyDescription]  = value;
+    profile.tables[index].table[keyDescription] = value;
   }
 
   updateOperationDescription(index, key, value) {
     const keyDescription = `${key}Description`;
     const profile = Object.assign({}, this.props.profile);
-    const prof_value = profile.tables[index].table[keyDescription] ?? ["",""];
+    const prof_value = profile.tables[index].table[keyDescription] ?? ["", ""];
     prof_value[1] = value;
     profile.tables[index].table[keyDescription] = prof_value;
     this.props.updateProfile(profile);
@@ -276,7 +314,7 @@ class ProfileForm extends Component {
         operation.line = '';
         operation.ignore_missing_values = false;
       } else if (type === 'metadata_value') {
-        const mdZero =  getTableMetadataOptions(profile)[0];
+        const mdZero = getTableMetadataOptions(profile)[0];
         operation.value = mdZero.key;
         operation.table = `${mdZero.tableIndex}`;
         operation.metadata = '0';
@@ -300,10 +338,10 @@ class ProfileForm extends Component {
   updateOperation(index, key, opIndex, opKey, value) {
 
     if (opKey === 'metadata') {
-        const data = value.split(':');
-        this.updateOperation(index, key, opIndex, 'value', data[1].trim());
-        this.updateOperation(index, key, opIndex, 'table', data[2]);
-        value = data[0];
+      const data = value.split(':');
+      this.updateOperation(index, key, opIndex, 'value', data[1].trim());
+      this.updateOperation(index, key, opIndex, 'table', data[2]);
+      value = data[0];
     }
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
@@ -353,7 +391,7 @@ class ProfileForm extends Component {
         identifier.key = ''
         identifier.tableIndex = 0
       }
-    } else if (identifier.type === 'tableHeader'){
+    } else if (identifier.type === 'tableHeader') {
       identifier.tableIndex = 0
       identifier.lineNumber = ''
     }
@@ -371,6 +409,9 @@ class ProfileForm extends Component {
       identifier.outputTableIndex = 0
       identifier.outputLayer = ''
       identifier.outputKey = ''
+      identifier.predicate = null
+      identifier.subject = null
+      identifier.datatype = null
     } else {
       identifier.match = 'exact'
     }
@@ -379,11 +420,114 @@ class ProfileForm extends Component {
     this.props.updateProfile(profile)
   }
 
+  filterUnique(ontologyList, whiteList) {
+    const filteredOntologyList = ontologyList
+      .filter((item) => whiteList.includes(item.id));
+    return filteredOntologyList
+      .filter((item, index) => filteredOntologyList.slice(index + 1).findIndex((copyItem) => item.id === copyItem.id));
+  }
+
+  cleanOntology(profile) {
+    const usedSubjects = profile.identifiers.map((id) => id.subject?.id).filter(Boolean);
+    profile.subjects = this.filterUnique(profile.subjects, usedSubjects);
+    const usedDatatypes = profile.identifiers.map((id) => id.datatype?.id).filter(Boolean);
+    profile.datatypes = this.filterUnique(profile.datatypes, usedDatatypes);
+    console.log(profile.subjectInstances);
+    profile.subjectInstances = profile.identifiers.reduce((acc, id) => {
+      if (!id.subject) {
+        return acc
+      }
+      if (!acc[id.subject.id]) {
+        acc[id.subject.id] = [];
+      }
+      if (id.subject?.subjectInstance && !acc[id.subject.id].some((accItem) => accItem.name === id.subject.subjectInstance)) {
+        const originElement = profile.subjectInstances[id.subject.id]?.find((profileItem) => profileItem.name === id.subject.subjectInstance);
+        if (originElement) {
+          acc[id.subject.id].push(originElement)
+        } else {
+          acc[id.subject.id].push({
+            name: id.subject.subjectInstance,
+            predicate: GENERIC_SUBJECT_PREDICATE.id
+          });
+        }
+      }
+      return acc;
+    }, {});
+    console.log(profile.subjectInstances);
+
+    const usedPredicates = profile.identifiers
+      .map((id) => id.predicate?.id).concat(
+        Object.values(profile.subjectInstances).flat(Infinity).map((x) => x.predicate)
+      ).filter(Boolean);
+    profile.predicates.push(GENERIC_SUBJECT_PREDICATE);
+    profile.predicates = this.filterUnique(profile.predicates, usedPredicates);
+  }
+
   updateIdentifier(index, data) {
-    const profile = Object.assign({}, this.props.profile)
+    const profile = Object.assign({}, this.props.profile);
+    if (data['outputKey'] || data['outputLayer']) {
+      const {datasets} = this.props;
+      const dataset = getDataset(profile, datasets);
+      const {outputLayer, outputKey} = {...profile.identifiers[index], ...data}
+      const field = dataset.layers[outputLayer]?.fields.find((x) => x.field === outputKey);
+      if (field?.ontology) {
+        const ontology = addNamespaceToOntology(field.ontology);
+        this.updateIdentifierOntology(index, {type: 'predicate', ontology});
+      }
+    }
     if (index !== -1) {
-      profile.identifiers[index] = Object.assign(profile.identifiers[index], data)
-      this.props.updateProfile(profile)
+      profile.identifiers[index] = Object.assign(profile.identifiers[index], data);
+      this.cleanOntology(profile);
+      this.props.updateProfile(profile);
+    }
+  }
+
+  _findOntologyInDataset(dataset, profile, ontology) {
+    const {id} = ontology;
+    const fields = Object.entries(dataset?.layers).reduce((acc, [layarKey, layer]) => {
+      return acc.concat(layer.fields.reduce((innnerAcc, field) => {
+        if (field.ontology?.id === id) {
+          innnerAcc.push([layarKey, field.field]);
+        }
+        return innnerAcc;
+      }, []));
+    }, []);
+    if (fields.length === 1) {
+      return fields;
+    }
+    ;
+    return null;
+  }
+
+
+  updateIdentifierOntology(index, data) {
+    const profile = Object.assign({}, this.props.profile);
+
+    if (index !== -1) {
+
+      if (data.type && data.ontology) {
+        profile[`${data.type}s`].push(data.ontology);
+        profile.identifiers[index][data.type] = {'id': data.ontology.id};
+        if (data.type === 'predicate') {
+          const dataset = getDataset(profile, this.props.datasets);
+
+          const fieldPath = this._findOntologyInDataset(dataset, profile, data.ontology);
+          if (fieldPath) {
+            [profile.identifiers[index].outputLayer, profile.identifiers[index].outputKey] = fieldPath[0];
+          }
+        }
+      } else if (data.type && !data.ontology) {
+        profile.identifiers[index][data.type] = null;
+      }
+      if (data.instance && profile.identifiers[index]['subject']) {
+        profile.identifiers[index]['subject'] = {
+          ...profile.identifiers[index]['subject'],
+          subjectInstance: data.instance
+        };
+
+      }
+      this.cleanOntology(profile);
+      this.props.updateProfile(profile);
     }
   }
 
@@ -404,8 +548,8 @@ class ProfileForm extends Component {
       if (profile.identifiers[index].operations === undefined) {
         profile.identifiers[index].operations = []
       }
-      profile.identifiers[index].operations.push(operation)
-      this.props.updateProfile(profile)
+      profile.identifiers[index].operations.push(operation);
+      this.props.updateProfile(profile);
     }
   }
 
@@ -413,48 +557,55 @@ class ProfileForm extends Component {
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
       profile.identifiers[index].operations[opIndex][opKey] = value
-      this.props.updateProfile(profile)
+      this.props.updateProfile(profile);
     }
   }
 
   removeIdentifierOperation(index, opIndex) {
-    const profile = Object.assign({}, this.props.profile)
+    const profile = Object.assign({}, this.props.profile);
     if (index !== -1) {
-      profile.identifiers[index].operations.splice(opIndex, 1)
+      profile.identifiers[index].operations.splice(opIndex, 1);
 
       // remove operations if it is empty
       if (profile.identifiers[index].operations.length === 0) {
-        delete profile.identifiers[index].operations
+        delete profile.identifiers[index].operations;
       }
 
-      this.props.updateProfile(profile)
+      this.props.updateProfile(profile);
     }
   }
 
+  updateSubjectInstances(subjectInstances, predicate) {
+    const profile = {...this.props.profile, subjectInstances};
+    profile[`predicates`].push(predicate);
+    this.cleanOntology(profile);
+    this.props.updateProfile(profile);
+  }
+
   submitForm(event, profile) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (profile.id) {
-      this.props.updateProfile()
+      this.props.updateProfile();
     } else {
-      this.props.createProfile()
+      this.props.createProfile();
     }
   }
 
   renderMetadata(metadata) {
     return (
-     <Card>
+      <Card>
         <Card.Body>
           <Row as="dl">
             {Object.keys(metadata).map((key, index) => (
               <React.Fragment key={index}>
-              <TruncatedTextWithTooltip text={key} />
-              <Col as="dd" lg={7}>{metadata[key] || ' '}</Col>
+                <TruncatedTextWithTooltip text={key}/>
+                <Col as="dd" lg={7}>{metadata[key] || ' '}</Col>
               </React.Fragment>
             ))}
           </Row>
         </Card.Body>
-     </Card>
+      </Card>
     )
   }
 
@@ -475,8 +626,8 @@ class ProfileForm extends Component {
     }))
 
     const defaultColDef = {
-        resizable: true,
-        lockPosition: true
+      resizable: true,
+      lockPosition: true
     };
 
     const rowData = table.rows.map(row =>
@@ -499,7 +650,7 @@ class ProfileForm extends Component {
   }
 
   render() {
-    const { status, profile, options, datasets } = this.props
+    const {status, profile, options, datasets} = this.props
 
     const inputTables = getInputTables(profile)
     const inputColumns = getInputColumns(profile)
@@ -510,10 +661,15 @@ class ProfileForm extends Component {
     let dataset = {}
     let datasetList = null;
     if (datasets.length > 0) {
-      dataset = getDataset(profile, datasets)
+      dataset = getDataset(profile, datasets);
 
-      const dsOpt = datasets.map(ds => { return { value: ds?.ols, label: ds?.name } })
-      const dsValue = (dataset !== null && typeof dataset !== 'undefined') ? { value: dataset?.ols, label: dataset?.name } : ''
+      const dsOpt = datasets.map(ds => {
+        return {value: ds?.ols, label: ds?.name}
+      })
+      const dsValue = (dataset !== null && typeof dataset !== 'undefined') ? {
+        value: dataset?.ols,
+        label: dataset?.name
+      } : ''
 
       datasetList = (
         <Card className="mt-3">
@@ -531,7 +687,7 @@ class ProfileForm extends Component {
                 name="dataset"
                 options={dsOpt}
                 value={dsValue}
-                onChange={(event) => this.updateOls(event === null ? null : event.value)}
+                onChange={(event) => this.updateOls(event?.value)}
               />
             </Form.Group>
           </Card.Body>
@@ -600,13 +756,16 @@ class ProfileForm extends Component {
               <Card.Body>
                 <Form.Group controlId="profile-title">
                   <Form.Label column="lg">Title</Form.Label>
-                  <Form.Control size="sm" onChange={(event) => this.updateTitle(event.currentTarget.value)} value={profile.title} />
+                  <Form.Control size="sm" onChange={(event) => this.updateTitle(event.currentTarget.value)}
+                                value={profile.title}/>
                   <Form.Text>Please add a title for this profile.</Form.Text>
                 </Form.Group>
 
                 <Form.Group controlId="profile-description" className="mt-3">
                   <Form.Label column="lg">Description</Form.Label>
-                  <Form.Control as="textarea" size="sm" rows="3" onChange={(event) => this.updateDescription(event.currentTarget.value)} value={profile.description} />
+                  <Form.Control as="textarea" size="sm" rows="3"
+                                onChange={(event) => this.updateDescription(event.currentTarget.value)}
+                                value={profile.description}/>
                   <Form.Text>Please add a description for this profile.</Form.Text>
                 </Form.Group>
               </Card.Body>
@@ -628,54 +787,54 @@ class ProfileForm extends Component {
                   Use this output table configuration for:
                   <InputGroup>
                     {profile.tables[index].loopType === "all" && (
-                        <InputGroup.Checkbox
-                            id="match-tables-checkbox"
-                            checked={profile.matchTables || profile.tables[index].matchTables || false}
-                            onChange={() => this.toggleMatchTables(index)}
-                        />
+                      <InputGroup.Checkbox
+                        id="match-tables-checkbox"
+                        checked={profile.matchTables || profile.tables[index].matchTables || false}
+                        onChange={() => this.toggleMatchTables(index)}
+                      />
                     )}
-                    { profile.tables[index].loopType === "header" ? (
-                        <Button
-                            variant="outline-success"
-                            onClick={() => this.addOperation(
-                                index, 'loop_header',
-                                'column'
-                            )}>
-                          +
-                        </Button>
+                    {profile.tables[index].loopType === "header" ? (
+                      <Button
+                        variant="outline-success"
+                        onClick={() => this.addOperation(
+                          index, 'loop_header',
+                          'column'
+                        )}>
+                        +
+                      </Button>
                     ) : (profile.tables[index].loopType !== "all" && (
-                        <Button
-                            variant="outline-success"
-                            onClick={() => this.addOperation(
-                                index, `loop_${profile.tables[index].loopType}`,
-                                profile.tables[index].loopType === 'metadata' ? 'metadata' : 'header_value'
-                            )}>
-                          +
-                        </Button>))}
-                  <Form.Select
+                      <Button
+                        variant="outline-success"
+                        onClick={() => this.addOperation(
+                          index, `loop_${profile.tables[index].loopType}`,
+                          profile.tables[index].loopType === 'metadata' ? 'metadata' : 'header_value'
+                        )}>
+                        +
+                      </Button>))}
+                    <Form.Select
                       id="loop_select"
                       aria-label="Select looping"
                       value={profile.tables[index].loopType}
                       onChange={(e) => this.handleChangeLoop(e.target.value, index)}
-                  >
-                    <option value="all">all input tables.</option>
-                    <option value="header">all input tables that have the same column header.</option>
-                    <option value="theader">all input tables that have the same table header.</option>
-                    <option value="metadata">all input tables that have the same metadata.</option>
-                  </Form.Select>
+                    >
+                      <option value="all">all input tables.</option>
+                      <option value="header">all input tables that have the same column header.</option>
+                      <option value="theader">all input tables that have the same table header.</option>
+                      <option value="metadata">all input tables that have the same metadata.</option>
+                    </Form.Select>
                   </InputGroup>
                   {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_header']
-                      && profile.tables[index].table['loop_header'].map((operation, op_index) => (
-                    <InputGroup>
-                      <InputGroup.Text>&#8627;</InputGroup.Text>
-                      <Button
+                    && profile.tables[index].table['loop_header'].map((operation, op_index) => (
+                      <InputGroup>
+                        <InputGroup.Text>&#8627;</InputGroup.Text>
+                        <Button
                           variant="outline-danger"
                           onClick={() => this.removeOperation(index, 'loop_header', op_index)}
-                      >
-                        &times;
-                      </Button>
-                      <Select
-                        styles={{
+                        >
+                          &times;
+                        </Button>
+                        <Select
+                          styles={{
                             container: (base) => ({
                               ...base,
                               flex: "1 1 auto"
@@ -686,77 +845,77 @@ class ProfileForm extends Component {
                             })
                           }}
                           value={distInputColumns.flatMap(group => group.options)
-                              .find(col => isEqual(col.value, operation.column))}
+                            .find(col => isEqual(col.value, operation.column))}
                           options={distInputColumns}
-                          onChange={selectedOption  =>
-                              this.updateOperation(index, 'loop_header', op_index, 'column',selectedOption.value)
+                          onChange={selectedOption =>
+                            this.updateOperation(index, 'loop_header', op_index, 'column', selectedOption.value)
                           }
-                       />
-                    </InputGroup>
-                  ))}
+                        />
+                      </InputGroup>
+                    ))}
                   {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_metadata']
-                      && profile.tables[index].table['loop_metadata'].map((operation, op_index) => (
-                    <InputGroup>
-                      <InputGroup.Text>&#8627;</InputGroup.Text>
-                      <Button
+                    && profile.tables[index].table['loop_metadata'].map((operation, op_index) => (
+                      <InputGroup>
+                        <InputGroup.Text>&#8627;</InputGroup.Text>
+                        <Button
                           variant="outline-danger"
                           onClick={() => this.removeOperation(index, 'loop_metadata', op_index)}
-                      >
-                        &times;
-                      </Button>
-                      <Form.Select
+                        >
+                          &times;
+                        </Button>
+                        <Form.Select
                           size="sm"
                           value={operation.metadata || ''}
                           onChange={(event) => {
-                              this.updateOperation(index, 'loop_metadata', op_index, 'metadata',
-                                  `${event.target.value}:${tableMetadataOptions[event.target.value].key}
+                            this.updateOperation(index, 'loop_metadata', op_index, 'metadata',
+                              `${event.target.value}:${tableMetadataOptions[event.target.value].key}
                                   :${tableMetadataOptions[event.target.value].tableIndex}`);
-                            }
                           }
-                      >
+                          }
+                        >
                           {tableMetadataOptions.map((option, optionIndex) => (
-                              <option key={optionIndex} value={optionIndex}>{option.label}</option>
+                            <option key={optionIndex} value={optionIndex}>{option.label}</option>
                           ))}
-                      </Form.Select>
-                      <OverlayTrigger
-                        placement="bottom-end"
-                        overlay={<Tooltip>Ignore Value</Tooltip>}
-                      >
-                        <div className="input-group-text" style={{ cursor: 'pointer' }}>
-                          <input type="checkbox"
-                            checked={profile.tables[index].table.loop_metadata[op_index].ignoreValue || false}
-                            onChange={() => this.toggleMatchTables(index, op_index)}
-                          />
-                        </div>
-                      </OverlayTrigger>
-                    </InputGroup>
-                  ))}
+                        </Form.Select>
+                        <OverlayTrigger
+                          placement="bottom-end"
+                          overlay={<Tooltip>Ignore Value</Tooltip>}
+                        >
+                          <div className="input-group-text" style={{cursor: 'pointer'}}>
+                            <input type="checkbox"
+                                   checked={profile.tables[index].table.loop_metadata[op_index].ignoreValue || false}
+                                   onChange={() => this.toggleMatchTables(index, op_index)}
+                            />
+                          </div>
+                        </OverlayTrigger>
+                      </InputGroup>
+                    ))}
                   {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_theader']
-                      && profile.tables[index].table['loop_theader'].map((operation, op_index) => (
-                    <InputGroup>
-                      <InputGroup.Text>&#8627;</InputGroup.Text>
-                      <Button
+                    && profile.tables[index].table['loop_theader'].map((operation, op_index) => (
+                      <InputGroup>
+                        <InputGroup.Text>&#8627;</InputGroup.Text>
+                        <Button
                           variant="outline-danger"
                           onClick={() => this.removeOperation(index, 'loop_theader', op_index)}
-                      >
-                        &times;
-                      </Button>
-                      <Form.Control
+                        >
+                          &times;
+                        </Button>
+                        <Form.Control
                           value={operation.line || ''}
                           placeholder='Line'
                           onChange={(event) => {
                             this.updateOperation(index, 'loop_theader', op_index, 'line', event.target.value)
                           }}
-                      />
-                      <Form.Control
+                        />
+                        <Form.Control
                           value={operation.regex || ''}
                           placeholder='Regex'
                           onChange={(event) => {
                             this.updateOperation(index, 'loop_theader', op_index, 'regex', event.target.value)
                           }}
-                      />
-                    </InputGroup>
-                  ))}
+                        />
+                      </InputGroup>
+                    ))}
                   <TableForm
                     table={table}
                     inputTables={inputTables}
@@ -790,8 +949,8 @@ class ProfileForm extends Component {
               <Card.Body>
                 {
                   [['Based on file metadata', 'fileMetadata'],
-                   ['Based on table metadata', 'tableMetadata'],
-                   ['Based on table headers', 'tableHeader']].map(([label, type]) => (
+                    ['Based on table metadata', 'tableMetadata'],
+                    ['Based on table headers', 'tableHeader']].map(([label, type]) => (
                     <IdentifierForm
                       key={type}
                       label={label}
@@ -803,11 +962,14 @@ class ProfileForm extends Component {
                       inputTables={inputTables}
                       outputTables={profile.tables}
                       dataset={dataset}
+                      profile={profile}
+                      options={options}
                       addIdentifier={this.addIdentifier}
                       updateIdentifier={this.updateIdentifier}
                       removeIdentifier={this.removeIdentifier}
                       addIdentifierOperation={this.addIdentifierOperation}
                       updateIdentifierOperation={this.updateIdentifierOperation}
+                      updateIdentifierOntology={this.updateIdentifierOntology}
                       removeIdentifierOperation={this.removeIdentifierOperation}
                     />
                   ))
@@ -818,24 +980,26 @@ class ProfileForm extends Component {
                   </p>
                   <ul className="text-muted">
                     <li>
-                      The <code>Value</code> will be compared to the selected metadata or to the header of a table. If you select <code>Regex</code>, you can enter a regular expression as value.
+                      The <code>Value</code> will be compared to the selected metadata or to the header of a table. If
+                      you select <code>Regex</code>, you can enter a regular expression as value.
                     </li>
-                    <li>If you provide a line number, only this line of the header will be used. If line number is ommited, the whole header is compared (or searched with the Regex).
+                    <li>If you provide a line number, only this line of the header will be used. If line number is
+                      ommited, the whole header is compared (or searched with the Regex).
                     </li>
                   </ul>
                 </small>
               </Card.Body>
             </Card>
 
-            { datasetList }
+            {datasetList}
 
             <Card className="mt-3">
               <Card.Header>Metadata</Card.Header>
               <Card.Body>
                 {
                   [['Based on file metadata', 'fileMetadata'],
-                   ['Based on table metadata', 'tableMetadata'],
-                   ['Based on table headers', 'tableHeader']].map(([label, type]) => (
+                    ['Based on table metadata', 'tableMetadata'],
+                    ['Based on table headers', 'tableHeader']].map(([label, type]) => (
                     <IdentifierForm
                       key={type}
                       label={label}
@@ -847,11 +1011,14 @@ class ProfileForm extends Component {
                       inputTables={inputTables}
                       outputTables={profile.tables}
                       dataset={dataset}
+                      profile={profile}
+                      options={options}
                       addIdentifier={this.addIdentifier}
                       updateIdentifier={this.updateIdentifier}
                       removeIdentifier={this.removeIdentifier}
                       addIdentifierOperation={this.addIdentifierOperation}
                       updateIdentifierOperation={this.updateIdentifierOperation}
+                      updateIdentifierOntology={this.updateIdentifierOntology}
                       removeIdentifierOperation={this.removeIdentifierOperation}
                     />
                   ))
@@ -862,21 +1029,37 @@ class ProfileForm extends Component {
                   </p>
                   <ul className="text-muted">
                     <li>
-                      As above, the <code>Value</code> will be compared to the selected metadata or to the header of a table. If you select <code>Regex</code>, you can enter a regular expression as value.
+                      As above, the <code>Value</code> will be compared to the selected metadata or to the header of a
+                      table. If you select <code>Regex</code>, you can enter a regular expression as value.
                     </li>
-                    <li>Also, if you provide a line number, only this line of the header will be used. If line number is ommited, the whole header is compared (or searched with the Regex).
+                    <li>Also, if you provide a line number, only this line of the header will be used. If line number is
+                      ommited, the whole header is compared (or searched with the Regex).
                     </li>
                     <li>
-                      If groups are used in the regular expression (e.g. <code>Key: (.*?)</code>) only the first group will be extracted as metadata.
+                      If groups are used in the regular expression (e.g. <code>Key: (.*?)</code>) only the first group
+                      will be extracted as metadata.
                     </li>
                     <li>
-                      If you enter an <code>Output key</code> the matched value will be added to the output tables. If you set an <code>Output table</code> explicitely, it will only be added to this table, otherwise it will be added to all output tables.
+                      If you enter an <code>Output key</code> the matched value will be added to the output tables. If
+                      you set an <code>Output table</code> explicitely, it will only be added to this table, otherwise
+                      it will be added to all output tables.
                     </li>
                     <li>
                       The <code>Output layer</code> input is used for additional processing in the Chemotion ELN.
                     </li>
                   </ul>
                 </small>
+              </Card.Body>
+            </Card>
+
+            <Card className="mt-3">
+              <Card.Header>Subject Instances</Card.Header>
+              <Card.Body>
+                <OntologySubjectPredicateSelect
+                  updateSubjectInstances={this.updateSubjectInstances}
+                  dataset={dataset} subjects={profile.subjects}
+                  predicates={profile.predicates} options={options}
+                  subjectInstances={profile.subjectInstances}></OntologySubjectPredicateSelect>
               </Card.Body>
             </Card>
 

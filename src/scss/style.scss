@@ -1,7 +1,7 @@
-@import "bootstrap/dist/css/bootstrap.css";
-@import "ag-grid-community/styles/ag-grid.css";
-@import "ag-grid-community/styles/ag-theme-alpine.css";
-@import "components/layout";
-@import "components/pre";
-@import "components/table";
-@import "components/admin";
+@use "bootstrap/dist/css/bootstrap.css";
+@use "ag-grid-community/styles/ag-grid.css";
+@use "ag-grid-community/styles/ag-theme-alpine.css";
+@use "components/layout";
+@use "components/pre";
+@use "components/table";
+@use "components/admin";

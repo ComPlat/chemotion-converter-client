@@ -89,10 +89,11 @@ class App extends Component {
                 <Button variant="primary" size="lg" onClick={this.onSubmitFileHandler}>Upload</Button>
               </div>
               <Form.Group controlId="format-select" className="mt-3">
-                <Form.Label>Conversion format</Form.Label>
+                <Form.Label column="sm">Conversion format</Form.Label>
                 <Form.Select value={this.state.format} onChange={this.onFormatChangeHandler}>
                   <option value="jcampzip">Zip file containing JCAMP files</option>
                   <option value="jcamp">Single JCAMP file</option>
+                  <option value="rdf">The Resource Description Framework (.ttl)</option>
                 </Form.Select>
               </Form.Group>
             </Form>
