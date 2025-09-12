@@ -234,6 +234,7 @@ class AdminApp extends Component {
                         subjects: [],
                         predicates: [],
                         objects: [],
+                        subjectInstances: {},
                         rootOntology: GENERIC_PREDICATE
                     }
 
