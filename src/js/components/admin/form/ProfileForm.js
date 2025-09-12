@@ -151,8 +151,8 @@ class ProfileForm extends Component {
     const {options} = this.props
     const header = {}
     if (options) {
-      for (let key in options) {
-        header[key] = options[key][0]
+      for (let key of ["DATA CLASS", "DATA TYPE", "XUNITS", "YUNITS"]) {
+        header[key] = options[key][0];
       }
     }
 
@@ -453,7 +453,6 @@ class ProfileForm extends Component {
       }
       return acc;
     }, {});
-    console.log(profile.subjectInstances);
 
     const usedPredicates = profile.identifiers
       .map((id) => id.predicate?.id).concat(
@@ -484,6 +483,9 @@ class ProfileForm extends Component {
 
   _findOntologyInDataset(dataset, profile, ontology) {
     const {id} = ontology;
+    if (!dataset?.layers) {
+      return null;
+    }
     const fields = Object.entries(dataset?.layers).reduce((acc, [layarKey, layer]) => {
       return acc.concat(layer.fields.reduce((innnerAcc, field) => {
         if (field.ontology?.id === id) {
@@ -495,7 +497,7 @@ class ProfileForm extends Component {
     if (fields.length === 1) {
       return fields;
     }
-    ;
+
     return null;
   }
 
