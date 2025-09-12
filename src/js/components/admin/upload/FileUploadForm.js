@@ -17,7 +17,7 @@ class FileUploadForm extends Component {
 
           <Form.Group className="mb-3" controlId="OntologyLabelGroup">
             <Form.Label column={"lg"}>Ontology</Form.Label>
-            <Form.Control type="text" placeholder="n.d." defaultValue="n.d." ref={this.props.ontologyRef}/>
+            <Form.Control type="text" placeholder="n.d." defaultValue={null} ref={this.props.ontologyRef}/>
           </Form.Group>
 
         <div className="d-flex justify-content-end mt-4">
