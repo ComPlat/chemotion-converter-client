@@ -1,11 +1,43 @@
 import React, {useState, useEffect, useRef} from "react";
 
-export default function FileHeaderPresenter({header}) {
+const integerRegex = '[+-]?\\d+';
+const floatRegex = '[+-]?(?:\\d*[,.]\\d+|\\d+)(?:[eE][+-]?\\d+)?';
+const emailRegex = '[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}';
+const defaultRegex = '.+';
+const regexList = [integerRegex, floatRegex, emailRegex, defaultRegex];
+
+export default function FileHeaderPresenter({header, addIdentifier}) {
   const [selection, setSelection] = useState("");
+  const [selectionLine, setSelectionLine] = useState("");
   const [menuPos, setMenuPos] = useState(null);
   const [menuErrorMsg, setMenuErrorMsg] = useState(null);
   const menuRef = useRef(null);
   const paragraphRef = useRef(null);
+  const setNewSelection = (selection = "", selectionContainer = null) => {
+    setSelection(selection);
+    if (selectionContainer) {
+      setSelectionLine(selectionContainer.textContent);
+    } else {
+      setSelectionLine("")
+    }
+  };
+
+  function buildRegexWithSnippet(line, snippet) {
+    // Escape regex special chars in both
+    const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regexMath = regexList.find(x => {
+      return snippet.match(new RegExp(`^${x}$`))
+    });
+    const escapedLine = escapeRegex(line);
+    const escapedSnippet = escapeRegex(snippet);
+
+
+    // Replace the snippet in the escaped line with a capturing group
+    const pattern = escapedLine.replace(escapedSnippet, `(${regexMath})`);
+
+    // Create a regex that matches the full line (anchored)
+    return `^${pattern}$`;
+  }
 
   useEffect(() => {
     const handleMouseUp = (e) => {
@@ -20,16 +52,16 @@ export default function FileHeaderPresenter({header}) {
 
         if (!paragraphRef.current.contains(container)) {
           // Selection is outside → ignore
-          setSelection("");
+          setNewSelection();
           setMenuPos(null);
           return;
         }
 
         if (containerEnd === container) {
-          setSelection(selectedText);
+          setNewSelection(selectedText, container);
           setMenuErrorMsg("");
         } else {
-          setSelection("");
+          setNewSelection();
           setMenuErrorMsg("Generating an identifier is only possible for single-line selections.");
         }
 
@@ -39,7 +71,7 @@ export default function FileHeaderPresenter({header}) {
           y: rect.top - 10 + window.scrollY,
         });
       } else {
-        setSelection("");
+        setNewSelection();
         setMenuPos(null);
       }
     };
@@ -49,8 +81,9 @@ export default function FileHeaderPresenter({header}) {
   }, []);
 
   const handleOptionClick = (option) => {
-    console.log(`${option} on:`, selection);
-    setSelection("");
+    const res = buildRegexWithSnippet(selectionLine, selection);
+    setNewSelection();
+    addIdentifier(res);
     setMenuPos(null);
   };
 
