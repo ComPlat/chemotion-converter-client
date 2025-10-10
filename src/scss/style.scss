@@ -1,7 +1,9 @@
+@use "sass:meta";
+@use "components/layout";
+
 @import "bootstrap/dist/css/bootstrap.css";
 @import "ag-grid-community/styles/ag-grid.css";
 @import "ag-grid-community/styles/ag-theme-alpine.css";
-@import "components/layout";
-@import "components/pre";
-@import "components/table";
-@import "components/admin";
+@include meta.load-css("components/pre");
+@include meta.load-css("components/table");
+@include meta.load-css("components/admin");

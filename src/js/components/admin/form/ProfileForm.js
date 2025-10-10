@@ -18,6 +18,7 @@ import {
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
 import ColumnSelect from "./table/ColumnSelect";
+import FileHeaderPresenter from "./HeaderPresenter";
 
 class ProfileForm extends Component {
 
@@ -459,13 +460,7 @@ class ProfileForm extends Component {
   }
 
   renderHeader(header) {
-    return (
-      <pre>
-        {header.map((line, index) => (
-          <code key={index}>{line}</code>
-        ))}
-      </pre>
-    )
+    return <FileHeaderPresenter header={header}></FileHeaderPresenter>
   }
 
   renderDataGrid(table) {
