@@ -1,7 +1,7 @@
 import React, {Component} from "react"
 import PropTypes from 'prop-types';
 import {AgGridReact} from 'ag-grid-react';
-import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup, OverlayTrigger, Tooltip, Popover} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
 import isEqual from 'lodash/isEqual';
@@ -77,11 +77,11 @@ class ProfileForm extends Component {
       const regex = new RegExp(regexPattern);
       const match = header.header.map((x) => regex.exec(x)).filter(Boolean).map((res => res[1]));
       if (match.length > 0) {
-        return <p>Current match: <b>{match[0]}</b></p>;
+        return <p>Current match: <b>{match[0]}</b> (<a target="_blank" href="https://regex101.com/">regex101</a>)</p>;
       }
     } catch {
     }
-    return <></>;
+    return <></>; 
   }
 
 
@@ -587,7 +587,25 @@ class ProfileForm extends Component {
             {
               table.header !== undefined && table.header.length > 0 &&
               <div className="mt-3">
-                <h4>Input table header</h4>
+
+                <h4>Input table header
+                  <OverlayTrigger
+                    placement="bottom"
+                    overlay={<Popover id="header-popover-select-infp">
+                      <Popover.Header as="h3"> How to generate Identifier </Popover.Header>
+                        <Popover.Body>
+                          To generate an identifier, please highlight the value you wish to extract. To generate an identifier, please press the 'New Identifier' button on the appearing dialog. Please remember to check the regular expression. It is possible to set the correct output for your new identifier.
+                      </Popover.Body>
+                    </Popover>}
+                  >
+                        <span style={{
+                          borderRadius: '10px',
+                          display: 'inline-block',
+                          marginLeft: '5px'
+                        }} className="ml-3 btn btn-outline-info btn-sm">Hint</span>
+                  </OverlayTrigger>
+                </h4>
+
                 {this.renderHeader(table.header, idx)}
               </div>
             }

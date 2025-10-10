@@ -30,17 +30,16 @@ export default function FileHeaderPresenter({header, addIdentifier}) {
     });
     const escapedLine = escapeRegex(line);
     const escapedSnippet = escapeRegex(snippet);
-
-
+    const escapedSplitLine = escapedLine.split(escapedSnippet, 2);
     // Replace the snippet in the escaped line with a capturing group
-    const pattern = escapedLine.replace(escapedSnippet, `(${regexMath})`);
+    const pattern = `${escapedSplitLine[0]}(${regexMath})${escapedSplitLine[1].replace(/\d/g, '\\d')}`;
 
     // Create a regex that matches the full line (anchored)
     return `^${pattern}$`;
   }
 
   useEffect(() => {
-    const handleMouseUp = (e) => {
+    const handleMouseUp = () => {
       const selection = window.getSelection();
       const selectedText = selection.toString().trim();
 
@@ -80,7 +79,7 @@ export default function FileHeaderPresenter({header, addIdentifier}) {
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, []);
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = () => {
     const res = buildRegexWithSnippet(selectionLine, selection);
     setNewSelection();
     addIdentifier(res);
