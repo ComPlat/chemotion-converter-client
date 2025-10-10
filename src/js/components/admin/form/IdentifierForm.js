@@ -1,9 +1,10 @@
-import React, { Component } from "react"
+import React, {Component} from "react"
 import PropTypes from 'prop-types';
-import { Button, ListGroup } from 'react-bootstrap';
+import {Button, ListGroup} from 'react-bootstrap';
 
 import IdentifierInput from './IdentifierInput'
 import IdentifierHeader from './IdentifierHeader'
+
 
 class IdentifierForm extends Component {
 
@@ -12,11 +13,12 @@ class IdentifierForm extends Component {
       label, type, optional, identifiers, fileMetadataOptions,
       tableMetadataOptions, inputTables, outputTables, dataset,
       addIdentifier, updateIdentifier, removeIdentifier,
-      addIdentifierOperation, updateIdentifierOperation, removeIdentifierOperation
+      addIdentifierOperation, updateIdentifierOperation, removeIdentifierOperation,
+      updateRegex
     } = this.props
 
     const toggleIdentifier = (index) => {
-      updateIdentifier(index, { show: !identifiers[index].show})
+      updateIdentifier(index, {show: !identifiers[index].show})
     }
 
     const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional == optional)
@@ -52,7 +54,8 @@ class IdentifierForm extends Component {
                         updateIdentifierOperation={updateIdentifierOperation}
                         removeIdentifierOperation={removeIdentifierOperation}
                       />
-                      {identifier.optional && (
+                      {identifier.optional && (<>
+                        {updateRegex({...identifier})}
                         <Button
                           className="mt-1"
                           variant="success"
@@ -61,7 +64,8 @@ class IdentifierForm extends Component {
                         >
                           Add scalar operation
                         </Button>
-                      )}
+                      </>)}
+                      
                     </>
                   )}
                 </ListGroup.Item>
@@ -99,7 +103,8 @@ IdentifierForm.propTypes = {
   removeIdentifier: PropTypes.func,
   addIdentifierOperation: PropTypes.func,
   updateIdentifierOperation: PropTypes.func,
-  removeIdentifierOperation: PropTypes.func
+  removeIdentifierOperation: PropTypes.func,
+  updateRegex: PropTypes.func
 }
 
 export default IdentifierForm

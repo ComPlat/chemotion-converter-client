@@ -55,10 +55,35 @@ class ProfileForm extends Component {
     this.updateIdentifierOperation = this.updateIdentifierOperation.bind(this)
     this.removeIdentifierOperation = this.removeIdentifierOperation.bind(this)
 
+    this.updateRegex = this.updateRegex.bind(this)
+
     if (this.props.status === 'create') {
       this.addTable()
     }
   }
+
+  updateRegex({lineNumber, value, tableIndex, match}) {
+    if (match !== 'regex') {
+      return <></>;
+    }
+    const {profile} = this.props;
+    const regexPattern = value;
+    lineNumber = parseInt(lineNumber);
+    let header = profile.data.tables[tableIndex];
+    if (!isNaN(lineNumber) && header.length + 1 > lineNumber) {
+      header = [header[lineNumber - 1]];
+    }
+    try {
+      const regex = new RegExp(regexPattern);
+      const match = header.header.map((x) => regex.exec(x)).filter(Boolean).map((res => res[1]));
+      if (match.length > 0) {
+        return <p>Current match: <b>{match[0]}</b></p>;
+      }
+    } catch {
+    }
+    return <></>;
+  }
+
 
   onGridReady(params) {
     this.api = params.api;
@@ -820,6 +845,7 @@ class ProfileForm extends Component {
                       addIdentifierOperation={this.addIdentifierOperation}
                       updateIdentifierOperation={this.updateIdentifierOperation}
                       removeIdentifierOperation={this.removeIdentifierOperation}
+                      updateRegex={this.updateRegex}
                     />
                   ))
                 }
@@ -866,6 +892,7 @@ class ProfileForm extends Component {
                       addIdentifierOperation={this.addIdentifierOperation}
                       updateIdentifierOperation={this.updateIdentifierOperation}
                       removeIdentifierOperation={this.removeIdentifierOperation}
+                      updateRegex={this.updateRegex}
                     />
                   ))
                 }
