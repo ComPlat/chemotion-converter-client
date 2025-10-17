@@ -7,13 +7,13 @@ const defaultRegex = '.+';
 const regexList = [integerRegex, floatRegex, emailRegex, defaultRegex];
 
 export default function FileHeaderPresenter({header, addIdentifier}) {
-  const [selection, setSelection] = useState("");
+  const [selection, setSelection] = useState(["", ""]);
   const [selectionLine, setSelectionLine] = useState("");
   const [menuPos, setMenuPos] = useState(null);
   const [menuErrorMsg, setMenuErrorMsg] = useState(null);
   const menuRef = useRef(null);
   const paragraphRef = useRef(null);
-  const setNewSelection = (selection = "", selectionContainer = null) => {
+  const setNewSelection = (selection = ["", ""], selectionContainer = null) => {
     setSelection(selection);
     if (selectionContainer) {
       setSelectionLine(selectionContainer.textContent);
@@ -22,17 +22,18 @@ export default function FileHeaderPresenter({header, addIdentifier}) {
     }
   };
 
-  function buildRegexWithSnippet(line, snippet) {
+  function buildRegexWithSnippet(line, [prefix, snippet]) {
     // Escape regex special chars in both
-    const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapeRegex = str => str.replace(/[/.*+?^${}()|[\]\\]/g, "\\$&");
     const regexMath = regexList.find(x => {
       return snippet.match(new RegExp(`^${x}$`))
     });
     const escapedLine = escapeRegex(line);
+    const escapedPrefix = escapeRegex(prefix);
     const escapedSnippet = escapeRegex(snippet);
-    const escapedSplitLine = escapedLine.split(escapedSnippet, 2);
+    const escapedSuffix = escapedLine.substring(escapedPrefix.length + escapedSnippet.length);
     // Replace the snippet in the escaped line with a capturing group
-    const pattern = `${escapedSplitLine[0]}(${regexMath})${escapedSplitLine[1].replace(/\d/g, '\\d')}`;
+    const pattern = `${escapedPrefix}(${regexMath})${escapedSuffix.replace(/\d/g, '\\d')}`;
 
     // Create a regex that matches the full line (anchored)
     return `^${pattern}$`;
@@ -41,13 +42,22 @@ export default function FileHeaderPresenter({header, addIdentifier}) {
   useEffect(() => {
     const handleMouseUp = () => {
       const selection = window.getSelection();
+      if (!selection.rangeCount) return null;
       const selectedText = selection.toString().trim();
 
       if (selectedText) {
         const range = selection.getRangeAt(0);
+
         const rect = range.getBoundingClientRect();
         const container = range.startContainer;
         const containerEnd = range.endContainer;
+
+        const preRange = range.cloneRange();
+
+        preRange.selectNodeContents(container);
+        preRange.setEnd(range.startContainer, range.startOffset);
+
+        const preSelectedText = preRange.toString();
 
         if (!paragraphRef.current.contains(container)) {
           // Selection is outside → ignore
@@ -57,7 +67,7 @@ export default function FileHeaderPresenter({header, addIdentifier}) {
         }
 
         if (containerEnd === container) {
-          setNewSelection(selectedText, container);
+          setNewSelection([preSelectedText, selectedText], container);
           setMenuErrorMsg("");
         } else {
           setNewSelection();
@@ -91,7 +101,7 @@ export default function FileHeaderPresenter({header, addIdentifier}) {
       return <p>{menuErrorMsg}</p>;
     }
     return <><p className="mb-1">Generate identifier for:</p>
-      <p className="fw-bold"> {selection}</p>
+      <p className="fw-bold"> {selection[1]}</p>
       <button
         onClick={() => handleOptionClick()}
         className="btn btn-info"
