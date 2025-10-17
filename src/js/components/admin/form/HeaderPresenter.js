@@ -194,7 +194,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
         <Alert variant="warning"><b className="alert-heading">Multiline mode enabled.</b>
           <p>Select additional regex features from previous lines for more precise matching.</p>
           <p>Current regex is: <b>{multilineSelection}</b></p>
-          <p>{updateRegex(multilineSelection)}</p>
+          {updateRegex(multilineSelection)}
           <Button variant="success"
                   size="sm"
                   onClick={() => {
