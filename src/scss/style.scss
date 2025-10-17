@@ -7,3 +7,7 @@
 @include meta.load-css("components/pre");
 @include meta.load-css("components/table");
 @include meta.load-css("components/admin");
+
+body {
+  overflow: hidden;
+}

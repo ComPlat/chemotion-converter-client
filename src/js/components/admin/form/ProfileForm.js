@@ -69,19 +69,23 @@ class ProfileForm extends Component {
     const {profile} = this.props;
     const regexPattern = value;
     lineNumber = parseInt(lineNumber);
-    let header = profile.data.tables[tableIndex];
+    let {header} = profile.data.tables[tableIndex];
+
     if (!isNaN(lineNumber) && header.length + 1 > lineNumber) {
       header = [header[lineNumber - 1]];
+    } else if (!String(regexPattern).startsWith('^') && !String(regexPattern).endsWith('$')) {
+      header = [header.join('\n')];
     }
     try {
       const regex = new RegExp(regexPattern);
-      const match = header.header.map((x) => regex.exec(x)).filter(Boolean).map((res => res[1]));
-      if (match.length > 0) {
-        return <p>Current match: <b>{match[0]}</b> (<a target="_blank" href="https://regex101.com/">regex101</a>)</p>;
+      const matchResult = header.map((x) => regex.exec(x)).filter(Boolean).map((res => res[1]));
+      if (matchResult.length > 0) {
+        return <p>Current match: <b>{matchResult[0]}</b> (<a target="_blank" href="https://regex101.com/">regex101</a>)
+        </p>;
       }
     } catch {
     }
-    return <></>; 
+    return <></>;
   }
 
 
@@ -493,7 +497,9 @@ class ProfileForm extends Component {
   renderHeader(header, tableIndex) {
     return <FileHeaderPresenter addIdentifier={(value) => {
       this.addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
-    }} header={header}></FileHeaderPresenter>
+    }} header={header} updateRegex={(value) => {
+      return this.updateRegex({lineNumber:null, tableIndex, value, match:'regex'});
+    }}></FileHeaderPresenter>
   }
 
   renderDataGrid(table) {
@@ -593,8 +599,10 @@ class ProfileForm extends Component {
                     placement="bottom"
                     overlay={<Popover id="header-popover-select-infp">
                       <Popover.Header as="h3"> How to generate Identifier </Popover.Header>
-                        <Popover.Body>
-                          To generate an identifier, please highlight the value you wish to extract. To generate an identifier, please press the 'New Identifier' button on the appearing dialog. Please remember to check the regular expression. It is possible to set the correct output for your new identifier.
+                      <Popover.Body>
+                        To generate an identifier, please highlight the value you wish to extract. To generate an
+                        identifier, please press the 'New Identifier' button on the appearing dialog. Please remember to
+                        check the regular expression. It is possible to set the correct output for your new identifier.
                       </Popover.Body>
                     </Popover>}
                   >
