@@ -191,7 +191,16 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
     <div className="relative p-8 text-lg leading-relaxed">
 
       {multilineMode && (
-        <Alert variant="warning"><b className="alert-heading">Multiline mode enabled.</b>
+        <Alert variant="warning" style={{
+          position: 'fixed',
+          zIndex: 10,
+          right: '3px',
+          top: '118px',
+          width: '42vw',
+          minWidth: '400px',
+          bottom: '20px'
+        }}><b className="alert-heading">Multiline mode enabled.</b>
+          <p>In this mode, you can create an identifier that identifies a value from the header based on features from multiple lines. To exit this mode, you must either press Cancel or create the Identifier.</p>
           <p>Select additional regex features from previous lines for more precise matching.</p>
           <p>Current regex is: <b>{multilineSelection}</b></p>
           {updateRegex(multilineSelection)}
