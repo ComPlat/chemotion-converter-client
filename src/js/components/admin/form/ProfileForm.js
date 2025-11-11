@@ -1,7 +1,7 @@
 import React, {Component} from "react"
 import PropTypes from 'prop-types';
 import {AgGridReact} from 'ag-grid-react';
-import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup, OverlayTrigger, Tooltip, Popover} from 'react-bootstrap';
+import {Button, Card, Col, Form, Row, Nav, InputGroup, OverlayTrigger, Tooltip, Popover} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
 import isEqual from 'lodash/isEqual';
@@ -24,6 +24,10 @@ class ProfileForm extends Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      activeKey: 0, // start with the first tab active
+    };
 
     this.onGridReady = this.onGridReady.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
@@ -61,6 +65,10 @@ class ProfileForm extends Component {
       this.addTable()
     }
   }
+
+  handleSelect = (selectedKey) => {
+    this.setState({ activeKey: Number(selectedKey) });
+  };
 
   updateRegex({lineNumber, value, tableIndex, match}) {
     if (match !== 'regex') {
@@ -534,6 +542,9 @@ class ProfileForm extends Component {
 
   render() {
     const {status, profile, options, datasets} = this.props
+    const { activeKey } = this.state
+
+    if (!profile?.data) return null;
 
     const inputTables = getInputTables(profile)
     const inputColumns = getInputColumns(profile)
@@ -578,56 +589,78 @@ class ProfileForm extends Component {
       );
     }
 
-    const tabContents = [];
-    if (profile.data) {
-      profile.data.tables.forEach((table, idx) => {
-        tabContents.push(
-          <Tab key={`tableTab${idx}`} eventKey={idx} title={`Input table # ${idx}`}>
-            {
-              table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
-              <div className="mt-3">
-                <h4>Input table metadata</h4>
-                {this.renderMetadata(table.metadata)}
-              </div>
-            }
-            {
-              table.header !== undefined && table.header.length > 0 &&
-              <div className="mt-3">
+    const tabs = profile.data.tables.map((table, idx) => (
+      <Nav.Item key={`nav-tab-${idx}`}>
+        <Nav.Link eventKey={idx}>{`Input table # ${idx}`}</Nav.Link>
+      </Nav.Item>
+    ));
 
-                <h4>Input table header
-                  <OverlayTrigger
-                    placement="bottom"
-                    overlay={<Popover id="header-popover-select-infp">
-                      <Popover.Header as="h3"> How to generate Identifier </Popover.Header>
-                      <Popover.Body>
-                        To generate an identifier, please highlight the value you wish to extract. To generate an
-                        identifier, please press the 'New Identifier' button on the appearing dialog. Please remember to
-                        check the regular expression. It is possible to set the correct output for your new identifier.
-                      </Popover.Body>
-                    </Popover>}
-                  >
-                        <span style={{
+
+    const tabContents =
+      <div className="mt-3">
+          {profile.data.tables.map((table, idx) => (
+            <div
+              key={`tab-content-${idx}`}
+              style={{ display: activeKey === idx ? 'block' : 'none' }}
+            >
+              {/* Metadata Section */}
+              {table.metadata && Object.keys(table.metadata).length > 0 && (
+                <div className="mt-3">
+                  <h4>Input table metadata</h4>
+                  {this.renderMetadata(table.metadata)}
+                </div>
+              )}
+
+              {/* Header Section */}
+              {table.header && table.header.length > 0 && (
+                <div className="mt-3">
+                  <h4>
+                    Input table header
+                    <OverlayTrigger
+                      placement="bottom"
+                      overlay={
+                        <Popover id="header-popover-select-info">
+                          <Popover.Header as="h3">
+                            How to generate Identifier
+                          </Popover.Header>
+                          <Popover.Body>
+                            To generate an identifier, please highlight the
+                            value you wish to extract. Then press the “New
+                            Identifier” button in the appearing dialog. Please
+                            remember to check the regular expression and ensure
+                            it produces the correct output.
+                          </Popover.Body>
+                        </Popover>
+                      }
+                    >
+                      <span
+                        style={{
                           borderRadius: '10px',
                           display: 'inline-block',
-                          marginLeft: '5px'
-                        }} className="ml-3 btn btn-outline-info btn-sm">Hint</span>
-                  </OverlayTrigger>
-                </h4>
+                          marginLeft: '5px',
+                        }}
+                        className="ml-3 btn btn-outline-info btn-sm"
+                      >
+                        Hint
+                      </span>
+                    </OverlayTrigger>
+                  </h4>
 
-                {this.renderHeader(table.header, idx)}
-              </div>
-            }
-            {
-              table.rows !== undefined && table.rows.length > 0 &&
-              <div className="mt-3">
-                <h4>Input table data</h4>
-                {this.renderDataGrid(table)}
-              </div>
-            }
-          </Tab>
-        );
-      });
-    }
+                  {this.renderHeader(table.header, idx)}
+                </div>
+              )}
+
+              {/* Data Section */}
+              {table.rows && table.rows.length > 0 && (
+                <div className="mt-3">
+                  <h4>Input table data</h4>
+                  {this.renderDataGrid(table)}
+                </div>
+              )}
+            </div>
+          ))}
+      </div>
+
     profile.tables.map((table) => table.loopType = table.loopType ?? "all")
 
     return (
@@ -639,9 +672,15 @@ class ProfileForm extends Component {
                 <h4>Input file metadata</h4>
                 {Object.keys(profile.data.metadata).length > 0 && this.renderMetadata(profile.data.metadata)}
                 <h4 className="mt-3">Input tables</h4>
-                <Tabs defaultActiveKey={0} id="uncontrolled-tab-example">
-                  {tabContents}
-                </Tabs>
+                 <Nav
+                  variant="tabs"
+                  activeKey={activeKey}
+                  onSelect={this.handleSelect}
+                  id="nav-tab-example"
+                 >
+                    <>{tabs}</>
+                 </Nav>
+                 {tabContents}
               </div>
             ) : (
               <p>
