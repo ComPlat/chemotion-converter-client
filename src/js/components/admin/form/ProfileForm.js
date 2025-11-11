@@ -1,7 +1,7 @@
 import React, {Component} from "react"
 import PropTypes from 'prop-types';
 import {AgGridReact} from 'ag-grid-react';
-import {Button, Card, Col, Form, Row, Nav, InputGroup, OverlayTrigger, Tooltip, Popover} from 'react-bootstrap';
+import {Button, Card, Col, Form, Row, Nav, NavDropdown, InputGroup, OverlayTrigger, Tooltip, Popover} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
 import isEqual from 'lodash/isEqual';
@@ -589,77 +589,77 @@ class ProfileForm extends Component {
       );
     }
 
-    const tabs = profile.data.tables.map((table, idx) => (
-      <Nav.Item key={`nav-tab-${idx}`}>
-        <Nav.Link eventKey={idx}>{`Input table # ${idx}`}</Nav.Link>
-      </Nav.Item>
-    ));
+    const activeTable = profile.data.tables[activeKey];
 
+    const tabs = (profile.data.tables.map((table, idx) => (
+      <NavDropdown.Item eventKey={idx}>
+          {`Input table # ${idx}`}
+      </NavDropdown.Item>
+    )));
 
-    const tabContents =
+    const tabContents = (
       <div className="mt-3">
-          {profile.data.tables.map((table, idx) => (
-            <div
-              key={`tab-content-${idx}`}
-              style={{ display: activeKey === idx ? 'block' : 'none' }}
-            >
-              {/* Metadata Section */}
-              {table.metadata && Object.keys(table.metadata).length > 0 && (
-                <div className="mt-3">
-                  <h4>Input table metadata</h4>
-                  {this.renderMetadata(table.metadata)}
-                </div>
-              )}
+        {activeTable && (
+          <div key={`tab-content-${activeKey}`}>
+            {/* Metadata Section */}
+            {activeTable.metadata && Object.keys(activeTable.metadata).length > 0 && (
+              <div className="mt-3">
+                <h4>Input table metadata</h4>
+                {this.renderMetadata(activeTable.metadata)}
+              </div>
+            )}
 
-              {/* Header Section */}
-              {table.header && table.header.length > 0 && (
-                <div className="mt-3">
-                  <h4>
-                    Input table header
-                    <OverlayTrigger
-                      placement="bottom"
-                      overlay={
-                        <Popover id="header-popover-select-info">
-                          <Popover.Header as="h3">
-                            How to generate Identifier
-                          </Popover.Header>
-                          <Popover.Body>
-                            To generate an identifier, please highlight the
-                            value you wish to extract. Then press the “New
-                            Identifier” button in the appearing dialog. Please
-                            remember to check the regular expression and ensure
-                            it produces the correct output.
-                          </Popover.Body>
-                        </Popover>
-                      }
+            {/* Header Section */}
+            {activeTable.header && activeTable.header.length > 0 && (
+              <div className="mt-3">
+                <h4>
+                  Input table header
+                  <OverlayTrigger
+                    placement="bottom"
+                    overlay={
+                      <Popover id="header-popover-select-info">
+                        <Popover.Header as="h3">
+                          How to generate Identifier
+                        </Popover.Header>
+                        <Popover.Body>
+                          To generate an identifier, please highlight the
+                          value you wish to extract. Then press the “New
+                          Identifier” button in the appearing dialog. Please
+                          remember to check the regular expression and ensure
+                          it produces the correct output.
+                        </Popover.Body>
+                      </Popover>
+                    }
+                  >
+                    <span
+                      style={{
+                        borderRadius: '10px',
+                        display: 'inline-block',
+                        marginLeft: '5px',
+                      }}
+                      className="ml-3 btn btn-outline-info btn-sm"
                     >
-                      <span
-                        style={{
-                          borderRadius: '10px',
-                          display: 'inline-block',
-                          marginLeft: '5px',
-                        }}
-                        className="ml-3 btn btn-outline-info btn-sm"
-                      >
-                        Hint
-                      </span>
-                    </OverlayTrigger>
-                  </h4>
+                      Hint
+                    </span>
+                  </OverlayTrigger>
+                </h4>
 
-                  {this.renderHeader(table.header, idx)}
-                </div>
-              )}
+                {this.renderHeader(activeTable.header, activeKey)}
+              </div>
+            )}
 
-              {/* Data Section */}
-              {table.rows && table.rows.length > 0 && (
-                <div className="mt-3">
-                  <h4>Input table data</h4>
-                  {this.renderDataGrid(table)}
-                </div>
-              )}
-            </div>
-          ))}
+            {/* Data Section */}
+            {activeTable.rows && activeTable.rows.length > 0 && (
+              <div className="mt-3">
+                <h4>Input table data</h4>
+                {this.renderDataGrid(activeTable)}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+    );
+
 
     profile.tables.map((table) => table.loopType = table.loopType ?? "all")
 
@@ -678,7 +678,9 @@ class ProfileForm extends Component {
                   onSelect={this.handleSelect}
                   id="nav-tab-example"
                  >
-                    <>{tabs}</>
+                    <NavDropdown title={`Input table # ${activeKey}`} id="nav-dropdown">
+                        {tabs}
+                    </NavDropdown>
                  </Nav>
                  {tabContents}
               </div>
