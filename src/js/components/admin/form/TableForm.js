@@ -5,6 +5,7 @@ import HeaderInput from './table/HeaderInput'
 import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
 import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
+import {Col, Form, Row} from "react-bootstrap";
 
 
 class TableForm extends Component {
@@ -39,6 +40,27 @@ class TableForm extends Component {
           <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={xy_units[optionKey]} updateHeader={updateHeader} />
         ))}
 
+        {(table.header['DATA CLASS'] === 'NTUPLES') && (
+            <Form.Group as={Row}>
+                <Form.Label as={Col} sm={4}>NTUPELS PAGE HEADER</Form.Label>
+                <Col sm={8}>
+                    <Form.Select
+                        size="sm"
+                        value={table.header['NTUPELS_PAGE_HEADER']}
+                        onChange={event => {
+                            updateHeader('NTUPELS_PAGE_HEADER', event.target.value)
+                        }}
+                    >
+                        <option value="+">Incrementing Page Index</option>
+                        <option value="TABLE_NAME">Input Table Name</option>
+                        <option disabled>---METADATA---</option>
+                        {tableMetadataOptions.map((option, optionIndex) => (
+                            <option key={optionIndex} value={optionIndex}>{option.label}</option>
+                        ))}
+                    </Form.Select>
+                </Col>
+            </Form.Group>
+        )}
         <div className="mt-3 fw-bold">
           Table columns
         </div>
