@@ -633,7 +633,7 @@ class ProfileForm extends Component {
     const activeTable = profile.data.tables[activeKey];
 
     const tabs = (profile.data.tables.map((table, idx) => (
-      <NavDropdown.Item eventKey={idx}>
+      <NavDropdown.Item eventKey={idx} key={idx}>
         {`Input table # ${idx}`}
       </NavDropdown.Item>
     )));
@@ -815,7 +815,7 @@ class ProfileForm extends Component {
                   </InputGroup>
                   {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_header']
                     && profile.tables[index].table['loop_header'].map((operation, op_index) => (
-                      <InputGroup>
+                      <InputGroup key={op_index}>
                         <InputGroup.Text>&#8627;</InputGroup.Text>
                         <Button
                           variant="outline-danger"
@@ -845,7 +845,7 @@ class ProfileForm extends Component {
                     ))}
                   {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_metadata']
                     && profile.tables[index].table['loop_metadata'].map((operation, op_index) => (
-                      <InputGroup>
+                      <InputGroup key={op_index}>
                         <InputGroup.Text>&#8627;</InputGroup.Text>
                         <Button
                           variant="outline-danger"
