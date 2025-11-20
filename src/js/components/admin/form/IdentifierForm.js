@@ -21,7 +21,7 @@ class IdentifierForm extends Component {
       updateIdentifier(index, {show: !identifiers[index].show})
     }
 
-    const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional == optional)
+    const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional === optional && identifier.editable)
     const hasIdentifiers = identifiers.some(isRelevantIdentifier)
 
     return (

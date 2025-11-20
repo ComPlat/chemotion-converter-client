@@ -23,7 +23,8 @@
     "bootstrap": "^5.3.3",
     "lodash": "^4.17.21",
     "prop-types": "^15.8.1",
-    "react-select": "5.2.2"
+    "react-select": "5.2.2",
+    "uuid": "^13.0.0"
   },
   "peerDependencies": {
     "ag-grid-community": "^32.0.1",

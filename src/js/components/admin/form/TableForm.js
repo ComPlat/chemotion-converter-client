@@ -25,7 +25,6 @@ class TableForm extends Component {
       return filtered;
     }, {});
 
-
     return (
       <div>
         <div className="fw-bold">
@@ -42,20 +41,24 @@ class TableForm extends Component {
 
         {(table.header['DATA CLASS'] === 'NTUPLES') && (
             <Form.Group as={Row}>
-                <Form.Label as={Col} sm={4}>NTUPELS PAGE HEADER</Form.Label>
+                <Form.Label as={Col} sm={4}>NTUPLES PAGE HEADER</Form.Label>
                 <Col sm={8}>
                     <Form.Select
                         size="sm"
-                        value={table.header['NTUPELS_PAGE_HEADER']}
+                        value={table.header['NTUPLES_PAGE_HEADER']}
                         onChange={event => {
-                            updateHeader('NTUPELS_PAGE_HEADER', event.target.value)
+                            const {value} = event.target;
+                            updateHeader('NTUPLES_PAGE_HEADER', value);
                         }}
                     >
-                        <option value="+">Incrementing Page Index</option>
-                        <option value="TABLE_NAME">Input Table Name</option>
+                        <option value="___+">Incrementing Page Index</option>
+                        <option value="___TABLE_NAME">Input Table Name</option>
                         <option disabled>---METADATA---</option>
-                        {tableMetadataOptions.map((option, optionIndex) => (
-                            <option key={optionIndex} value={optionIndex}>{option.label}</option>
+                        {Array.from(tableMetadataOptions.reduce((accumulator, currentValue)=> {
+                            accumulator.add(currentValue.key);
+                            return accumulator;
+                        }, new Set())).map((option, optionIndex) => (
+                            <option key={optionIndex} data-idx={optionIndex} value={option}>{option}</option>
                         ))}
                     </Form.Select>
                 </Col>
