@@ -8,10 +8,6 @@
 @include meta.load-css("components/table");
 @include meta.load-css("components/admin");
 
-body {
-  overflow: hidden;
-}
-
 #root > .container {
   display: flex;
   flex-direction: column;
