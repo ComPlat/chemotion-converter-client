@@ -8,4 +8,19 @@
 @include meta.load-css("components/table");
 @include meta.load-css("components/admin");
 
+body {
+  overflow: hidden;
+}
 
+#root > .container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+main {
+  flex: 1; /* takes remaining space */
+
+      overflow-x: hidden;
+    overflow-y: auto;
+}
