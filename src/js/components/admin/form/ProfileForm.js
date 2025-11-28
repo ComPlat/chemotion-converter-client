@@ -460,7 +460,7 @@ class ProfileForm extends Component {
 
   updateIdentifier(index, data) {
     const profile = Object.assign({}, this.props.profile)
-    if (typeof index === 'string' && index.startsWith('#') > 10) {
+    if (typeof index === 'string' && index.startsWith('#')) {
       index = profile.identifiers.findIndex((x) => x.id === index);
     }
     if (index !== -1) {
