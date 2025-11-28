@@ -17,7 +17,6 @@ import {
 
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
-import ColumnSelect from "./table/ColumnSelect";
 import FileHeaderPresenter from "./HeaderPresenter";
 
 class ProfileForm extends Component {
@@ -94,11 +93,43 @@ class ProfileForm extends Component {
   }
 
   onSubmit(event) {
-    event.preventDefault()
-    this.props.storeProfile()
-  }
+		event.preventDefault();
 
-  updateTitle(title) {
+		const profile = { ...this.props.profile };
+		const errors = [];
+
+		this.check_loop_fields(profile, errors);
+
+		if (errors.length > 0) {
+			alert(errors.join("\n"));
+			return;
+		}
+
+		this.props.storeProfile();
+	}
+
+
+	check_loop_fields(profile, errors) {
+		profile.tables.forEach((t, tableIndex) => {
+			t.table['loop_header']?.forEach((lh, lhIndex) => {
+				if (lh.column?.columnIndex == null) {
+					errors.push(`In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`);
+				}
+			});
+			t.table['loop_theader']?.forEach((lh, lhIndex) => {
+				if (lh.line === "" || lh.regex === "") {
+					errors.push(`In Output Table ${tableIndex}: no line or regex selected for loop condition ${lhIndex}`);
+				}
+			});
+			t.table['loop_metadata']?.forEach((lh, lhIndex) => {
+				if (lh.metadata == null) {
+					errors.push(`In Output Table ${tableIndex}: no metadata selected for loop condition ${lhIndex}`);
+				}
+			});
+		});
+	}
+
+	updateTitle(title) {
     const profile = Object.assign({}, this.props.profile)
     profile.title = title
     this.props.updateProfile(profile)
@@ -467,16 +498,6 @@ class ProfileForm extends Component {
     }
   }
 
-  submitForm(event, profile) {
-    event.preventDefault()
-
-    if (profile.id) {
-      this.props.updateProfile()
-    } else {
-      this.props.createProfile()
-    }
-  }
-
   renderMetadata(metadata) {
     return (
       <Card>
@@ -776,9 +797,10 @@ class ProfileForm extends Component {
                           }
                           }
                         >
-                          {tableMetadataOptions.map((option, optionIndex) => (
-                            <option key={optionIndex} value={optionIndex}>{option.label}</option>
-                          ))}
+													<option disabled key={-1} value="">Select...</option>
+													{tableMetadataOptions.map((option, optionIndex) => (
+															<option key={optionIndex} value={optionIndex}>{option.label}</option>
+													))}
                         </Form.Select>
                         <OverlayTrigger
                           placement="bottom-end"
