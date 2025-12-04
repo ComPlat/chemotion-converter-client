@@ -6,3 +6,18 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.fixed-alert-container {
+  /* Set the positioning context */
+  position: fixed;
+
+  /* Place the alert in the top-right corner */
+  top: 5px;
+  right: 2vw;
+
+  /* Optional: ensure it appears above other content */
+  z-index: 1050;
+
+  /* Optional: limit the width so it doesn't span the whole screen */
+  width: 96vw;
+}

@@ -1,17 +1,14 @@
 pre {
     background-color: rgb(249, 249, 249);
-
-    &:before {
-        counter-reset: listing;
-    }
+    counter-reset: line;
 
     code {
         display: block;
-        counter-increment: listing;
     }
 
     code:before {
-        content: counter(listing);
+        content: counter(line);
+        counter-increment: line;
         display: inline-block;
 
         width: 4em;

@@ -1,8 +1,21 @@
-@use "sass:meta";
+@use "components/layout";
+
 @import "bootstrap/dist/css/bootstrap.css";
 @import "ag-grid-community/styles/ag-grid.css";
 @import "ag-grid-community/styles/ag-theme-alpine.css";
-@include meta.load-css("components/layout");
 @include meta.load-css("components/pre");
 @include meta.load-css("components/table");
 @include meta.load-css("components/admin");
+
+#root > .container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+main {
+  flex: 1; /* takes remaining space */
+
+      overflow-x: hidden;
+    overflow-y: auto;
+}
