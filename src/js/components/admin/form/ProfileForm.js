@@ -805,6 +805,12 @@ class ProfileForm extends Component {
                         </Button>
                         <Select
                           className="loop-select-container"
+													classNamePrefix="loop-select"
+													menuPortalTarget={document.body}
+													menuShouldBlockScroll={false}
+													menuShouldScrollIntoView={false}
+													openMenuOnScroll={false}
+													closeMenuOnScroll={false}
                           value={distInputColumns.flatMap(group => group.options)
                             .find(col => isEqual(col.value, operation.column))}
                           options={distInputColumns}
@@ -826,6 +832,12 @@ class ProfileForm extends Component {
                         </Button>
                         <Select
 													className="loop-select-container"
+													classNamePrefix="loop-select"
+													menuPortalTarget={document.body}
+													menuShouldBlockScroll={false}
+													menuShouldScrollIntoView={false}
+													openMenuOnScroll={false}
+													closeMenuOnScroll={false}
                           value={getSelectedMetadataOption(operation.metadata, index, op_index)}
                           onChange={(selected) => {
 														if (!selected) {

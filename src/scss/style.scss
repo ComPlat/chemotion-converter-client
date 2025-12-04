@@ -28,6 +28,17 @@ body {
   min-height: 38px;
 }
 
+/* Target the portal wrapper */
+.loop-select-menu-portal {
+  z-index: 9999 !important;
+  position: relative; /* ensures stacking works correctly */
+}
+
+/* Target the actual menu */
+.loop-select-menu {
+  z-index: 9999 !important;
+}
+
 main {
   flex: 1; /* takes remaining space */
 
