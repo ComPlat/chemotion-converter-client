@@ -1,10 +1,11 @@
-import React, { Component } from "react"
+import React, {Component} from "react"
 import PropTypes from 'prop-types';
 
 import HeaderInput from './table/HeaderInput'
 import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
 import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
+import {Col, Form, Row} from "react-bootstrap";
 
 
 class TableForm extends Component {
@@ -17,13 +18,12 @@ class TableForm extends Component {
       fileMetadataOptions, tableMetadataOptions
     } = this.props
 
-    const xy_units = { XUNITS: options.XUNITS, YUNITS: options.YUNITS }
+    const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
 
-    const headerOptions = Object.keys(options).reduce(function(filtered, key) {
+    const headerOptions = Object.keys(options).reduce(function (filtered, key) {
       if (!(key in xy_units)) filtered[key] = options[key];
       return filtered;
     }, {});
-
 
     return (
       <div>
@@ -32,13 +32,39 @@ class TableForm extends Component {
         </div>
 
         {Object.keys(headerOptions).map((optionKey, index) => (
-          <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={headerOptions[optionKey]} updateHeader={updateHeader} />
+          <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
+                       values={headerOptions[optionKey]} updateHeader={updateHeader}/>
         ))}
 
         {Object.keys(xy_units).map((optionKey, index) => (
-          <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]} values={xy_units[optionKey]} updateHeader={updateHeader} />
+          <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
+                               values={xy_units[optionKey]} updateHeader={updateHeader}/>
         ))}
 
+        {(table.header['DATA CLASS'] === 'NTUPLES') && (
+          <Form.Group as={Row}>
+            <Form.Label as={Col} sm={4}>NTUPLES PAGE HEADER</Form.Label>
+            <Col sm={8}>
+              <Form.Select
+                size="sm"
+                value={table.header['NTUPLES_PAGE_HEADER']}
+                onChange={event => {
+                  const {value} = event.target;
+                  updateHeader('NTUPLES_PAGE_HEADER', value);
+                }}
+              >
+                <option value="___+">Incrementing Page Index</option>
+                <option value="___TABLE_NAME">Input Table Name</option>
+                <option disabled>---METADATA---</option>
+                <>
+                  {[...new Set(tableMetadataOptions.map(o => o.key))].map((option, optionIndex) => (
+                    <option key={optionIndex} data-idx={optionIndex} value={option}>{option}</option>
+                  ))}
+                </>
+              </Form.Select>
+            </Col>
+          </Form.Group>
+        )}
         <div className="mt-3 fw-bold">
           Table columns
         </div>
@@ -93,7 +119,8 @@ class TableForm extends Component {
           inputTables={inputTables}
         />
 
-        <small className="text-muted">The data you pick will determine which table columns are going to converted.</small>
+        <small className="text-muted">The data you pick will determine which table columns are going to
+          converted.</small>
       </div>
     )
   }

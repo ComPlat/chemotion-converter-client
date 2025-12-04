@@ -55,7 +55,10 @@ class ConverterApi {
         if (ok) {
           return data
         } else {
-          throw data
+          const error = new Error('A error occurred during processing.');
+          // Attach the custom data object to the error instance
+          error.data = data;
+          throw error;
         }
       })
   }
@@ -79,7 +82,10 @@ class ConverterApi {
         if (ok) {
           return data
         } else {
-          throw new Error(data)
+          const error = new Error('A error occurred during processing.');
+          // Attach the custom data object to the error instance
+          error.data = data;
+          throw error;
         }
       })
   }
