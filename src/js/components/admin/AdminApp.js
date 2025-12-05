@@ -6,6 +6,14 @@ import ConverterApi from '../../api/ConverterApi';
 import ProfileList from './list/ProfileList';
 import ProfileForm from './form/ProfileForm';
 import FileUploadForm from './upload/FileUploadForm';
+import { ModuleRegistry, provideGlobalGridOptions, AllCommunityModule } from 'ag-grid-community';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+// Mark all grids as using legacy themes
+provideGlobalGridOptions({
+    theme: "legacy",
+});
 
 
 class AdminApp extends Component {
