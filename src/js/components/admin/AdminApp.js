@@ -48,6 +48,8 @@ class AdminApp extends Component {
         this.importFile = this.importFile.bind(this);
 
         this.dispatchView = this.dispatchView.bind(this);
+
+        this.ontologyRef = React.createRef();
     }
 
     componentDidMount() {
@@ -224,11 +226,15 @@ class AdminApp extends Component {
     uploadFile() {
         const {selectedFile} = this.state
 
+        const ontology = this.ontologyRef.current.value;
+
+        console.log("chosen ontology", ontology);
+
         this.setState({
             isLoading: true
         })
 
-        ConverterApi.fetchTables(selectedFile)
+        ConverterApi.fetchTables(selectedFile, ontology)
             .then(data => {
                 if (data) {
                     const profile = {
@@ -305,6 +311,7 @@ class AdminApp extends Component {
                 <FileUploadForm
                     onFileChangeHandler={this.updateFile}
                     onSubmitFileHandler={handler}
+                    ontologyRef={this.ontologyRef}
                     errorMessage={errorMessage}
                     error={error}
                     isLoading={isLoading}
