@@ -1,0 +1,25 @@
+{
+  "name": "ChemConverterClient",
+  "build": {
+    "dockerfile": "Dockerfile.devcontainer",
+    "context": ".."
+  },
+  "runArgs": [
+    "--add-host=host.docker.internal:host-gateway"
+  ],
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [
+    4000, // Port for Flask interface
+
+  ],
+  "postCreateCommand": "asdf reshim && yarn install",
+  // Ensure the environment
+  "postStartCommand": "yarn install",
+  "remoteUser": "debian",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/debian/chem_converter,type=bind",
+    "workspaceFolder": "/home/debian/chem_converter",
+  // Inject variables from file into the container.
+  // Configure tool-specific properties.
+  "customizations": {
+  }
+}
