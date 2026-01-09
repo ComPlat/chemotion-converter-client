@@ -1,22 +1,32 @@
+
 name: Build
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - master
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
           registry-url: https://registry.npmjs.org/
-      - run: yarn install
-      - run: yarn build:prod
-      - run: yarn build:bundle
+
+      - name: Install deps
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build:prod & yarn build:bundle
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-build
+          path: dist/
