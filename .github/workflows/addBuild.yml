@@ -23,6 +23,7 @@ jobs:
       - name: Build
         run: |
           yarn build:prod
+          rm -rf "./build" 2>/dev/null
           mv ./public ./build
 
       - name: Configure git
