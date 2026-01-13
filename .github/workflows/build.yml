@@ -4,6 +4,9 @@ name: Build
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
+      - master
   pull_request:
 
 jobs:
@@ -28,5 +31,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: my-build
+          name: ChemConverterApp
           path: dist/
