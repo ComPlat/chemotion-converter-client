@@ -41,6 +41,8 @@ class ProfileForm extends Component {
 
     this.state = {
       activeKey: 0, // start with the first tab active
+      softwares: this.props.profile.software,
+      devices: this.props.profile.devices
     };
 
     this.onGridReady = this.onGridReady.bind(this)
@@ -48,6 +50,8 @@ class ProfileForm extends Component {
 
     this.updateTitle = this.updateTitle.bind(this)
     this.updateDescription = this.updateDescription.bind(this)
+    this.updateSoftware = this.updateSoftware.bind(this)
+    this.updateDevices = this.updateDevices.bind(this)
     this.updateOls = this.updateOls.bind(this)
     this.toggleMatchTables = this.toggleMatchTables.bind(this)
     this.handleChangeLoop = this.handleChangeLoop.bind(this)
@@ -129,6 +133,20 @@ class ProfileForm extends Component {
   updateDescription(description) {
     const profile = Object.assign({}, this.props.profile)
     profile.description = description
+    this.props.updateProfile(profile)
+  }
+
+  updateSoftware(software) {
+    this.setState({ softwares: software });
+    const profile = Object.assign({}, this.props.profile)
+    profile.software = software ? software.split(',').map(s => s.trim()) : []
+    this.props.updateProfile(profile)
+  }
+
+  updateDevices(devices) {
+    this.setState({ devices });
+    const profile = Object.assign({}, this.props.profile)
+    profile.devices = devices ? devices.split(',').map(s => s.trim()) : []
     this.props.updateProfile(profile)
   }
 
@@ -758,6 +776,20 @@ class ProfileForm extends Component {
                                 value={profile.description}/>
                   <Form.Text>Please add a description for this profile.</Form.Text>
                 </Form.Group>
+                <InputGroup>
+                  <InputGroup.Text>Software</InputGroup.Text>
+                  <Form.Control
+                    size="sm"
+                    value={this.state.softwares}
+                    onChange={(event) => this.updateSoftware(event.currentTarget.value)}
+                  />
+                  <InputGroup.Text>Devices</InputGroup.Text>
+                  <Form.Control
+                    size="sm"
+                    value={this.state.devices}
+                    onChange={(event) => this.updateDevices(event.currentTarget.value)}
+                  />
+                </InputGroup>
               </Card.Body>
             </Card>
 
