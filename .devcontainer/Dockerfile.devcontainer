@@ -1,0 +1,47 @@
+FROM debian:stable
+
+# -----------------------------------------------------
+# Create user 'debian' (reuse group with GID 1000)
+# -----------------------------------------------------
+ARG USERNAME=debian
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    sudo git curl build-essential ca-certificates libssl-dev libreadline-dev
+
+# Create the user (but DO NOT create the group because GID 1000 already exists)
+
+
+# Create user with same UID/GID as host
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && passwd -d ${USERNAME} && adduser ${USERNAME} sudo \
+    && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER $USERNAME
+WORKDIR /home/$USERNAME
+
+# -----------------------------------------------------
+# Install asdf for user 'debian'
+# -----------------------------------------------------
+ENV ASDF_DIR=/home/$USERNAME/.asdf
+RUN git clone https://github.com/asdf-vm/asdf.git $ASDF_DIR --branch v0.14.0
+
+# Add asdf to PATH
+ENV PATH="$ASDF_DIR/bin:$ASDF_DIR/shims:$PATH"
+
+# -----------------------------------------------------
+# Install nodejs plugin + Node.js 22.14.0
+# -----------------------------------------------------
+RUN asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+
+ARG NODE_VERSION=22.14.0
+RUN asdf install nodejs $NODE_VERSION --compile \
+    && asdf global nodejs $NODE_VERSION
+
+RUN asdf reshim
+
+# Enable Yarn via Corepack
+RUN corepack enable && corepack prepare yarn@stable --activate

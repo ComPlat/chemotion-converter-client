@@ -156,7 +156,7 @@ class AdminApp extends Component {
             .catch(errors => {
                 this.setState({
                     error: true,
-                    errorMessage: Object.values(errors).join(', '),
+                    errorMessage: Object.values(errors.data).join(', '),
                     isLoading: false
                 });
             });
@@ -172,6 +172,13 @@ class AdminApp extends Component {
                     status: 'list',
                     profiles: profiles,
                     profile: null
+                });
+            })
+            .catch(errors => {
+                this.setState({
+                    error: true,
+                    errorMessage: Object.values(errors.data).join(', '),
+                    isLoading: false
                 });
             });
     }
@@ -311,13 +318,15 @@ class AdminApp extends Component {
                 />
             )
         } else {
-            const {profile, options, datasets} = this.state;
+            const {errorMessage, error, profile, options, datasets} = this.state;
             return (
                 <ProfileForm
                     status={status}
                     profile={profile}
                     options={options}
                     datasets={datasets}
+                    errorMessage={errorMessage}
+                    error={error}
                     updateProfile={this.updateProfile}
                     storeProfile={this.storeProfile}
                 />

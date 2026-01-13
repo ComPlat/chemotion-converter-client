@@ -1,9 +1,10 @@
-import React, {Component} from "react"
+import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import {Button, ListGroup} from 'react-bootstrap';
+import { Button, ListGroup } from 'react-bootstrap';
 
 import IdentifierInput from './IdentifierInput'
 import IdentifierHeader from './IdentifierHeader'
+
 
 class IdentifierForm extends Component {
 
@@ -13,14 +14,14 @@ class IdentifierForm extends Component {
       tableMetadataOptions, inputTables, outputTables, dataset,
       addIdentifier, updateIdentifier, removeIdentifier, profile,
       addIdentifierOperation, updateIdentifierOperation,
-      options, removeIdentifierOperation, updateIdentifierOntology
+      options, removeIdentifierOperation, updateIdentifierOntology, updateRegex
     } = this.props
 
     const toggleIdentifier = (index) => {
-      updateIdentifier(index, {show: !identifiers[index].show})
+      updateIdentifier(index, { show: !identifiers[index].show})
     }
 
-    const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional == optional)
+    const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional === optional && identifier.editable)
     const hasIdentifiers = identifiers.some(isRelevantIdentifier)
 
     return (
@@ -56,7 +57,8 @@ class IdentifierForm extends Component {
                         updateIdentifierOntology={updateIdentifierOntology}
                         removeIdentifierOperation={removeIdentifierOperation}
                       />
-                      {identifier.optional && (
+                      {identifier.optional && (<>
+                        {updateRegex({...identifier})}
                         <Button
                           className="mt-1"
                           variant="success"
@@ -65,7 +67,8 @@ class IdentifierForm extends Component {
                         >
                           Add scalar operation
                         </Button>
-                      )}
+                      </>)}
+
                     </>
                   )}
                 </ListGroup.Item>
@@ -106,7 +109,8 @@ IdentifierForm.propTypes = {
   addIdentifierOperation: PropTypes.func,
   updateIdentifierOperation: PropTypes.func,
   removeIdentifierOperation: PropTypes.func,
-  updateIdentifierOntology: PropTypes.func
+  updateIdentifierOntology: PropTypes.func,
+  updateRegex: PropTypes.func
 }
 
 export default IdentifierForm

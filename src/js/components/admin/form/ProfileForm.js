@@ -1,7 +1,21 @@
 import React, {Component} from "react"
 import PropTypes from 'prop-types';
 import {AgGridReact} from 'ag-grid-react';
-import {Button, Card, Col, Form, Row, Tabs, Tab, InputGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import {v4 as uuidv4} from 'uuid';
+import {
+  Button,
+  Card,
+  Col,
+  Form,
+  Row,
+  Nav,
+  NavDropdown,
+  InputGroup,
+  OverlayTrigger,
+  Tooltip,
+  Popover,
+  Alert
+} from 'react-bootstrap';
 import Select from 'react-select';
 import TruncatedTextWithTooltip from './common/TruncatedTextWithTooltip'
 import isEqual from 'lodash/isEqual';
@@ -19,11 +33,16 @@ import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
 import OntologySubjectPredicateSelect from "./identifier/OntologySubjectPredicateSelect";
 import {addNamespaceToOntology, GENERIC_PREDICATE, GENERIC_SUBJECT_PREDICATE} from "./common/TibFetchService";
+import FileHeaderPresenter from "./HeaderPresenter";
 
 class ProfileForm extends Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      activeKey: 0, // start with the first tab active
+    };
 
     this.onGridReady = this.onGridReady.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
@@ -58,10 +77,43 @@ class ProfileForm extends Component {
 
     this.updateSubjectInstances = this.updateSubjectInstances.bind(this);
 
+    this.updateRegex = this.updateRegex.bind(this)
+
     if (this.props.status === 'create') {
       this.addTable();
     }
   }
+
+  handleSelect = (selectedKey) => {
+    this.setState({activeKey: Number(selectedKey)});
+  };
+
+  updateRegex({lineNumber, value, tableIndex, match}) {
+    if (match !== 'regex') {
+      return <></>;
+    }
+    const {profile} = this.props;
+    const regexPattern = value;
+    lineNumber = parseInt(lineNumber);
+    let {header} = profile.data.tables[tableIndex];
+
+    if (!isNaN(lineNumber) && header.length + 1 > lineNumber) {
+      header = [header[lineNumber - 1]];
+    } else if (!String(regexPattern).startsWith('^') && !String(regexPattern).endsWith('$')) {
+      header = [header.join('\n')];
+    }
+    try {
+      const regex = new RegExp(regexPattern);
+      const matchResult = header.map((x) => regex.exec(x)).filter(Boolean).map((res => res[1]));
+      if (matchResult.length > 0) {
+        return <p>Current match: <b>{matchResult[0]}</b> (<a target="_blank" href="https://regex101.com/">regex101</a>)
+        </p>;
+      }
+    } catch {
+    }
+    return <></>;
+  }
+
 
   onGridReady(params) {
     this.api = params.api;
@@ -223,19 +275,35 @@ class ProfileForm extends Component {
         }, {})
       }
 
-      if (header['DATA CLASS'] === 'XYDATA') {
-        ['FIRSTX', 'LASTX', 'DELTAX'].forEach(headerKey => {
-          // ensure headerKeys are there if XYDATA is selected
-          if (header[headerKey] === undefined) {
-            header[headerKey] = this.initIdentifier(profile, 'fileMetadata')
-          }
+      if (key === 'DATA CLASS') {
+        if (value === 'NTUPLES') {
+          header.NTUPLES_PAGE_HEADER = header.NTUPLES_PAGE_HEADER || '___+';
+          header.NTUPLES_ID = header.NTUPLES_ID || uuidv4();
+        } else if (header['NTUPLES_PAGE_HEADER']) {
+          delete header.NTUPLES_PAGE_HEADER;
+          delete header.NTUPLES_ID;
+        }
 
-          // update header identifiers if the type changed
-          if (headerKey === key &&
+        if (value === 'XYDATA') {
+          ['FIRSTX', 'LASTX', 'DELTAX'].forEach(headerKey => {
+            // ensure headerKeys are there if XYDATA is selected
+            if (header[headerKey] === undefined) {
+              header[headerKey] = this.initIdentifier(profile, 'fileMetadata')
+            }
+
+            // update header identifiers if the type changed
+            if (headerKey === key &&
             profile.tables[index].header[headerKey].type !== header[headerKey].type) {
-            header[headerKey] = this.initIdentifier(profile, header[headerKey].type)
-          }
-        })
+              header[headerKey] = this.initIdentifier(profile, header[headerKey].type)
+            }
+          })
+        } else {
+          ['FIRSTX', 'LASTX', 'DELTAX'].forEach(headerKey => {
+            if (header[headerKey]) {
+              delete header[headerKey];
+            }
+          });
+        }
       }
 
       profile.tables[index].header = header
@@ -399,21 +467,32 @@ class ProfileForm extends Component {
     return identifier
   }
 
-  addIdentifier(type, optional) {
-    const profile = Object.assign({}, this.props.profile)
-    const identifier = this.initIdentifier(profile, type)
-    identifier.show = true
-    identifier.optional = optional
+  addIdentifier(type, optional, options = {}) {
+    const profile = Object.assign({}, this.props.profile);
+    const identifier = this.initIdentifier(profile, type);
+    identifier.show = true;
+    identifier.optional = optional;
+    identifier.id = options.id ?? uuidv4();
+    if (!identifier.id.startsWith('#')) {
+      identifier.id = `#${identifier.id}`;
+    }
+    identifier.editable = options.editable ?? true;
 
     if (identifier.optional) {
-      identifier.outputTableIndex = 0
-      identifier.outputLayer = ''
-      identifier.outputKey = ''
-      identifier.predicate = null
-      identifier.subject = null
-      identifier.datatype = null
+      identifier.outputTableIndex = 0;
+      identifier.outputLayer = '';
+      identifier.outputKey = '';
+      identifier.predicate = null;
+      identifier.subject = null;
+      identifier.datatype = null;
     } else {
-      identifier.match = 'exact'
+      identifier.match = 'exact';
+    }
+
+    for (const key of Object.keys(identifier)) {
+      if (Object.prototype.hasOwnProperty.call(options, key)) {
+        identifier[key] = options[key];
+      }
     }
 
     profile.identifiers.push(identifier)
@@ -464,6 +543,11 @@ class ProfileForm extends Component {
 
   updateIdentifier(index, data) {
     const profile = Object.assign({}, this.props.profile);
+
+    if (typeof index === 'string' && index.startsWith('#')) {
+      index = profile.identifiers.findIndex((x) => x.id === index);
+    }
+
     if (data['outputKey'] || data['outputLayer']) {
       const {datasets} = this.props;
       const dataset = getDataset(profile, datasets);
@@ -474,6 +558,7 @@ class ProfileForm extends Component {
         this.updateIdentifierOntology(index, {type: 'predicate', ontology});
       }
     }
+
     if (index !== -1) {
       profile.identifiers[index] = Object.assign(profile.identifiers[index], data);
       this.cleanOntology(profile);
@@ -534,10 +619,13 @@ class ProfileForm extends Component {
   }
 
   removeIdentifier(index) {
-    const profile = Object.assign({}, this.props.profile)
+    const profile = Object.assign({}, this.props.profile);
+    if (typeof index === 'string' && index.startsWith('#')) {
+      index = profile.identifiers.findIndex((x) => x.id === index);
+    }
     if (index !== -1) {
-      profile.identifiers.splice(index, 1)
-      this.props.updateProfile(profile)
+      profile.identifiers.splice(index, 1);
+      this.props.updateProfile(profile);
     }
   }
 
@@ -611,14 +699,12 @@ class ProfileForm extends Component {
     )
   }
 
-  renderHeader(header) {
-    return (
-      <pre>
-        {header.map((line, index) => (
-          <code key={index}>{line}</code>
-        ))}
-      </pre>
-    )
+  renderHeader(header, tableIndex) {
+    return <FileHeaderPresenter addIdentifier={(value) => {
+      this.addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
+    }} header={header} updateRegex={(value) => {
+      return this.updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});
+    }}></FileHeaderPresenter>
   }
 
   renderDataGrid(table) {
@@ -653,6 +739,9 @@ class ProfileForm extends Component {
 
   render() {
     const {status, profile, options, datasets} = this.props
+    const {activeKey} = this.state
+
+    if (!profile?.data) return null;
 
     const inputTables = getInputTables(profile)
     const inputColumns = getInputColumns(profile)
@@ -697,40 +786,87 @@ class ProfileForm extends Component {
       );
     }
 
-    const tabContents = [];
-    if (profile.data) {
-      profile.data.tables.forEach((table, idx) => {
-        tabContents.push(
-          <Tab key={`tableTab${idx}`} eventKey={idx} title={`Input table # ${idx}`}>
-            {
-              table.metadata !== undefined && Object.keys(table.metadata).length > 0 &&
+    const activeTable = profile.data.tables[activeKey];
+
+    const tabs = (profile.data.tables.map((table, idx) => (
+      <NavDropdown.Item eventKey={idx} key={idx}>
+        {`Input table # ${idx}`}
+      </NavDropdown.Item>
+    )));
+
+    const tabContents = (
+      <div className="mt-3">
+        {activeTable && (
+          <div key={`tab-content-${activeKey}`}>
+            {/* Metadata Section */}
+            {activeTable.metadata && Object.keys(activeTable.metadata).length > 0 && (
               <div className="mt-3">
                 <h4>Input table metadata</h4>
-                {this.renderMetadata(table.metadata)}
+                {this.renderMetadata(activeTable.metadata)}
               </div>
-            }
-            {
-              table.header !== undefined && table.header.length > 0 &&
+            )}
+
+            {/* Header Section */}
+            {activeTable.header && activeTable.header.length > 0 && (
               <div className="mt-3">
-                <h4>Input table header</h4>
-                {this.renderHeader(table.header)}
+                <h4>
+                  Input table header
+                  <OverlayTrigger
+                    placement="bottom"
+                    overlay={
+                      <Popover id="header-popover-select-info">
+                        <Popover.Header as="h3">
+                          How to generate Identifier
+                        </Popover.Header>
+                        <Popover.Body>
+                          To generate an identifier, please highlight the
+                          value you wish to extract. Then press the “New
+                          Identifier” button in the appearing dialog. Please
+                          remember to check the regular expression and ensure
+                          it produces the correct output.
+                        </Popover.Body>
+                      </Popover>
+                    }
+                  >
+                    <span
+                      style={{
+                        borderRadius: '10px',
+                        display: 'inline-block',
+                        marginLeft: '5px',
+                      }}
+                      className="ml-3 btn btn-outline-info btn-sm"
+                    >
+                      Hint
+                    </span>
+                  </OverlayTrigger>
+                </h4>
+
+                {this.renderHeader(activeTable.header, activeKey)}
               </div>
-            }
-            {
-              table.rows !== undefined && table.rows.length > 0 &&
+            )}
+
+            {/* Data Section */}
+            {activeTable.rows && activeTable.rows.length > 0 && (
               <div className="mt-3">
                 <h4>Input table data</h4>
-                {this.renderDataGrid(table)}
+                {this.renderDataGrid(activeTable)}
               </div>
-            }
-          </Tab>
-        );
-      });
-    }
+            )}
+          </div>
+        )}
+      </div>
+    );
+
+
     profile.tables.map((table) => table.loopType = table.loopType ?? "all")
 
     return (
       <Row>
+        {this.props.error && (
+          <div className="fixed-alert-container">
+            <Alert variant="danger">{this.props.errorMessage}</Alert>
+          </div>
+        )}
         <Col md={7}>
           {profile.data
             ? (
@@ -738,9 +874,17 @@ class ProfileForm extends Component {
                 <h4>Input file metadata</h4>
                 {Object.keys(profile.data.metadata).length > 0 && this.renderMetadata(profile.data.metadata)}
                 <h4 className="mt-3">Input tables</h4>
-                <Tabs defaultActiveKey={0} id="uncontrolled-tab-example">
-                  {tabContents}
-                </Tabs>
+                <Nav
+                  variant="tabs"
+                  activeKey={activeKey}
+                  onSelect={this.handleSelect}
+                  id="nav-tab-example"
+                >
+                  <NavDropdown title={`Input table # ${activeKey}`} id="nav-dropdown">
+                    {tabs}
+                  </NavDropdown>
+                </Nav>
+                {tabContents}
               </div>
             ) : (
               <p>
@@ -827,7 +971,7 @@ class ProfileForm extends Component {
                   </InputGroup>
                   {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_header']
                     && profile.tables[index].table['loop_header'].map((operation, op_index) => (
-                      <InputGroup>
+                      <InputGroup key={op_index}>
                         <InputGroup.Text>&#8627;</InputGroup.Text>
                         <Button
                           variant="outline-danger"
@@ -857,7 +1001,7 @@ class ProfileForm extends Component {
                     ))}
                   {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_metadata']
                     && profile.tables[index].table['loop_metadata'].map((operation, op_index) => (
-                      <InputGroup>
+                      <InputGroup key={op_index}>
                         <InputGroup.Text>&#8627;</InputGroup.Text>
                         <Button
                           variant="outline-danger"
@@ -973,6 +1117,7 @@ class ProfileForm extends Component {
                       updateIdentifierOperation={this.updateIdentifierOperation}
                       updateIdentifierOntology={this.updateIdentifierOntology}
                       removeIdentifierOperation={this.removeIdentifierOperation}
+                      updateRegex={this.updateRegex}
                     />
                   ))
                 }
@@ -1022,6 +1167,7 @@ class ProfileForm extends Component {
                       updateIdentifierOperation={this.updateIdentifierOperation}
                       updateIdentifierOntology={this.updateIdentifierOntology}
                       removeIdentifierOperation={this.removeIdentifierOperation}
+                      updateRegex={this.updateRegex}
                     />
                   ))
                 }
@@ -1083,7 +1229,9 @@ ProfileForm.propTypes = {
   options: PropTypes.object,
   datasets: PropTypes.array,
   updateProfile: PropTypes.func,
-  storeProfile: PropTypes.func
+  storeProfile: PropTypes.func,
+  error: PropTypes.bool,
+  errorMessage: PropTypes.string
 }
 
 export default ProfileForm

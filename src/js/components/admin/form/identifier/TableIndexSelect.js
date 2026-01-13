@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Form } from 'react-bootstrap';
 
 const TableIndexSelect = ({ index, identifier, tables, updateIdentifier }) => {
-  console.log(tables)
   return (
     <Form.Group controlId={`tableIndexSelect${index}`}>
       <Form.Label>Input table</Form.Label>

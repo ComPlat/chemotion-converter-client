@@ -20,7 +20,7 @@ class TableColumn extends Component {
         try {
             const regex = new RegExp(regexPattern);
             const match = regex.exec(header);
-            let matchStr = regex.exec(header);
+            let matchStr = null;
             if (match.length > 1) {
                 matchStr = match[1]
             }
