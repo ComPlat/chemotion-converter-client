@@ -31,7 +31,6 @@ import {
 
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
-import ColumnSelect from "./table/ColumnSelect";
 import FileHeaderPresenter from "./HeaderPresenter";
 
 class ProfileForm extends Component {
@@ -116,11 +115,43 @@ class ProfileForm extends Component {
   }
 
   onSubmit(event) {
-    event.preventDefault()
-    this.props.storeProfile()
-  }
+		event.preventDefault();
 
-  updateTitle(title) {
+		const profile = { ...this.props.profile };
+		const errors = [];
+
+		this.check_loop_fields(profile, errors);
+
+		if (errors.length > 0) {
+			alert(errors.join("\n"));
+			return;
+		}
+
+		this.props.storeProfile();
+	}
+
+
+	check_loop_fields(profile, errors) {
+		profile.tables.forEach((t, tableIndex) => {
+			t.table['loop_header']?.forEach((lh, lhIndex) => {
+				if (lh.column?.columnIndex == null) {
+					errors.push(`In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`);
+				}
+			});
+			t.table['loop_theader']?.forEach((lh, lhIndex) => {
+				if (lh.line === "" || lh.regex === "") {
+					errors.push(`In Output Table ${tableIndex}: no line or regex selected for loop condition ${lhIndex}`);
+				}
+			});
+			t.table['loop_metadata']?.forEach((lh, lhIndex) => {
+				if (lh.metadata == null) {
+					errors.push(`In Output Table ${tableIndex}: no metadata selected for loop condition ${lhIndex}`);
+				}
+			});
+		});
+	}
+
+	updateTitle(title) {
     const profile = Object.assign({}, this.props.profile)
     profile.title = title
     this.props.updateProfile(profile)
@@ -516,16 +547,6 @@ class ProfileForm extends Component {
     }
   }
 
-  submitForm(event, profile) {
-    event.preventDefault()
-
-    if (profile.id) {
-      this.props.updateProfile()
-    } else {
-      this.props.createProfile()
-    }
-  }
-
   renderMetadata(metadata) {
     return (
       <Card>
@@ -592,6 +613,52 @@ class ProfileForm extends Component {
     const distInputColumns = getDistInputColumns(profile)
     const fileMetadataOptions = getFileMetadataOptions(profile)
     const tableMetadataOptions = getTableMetadataOptions(profile)
+
+		const loopMetadataOptions = (outputTable, op_index) => {
+			const seenLabels = new Set();
+			const groups = tableMetadataOptions.reduce((acc, item, index) => {
+				const groupIndex = item.tableIndex;
+
+				if (!acc[groupIndex]) {
+					acc[groupIndex] = {
+						label: `Input table #${groupIndex}`,
+						options: []
+					};
+				}
+
+				const cleanLabel = item.label.replace(/^Input table #\d+ /, "");
+				const showValue = !profile.tables[outputTable].table.loop_metadata[op_index].ignoreValue && true
+
+				if (!showValue && seenLabels.has(cleanLabel)) {
+      		return acc;
+    		}
+
+				acc[groupIndex].options.push({
+					value: index,
+					label: showValue ? `${cleanLabel} (${item.value})` : cleanLabel
+				});
+
+				seenLabels.add(cleanLabel);
+				return acc;
+			}, {});
+
+			return Object.values(groups);
+		};
+
+		const getSelectedMetadataOption = (metadata, outputTable, op_index) => {
+			if (!metadata) return null;
+
+			const [indexString] = metadata.split(":");
+			const optionIndex = Number(indexString);
+
+			for (const group of loopMetadataOptions(outputTable, op_index)) {
+				const found = group.options.find(opt => opt.value === optionIndex);
+				if (found) return found;
+			}
+
+			return null;
+		};
+
 
     let dataset = {}
     let datasetList = null;
@@ -824,16 +891,13 @@ class ProfileForm extends Component {
                           &times;
                         </Button>
                         <Select
-                          styles={{
-                            container: (base) => ({
-                              ...base,
-                              flex: "1 1 auto"
-                            }),
-                            control: (base) => ({
-                              ...base,
-                              minHeight: '38px' // match Bootstrap form height if needed
-                            })
-                          }}
+                          className="loop-select-container"
+													classNamePrefix="loop-select"
+													menuPortalTarget={document.body}
+													menuShouldBlockScroll={false}
+													menuShouldScrollIntoView={false}
+													openMenuOnScroll={false}
+													closeMenuOnScroll={false}
                           value={distInputColumns.flatMap(group => group.options)
                             .find(col => isEqual(col.value, operation.column))}
                           options={distInputColumns}
@@ -853,20 +917,28 @@ class ProfileForm extends Component {
                         >
                           &times;
                         </Button>
-                        <Form.Select
-                          size="sm"
-                          value={operation.metadata || ''}
-                          onChange={(event) => {
-                            this.updateOperation(index, 'loop_metadata', op_index, 'metadata',
-                              `${event.target.value}:${tableMetadataOptions[event.target.value].key}
-                                  :${tableMetadataOptions[event.target.value].tableIndex}`);
-                          }
-                          }
-                        >
-                          {tableMetadataOptions.map((option, optionIndex) => (
-                            <option key={optionIndex} value={optionIndex}>{option.label}</option>
-                          ))}
-                        </Form.Select>
+                        <Select
+													className="loop-select-container"
+													classNamePrefix="loop-select"
+													menuPortalTarget={document.body}
+													menuShouldBlockScroll={false}
+													menuShouldScrollIntoView={false}
+													openMenuOnScroll={false}
+													closeMenuOnScroll={false}
+                          value={getSelectedMetadataOption(operation.metadata, index, op_index)}
+                          onChange={(selected) => {
+														if (!selected) {
+															this.updateOperation(index, 'loop_metadata', op_index, 'metadata', '');
+															return;
+														}
+
+														const selectedOption = tableMetadataOptions[selected.value];
+														const metadataString = `${selected.value}:${selectedOption.key}:${selectedOption.tableIndex}`;
+
+														this.updateOperation(index, 'loop_metadata', op_index, 'metadata', metadataString);
+													}}
+													options={loopMetadataOptions(index, op_index)}
+                        />
                         <OverlayTrigger
                           placement="bottom-end"
                           overlay={<Tooltip>Ignore Value</Tooltip>}
