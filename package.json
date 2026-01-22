@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "prop-types": "^15.8.1",
     "react-select": "^5.10.2",
     "uuid": "^13.0.0"
