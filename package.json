@@ -1,6 +1,6 @@
 {
   "name": "@complat/chemotion-converter-client",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "main": "./dist/bundle.js",
   "files": [
     "dist",
@@ -22,7 +22,7 @@
   "dependencies": {
     "@rdfjs/namespace": "^2.0.1",
     "bootstrap": "^5.3.8",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "prop-types": "^15.8.1",
     "react-select": "^5.10.2",
     "uuid": "^13.0.0"
