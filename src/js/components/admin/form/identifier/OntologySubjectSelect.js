@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Col, Row} from 'react-bootstrap';
+import {Form, Col, Row, OverlayTrigger, Popover} from 'react-bootstrap';
 import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 import Select from "react-select";
 
@@ -54,11 +54,23 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
       <Row>
         <Col>
           <Form.Group controlId={`OntologySubjectInput`}>
-
-            <Form.Label column="sm">Subject Term:</Form.Label>
-            <p><small>Adding a subject is optional. If nothing is selected, the subject will be the actual
-              measurement {dataset?.ols || 'OBI:0000070'}. When a new subject has been created, the predicates with which the measurement is associated
-              with the new subject must be determined before the profile can be saved. </small></p>
+            <OverlayTrigger
+              placement="bottom"
+              overlay={
+                <Popover id="header-popover-select-info">
+                  <Popover.Header as="h3">
+                    Subject Term
+                  </Popover.Header>
+                  <Popover.Body>Adding a subject is optional. If nothing is selected, the subject will be the actual
+                    measurement {dataset?.ols || 'OBI:0000070'}. When a new subject has been created, the predicates
+                    with which the measurement is associated
+                    with the new subject must be determined before the profile can be saved.
+                  </Popover.Body>
+                </Popover>
+              }
+            >
+              <Form.Label column="sm">Subject Term:</Form.Label>
+            </OverlayTrigger>
             <OntologyAsyncSelect
               additionalOptions={rdf}
               defaultOptions
@@ -79,11 +91,24 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
         <Row>
           <Col>
             <Form.Group controlId={`OntologySubjectInstanceInput`}>
-
-              <Form.Label column="sm">Subject Instance:</Form.Label>
-              <p><small>If there are multiple instances of the same subject, please select the current instance for this
-                object/value in this section. However, it is important to manage the predicates in the way that the
-                instances are connected to the measurement.</small></p>
+              <OverlayTrigger
+                placement="bottom"
+                overlay={
+                  <Popover id="header-popover-select-info">
+                    <Popover.Header as="h3">
+                      Subject Instance
+                    </Popover.Header>
+                    <Popover.Body>If there are multiple instances of the same subject, please select the current
+                      instance for this
+                      object/value in this section. However, it is important to manage the predicates in the way that
+                      the
+                      instances are connected to the measurement.
+                    </Popover.Body>
+                  </Popover>
+                }
+              >
+                <Form.Label column="sm">Subject Instance:</Form.Label>
+              </OverlayTrigger>
               <Select
                 isDisabled={!instance.subject}
                 isLoading={false}
@@ -105,9 +130,22 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
       <Row>
         <Col>
           <Form.Group controlId={`OntologyDatatypeInput`}>
-            <Form.Label column="sm">Unit/Datatype Term:</Form.Label>
-            <p><small>Adding a Unit/Datatype is optional. The datatype should be either a unit like "Voltage" or a
-              datatype like "xsd:double"</small></p>
+            <OverlayTrigger
+              placement="bottom"
+              overlay={
+                <Popover id="header-popover-select-info">
+                  <Popover.Header as="h3">
+                    Unit/Datatype Term
+                  </Popover.Header>
+                  <Popover.Body>Adding a Unit/Datatype is optional. The datatype should be either a unit like "Voltage"
+                    or a
+                    datatype like "xsd:double"
+                  </Popover.Body>
+                </Popover>
+              }
+            >
+              <Form.Label column="sm">Unit/Datatype Term:</Form.Label>
+            </OverlayTrigger>
             <OntologyAsyncSelect
               defaultOptions
               additionalOptions={rdf}

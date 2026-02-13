@@ -56,18 +56,9 @@ class IdentifierForm extends Component {
                         updateIdentifierOperation={updateIdentifierOperation}
                         updateIdentifierOntology={updateIdentifierOntology}
                         removeIdentifierOperation={removeIdentifierOperation}
+                        updateRegex={updateRegex}
+                        addIdentifierOperation={addIdentifierOperation}
                       />
-                      {identifier.optional && (<>
-                        {updateRegex({...identifier})}
-                        <Button
-                          className="mt-1"
-                          variant="success"
-                          size="sm"
-                          onClick={() => addIdentifierOperation(index)}
-                        >
-                          Add scalar operation
-                        </Button>
-                      </>)}
 
                     </>
                   )}

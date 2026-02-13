@@ -16,6 +16,10 @@ const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predi
   if (!checkResult) {
     return <p>We are very sorry, but the TIB Terminology Service is currently unavailable.</p>
   }
+
+  if (Object.keys(subjectInstances).length === 0) {
+    return <p>No subjects found.</p>;
+  }
   const {rdf} = options;
 
   const mainForm = Object.entries(subjectInstances).map(([subjectId, instances]) => {

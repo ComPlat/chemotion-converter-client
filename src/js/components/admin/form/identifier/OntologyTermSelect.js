@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Col, Row} from 'react-bootstrap';
+import {Form, Col, Row, Popover, OverlayTrigger} from 'react-bootstrap';
 import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 
 
@@ -22,10 +22,25 @@ const OntologyTermSelect = ({term, updateOntology, predicates, options}) => {
     <Row>
       <Col>
         <Form.Group controlId={`OntologyTermInput`}>
-          <Form.Label column="sm">Ontology Term to describe the Predicate:</Form.Label>
-          <p><small> Assign an object ontology term to the property. If the selected term is already assigned
-            to <b>one</b> field in the chosen dataset, the output layer and output field will be selected automatically.</small>
-          </p>
+
+
+          <OverlayTrigger
+            placement="bottom"
+            overlay={
+              <Popover id="header-popover-select-info">
+                <Popover.Header as="h3">
+                  Ontology Term to describe the Predicate
+                </Popover.Header>
+                <Popover.Body>
+                  Assign an object ontology term to the property. If the selected term is already assigned
+                  to <b>one</b> field in the chosen dataset, the output layer and output field will be selected
+                  automatically.
+                </Popover.Body>
+              </Popover>
+            }
+          >
+            <Form.Label column="sm">Ontology Term to describe the Predicate:</Form.Label>
+          </OverlayTrigger>
 
 
           <OntologyAsyncSelect
