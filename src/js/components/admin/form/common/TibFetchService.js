@@ -49,7 +49,6 @@ const addNamespaceToOntology = (ontology) => {
 }
 
 const ontologySchemaToOption = (ontologyId, ontologyList = null) => {
-  console.log({ontologyId, ontologyList});
   if (!ontologyId) return ontologyId;
   let ontologyJson;
   if (!ontologyList) {
