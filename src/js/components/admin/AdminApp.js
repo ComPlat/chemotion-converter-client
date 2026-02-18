@@ -14,6 +14,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 provideGlobalGridOptions({
     theme: "legacy",
 });
+import {GENERIC_PREDICATE} from "./form/common/TibFetchService";
 
 
 class AdminApp extends Component {
@@ -245,6 +246,11 @@ class AdminApp extends Component {
                         tables: [],
                         identifiers: [],
                         data: data,
+                        subjects: [],
+                        predicates: [],
+                        datatypes: [],
+                        subjectInstances: {},
+                        rootOntology: GENERIC_PREDICATE
                     }
 
                     this.setState({
