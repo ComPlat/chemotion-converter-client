@@ -1,6 +1,6 @@
-import React, {Component} from "react"
+import React, { Component } from "react"
 import PropTypes from 'prop-types';
-import {Button, ListGroup} from 'react-bootstrap';
+import { Button, ListGroup } from 'react-bootstrap';
 
 import IdentifierInput from './IdentifierInput'
 import IdentifierHeader from './IdentifierHeader'
@@ -12,13 +12,13 @@ class IdentifierForm extends Component {
     const {
       label, type, optional, identifiers, fileMetadataOptions,
       tableMetadataOptions, inputTables, outputTables, dataset,
-      addIdentifier, updateIdentifier, removeIdentifier,
-      addIdentifierOperation, updateIdentifierOperation, removeIdentifierOperation,
-      updateRegex
+      addIdentifier, updateIdentifier, removeIdentifier, profile,
+      addIdentifierOperation, updateIdentifierOperation,
+      options, removeIdentifierOperation, updateIdentifierOntology, updateRegex
     } = this.props
 
     const toggleIdentifier = (index) => {
-      updateIdentifier(index, {show: !identifiers[index].show})
+      updateIdentifier(index, { show: !identifiers[index].show})
     }
 
     const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional === optional && identifier.editable)
@@ -43,7 +43,9 @@ class IdentifierForm extends Component {
                       <IdentifierInput
                         index={index}
                         optional={optional}
+                        options={options}
                         identifier={identifier}
+                        profile={profile}
                         fileMetadataOptions={fileMetadataOptions}
                         tableMetadataOptions={tableMetadataOptions}
                         inputTables={inputTables}
@@ -52,20 +54,12 @@ class IdentifierForm extends Component {
                         updateIdentifier={updateIdentifier}
                         removeIdentifier={removeIdentifier}
                         updateIdentifierOperation={updateIdentifierOperation}
+                        updateIdentifierOntology={updateIdentifierOntology}
                         removeIdentifierOperation={removeIdentifierOperation}
+                        updateRegex={updateRegex}
+                        addIdentifierOperation={addIdentifierOperation}
                       />
-                      {identifier.optional && (<>
-                        {updateRegex({...identifier})}
-                        <Button
-                          className="mt-1"
-                          variant="success"
-                          size="sm"
-                          onClick={() => addIdentifierOperation(index)}
-                        >
-                          Add scalar operation
-                        </Button>
-                      </>)}
-                      
+
                     </>
                   )}
                 </ListGroup.Item>
@@ -98,12 +92,15 @@ IdentifierForm.propTypes = {
   inputTables: PropTypes.array,
   outputTables: PropTypes.array,
   dataset: PropTypes.object,
+  options: PropTypes.object,
+  profile: PropTypes.object,
   addIdentifier: PropTypes.func,
   updateIdentifier: PropTypes.func,
   removeIdentifier: PropTypes.func,
   addIdentifierOperation: PropTypes.func,
   updateIdentifierOperation: PropTypes.func,
   removeIdentifierOperation: PropTypes.func,
+  updateIdentifierOntology: PropTypes.func,
   updateRegex: PropTypes.func
 }
 

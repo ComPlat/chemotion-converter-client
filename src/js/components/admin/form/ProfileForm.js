@@ -31,6 +31,8 @@ import {
 
 import TableForm from './TableForm'
 import IdentifierForm from './IdentifierForm'
+import OntologySubjectPredicateSelect from "./identifier/OntologySubjectPredicateSelect";
+import {addNamespaceToOntology, GENERIC_PREDICATE, GENERIC_SUBJECT_PREDICATE} from "./common/TibFetchService";
 import FileHeaderPresenter from "./HeaderPresenter";
 
 class ProfileForm extends Component {
@@ -44,42 +46,45 @@ class ProfileForm extends Component {
       devices: this.props.profile.devices
     };
 
-    this.onGridReady = this.onGridReady.bind(this)
-    this.onSubmit = this.onSubmit.bind(this)
+    this.onGridReady = this.onGridReady.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
 
-    this.updateTitle = this.updateTitle.bind(this)
-    this.updateDescription = this.updateDescription.bind(this)
-    this.updateSoftware = this.updateSoftware.bind(this)
-    this.updateDevices = this.updateDevices.bind(this)
-    this.updateOls = this.updateOls.bind(this)
-    this.toggleMatchTables = this.toggleMatchTables.bind(this)
-    this.handleChangeLoop = this.handleChangeLoop.bind(this)
+    this.updateTitle = this.updateTitle.bind(this);
+    this.updateDescription = this.updateDescription.bind(this);
+    this.updateSoftware = this.updateSoftware.bind(this);
+    this.updateDevices = this.updateDevices.bind(this);
+    this.updateOls = this.updateOls.bind(this);
+    this.toggleMatchTables = this.toggleMatchTables.bind(this);
+    this.handleChangeLoop = this.handleChangeLoop.bind(this);
 
-    this.addTable = this.addTable.bind(this)
-    this.updateTable = this.updateTable.bind(this)
-    this.removeTable = this.removeTable.bind(this)
+    this.addTable = this.addTable.bind(this);
+    this.updateTable = this.updateTable.bind(this);
+    this.removeTable = this.removeTable.bind(this);
 
-    this.addHeader = this.addHeader.bind(this)
-    this.updateHeader = this.updateHeader.bind(this)
-    this.removeHeader = this.removeHeader.bind(this)
+    this.addHeader = this.addHeader.bind(this);
+    this.updateHeader = this.updateHeader.bind(this);
+    this.removeHeader = this.removeHeader.bind(this);
 
-    this.addOperation = this.addOperation.bind(this)
-    this.updateOperation = this.updateOperation.bind(this)
-    this.updateOperationDescription = this.updateOperationDescription.bind(this)
-    this.removeOperation = this.removeOperation.bind(this)
+    this.addOperation = this.addOperation.bind(this);
+    this.updateOperation = this.updateOperation.bind(this);
+    this.updateOperationDescription = this.updateOperationDescription.bind(this);
+    this.removeOperation = this.removeOperation.bind(this);
 
-    this.addIdentifier = this.addIdentifier.bind(this)
-    this.updateIdentifier = this.updateIdentifier.bind(this)
-    this.removeIdentifier = this.removeIdentifier.bind(this)
+    this.addIdentifier = this.addIdentifier.bind(this);
+    this.updateIdentifier = this.updateIdentifier.bind(this);
+    this.updateIdentifierOntology = this.updateIdentifierOntology.bind(this);
+    this.removeIdentifier = this.removeIdentifier.bind(this);
 
-    this.addIdentifierOperation = this.addIdentifierOperation.bind(this)
-    this.updateIdentifierOperation = this.updateIdentifierOperation.bind(this)
-    this.removeIdentifierOperation = this.removeIdentifierOperation.bind(this)
+    this.addIdentifierOperation = this.addIdentifierOperation.bind(this);
+    this.updateIdentifierOperation = this.updateIdentifierOperation.bind(this);
+    this.removeIdentifierOperation = this.removeIdentifierOperation.bind(this);
+
+    this.updateSubjectInstances = this.updateSubjectInstances.bind(this);
 
     this.updateRegex = this.updateRegex.bind(this)
 
     if (this.props.status === 'create') {
-      this.addTable()
+      this.addTable();
     }
   }
 
@@ -119,46 +124,46 @@ class ProfileForm extends Component {
   }
 
   onSubmit(event) {
-		event.preventDefault();
+    event.preventDefault();
 
-		const profile = { ...this.props.profile };
-		const errors = [];
+    const profile = {...this.props.profile};
+    const errors = [];
 
-		this.check_loop_fields(profile, errors);
+    this.check_loop_fields(profile, errors);
 
-		if (errors.length > 0) {
-			alert(errors.join("\n"));
-			return;
-		}
+    if (errors.length > 0) {
+      alert(errors.join("\n"));
+      return;
+    }
 
-		this.props.storeProfile();
-	}
+    this.props.storeProfile();
+  }
 
 
-	check_loop_fields(profile, errors) {
-		profile.tables.forEach((t, tableIndex) => {
-			t.table['loop_header']?.forEach((lh, lhIndex) => {
-				if (lh.column?.columnIndex == null) {
-					errors.push(`In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`);
-				}
-			});
-			t.table['loop_theader']?.forEach((lh, lhIndex) => {
-				if (lh.line === "" || lh.regex === "") {
-					errors.push(`In Output Table ${tableIndex}: no line or regex selected for loop condition ${lhIndex}`);
-				}
-			});
-			t.table['loop_metadata']?.forEach((lh, lhIndex) => {
-				if (lh.metadata == null) {
-					errors.push(`In Output Table ${tableIndex}: no metadata selected for loop condition ${lhIndex}`);
-				}
-			});
-		});
-	}
+  check_loop_fields(profile, errors) {
+    profile.tables.forEach((t, tableIndex) => {
+      t.table['loop_header']?.forEach((lh, lhIndex) => {
+        if (lh.column?.columnIndex == null) {
+          errors.push(`In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`);
+        }
+      });
+      t.table['loop_theader']?.forEach((lh, lhIndex) => {
+        if (lh.line === "" || lh.regex === "") {
+          errors.push(`In Output Table ${tableIndex}: no line or regex selected for loop condition ${lhIndex}`);
+        }
+      });
+      t.table['loop_metadata']?.forEach((lh, lhIndex) => {
+        if (lh.metadata == null) {
+          errors.push(`In Output Table ${tableIndex}: no metadata selected for loop condition ${lhIndex}`);
+        }
+      });
+    });
+  }
 
-	updateTitle(title) {
-    const profile = Object.assign({}, this.props.profile)
-    profile.title = title
-    this.props.updateProfile(profile)
+  updateTitle(title) {
+    const profile = Object.assign({}, this.props.profile);
+    profile.title = title;
+    this.props.updateProfile(profile);
   }
 
   updateDescription(description) {
@@ -168,14 +173,14 @@ class ProfileForm extends Component {
   }
 
   updateSoftware(software) {
-    this.setState({ softwares: software });
+    this.setState({softwares: software});
     const profile = Object.assign({}, this.props.profile)
     profile.software = software ? software.split(',').map(s => s.trim()) : []
     this.props.updateProfile(profile)
   }
 
   updateDevices(devices) {
-    this.setState({ devices });
+    this.setState({devices});
     const profile = Object.assign({}, this.props.profile)
     profile.devices = devices ? devices.split(',').map(s => s.trim()) : []
     this.props.updateProfile(profile)
@@ -183,9 +188,43 @@ class ProfileForm extends Component {
 
   updateOls(ols) {
     const profile = Object.assign({}, this.props.profile)
-    if (typeof profile != 'undefined' && profile !== null && typeof ols !== 'undefined' && ols != null) {
-      profile.ols = ols
-      this.props.updateProfile(profile)
+    if (typeof profile != 'undefined' && profile !== null) {
+      if (!ols) {
+        profile.ols = null;
+        profile.rootOntology = GENERIC_PREDICATE;
+        this.props.updateProfile(profile);
+      } else {
+        profile.ols = ols;
+        fetch(`https://www.ebi.ac.uk/ols4/api/ontologies/CHMO/terms?obo_id=${ols}&lang=en`).then(async (res) => {
+          const {_embedded} = await res.json();
+          let {
+            iri,
+            ontology_name,
+            ontology_prefix,
+            short_form,
+            description,
+            id,
+            label,
+            obo_id,
+            type
+          } = _embedded.terms[0];
+          id = id ?? `${ontology_prefix}:properties:${iri}`;
+          type = type ?? 'class';
+          profile.rootOntology = addNamespaceToOntology({
+            iri,
+            ontology_name,
+            ontology_prefix,
+            short_form,
+            description,
+            id,
+            label,
+            obo_id,
+            type
+          });
+        }).finally(() => {
+          this.props.updateProfile(profile);
+        })
+      }
     }
   }
 
@@ -214,8 +253,8 @@ class ProfileForm extends Component {
     const {options} = this.props
     const header = {}
     if (options) {
-      for (let key in options) {
-        header[key] = options[key][0]
+      for (let key of ["DATA CLASS", "DATA TYPE", "XUNITS", "YUNITS"]) {
+        header[key] = options[key][0];
       }
     }
 
@@ -493,6 +532,9 @@ class ProfileForm extends Component {
       identifier.outputTableIndex = 0;
       identifier.outputLayer = '';
       identifier.outputKey = '';
+      identifier.predicate = null;
+      identifier.subject = null;
+      identifier.datatype = null;
     } else {
       identifier.match = 'exact';
     }
@@ -507,14 +549,126 @@ class ProfileForm extends Component {
     this.props.updateProfile(profile)
   }
 
+  filterUnique(ontologyList, whiteList) {
+    const uniqueWhiteList = [...new Set(whiteList)];
+    return [
+      ...new Map(ontologyList
+        .filter((item) => uniqueWhiteList.includes(item.id))
+        .map(item => [item.id, item]))
+        .values()
+    ];
+
+  }
+
+  cleanOntology(profile) {
+    const usedSubjects = profile.identifiers.map((id) => id.subject?.id).filter(Boolean);
+    profile.subjects = this.filterUnique(profile.subjects, usedSubjects);
+    const usedDatatypes = profile.identifiers.map((id) => id.datatype?.id).filter(Boolean);
+    profile.datatypes = this.filterUnique(profile.datatypes, usedDatatypes);
+
+    profile.subjectInstances = profile.identifiers.reduce((acc, id) => {
+      if (!id.subject) {
+        return acc
+      }
+      if (!acc[id.subject.id]) {
+        acc[id.subject.id] = [];
+      }
+      if (id.subject?.subjectInstance && !acc[id.subject.id].some((accItem) => accItem.name === id.subject.subjectInstance)) {
+        const originElement = profile.subjectInstances[id.subject.id]?.find((profileItem) => profileItem.name === id.subject.subjectInstance);
+        if (originElement) {
+          acc[id.subject.id].push(originElement)
+        } else {
+          acc[id.subject.id].push({
+            name: id.subject.subjectInstance,
+            predicate: GENERIC_SUBJECT_PREDICATE.id
+          });
+        }
+      }
+      return acc;
+    }, {});
+
+    const usedPredicates = profile.identifiers
+      .map((id) => id.predicate?.id).concat(
+        Object.values(profile.subjectInstances).flat(Infinity).map((x) => x.predicate)
+      ).filter(Boolean);
+    profile.predicates.push(GENERIC_SUBJECT_PREDICATE);
+    profile.predicates = this.filterUnique(profile.predicates, usedPredicates);
+  }
+
   updateIdentifier(index, data) {
-    const profile = Object.assign({}, this.props.profile)
+    const profile = Object.assign({}, this.props.profile);
+
     if (typeof index === 'string' && index.startsWith('#')) {
       index = profile.identifiers.findIndex((x) => x.id === index);
     }
+
+    if (data['outputKey'] || data['outputLayer']) {
+      const {datasets} = this.props;
+      const dataset = getDataset(profile, datasets);
+      const {outputLayer, outputKey} = {...profile.identifiers[index], ...data}
+      const field = dataset.layers[outputLayer]?.fields.find((x) => x.field === outputKey);
+      if (field?.ontology) {
+        const ontology = addNamespaceToOntology(field.ontology);
+        this.updateIdentifierOntology(index, {type: 'predicate', ontology});
+      }
+    }
+
     if (index !== -1) {
-      profile.identifiers[index] = Object.assign(profile.identifiers[index], data)
-      this.props.updateProfile(profile)
+      profile.identifiers[index] = Object.assign(profile.identifiers[index], data);
+      this.cleanOntology(profile);
+      this.props.updateProfile(profile);
+    }
+  }
+
+  _findOntologyInDataset(dataset, profile, ontology) {
+    const {id} = ontology;
+    if (!dataset?.layers) {
+      return null;
+    }
+    const fields = Object.entries(dataset?.layers).reduce((acc, [layarKey, layer]) => {
+      return acc.concat(layer.fields.reduce((innnerAcc, field) => {
+        if (field.ontology?.id === id) {
+          innnerAcc.push([layarKey, field.field]);
+        }
+        return innnerAcc;
+      }, []));
+    }, []);
+    if (fields.length === 1) {
+      return fields;
+    }
+
+    return null;
+  }
+
+
+  updateIdentifierOntology(index, data) {
+    const profile = Object.assign({}, this.props.profile);
+
+    if (index !== -1) {
+
+      if (data.type && data.ontology) {
+        profile[`${data.type}s`].push(data.ontology);
+        profile.identifiers[index][data.type] = {'id': data.ontology.id};
+        if (data.type === 'predicate') {
+          const dataset = getDataset(profile, this.props.datasets);
+
+          const fieldPath = this._findOntologyInDataset(dataset, profile, data.ontology);
+          if (fieldPath) {
+            [profile.identifiers[index].outputLayer, profile.identifiers[index].outputKey] = fieldPath[0];
+          }
+        }
+      } else if (data.type && !data.ontology) {
+        profile.identifiers[index][data.type] = null;
+      }
+      if (data.instance && profile.identifiers[index]['subject']) {
+        profile.identifiers[index]['subject'] = {
+          ...profile.identifiers[index]['subject'],
+          subjectInstance: data.instance
+        };
+
+      }
+      this.cleanOntology(profile);
+      this.props.updateProfile(profile);
     }
   }
 
@@ -538,8 +692,8 @@ class ProfileForm extends Component {
       if (profile.identifiers[index].operations === undefined) {
         profile.identifiers[index].operations = []
       }
-      profile.identifiers[index].operations.push(operation)
-      this.props.updateProfile(profile)
+      profile.identifiers[index].operations.push(operation);
+      this.props.updateProfile(profile);
     }
   }
 
@@ -547,21 +701,38 @@ class ProfileForm extends Component {
     const profile = Object.assign({}, this.props.profile)
     if (index !== -1) {
       profile.identifiers[index].operations[opIndex][opKey] = value
-      this.props.updateProfile(profile)
+      this.props.updateProfile(profile);
     }
   }
 
   removeIdentifierOperation(index, opIndex) {
-    const profile = Object.assign({}, this.props.profile)
+    const profile = Object.assign({}, this.props.profile);
     if (index !== -1) {
-      profile.identifiers[index].operations.splice(opIndex, 1)
+      profile.identifiers[index].operations.splice(opIndex, 1);
 
       // remove operations if it is empty
       if (profile.identifiers[index].operations.length === 0) {
-        delete profile.identifiers[index].operations
+        delete profile.identifiers[index].operations;
       }
 
-      this.props.updateProfile(profile)
+      this.props.updateProfile(profile);
+    }
+  }
+
+  updateSubjectInstances(subjectInstances, predicate) {
+    const profile = {...this.props.profile, subjectInstances};
+    profile[`predicates`].push(predicate);
+    this.cleanOntology(profile);
+    this.props.updateProfile(profile);
+  }
+
+  submitForm(event, profile) {
+    event.preventDefault();
+
+    if (profile.id) {
+      this.props.updateProfile();
+    } else {
+      this.props.createProfile();
     }
   }
 
@@ -632,56 +803,56 @@ class ProfileForm extends Component {
     const fileMetadataOptions = getFileMetadataOptions(profile)
     const tableMetadataOptions = getTableMetadataOptions(profile)
 
-		const loopMetadataOptions = (outputTable, op_index) => {
-			const seenLabels = new Set();
-			const groups = tableMetadataOptions.reduce((acc, item, index) => {
-				const groupIndex = item.tableIndex;
+    const loopMetadataOptions = (outputTable, op_index) => {
+      const seenLabels = new Set();
+      const groups = tableMetadataOptions.reduce((acc, item, index) => {
+        const groupIndex = item.tableIndex;
 
-				if (!acc[groupIndex]) {
-					acc[groupIndex] = {
-						label: `Input table #${groupIndex}`,
-						options: []
-					};
-				}
+        if (!acc[groupIndex]) {
+          acc[groupIndex] = {
+            label: `Input table #${groupIndex}`,
+            options: []
+          };
+        }
 
-				const cleanLabel = item.label.replace(/^Input table #\d+ /, "");
-				const showValue = !profile.tables[outputTable].table.loop_metadata[op_index].ignoreValue && true
+        const cleanLabel = item.label.replace(/^Input table #\d+ /, "");
+        const showValue = !profile.tables[outputTable].table.loop_metadata[op_index].ignoreValue && true
 
-				if (!showValue && seenLabels.has(cleanLabel)) {
-      		return acc;
-    		}
+        if (!showValue && seenLabels.has(cleanLabel)) {
+          return acc;
+        }
 
-				acc[groupIndex].options.push({
-					value: index,
-					label: showValue ? `${cleanLabel} (${item.value})` : cleanLabel
-				});
+        acc[groupIndex].options.push({
+          value: index,
+          label: showValue ? `${cleanLabel} (${item.value})` : cleanLabel
+        });
 
-				seenLabels.add(cleanLabel);
-				return acc;
-			}, {});
+        seenLabels.add(cleanLabel);
+        return acc;
+      }, {});
 
-			return Object.values(groups);
-		};
+      return Object.values(groups);
+    };
 
-		const getSelectedMetadataOption = (metadata, outputTable, op_index) => {
-			if (!metadata) return null;
+    const getSelectedMetadataOption = (metadata, outputTable, op_index) => {
+      if (!metadata) return null;
 
-			const [indexString] = metadata.split(":");
-			const optionIndex = Number(indexString);
+      const [indexString] = metadata.split(":");
+      const optionIndex = Number(indexString);
 
-			for (const group of loopMetadataOptions(outputTable, op_index)) {
-				const found = group.options.find(opt => opt.value === optionIndex);
-				if (found) return found;
-			}
+      for (const group of loopMetadataOptions(outputTable, op_index)) {
+        const found = group.options.find(opt => opt.value === optionIndex);
+        if (found) return found;
+      }
 
-			return null;
-		};
+      return null;
+    };
 
 
     let dataset = {}
     let datasetList = null;
     if (datasets.length > 0) {
-      dataset = getDataset(profile, datasets)
+      dataset = getDataset(profile, datasets);
 
       const dsOpt = datasets.map(ds => {
         return {value: ds?.ols, label: ds?.name}
@@ -707,7 +878,7 @@ class ProfileForm extends Component {
                 name="dataset"
                 options={dsOpt}
                 value={dsValue}
-                onChange={(event) => this.updateOls(event === null ? null : event.value)}
+                onChange={(event) => this.updateOls(event?.value)}
               />
             </Form.Group>
           </Card.Body>
@@ -924,12 +1095,12 @@ class ProfileForm extends Component {
                         </Button>
                         <Select
                           className="loop-select-container"
-													classNamePrefix="loop-select"
-													menuPortalTarget={document.body}
-													menuShouldBlockScroll={false}
-													menuShouldScrollIntoView={false}
-													openMenuOnScroll={false}
-													closeMenuOnScroll={false}
+                          classNamePrefix="loop-select"
+                          menuPortalTarget={document.body}
+                          menuShouldBlockScroll={false}
+                          menuShouldScrollIntoView={false}
+                          openMenuOnScroll={false}
+                          closeMenuOnScroll={false}
                           value={distInputColumns.flatMap(group => group.options)
                             .find(col => isEqual(col.value, operation.column))}
                           options={distInputColumns}
@@ -950,26 +1121,26 @@ class ProfileForm extends Component {
                           &times;
                         </Button>
                         <Select
-													className="loop-select-container"
-													classNamePrefix="loop-select"
-													menuPortalTarget={document.body}
-													menuShouldBlockScroll={false}
-													menuShouldScrollIntoView={false}
-													openMenuOnScroll={false}
-													closeMenuOnScroll={false}
+                          className="loop-select-container"
+                          classNamePrefix="loop-select"
+                          menuPortalTarget={document.body}
+                          menuShouldBlockScroll={false}
+                          menuShouldScrollIntoView={false}
+                          openMenuOnScroll={false}
+                          closeMenuOnScroll={false}
                           value={getSelectedMetadataOption(operation.metadata, index, op_index)}
                           onChange={(selected) => {
-														if (!selected) {
-															this.updateOperation(index, 'loop_metadata', op_index, 'metadata', '');
-															return;
-														}
+                            if (!selected) {
+                              this.updateOperation(index, 'loop_metadata', op_index, 'metadata', '');
+                              return;
+                            }
 
-														const selectedOption = tableMetadataOptions[selected.value];
-														const metadataString = `${selected.value}:${selectedOption.key}:${selectedOption.tableIndex}`;
+                            const selectedOption = tableMetadataOptions[selected.value];
+                            const metadataString = `${selected.value}:${selectedOption.key}:${selectedOption.tableIndex}`;
 
-														this.updateOperation(index, 'loop_metadata', op_index, 'metadata', metadataString);
-													}}
-													options={loopMetadataOptions(index, op_index)}
+                            this.updateOperation(index, 'loop_metadata', op_index, 'metadata', metadataString);
+                          }}
+                          options={loopMetadataOptions(index, op_index)}
                         />
                         <OverlayTrigger
                           placement="bottom-end"
@@ -1056,11 +1227,14 @@ class ProfileForm extends Component {
                       inputTables={inputTables}
                       outputTables={profile.tables}
                       dataset={dataset}
+                      profile={profile}
+                      options={options}
                       addIdentifier={this.addIdentifier}
                       updateIdentifier={this.updateIdentifier}
                       removeIdentifier={this.removeIdentifier}
                       addIdentifierOperation={this.addIdentifierOperation}
                       updateIdentifierOperation={this.updateIdentifierOperation}
+                      updateIdentifierOntology={this.updateIdentifierOntology}
                       removeIdentifierOperation={this.removeIdentifierOperation}
                       updateRegex={this.updateRegex}
                     />
@@ -1103,11 +1277,14 @@ class ProfileForm extends Component {
                       inputTables={inputTables}
                       outputTables={profile.tables}
                       dataset={dataset}
+                      profile={profile}
+                      options={options}
                       addIdentifier={this.addIdentifier}
                       updateIdentifier={this.updateIdentifier}
                       removeIdentifier={this.removeIdentifier}
                       addIdentifierOperation={this.addIdentifierOperation}
                       updateIdentifierOperation={this.updateIdentifierOperation}
+                      updateIdentifierOntology={this.updateIdentifierOntology}
                       removeIdentifierOperation={this.removeIdentifierOperation}
                       updateRegex={this.updateRegex}
                     />
@@ -1139,6 +1316,17 @@ class ProfileForm extends Component {
                     </li>
                   </ul>
                 </small>
+              </Card.Body>
+            </Card>
+
+            <Card className="mt-3">
+              <Card.Header>Subject Instances</Card.Header>
+              <Card.Body>
+                <OntologySubjectPredicateSelect
+                  updateSubjectInstances={this.updateSubjectInstances}
+                  dataset={dataset} subjects={profile.subjects}
+                  predicates={profile.predicates} options={options}
+                  subjectInstances={profile.subjectInstances}></OntologySubjectPredicateSelect>
               </Card.Body>
             </Card>
 

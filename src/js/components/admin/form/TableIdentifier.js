@@ -24,13 +24,14 @@ class TableIdentifier extends Component {
   render() {
     const {
       index, headerKey, table, inputTables,
-      fileMetadataOptions, tableMetadataOptions
+      fileMetadataOptions, tableMetadataOptions,
+      options
     } = this.props
 
     return (
       <div>
         <Form.Group as={Row}>
-          <Form.Label as={Col} md={2} className="fw-bold">
+          <Form.Label as={Col} md={2} className="fw-bold" column={"sm"}>
             {headerKey}
           </Form.Label>
           <Col md={10}>
@@ -45,6 +46,7 @@ class TableIdentifier extends Component {
           index={index}
           identifier={table.header[headerKey]}
           inputTables={inputTables}
+          options={options}
           fileMetadataOptions={fileMetadataOptions}
           tableMetadataOptions={tableMetadataOptions}
           updateIdentifier={this.updateTableIdentifier}
@@ -58,6 +60,7 @@ TableIdentifier.propTypes = {
   index: PropTypes.number,
   headerKey: PropTypes.string,
   table: PropTypes.object,
+  options: PropTypes.object,
   inputTables: PropTypes.array,
   updateHeader: PropTypes.func,
   fileMetadataOptions: PropTypes.array,

@@ -20,6 +20,7 @@
     "url": "https://github.com/ComPlat/chemotion-converter-client"
   },
   "dependencies": {
+    "@rdfjs/namespace": "^2.0.1",
     "bootstrap": "^5.3.8",
     "lodash": "^4.17.23",
     "prop-types": "^15.8.1",
