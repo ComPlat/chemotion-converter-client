@@ -1,10 +1,9 @@
 {
   "name": "@complat/chemotion-converter-client",
   "version": "0.15.0",
-  "main": "./dist/bundle.js",
+  "main": "./build/bundle.js",
   "files": [
-    "dist",
-    "public",
+    "build",
     "README.md"
   ],
   "scripts": {
