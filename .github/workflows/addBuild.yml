@@ -26,7 +26,7 @@ jobs:
           yarn build:bundle
           rm -rf "./build" 2>/dev/null
           mv ./public ./build
-          mv ./dist ./build
+          mv ./dist/* ./build
 
       - name: Configure git
         run: |
