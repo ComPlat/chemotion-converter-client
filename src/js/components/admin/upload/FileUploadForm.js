@@ -15,6 +15,11 @@ class FileUploadForm extends Component {
           <Form.Control type="file" id="fileUpload" onChange={this.props.onFileChangeHandler} />
         </Form.Group>
 
+          <Form.Group className="mb-3" controlId="OntologyLabelGroup">
+            <Form.Label column={"lg"}>Ontology</Form.Label>
+            <Form.Control type="text" placeholder="n.d." defaultValue={null} ref={this.props.ontologyRef}/>
+          </Form.Group>
+
         <div className="d-flex justify-content-end mt-4">
           <Button
             variant="primary"

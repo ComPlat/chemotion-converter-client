@@ -88,6 +88,9 @@ class App extends Component {
               <div className="d-grid gap-2">
                 <Button variant="primary" size="lg" onClick={this.onSubmitFileHandler}>Upload</Button>
               </div>
+              <p className="text-center">For testing and advanced functions (like ontologies), you could also use the following command:
+                <code> curl -X POST http://localhost:5000/conversions   -u username:password   -F "file=@/path/to/your/file.xyz"   -F "format=jcampzip" -F "ontology=???" -o output.zip</code>!
+              </p>
               <Form.Group controlId="format-select" className="mt-3">
                 <Form.Label column="sm">Conversion format</Form.Label>
                 <Form.Select value={this.state.format} onChange={this.onFormatChangeHandler}>

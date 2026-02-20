@@ -17,9 +17,10 @@ class ConverterApi {
       })
   }
 
-  static fetchTables(file) {
+  static fetchTables(file, ontology) {
     const data = new FormData()
     data.append('file', file)
+    data.append('ontology', ontology)
 
     const requestOptions = {
       method: 'POST',
