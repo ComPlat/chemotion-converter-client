@@ -1096,6 +1096,7 @@ class ProfileForm extends Component {
                         <Select
                           className="loop-select-container"
                           classNamePrefix="loop-select"
+                          menuPosition="fixed"
                           menuPortalTarget={document.body}
                           menuShouldBlockScroll={false}
                           menuShouldScrollIntoView={false}
@@ -1123,6 +1124,7 @@ class ProfileForm extends Component {
                         <Select
                           className="loop-select-container"
                           classNamePrefix="loop-select"
+                          menuPosition="fixed"
                           menuPortalTarget={document.body}
                           menuShouldBlockScroll={false}
                           menuShouldScrollIntoView={false}
