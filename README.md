@@ -16,14 +16,15 @@ After following the instructions in the installation script, `nvm` should be ava
 
 ```bash
 nvm install
-npm install
-npm run build
+npm install -g yarn
+yarn install
+yarn build
 ```
 
 While developing, the `webpack-dev-server` can be used to update the application on-the-fly:
 
 ```bash
-npm run serve
+yarn serve
 ```
 
 Production setup
