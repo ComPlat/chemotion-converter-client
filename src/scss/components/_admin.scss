@@ -1,10 +1,11 @@
 .tooltip-inner {
-    max-width: none !important;
+  max-width: none !important;
 }
+
 .div-nowrap {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fixed-alert-container {
@@ -20,4 +21,11 @@
 
   /* Optional: limit the width so it doesn't span the whole screen */
   width: 96vw;
+}
+
+#main-form-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background-color: #fff;
 }
