@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from "react";
+import PropTypes from "prop-types";
 import {Alert, Button} from "react-bootstrap";
 
 const integerRegex = '[+-]?\\d+';
@@ -29,7 +30,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
     }
   };
 
-  const escapeRegex = str => str.replace(/[/.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapeRegex = str => str.replace(/[/.*+?^${}()|[\]\\]/g, "\\$&").replace(/\t/g, '\\s*');
 
   function buildRegexWithSnippet(line, [prefix, snippet]) {
     // Escape regex special chars in both
@@ -200,7 +201,8 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
           minWidth: '400px',
           bottom: '20px'
         }}><b className="alert-heading">Multiline mode enabled.</b>
-          <p>In this mode, you can create an identifier that identifies a value from the header based on features from multiple lines. To exit this mode, you must either press Cancel or create the Identifier.</p>
+          <p>In this mode, you can create an identifier that identifies a value from the header based on features from
+            multiple lines. To exit this mode, you must either press Cancel or create the Identifier.</p>
           <p>Select additional regex features from previous lines for more precise matching.</p>
           <p>Current regex is: <b>{multilineSelection}</b></p>
           {updateRegex(multilineSelection)}
@@ -251,3 +253,9 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
     </div>
   );
 }
+
+FileHeaderPresenter.propTypes = {
+  header: PropTypes.arrayOf(PropTypes.string).isRequired,
+  addIdentifier: PropTypes.func.isRequired,
+  updateRegex: PropTypes.func.isRequired
+};

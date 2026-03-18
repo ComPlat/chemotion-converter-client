@@ -1,33 +1,29 @@
-import React, {Component} from "react"
+import React from "react"
 import PropTypes from 'prop-types';
 import {ListGroup} from 'react-bootstrap';
 
 import ProfileListItem from './ProfileListItem'
 
-class ProfileList extends Component {
+function ProfileList({profiles, updateProfile, deleteProfile, downloadProfile, isAdmin, toggleDisableProfile}) {
+    const sortedProfiles = profiles.sort((a, b) => a.title.localeCompare(b.title))
 
-    render() {
-        const {profiles, updateProfile, deleteProfile, downloadProfile, isAdmin, toggleDisableProfile} = this.props
-        const sortedProfiles = profiles.sort((a, b) => a.title.localeCompare(b.title))
-
-        return (<ListGroup>
-                {sortedProfiles.map((profile) => (
-                    <ProfileListItem
-                        key={profile.id}
-                        id={profile.id}
-                        title={profile.title}
-                        isAdmin={isAdmin}
-                        description={profile.description}
-                        isDisabled={profile.isDisabled ?? false}
-                        isDefaultProfile={profile.isDefaultProfile}
-                        toggleDisableProfile={() => toggleDisableProfile(profile)}
-                        updateProfile={() => updateProfile(profile)}
-                        deleteProfile={() => deleteProfile(profile)}
-                        downloadProfile={() => downloadProfile(profile)}/>
-                ))}
-            </ListGroup>
-        )
-    }
+    return (<ListGroup>
+            {sortedProfiles.map((profile) => (
+                <ProfileListItem
+                    key={profile.id}
+                    id={profile.id}
+                    title={profile.title}
+                    isAdmin={isAdmin}
+                    description={profile.description}
+                    isDisabled={profile.isDisabled ?? false}
+                    isDefaultProfile={profile.isDefaultProfile}
+                    toggleDisableProfile={() => toggleDisableProfile(profile)}
+                    updateProfile={() => updateProfile(profile)}
+                    deleteProfile={() => deleteProfile(profile)}
+                    downloadProfile={() => downloadProfile(profile)}/>
+            ))}
+        </ListGroup>
+    )
 }
 
 ProfileList.propTypes = {

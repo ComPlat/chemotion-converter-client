@@ -1,5 +1,6 @@
 import React from "react"
-import ReactDOM from "react-dom"
 import AdminApp from "./components/admin/AdminApp.js"
+import { createRoot } from "react-dom/client";
 
-ReactDOM.render(<AdminApp />, document.getElementById("root"))
+const root = createRoot(document.getElementById("root"));
+root.render(<AdminApp />);
