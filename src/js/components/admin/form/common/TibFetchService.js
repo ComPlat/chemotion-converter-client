@@ -130,7 +130,7 @@ const fetchProperties = async (inputValue, create = true, typeFilter = null, add
 
 
 const checkTIB = (setCheckResult) => {
-  return async () => {
+  return () => {
     let isMounted = true;
 
     const _checkTIB = async () => {
@@ -147,8 +147,7 @@ const checkTIB = (setCheckResult) => {
       }
     };
 
-    await _checkTIB();
-
+    _checkTIB().then(r => null);
     return () => {
       isMounted = false; // cleanup to avoid state updates on unmounted component
     };

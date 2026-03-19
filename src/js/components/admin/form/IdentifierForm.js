@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React from "react"
 import PropTypes from 'prop-types';
 import { Button, ListGroup } from 'react-bootstrap';
 
@@ -6,80 +6,71 @@ import IdentifierInput from './IdentifierInput'
 import IdentifierHeader from './IdentifierHeader'
 
 
-class IdentifierForm extends Component {
-
-  render() {
-    const {
-      label, type, optional, identifiers, fileMetadataOptions,
-      tableMetadataOptions, inputTables, outputTables, dataset,
-      addIdentifier, updateIdentifier, removeIdentifier, profile,
-      addIdentifierOperation, updateIdentifierOperation,
-      options, removeIdentifierOperation, updateIdentifierOntology, updateRegex
-    } = this.props
-
-    const toggleIdentifier = (index) => {
-      updateIdentifier(index, { show: !identifiers[index].show})
-    }
-
-    const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional === optional && identifier.editable)
-    const hasIdentifiers = identifiers.some(isRelevantIdentifier)
-
-    return (
-      <div className="mb-3">
-        <div className="fw-bold">{label}</div>
-        {hasIdentifiers && (
-          <ListGroup>
-            {identifiers.map((identifier, index) => (
-              isRelevantIdentifier(identifier) && (
-                <ListGroup.Item key={index}>
-                  <IdentifierHeader
-                    identifier={identifier}
-                    show={identifier.show}
-                    onToggle={() => toggleIdentifier(index)}
-                    onRemove={() => removeIdentifier(index)}
-                  />
-                  {identifier.show && (
-                    <>
-                      <IdentifierInput
-                        index={index}
-                        optional={optional}
-                        options={options}
-                        identifier={identifier}
-                        profile={profile}
-                        fileMetadataOptions={fileMetadataOptions}
-                        tableMetadataOptions={tableMetadataOptions}
-                        inputTables={inputTables}
-                        outputTables={outputTables}
-                        dataset={dataset}
-                        updateIdentifier={updateIdentifier}
-                        removeIdentifier={removeIdentifier}
-                        updateIdentifierOperation={updateIdentifierOperation}
-                        updateIdentifierOntology={updateIdentifierOntology}
-                        removeIdentifierOperation={removeIdentifierOperation}
-                        updateRegex={updateRegex}
-                        addIdentifierOperation={addIdentifierOperation}
-                      />
-
-                    </>
-                  )}
-                </ListGroup.Item>
-              )
-            ))}
-          </ListGroup>
-        )}
-
-        <Button
-          className="mt-1"
-          variant="success"
-          size="sm"
-          onClick={() => addIdentifier(type, optional)}
-        >
-          {optional ? 'Add metadata' : 'Add Identifier'}
-        </Button>
-      </div>
-    )
+function IdentifierForm({
+  label, type, optional, identifiers, fileMetadataOptions,
+  tableMetadataOptions, inputTables, outputTables, dataset,
+  addIdentifier, updateIdentifier, removeIdentifier, profile,
+  addIdentifierOperation, updateIdentifierOperation,
+  options, removeIdentifierOperation, updateIdentifierOntology, updateRegex
+}) {
+  const toggleIdentifier = (index) => {
+    updateIdentifier(index, { show: !identifiers[index].show})
   }
 
+  const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional === optional && identifier.editable)
+  const hasIdentifiers = identifiers.some(isRelevantIdentifier)
+
+  return (
+    <div className="mb-3">
+      <div className="fw-bold">{label}</div>
+      {hasIdentifiers && (
+        <ListGroup>
+          {identifiers.map((identifier, index) => (
+            isRelevantIdentifier(identifier) && (
+              <ListGroup.Item key={index}>
+                <IdentifierHeader
+                  identifier={identifier}
+                  show={identifier.show}
+                  onToggle={() => toggleIdentifier(index)}
+                  onRemove={() => removeIdentifier(index)}
+                />
+                {identifier.show && (
+                  <IdentifierInput
+                    index={index}
+                    optional={optional}
+                    options={options}
+                    identifier={identifier}
+                    profile={profile}
+                    fileMetadataOptions={fileMetadataOptions}
+                    tableMetadataOptions={tableMetadataOptions}
+                    inputTables={inputTables}
+                    outputTables={outputTables}
+                    dataset={dataset}
+                    updateIdentifier={updateIdentifier}
+                    removeIdentifier={removeIdentifier}
+                    updateIdentifierOperation={updateIdentifierOperation}
+                    updateIdentifierOntology={updateIdentifierOntology}
+                    removeIdentifierOperation={removeIdentifierOperation}
+                    updateRegex={updateRegex}
+                    addIdentifierOperation={addIdentifierOperation}
+                  />
+                )}
+              </ListGroup.Item>
+            )
+          ))}
+        </ListGroup>
+      )}
+
+      <Button
+        className="mt-1"
+        variant="success"
+        size="sm"
+        onClick={() => addIdentifier(type, optional)}
+      >
+        {optional ? 'Add metadata' : 'Add Identifier'}
+      </Button>
+    </div>
+  )
 }
 
 IdentifierForm.propTypes = {
