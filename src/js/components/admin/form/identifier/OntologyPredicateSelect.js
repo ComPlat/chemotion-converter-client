@@ -4,7 +4,7 @@ import {Form, Col, Row, Popover, OverlayTrigger} from 'react-bootstrap';
 import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 
 
-const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
+const OntologyPredicateSelect = ({term, updateOntology, predicates, options}) => {
   const [checkResult, setCheckResult] = useState(null); // null = not checked yet
 
   useEffect(checkTIB(setCheckResult), []);
@@ -22,20 +22,22 @@ const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
     <Row>
       <Col>
         <Form.Group controlId={`OntologyTermInput`}>
+
+
           <OverlayTrigger
             placement="left"
             overlay={
               <Popover id="header-popover-select-info">
                 <Popover.Header as="h3">
-                  Ontology Term to describe the Object
+                  Ontology Term to describe the Predicate
                 </Popover.Header>
                 <Popover.Body>
-                  <h5>What is a Object?</h5>
+                  <h5>What is a Predicate?</h5>
 
-                  <p>In an RDF graph, the object is the value or entity that the subject is connected to.
-                    A subject (what you’re talking about) is connected to an object (what you’re saying about it).</p>
+                  <p>In an RDF graph, a predicate describes the relationship between two things.
+                    It connects a subject (what you’re talking about) to an object (what you’re saying about it).</p>
 
-                  <p>You can think of the object as the result or target of the relationship.</p>
+                  <p>You can think of a predicate like a verb in a sentence.</p>
 
                   <p>Example:
                     “Reaction1 usedPreparation PreparationA”</p>
@@ -46,18 +48,14 @@ const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
 
                     <li>PreparationA → object</li>
                   </ul>
-                  The object tells you what the subject is related to.
-
-
-                  <p>Assign an object ontology term to the property. If the selected term is already assigned
-                  to <b>one</b> field in the chosen dataset, the output layer and output field will be selected</p>
-                  automatically.
+                  The predicate “usedPreparation” tells you how the two entities are related.
                 </Popover.Body>
               </Popover>
             }
           >
-            <Form.Label column="sm">Ontology Term to describe the Object:</Form.Label>
+            <Form.Label column="sm">Ontology Term to describe the Predicate:</Form.Label>
           </OverlayTrigger>
+
 
           <OntologyAsyncSelect
             defaultOptions
@@ -65,11 +63,11 @@ const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
             onChange={(event) => {
               updateOntology({
                 ontology: event?.value,
-                type: "object"
+                type: "predicate"
               })
             }}
             placeholder="Search for a property..."
-            value={ontologySchemaToOption(term?.id, objects)}
+            value={ontologySchemaToOption(term?.id, predicates)}
           />
         </Form.Group>
       </Col>
@@ -77,12 +75,12 @@ const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
   )
 }
 
-OntologyTermSelect.propTypes = {
+OntologyPredicateSelect.propTypes = {
   term: PropTypes.object,
   options: PropTypes.object,
   updateOntology: PropTypes.func,
   dataset: PropTypes.object,
-  objects: PropTypes.array
+  predicate: PropTypes.array
 }
 
-export default OntologyTermSelect
+export default OntologyPredicateSelect

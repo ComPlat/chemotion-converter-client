@@ -164,7 +164,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset) {
         const field = dataset?.layers[outputLayer]?.fields.find((x) => x.field === outputKey);
         if (field?.ontology) {
           const ontology = addNamespaceToOntology(field.ontology);
-          handlers.updateIdentifierOntology(index, {type: 'predicate', ontology});
+          handlers.updateIdentifierOntology(index, {type: 'object', ontology});
         }
       }
 
@@ -181,7 +181,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset) {
         if (data.type && data.ontology) {
           profile[`${data.type}s`].push(data.ontology);
           profile.identifiers[index][data.type] = {'id': data.ontology.id};
-          if (data.type === 'predicate') {
+          if (data.type === 'object') {
             const fieldPath = findOntologyInDataset(dataset, data.ontology);
             if (fieldPath) {
               [profile.identifiers[index].outputLayer, profile.identifiers[index].outputKey] = fieldPath[0];

@@ -55,16 +55,36 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
         <Col>
           <Form.Group controlId={`OntologySubjectInput`}>
             <OverlayTrigger
-              placement="bottom"
+              placement="left"
               overlay={
                 <Popover id="header-popover-select-info">
                   <Popover.Header as="h3">
                     Subject Term
                   </Popover.Header>
-                  <Popover.Body>Adding a subject is optional. If nothing is selected, the subject will be the actual
-                    measurement {dataset?.ols || 'OBI:0000070'}. When a new subject has been created, the predicates
-                    with which the measurement is associated
-                    with the new subject must be determined before the profile can be saved.
+                  <Popover.Body>
+                    <h5>What is a Subject?</h5>
+
+                    <p>In an RDF graph, the subject is the thing you are describing. It represents the starting point of
+                      a statement.
+                      A subject (what you’re talking about) is connected to an object (what you’re saying about it).</p>
+
+                    <p>You can think of the subject like the topic of a sentence.</p>
+
+                    <p>Example:
+                      “Reaction1 usedPreparation PreparationA”</p>
+                    <ul>
+                      <li>Reaction1 → subject</li>
+
+                      <li>usedPreparation → predicate</li>
+
+                      <li>PreparationA → object</li>
+                    </ul>
+                    The subject is the entity that the statement is about.
+
+                    <p>Adding a subject is optional. If nothing is selected, the subject will be the actual
+                      measurement {dataset?.ols || 'OBI:0000070'}. When a new subject has been created, the predicates
+                      with which the measurement is associated
+                      with the new subject must be determined before the profile can be saved.</p>
                   </Popover.Body>
                 </Popover>
               }
@@ -92,7 +112,7 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
           <Col>
             <Form.Group controlId={`OntologySubjectInstanceInput`}>
               <OverlayTrigger
-                placement="bottom"
+                placement="left"
                 overlay={
                   <Popover id="header-popover-select-info">
                     <Popover.Header as="h3">
@@ -131,7 +151,7 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
         <Col>
           <Form.Group controlId={`OntologyDatatypeInput`}>
             <OverlayTrigger
-              placement="bottom"
+              placement="left"
               overlay={
                 <Popover id="header-popover-select-info">
                   <Popover.Header as="h3">

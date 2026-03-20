@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Col, Row, Container} from 'react-bootstrap';
+import {Form, Col, Row, Container, Popover, OverlayTrigger} from 'react-bootstrap';
 import {checkTIB, findOntologyById, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 
 
-const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predicates, subjectInstances, options}) => {
+const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predicates, subjectInstances, options, datasetId}) => {
   const [checkResult, setCheckResult] = useState(null); // null = not checked yet
 
   useEffect(checkTIB(setCheckResult), []);
@@ -35,7 +35,38 @@ const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predi
         return <Row key={`${subjectId}__${instance.name}`}>
           <Col>
             <Form.Group controlId={`${subjectId}__${instance.name}`}>
-              <Form.Label column="sm">Predicate For <b>{instance.name}:</b></Form.Label>
+              <OverlayTrigger
+            placement="left"
+            overlay={
+              <Popover id="header-popover-select-info">
+                <Popover.Header as="h3">
+                  Ontology Term to describe the Predicate
+                </Popover.Header>
+                <Popover.Body>
+                  <h5>What is a Predicate?</h5>
+
+                  <p>In an RDF graph, a predicate describes the relationship between two things.
+                    It connects a subject (what you’re talking about) to an object (what you’re saying about it).</p>
+
+                  <p>You can think of a predicate like a verb in a sentence.</p>
+
+                  <p>Example:
+                    “Reaction1 usedPreparation PreparationA”</p>
+                  <ul>
+                    <li>Reaction1 → subject</li>
+
+                    <li>Predicate → <br/><b>{instance.predicate}</b></li>
+
+                    <li>Object → <br/><b>{instance.name}</b></li>
+                  </ul>
+                  The predicate “usedPreparation” tells you how the two entities are related.
+                </Popover.Body>
+              </Popover>
+            }
+          >
+             <Form.Label column="sm">Predicate For <b>{instance.name}:</b></Form.Label>
+          </OverlayTrigger>
+
               <OntologyAsyncSelect
                 defaultOptions
                 additionalOptions={rdf}
@@ -67,12 +98,13 @@ const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predi
 }
 
 OntologySubjectPredicateSelect.propTypes = {
-  options: PropTypes.object,
-  dataset: PropTypes.object,
-  subjects: PropTypes.array,
-  predicates: PropTypes.array,
-  subjectInstances: PropTypes.object,
-  updateSubjectInstances: PropTypes.func,
+  options: PropTypes.object.isRequired,
+  dataset: PropTypes.object.isRequired,
+  subjects: PropTypes.array.isRequired,
+  predicates: PropTypes.array.isRequired,
+  subjectInstances: PropTypes.object.isRequired,
+  updateSubjectInstances: PropTypes.func.isRequired,
+  datasetId: PropTypes.string.isRequired
 }
 
 export default OntologySubjectPredicateSelect
