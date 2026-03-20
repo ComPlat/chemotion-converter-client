@@ -175,11 +175,11 @@ function AdminApp() {
 	const uploadFile = () => {
 		setIsLoading(true);
 
-		ConverterApi.fetchTables(selectedFile)
+		return ConverterApi.fetchTables(selectedFile)
 			.then(data => {
 				if (data) {
 					let nextProfile = {};
-					if (data.metadata.reader === profile.data.metadata.reader) {
+					if (profile && data.metadata.reader === profile.data.metadata.reader) {
 						nextProfile = {
 							...profile,
 							data: {
@@ -213,6 +213,7 @@ function AdminApp() {
 					setError(false);
 					setErrorMessage('');
 				}
+				return true;
 			})
 			.catch(error => {
 				if (error.status === 413) {
@@ -226,6 +227,7 @@ function AdminApp() {
 						setIsLoading(false);
 					})
 				}
+				return false;
 			})
 	};
 
@@ -278,6 +280,9 @@ function AdminApp() {
 					error={error}
 					updateProfile={updateProfile}
 					storeProfile={storeProfile}
+					onFileChangeHandler={updateFile}
+					onSubmitFileHandler={uploadFile}
+					isLoading={isLoading}
 				/>
 			)
 		}
