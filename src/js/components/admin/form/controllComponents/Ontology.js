@@ -69,7 +69,8 @@ export default function OntologyManager({dataset, datasets, profile, options, se
           subjects={profile.subjects}
           predicates={profile.predicates}
           options={options}
-          subjectInstances={profile.subjectInstances} />
+          subjectInstances={profile.subjectInstances}
+          datasetId={dataset?.name ?? 'Assay'}/>
       </Card.Body>
     </Card>
   </>)

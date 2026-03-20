@@ -4,6 +4,8 @@ import {Form, Col, Row, OverlayTrigger, Popover} from 'react-bootstrap';
 import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 import Select from "react-select";
 
+const nextNameForInstance = (ontology, idx=0)=> `${ontology?.label ?? '-'}_${idx + 1}`;
+
 const labelToInstanceOption = (instanceOption) => {
   if (!instanceOption) {
     return null;
@@ -27,11 +29,13 @@ const prepareInstanceOptions = (instanceOptions, key, subjects) => {
     }
     return Math.max(num, acc);
   }, 0);
-  const oboId = subjects.find((sub) => sub.id === key).obo_id;
+
+
   const instancesListOptions = instancesList.map((x) => labelToInstanceOption(x.name));
+  const nextName = nextNameForInstance(subjects.find((sub) => sub.id === key), nextNum)
   instancesListOptions.push({
-    label: `New Instance: ${oboId} ${nextNum + 1}`,
-    value: `${oboId} ${nextNum + 1}`
+    label: `New Instance: ${nextName}`,
+    value: `${nextName}`
   });
   return instancesListOptions;
 }
@@ -81,15 +85,15 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
                     </ul>
                     The subject is the entity that the statement is about.
 
-                    <p>Adding a subject is optional. If nothing is selected, the subject will be the actual
-                      measurement {dataset?.ols || 'OBI:0000070'}. When a new subject has been created, the predicates
+                    <p>Adding a subject is optional. If nothing is selected, the subject will be the general
+                      assay {dataset?.ols || 'OBI:0000070'}. When a new subject has been created, the predicates
                       with which the measurement is associated
                       with the new subject must be determined before the profile can be saved.</p>
                   </Popover.Body>
                 </Popover>
               }
             >
-              <Form.Label column="sm">Subject Term:</Form.Label>
+              <Form.Label column="sm">Subject Term [OPTIONAL]:</Form.Label>
             </OverlayTrigger>
             <OntologyAsyncSelect
               additionalOptions={rdf}
@@ -98,7 +102,7 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
                 updateOntology({
                   ontology: event?.value,
                   type: "subject",
-                  instance: event ? `${event.value.obo_id} 1` : null
+                  instance: event ? nextNameForInstance(event.value) : null
                 })
               }
               placeholder={dataset?.ols ? `Measurement: ${dataset.ols}` : 'Measurement: Assay (OBI:0000070)'}

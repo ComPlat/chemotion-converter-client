@@ -1,5 +1,6 @@
 import React from 'react';
 import AsyncSelect from 'react-select/async';
+import PropTypes from 'prop-types';
 
 
 const CHEMOTION_URL = 'https://chemotion.net/chemotion/#';
@@ -212,6 +213,22 @@ function OntologyAsyncSelect({
     />
   );
 }
+
+OntologyAsyncSelect.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+  value: PropTypes.shape({
+    value: PropTypes.object,
+    label: PropTypes.string
+  }),
+  create: PropTypes.bool,
+  isClearable: PropTypes.bool,
+  typeFilter: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string)
+  ]),
+  additionalOptions: PropTypes.arrayOf(PropTypes.object)
+};
 
 export {
   fetchProperties,

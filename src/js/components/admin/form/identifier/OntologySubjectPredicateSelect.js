@@ -4,7 +4,14 @@ import {Form, Col, Row, Container, Popover, OverlayTrigger} from 'react-bootstra
 import {checkTIB, findOntologyById, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 
 
-const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predicates, subjectInstances, options, datasetId}) => {
+const OntologySubjectPredicateSelect = ({
+                                          updateSubjectInstances,
+                                          subjects,
+                                          predicates,
+                                          subjectInstances,
+                                          options,
+                                          datasetId
+                                        }) => {
   const [checkResult, setCheckResult] = useState(null); // null = not checked yet
 
   useEffect(checkTIB(setCheckResult), []);
@@ -36,36 +43,36 @@ const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predi
           <Col>
             <Form.Group controlId={`${subjectId}__${instance.name}`}>
               <OverlayTrigger
-            placement="left"
-            overlay={
-              <Popover id="header-popover-select-info">
-                <Popover.Header as="h3">
-                  Ontology Term to describe the Predicate
-                </Popover.Header>
-                <Popover.Body>
-                  <h5>What is a Predicate?</h5>
+                placement="left"
+                overlay={
+                  <Popover id="header-popover-select-info">
+                    <Popover.Header as="h3">
+                      Ontology Term to describe the Predicate
+                    </Popover.Header>
+                    <Popover.Body>
+                      <h5>What is a Predicate?</h5>
 
-                  <p>In an RDF graph, a predicate describes the relationship between two things.
-                    It connects a subject (what you’re talking about) to an object (what you’re saying about it).</p>
+                      <p>In an RDF graph, a predicate describes the relationship between two things.
+                        It connects a subject (what you’re talking about) to an object (what you’re saying about
+                        it).</p>
 
-                  <p>You can think of a predicate like a verb in a sentence.</p>
+                      <p>You can think of a predicate like a verb in a sentence.</p>
 
-                  <p>Example:
-                    “Reaction1 usedPreparation PreparationA”</p>
-                  <ul>
-                    <li>Reaction1 → subject</li>
+                      <p>Example:</p>
+                      <ul>
+                        <li>Subject → <br/><b>{datasetId}</b></li>
 
-                    <li>Predicate → <br/><b>{instance.predicate}</b></li>
+                        <li>Predicate → <br/><b>{instance.predicate}</b></li>
 
-                    <li>Object → <br/><b>{instance.name}</b></li>
-                  </ul>
-                  The predicate “usedPreparation” tells you how the two entities are related.
-                </Popover.Body>
-              </Popover>
-            }
-          >
-             <Form.Label column="sm">Predicate For <b>{instance.name}:</b></Form.Label>
-          </OverlayTrigger>
+                        <li>Object → <br/><b>{instance.name}</b></li>
+                      </ul>
+                      The predicate “{instance.predicate}” tells you how the two entities are related.
+                    </Popover.Body>
+                  </Popover>
+                }
+              >
+                <Form.Label column="sm">Predicate For <b>{instance.name}:</b></Form.Label>
+              </OverlayTrigger>
 
               <OntologyAsyncSelect
                 defaultOptions
@@ -89,8 +96,8 @@ const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predi
   return (
     <Container>
       <Row>
-        <Col><p>The predicate for the subject instances specifies how the instances are connected to the actual
-          measurement.</p></Col>
+        <Col><p>The predicate for the subject instances specifies how the instances are connected to the main
+          class: {datasetId}.</p></Col>
       </Row>
       {mainForm}
     </Container>
@@ -99,7 +106,6 @@ const OntologySubjectPredicateSelect = ({updateSubjectInstances, subjects, predi
 
 OntologySubjectPredicateSelect.propTypes = {
   options: PropTypes.object.isRequired,
-  dataset: PropTypes.object.isRequired,
   subjects: PropTypes.array.isRequired,
   predicates: PropTypes.array.isRequired,
   subjectInstances: PropTypes.object.isRequired,

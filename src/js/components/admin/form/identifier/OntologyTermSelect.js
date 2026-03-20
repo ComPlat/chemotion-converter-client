@@ -50,7 +50,7 @@ const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
 
 
                   <p>Assign an object ontology term to the property. If the selected term is already assigned
-                  to <b>one</b> field in the chosen dataset, the output layer and output field will be selected</p>
+                    to <b>one</b> field in the chosen dataset, the output layer and output field will be selected</p>
                   automatically.
                 </Popover.Body>
               </Popover>
@@ -78,11 +78,10 @@ const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
 }
 
 OntologyTermSelect.propTypes = {
-  term: PropTypes.object,
-  options: PropTypes.object,
-  updateOntology: PropTypes.func,
-  dataset: PropTypes.object,
-  objects: PropTypes.array
+  term: PropTypes.object.isRequired,
+  options: PropTypes.object.isRequired,
+  updateOntology: PropTypes.func.isRequired,
+  objects: PropTypes.array.isRequired
 }
 
 export default OntologyTermSelect

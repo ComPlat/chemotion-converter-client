@@ -91,6 +91,8 @@ const cleanOntology = (profile) => {
   profile.subjects = filterUnique(profile.subjects, usedSubjects);
   const usedDatatypes = profile.identifiers.map((id) => id.datatype?.id).filter(Boolean);
   profile.datatypes = filterUnique(profile.datatypes, usedDatatypes);
+  const usedObjects = profile.identifiers.map((id) => id.object?.id).filter(Boolean);
+  profile.objects = filterUnique(profile.objects, usedObjects);
 
   profile.subjectInstances = profile.identifiers.reduce((acc, id) => {
     if (!id.subject) {
@@ -140,6 +142,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset) {
         identifier.predicate = null;
         identifier.subject = null;
         identifier.datatype = null;
+        identifier.object = null;
       } else {
         identifier.match = 'exact';
       }

@@ -22,8 +22,6 @@ const OntologyPredicateSelect = ({term, updateOntology, predicates, options}) =>
     <Row>
       <Col>
         <Form.Group controlId={`OntologyTermInput`}>
-
-
           <OverlayTrigger
             placement="left"
             overlay={
@@ -32,6 +30,8 @@ const OntologyPredicateSelect = ({term, updateOntology, predicates, options}) =>
                   Ontology Term to describe the Predicate
                 </Popover.Header>
                 <Popover.Body>
+                  <p><b>If left blank, the object is used as a connection between the subject and the value
+                    (literal)</b></p>
                   <h5>What is a Predicate?</h5>
 
                   <p>In an RDF graph, a predicate describes the relationship between two things.
@@ -53,10 +53,8 @@ const OntologyPredicateSelect = ({term, updateOntology, predicates, options}) =>
               </Popover>
             }
           >
-            <Form.Label column="sm">Ontology Term to describe the Predicate:</Form.Label>
+            <Form.Label column="sm">Ontology Term to describe the Predicate [OPTIONAL]:</Form.Label>
           </OverlayTrigger>
-
-
           <OntologyAsyncSelect
             defaultOptions
             additionalOptions={rdf}
@@ -79,8 +77,7 @@ OntologyPredicateSelect.propTypes = {
   term: PropTypes.object,
   options: PropTypes.object,
   updateOntology: PropTypes.func,
-  dataset: PropTypes.object,
-  predicate: PropTypes.array
+  predicates: PropTypes.array
 }
 
 export default OntologyPredicateSelect
