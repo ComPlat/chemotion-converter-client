@@ -182,13 +182,7 @@ function AdminApp() {
 					if (profile && data.metadata.reader === profile.data.metadata.reader) {
 						nextProfile = {
 							...profile,
-							data: {
-								...profile.data,
-								metadata: {
-									...profile.data.metadata,
-									file_name: selectedFile.name
-								}
-							}
+							data: data
 						};
 						setStatus('update');
 					} else {
