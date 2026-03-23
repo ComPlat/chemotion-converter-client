@@ -1,10 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import PropTypes from 'prop-types';
-import {Form, Col, Row, Popover, OverlayTrigger} from 'react-bootstrap';
-import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { Form, Col, Row, Popover, OverlayTrigger } from "react-bootstrap";
+import {
+  checkTIB,
+  OntologyAsyncSelect,
+  ontologySchemaToOption,
+} from "../common/TibFetchService";
 
-
-const OntologyTermSelect = ({term, updateOntology, predicates, options}) => {
+const OntologyTermSelect = ({ term, updateOntology, predicates, options }) => {
   const [checkResult, setCheckResult] = useState(null); // null = not checked yet
 
   useEffect(checkTIB(setCheckResult), []);
@@ -15,15 +18,18 @@ const OntologyTermSelect = ({term, updateOntology, predicates, options}) => {
   }
 
   if (!checkResult) {
-    return <p>We are very sorry, but the TIB Terminology Service is currently unavailable.</p>
+    return (
+      <p>
+        We are very sorry, but the TIB Terminology Service is currently
+        unavailable.
+      </p>
+    );
   }
-  const {rdf} = options;
+  const { rdf } = options;
   return (
     <Row>
       <Col>
         <Form.Group controlId={`OntologyTermInput`}>
-
-
           <OverlayTrigger
             placement="bottom"
             overlay={
@@ -32,16 +38,18 @@ const OntologyTermSelect = ({term, updateOntology, predicates, options}) => {
                   Ontology Term to describe the Predicate
                 </Popover.Header>
                 <Popover.Body>
-                  Assign an object ontology term to the property. If the selected term is already assigned
-                  to <b>one</b> field in the chosen dataset, the output layer and output field will be selected
-                  automatically.
+                  Assign an object ontology term to the property. If the
+                  selected term is already assigned to <b>one</b> field in the
+                  chosen dataset, the output layer and output field will be
+                  selected automatically.
                 </Popover.Body>
               </Popover>
             }
           >
-            <Form.Label column="sm">Ontology Term to describe the Predicate:</Form.Label>
+            <Form.Label column="sm">
+              Ontology Term to describe the Predicate:
+            </Form.Label>
           </OverlayTrigger>
-
 
           <OntologyAsyncSelect
             defaultOptions
@@ -49,8 +57,8 @@ const OntologyTermSelect = ({term, updateOntology, predicates, options}) => {
             onChange={(event) => {
               updateOntology({
                 ontology: event?.value,
-                type: "predicate"
-              })
+                type: "predicate",
+              });
             }}
             placeholder="Search for a property..."
             value={ontologySchemaToOption(term?.id, predicates)}
@@ -58,15 +66,15 @@ const OntologyTermSelect = ({term, updateOntology, predicates, options}) => {
         </Form.Group>
       </Col>
     </Row>
-  )
-}
+  );
+};
 
 OntologyTermSelect.propTypes = {
   term: PropTypes.object,
   options: PropTypes.object,
   updateOntology: PropTypes.func,
   dataset: PropTypes.object,
-  predicate: PropTypes.array
-}
+  predicate: PropTypes.array,
+};
 
-export default OntologyTermSelect
+export default OntologyTermSelect;

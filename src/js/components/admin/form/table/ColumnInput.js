@@ -1,21 +1,25 @@
-import React from "react"
-import PropTypes from 'prop-types';
-import { Col, Form, Row } from 'react-bootstrap';
+import React from "react";
+import PropTypes from "prop-types";
+import { Col, Form, Row } from "react-bootstrap";
 
 const ColumnInput = ({ column, onChange }) => {
   // a column list is not available
   const getIndex = (column, key) => {
-    if (column !== undefined && typeof column[key] == 'number' && !isNaN(column[key])) {
-      return column[key]
+    if (
+      column !== undefined &&
+      typeof column[key] == "number" &&
+      !isNaN(column[key])
+    ) {
+      return column[key];
     } else {
-      return null
+      return null;
     }
-  }
+  };
 
   const getValue = (column, key) => {
-    const index = getIndex(column, key)
-    return index === null ? '' : index
-  }
+    const index = getIndex(column, key);
+    return index === null ? "" : index;
+  };
 
   return (
     <Row>
@@ -24,11 +28,13 @@ const ColumnInput = ({ column, onChange }) => {
         <Form.Control
           type="number"
           size="sm"
-          onChange={event => onChange({
-            tableIndex: parseInt(event.target.value),
-            columnIndex: getIndex(column, 'columnIndex')
-          })}
-          value={getValue(column, 'tableIndex')}
+          onChange={(event) =>
+            onChange({
+              tableIndex: parseInt(event.target.value),
+              columnIndex: getIndex(column, "columnIndex"),
+            })
+          }
+          value={getValue(column, "tableIndex")}
         />
       </Form.Group>
 
@@ -38,20 +44,22 @@ const ColumnInput = ({ column, onChange }) => {
           type="number"
           size="sm"
           className="form-control input-sm"
-          onChange={event => onChange({
-            tableIndex: getIndex(column, 'tableIndex'),
-            columnIndex: parseInt(event.target.value)
-          })}
-          value={getValue(column, 'columnIndex')}
+          onChange={(event) =>
+            onChange({
+              tableIndex: getIndex(column, "tableIndex"),
+              columnIndex: parseInt(event.target.value),
+            })
+          }
+          value={getValue(column, "columnIndex")}
         />
       </Form.Group>
     </Row>
-  )
-}
+  );
+};
 
 ColumnInput.propTypes = {
   column: PropTypes.object,
-  onChange: PropTypes.func
-}
+  onChange: PropTypes.func,
+};
 
-export default ColumnInput
+export default ColumnInput;

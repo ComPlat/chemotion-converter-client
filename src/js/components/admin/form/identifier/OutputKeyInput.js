@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Form } from 'react-bootstrap';
-import Select from 'react-select';
-import { sortBy } from 'lodash';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { Form } from "react-bootstrap";
+import Select from "react-select";
+import { sortBy } from "lodash";
 
 const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
-  const fields = (dataset?.layers ?? {})[identifier.outputLayer]?.fields
-  const dsOpt = fields && fields.map((e) => ({ value: e.field, label: e.label }))
+  const fields = (dataset?.layers ?? {})[identifier.outputLayer]?.fields;
+  const dsOpt =
+    fields && fields.map((e) => ({ value: e.field, label: e.label }));
 
   return (
     <Form.Group controlId={`outputKeyInput${index}`}>
@@ -22,7 +23,7 @@ const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
             updateIdentifier(index, { outputKey: event.value })
           }
           options={dsOpt}
-          value={dsOpt.find(o => o.value === identifier.outputKey)}
+          value={dsOpt.find((o) => o.value === identifier.outputKey)}
         />
       ) : (
         <Form.Control
@@ -34,14 +35,14 @@ const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
         />
       )}
     </Form.Group>
-  )
-}
+  );
+};
 
 OutputKeyInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
   updateIdentifier: PropTypes.func,
-  dataset: PropTypes.object
-}
+  dataset: PropTypes.object,
+};
 
-export default OutputKeyInput
+export default OutputKeyInput;

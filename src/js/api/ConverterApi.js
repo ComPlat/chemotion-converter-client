@@ -1,175 +1,184 @@
-const converter_app_url = process.env.CONVERTER_APP_URL
+const converter_app_url = process.env.CONVERTER_APP_URL;
 
 class ConverterApi {
-
-  static fetchProfiles () {
+  static fetchProfiles() {
     const requestOptions = {
-      method: 'GET'
-    }
+      method: "GET",
+    };
 
-    return fetch(converter_app_url + '/profiles', requestOptions)
-      .then(response => {
-        if (!response.ok) { throw response }
-        return response.json()
+    return fetch(converter_app_url + "/profiles", requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw response;
+        }
+        return response.json();
       })
-      .then(data => {
-        return data
-      })
+      .then((data) => {
+        return data;
+      });
   }
 
   static fetchTables(file) {
-    const data = new FormData()
-    data.append('file', file)
+    const data = new FormData();
+    data.append("file", file);
 
     const requestOptions = {
-      method: 'POST',
-      body: data
-    }
+      method: "POST",
+      body: data,
+    };
 
-    return fetch(converter_app_url + '/tables', requestOptions)
-      .then(response => {
-        if (!response.ok) { throw response }
-        return response.json()
+    return fetch(converter_app_url + "/tables", requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw response;
+        }
+        return response.json();
       })
-      .then(data => {
-          return data
-      })
+      .then((data) => {
+        return data;
+      });
   }
 
   static createProfile(profile) {
     const requestOptions = {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(profile),
       headers: {
-        'Content-Type': 'application/json'
-      }
-    }
+        "Content-Type": "application/json",
+      },
+    };
 
-    let ok
-    return fetch(converter_app_url + '/profiles', requestOptions)
-      .then(response => {
-        ok = response.ok
-        return response.json()
+    let ok;
+    return fetch(converter_app_url + "/profiles", requestOptions)
+      .then((response) => {
+        ok = response.ok;
+        return response.json();
       })
-      .then(data => {
+      .then((data) => {
         if (ok) {
-          return data
+          return data;
         } else {
-          const error = new Error('A error occurred during processing.');
+          const error = new Error("A error occurred during processing.");
           // Attach the custom data object to the error instance
           error.data = data;
           throw error;
         }
-      })
+      });
   }
 
   static updateProfile(profile) {
     const requestOptions = {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(profile),
       headers: {
-        'Content-Type': 'application/json'
-      }
-    }
+        "Content-Type": "application/json",
+      },
+    };
 
-    let ok
-    return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
-      .then(response => {
-        ok = response.ok
-        return response.json()
+    let ok;
+    return fetch(converter_app_url + "/profiles/" + profile.id, requestOptions)
+      .then((response) => {
+        ok = response.ok;
+        return response.json();
       })
-      .then(data => {
+      .then((data) => {
         if (ok) {
-          return data
+          return data;
         } else {
-          const error = new Error('A error occurred during processing.');
+          const error = new Error("A error occurred during processing.");
           // Attach the custom data object to the error instance
           error.data = data;
           throw error;
         }
-      })
+      });
   }
 
-  static deleteProfile (profile) {
+  static deleteProfile(profile) {
     const requestOptions = {
-      method: 'DELETE'
-    }
+      method: "DELETE",
+    };
 
-    return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
-      .then(response => {
-        if (!response.ok) { throw response }
-          return response
-      })
+    return fetch(
+      converter_app_url + "/profiles/" + profile.id,
+      requestOptions,
+    ).then((response) => {
+      if (!response.ok) {
+        throw response;
+      }
+      return response;
+    });
   }
 
   static fetchConversion(file, format) {
-    const data = new FormData()
-    data.append('file', file)
-    data.append('format', format)
+    const data = new FormData();
+    data.append("file", file);
+    data.append("format", format);
 
     const requestOptions = {
-      method: 'POST',
-      body: data
-    }
+      method: "POST",
+      body: data,
+    };
 
-    let fileName
-    return fetch(converter_app_url + '/conversions', requestOptions)
-      .then(response => {
+    let fileName;
+    return fetch(converter_app_url + "/conversions", requestOptions)
+      .then((response) => {
         if (!response.ok) {
-          throw response
+          throw response;
         }
-        fileName = response.headers.get('content-disposition')
-          .split(';')
-          .find(n => n.includes('filename='))
-          .replace('filename=', '')
+        fileName = response.headers
+          .get("content-disposition")
+          .split(";")
+          .find((n) => n.includes("filename="))
+          .replace("filename=", "")
           .trim();
-        return response.blob()
+        return response.blob();
       })
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = fileName
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
 
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-        return 'success'
-      })
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        return "success";
+      });
   }
 
-  static fetchDatasets () {
-
+  static fetchDatasets() {
     const requestOptions = {
-      method: 'GET'
-    }
+      method: "GET",
+    };
 
-    return fetch(converter_app_url + '/datasets', requestOptions)
-      .then(response => {
-        if (!response.ok) { throw response }
-        return response.json()
+    return fetch(converter_app_url + "/datasets", requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw response;
+        }
+        return response.json();
       })
-      .then(data => {
-        return data
-      })
+      .then((data) => {
+        return data;
+      });
   }
 
-  static fetchOptions () {
-
+  static fetchOptions() {
     const requestOptions = {
-      method: 'GET'
-    }
+      method: "GET",
+    };
 
-    return fetch(converter_app_url + '/options', requestOptions)
-      .then(response => {
-        if (!response.ok) { throw response }
-        return response.json()
+    return fetch(converter_app_url + "/options", requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw response;
+        }
+        return response.json();
       })
-      .then(data => {
-        return data
-      })
+      .then((data) => {
+        return data;
+      });
   }
-
 }
 
-export default ConverterApi
+export default ConverterApi;

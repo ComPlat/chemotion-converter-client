@@ -12,7 +12,8 @@
     "build:bundle": "webpack --config webpack/lib.config.js --mode production",
     "build": "webpack --config webpack/dev.config.js --mode development",
     "watch": "webpack --config webpack/dev.config.js --watch --mode development",
-    "serve": "webpack-dev-server --config webpack/dev.config.js --open --mode development"
+    "serve": "webpack-dev-server --config webpack/dev.config.js --open --mode development",
+    "format": "prettier --write \"src/**/*.{js,jsx,scss,css,html,json}\""
   },
   "license": "AGPL-3.0-or-later",
   "repository": {
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@babel/cli": "^7.28.6",
     "@babel/core": "^7.29.0",
+    "@babel/eslint-parser": "^7.28.5",
     "@babel/preset-env": "^7.29.2",
     "@babel/preset-react": "^7.28.5",
     "ag-grid-community": "^35.1.0",
@@ -45,8 +47,16 @@
     "babel-loader": "^10.1.1",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.4",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-no-relative-import-paths": "^1.6.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "file-loader": "^6.2.0",
     "mini-css-extract-plugin": "^2.10.1",
+    "prettier": "^3.8.1",
     "react": "^19.2.4",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.4",

@@ -1,21 +1,21 @@
 pre {
-    background-color: rgb(249, 249, 249);
-    counter-reset: line;
+  background-color: rgb(249, 249, 249);
+  counter-reset: line;
 
-    code {
-        display: block;
-    }
+  code {
+    display: block;
+  }
 
-    code:before {
-        content: counter(line);
-        counter-increment: line;
-        display: inline-block;
+  code:before {
+    content: counter(line);
+    counter-increment: line;
+    display: inline-block;
 
-        width: 4em;
-        padding-right: 1em;
-        margin-right: 1em;
+    width: 4em;
+    padding-right: 1em;
+    margin-right: 1em;
 
-        text-align: right;
-        border-right: 1px solid silver;
-    }
+    text-align: right;
+    border-right: 1px solid silver;
+  }
 }

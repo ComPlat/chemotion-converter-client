@@ -1,63 +1,80 @@
-import React from "react"
-import PropTypes from 'prop-types';
-import { Button, ListGroup } from 'react-bootstrap';
+import React from "react";
+import PropTypes from "prop-types";
+import { Button, ListGroup } from "react-bootstrap";
 
-import IdentifierInput from './IdentifierInput'
-import IdentifierHeader from './IdentifierHeader'
-
+import IdentifierInput from "./IdentifierInput";
+import IdentifierHeader from "./IdentifierHeader";
 
 function IdentifierForm({
-  label, type, optional, identifiers, fileMetadataOptions,
-  tableMetadataOptions, inputTables, outputTables, dataset,
-  addIdentifier, updateIdentifier, removeIdentifier, profile,
-  addIdentifierOperation, updateIdentifierOperation,
-  options, removeIdentifierOperation, updateIdentifierOntology, updateRegex
+  label,
+  type,
+  optional,
+  identifiers,
+  fileMetadataOptions,
+  tableMetadataOptions,
+  inputTables,
+  outputTables,
+  dataset,
+  addIdentifier,
+  updateIdentifier,
+  removeIdentifier,
+  profile,
+  addIdentifierOperation,
+  updateIdentifierOperation,
+  options,
+  removeIdentifierOperation,
+  updateIdentifierOntology,
+  updateRegex,
 }) {
   const toggleIdentifier = (index) => {
-    updateIdentifier(index, { show: !identifiers[index].show})
-  }
+    updateIdentifier(index, { show: !identifiers[index].show });
+  };
 
-  const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional === optional && identifier.editable)
-  const hasIdentifiers = identifiers.some(isRelevantIdentifier)
+  const isRelevantIdentifier = (identifier) =>
+    identifier.type === type &&
+    identifier.optional === optional &&
+    identifier.editable;
+  const hasIdentifiers = identifiers.some(isRelevantIdentifier);
 
   return (
     <div className="mb-3">
       <div className="fw-bold">{label}</div>
       {hasIdentifiers && (
         <ListGroup>
-          {identifiers.map((identifier, index) => (
-            isRelevantIdentifier(identifier) && (
-              <ListGroup.Item key={index}>
-                <IdentifierHeader
-                  identifier={identifier}
-                  show={identifier.show}
-                  onToggle={() => toggleIdentifier(index)}
-                  onRemove={() => removeIdentifier(index)}
-                />
-                {identifier.show && (
-                  <IdentifierInput
-                    index={index}
-                    optional={optional}
-                    options={options}
+          {identifiers.map(
+            (identifier, index) =>
+              isRelevantIdentifier(identifier) && (
+                <ListGroup.Item key={index}>
+                  <IdentifierHeader
                     identifier={identifier}
-                    profile={profile}
-                    fileMetadataOptions={fileMetadataOptions}
-                    tableMetadataOptions={tableMetadataOptions}
-                    inputTables={inputTables}
-                    outputTables={outputTables}
-                    dataset={dataset}
-                    updateIdentifier={updateIdentifier}
-                    removeIdentifier={removeIdentifier}
-                    updateIdentifierOperation={updateIdentifierOperation}
-                    updateIdentifierOntology={updateIdentifierOntology}
-                    removeIdentifierOperation={removeIdentifierOperation}
-                    updateRegex={updateRegex}
-                    addIdentifierOperation={addIdentifierOperation}
+                    show={identifier.show}
+                    onToggle={() => toggleIdentifier(index)}
+                    onRemove={() => removeIdentifier(index)}
                   />
-                )}
-              </ListGroup.Item>
-            )
-          ))}
+                  {identifier.show && (
+                    <IdentifierInput
+                      index={index}
+                      optional={optional}
+                      options={options}
+                      identifier={identifier}
+                      profile={profile}
+                      fileMetadataOptions={fileMetadataOptions}
+                      tableMetadataOptions={tableMetadataOptions}
+                      inputTables={inputTables}
+                      outputTables={outputTables}
+                      dataset={dataset}
+                      updateIdentifier={updateIdentifier}
+                      removeIdentifier={removeIdentifier}
+                      updateIdentifierOperation={updateIdentifierOperation}
+                      updateIdentifierOntology={updateIdentifierOntology}
+                      removeIdentifierOperation={removeIdentifierOperation}
+                      updateRegex={updateRegex}
+                      addIdentifierOperation={addIdentifierOperation}
+                    />
+                  )}
+                </ListGroup.Item>
+              ),
+          )}
         </ListGroup>
       )}
 
@@ -67,10 +84,10 @@ function IdentifierForm({
         size="sm"
         onClick={() => addIdentifier(type, optional)}
       >
-        {optional ? 'Add metadata' : 'Add Identifier'}
+        {optional ? "Add metadata" : "Add Identifier"}
       </Button>
     </div>
-  )
+  );
 }
 
 IdentifierForm.propTypes = {
@@ -92,7 +109,7 @@ IdentifierForm.propTypes = {
   updateIdentifierOperation: PropTypes.func,
   removeIdentifierOperation: PropTypes.func,
   updateIdentifierOntology: PropTypes.func,
-  updateRegex: PropTypes.func
-}
+  updateRegex: PropTypes.func,
+};
 
-export default IdentifierForm
+export default IdentifierForm;

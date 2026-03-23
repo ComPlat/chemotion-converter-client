@@ -1,6 +1,6 @@
-import React, { Component } from "react"
-import PropTypes from 'prop-types';
-import { Form } from 'react-bootstrap';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { Form } from "react-bootstrap";
 
 const KeyInput = ({ index, identifier, updateIdentifier }) => {
   return (
@@ -8,17 +8,19 @@ const KeyInput = ({ index, identifier, updateIdentifier }) => {
       <Form.Label>Key</Form.Label>
       <Form.Control
         size="sm"
-        value={identifier.key || ''}
-        onChange={(event) => updateIdentifier(index, { key: event.target.value })}
+        value={identifier.key || ""}
+        onChange={(event) =>
+          updateIdentifier(index, { key: event.target.value })
+        }
       />
     </Form.Group>
-  )
-}
+  );
+};
 
 KeyInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
-  updateIdentifier: PropTypes.func
-}
+  updateIdentifier: PropTypes.func,
+};
 
-export default KeyInput
+export default KeyInput;

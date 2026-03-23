@@ -1,20 +1,19 @@
-import React, {useState} from 'react'
-import { Alert, Button, Col, Container, Form, Row } from 'react-bootstrap';
+import React, { useState } from "react";
+import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
-import ConverterApi from '../api/ConverterApi'
-
+import ConverterApi from "../api/ConverterApi";
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [format, setFormat] = useState('jcampzip');
+  const [format, setFormat] = useState("jcampzip");
 
   const onFileChangeHandler = (event) => {
     setSelectedFile(event.target.files[0]);
     setError(false);
-    setErrorMessage('');
+    setErrorMessage("");
   };
 
   const onFormatChangeHandler = (event) => {
@@ -25,24 +24,24 @@ function App() {
     setIsLoading(true);
 
     ConverterApi.fetchConversion(selectedFile, format)
-      .then(message => {
-        if (message === 'success') {
+      .then((message) => {
+        if (message === "success") {
           setIsLoading(false);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.status === 413) {
           setError(true);
-          setErrorMessage('The uploaded file is too large.');
+          setErrorMessage("The uploaded file is too large.");
           setIsLoading(false);
         } else {
-          error.text().then(errorMessage => {
+          error.text().then((errorMessage) => {
             setError(true);
             setErrorMessage(JSON.parse(errorMessage).error);
             setIsLoading(false);
-          })
+          });
         }
-      })
+      });
   };
 
   return (
@@ -57,22 +56,34 @@ function App() {
           <p className="text-center">Please upload a file.</p>
           <Form>
             <Form.Group className="mb-2">
-              <Form.Control type="file" id="fileUpload" onChange={onFileChangeHandler}/>
+              <Form.Control
+                type="file"
+                id="fileUpload"
+                onChange={onFileChangeHandler}
+              />
             </Form.Group>
             <div className="d-grid gap-2">
-              <Button variant="primary" size="lg" onClick={onSubmitFileHandler}>Upload</Button>
+              <Button variant="primary" size="lg" onClick={onSubmitFileHandler}>
+                Upload
+              </Button>
             </div>
             <Form.Group controlId="format-select" className="mt-3">
               <Form.Label column="sm">Conversion format</Form.Label>
               <Form.Select value={format} onChange={onFormatChangeHandler}>
-                <option value="jcampzip">Zip file containing JCAMP files</option>
+                <option value="jcampzip">
+                  Zip file containing JCAMP files
+                </option>
                 <option value="jcamp">Single JCAMP file</option>
-                <option value="rdf">The Resource Description Framework (.ttl)</option>
+                <option value="rdf">
+                  The Resource Description Framework (.ttl)
+                </option>
               </Form.Select>
             </Form.Group>
           </Form>
           {error && (
-            <Alert variant="danger" className="mt-3">{errorMessage}</Alert>
+            <Alert variant="danger" className="mt-3">
+              {errorMessage}
+            </Alert>
           )}
           {isLoading && (
             <div className="text-primary text-center" role="status">
@@ -82,7 +93,7 @@ function App() {
         </Col>
       </Row>
     </Container>
-  )
+  );
 }
 
-export default App
+export default App;

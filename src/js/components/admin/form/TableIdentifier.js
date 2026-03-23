@@ -1,21 +1,29 @@
-import React from "react"
-import PropTypes from 'prop-types';
-import { Col, Form, Row } from 'react-bootstrap';
+import React from "react";
+import PropTypes from "prop-types";
+import { Col, Form, Row } from "react-bootstrap";
 
-import TypeSelect from './identifier/TypeSelect'
-import IdentifierInput from './IdentifierInput'
-
+import TypeSelect from "./identifier/TypeSelect";
+import IdentifierInput from "./IdentifierInput";
 
 function TableIdentifier({
-  index, headerKey, table, inputTables,
-  fileMetadataOptions, tableMetadataOptions,
-  options, updateHeader
+  index,
+  headerKey,
+  table,
+  inputTables,
+  fileMetadataOptions,
+  tableMetadataOptions,
+  options,
+  updateHeader,
 }) {
   const updateTableIdentifier = (identifierIndex, data) => {
-    const headerKeyIdentifier = Object.assign({}, table.header[headerKey], data)
+    const headerKeyIdentifier = Object.assign(
+      {},
+      table.header[headerKey],
+      data,
+    );
 
-    updateHeader(headerKey, headerKeyIdentifier)
-  }
+    updateHeader(headerKey, headerKeyIdentifier);
+  };
 
   return (
     <div>
@@ -27,7 +35,8 @@ function TableIdentifier({
           <TypeSelect
             index={index}
             identifier={table.header[headerKey]}
-            updateIdentifier={updateTableIdentifier} />
+            updateIdentifier={updateTableIdentifier}
+          />
         </Col>
       </Form.Group>
 
@@ -41,7 +50,7 @@ function TableIdentifier({
         updateIdentifier={updateTableIdentifier}
       />
     </div>
-  )
+  );
 }
 
 TableIdentifier.propTypes = {
@@ -52,7 +61,7 @@ TableIdentifier.propTypes = {
   inputTables: PropTypes.array,
   updateHeader: PropTypes.func,
   fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array
-}
+  tableMetadataOptions: PropTypes.array,
+};
 
-export default TableIdentifier
+export default TableIdentifier;

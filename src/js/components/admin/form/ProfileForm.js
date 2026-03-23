@@ -1,11 +1,6 @@
-import React, {useState} from "react"
-import PropTypes from 'prop-types';
-import {
-  Button,
-  Col,
-  Row,
-  Alert
-} from 'react-bootstrap';
+import React, { useState } from "react";
+import PropTypes from "prop-types";
+import { Button, Col, Row, Alert } from "react-bootstrap";
 
 import InputTables from "./common/InputTables";
 import FormNavigatorCol from "./controllComponents/FormNavigator";
@@ -13,25 +8,26 @@ import FormNavigatorCol from "./controllComponents/FormNavigator";
 const profileShape = PropTypes.shape({
   data: PropTypes.shape({
     metadata: PropTypes.object,
-    tables: PropTypes.array
+    tables: PropTypes.array,
   }),
-  tables: PropTypes.arrayOf(PropTypes.shape({
-    table: PropTypes.object,
-    loopType: PropTypes.string
-  })).isRequired
+  tables: PropTypes.arrayOf(
+    PropTypes.shape({
+      table: PropTypes.object,
+      loopType: PropTypes.string,
+    }),
+  ).isRequired,
 });
 
 function ProfileForm({
-                       status,
-                       profile,
-                       options,
-                       datasets,
-                       updateProfile,
-                       storeProfile,
-                       error,
-                       errorMessage
-                     }) {
-
+  status,
+  profile,
+  options,
+  datasets,
+  updateProfile,
+  storeProfile,
+  error,
+  errorMessage,
+}) {
   const [activeTabKey, setActiveTabKey] = useState("basics");
 
   const onSubmit = (event) => {
@@ -46,43 +42,52 @@ function ProfileForm({
     }
 
     storeProfile();
-  }
+  };
 
   const check_loop_fields = (profile, errors) => {
     profile.tables.forEach((t, tableIndex) => {
-      t.table['loop_header']?.forEach((lh, lhIndex) => {
+      t.table["loop_header"]?.forEach((lh, lhIndex) => {
         if (lh.column?.columnIndex == null) {
-          errors.push(`In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`);
+          errors.push(
+            `In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`,
+          );
         }
       });
-      t.table['loop_theader']?.forEach((lh, lhIndex) => {
+      t.table["loop_theader"]?.forEach((lh, lhIndex) => {
         if (lh.line === "" || lh.regex === "") {
-          errors.push(`In Output Table ${tableIndex}: no line or regex selected for loop condition ${lhIndex}`);
+          errors.push(
+            `In Output Table ${tableIndex}: no line or regex selected for loop condition ${lhIndex}`,
+          );
         }
       });
-      t.table['loop_metadata']?.forEach((lh, lhIndex) => {
+      t.table["loop_metadata"]?.forEach((lh, lhIndex) => {
         if (lh.metadata == null) {
-          errors.push(`In Output Table ${tableIndex}: no metadata selected for loop condition ${lhIndex}`);
+          errors.push(
+            `In Output Table ${tableIndex}: no metadata selected for loop condition ${lhIndex}`,
+          );
         }
       });
     });
-  }
-
+  };
 
   if (!profile?.data) return null;
 
-  profile.tables.map((table) => table.loopType = table.loopType ?? "all")
+  profile.tables.map((table) => (table.loopType = table.loopType ?? "all"));
 
   return (
     <div>
-      <Button className="mt-3"
-              style={{
-                position: "fixed",
-                top: '10px',
-                right: '10px',
-              }} variant="primary" onClick={onSubmit}>
-            {status === 'create' && 'Create profile'}
-            {status === 'update' && 'Update profile'}
+      <Button
+        className="mt-3"
+        style={{
+          position: "fixed",
+          top: "10px",
+          right: "10px",
+        }}
+        variant="primary"
+        onClick={onSubmit}
+      >
+        {status === "create" && "Create profile"}
+        {status === "update" && "Update profile"}
       </Button>
       <Row>
         {error && (
@@ -90,7 +95,11 @@ function ProfileForm({
             <Alert variant="danger">{errorMessage}</Alert>
           </div>
         )}
-        <InputTables setActiveTabKey={setActiveTabKey} profile={profile} setProfile={updateProfile}/>
+        <InputTables
+          setActiveTabKey={setActiveTabKey}
+          profile={profile}
+          setProfile={updateProfile}
+        />
         <FormNavigatorCol
           profile={profile}
           datasets={datasets}
@@ -99,11 +108,9 @@ function ProfileForm({
           activeTabKey={activeTabKey}
           setActiveTabKey={setActiveTabKey}
         />
-
       </Row>
-
     </div>
-  )
+  );
 }
 
 ProfileForm.propTypes = {
@@ -114,7 +121,7 @@ ProfileForm.propTypes = {
   updateProfile: PropTypes.func,
   storeProfile: PropTypes.func,
   error: PropTypes.bool,
-  errorMessage: PropTypes.string
-}
+  errorMessage: PropTypes.string,
+};
 
-export default ProfileForm
+export default ProfileForm;
