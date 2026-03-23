@@ -14,10 +14,10 @@ function TableForm({
   addOperation, updateOperation, updateOperationDescription, removeOperation,
   fileMetadataOptions, tableMetadataOptions
 }) {
-  const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
+  const creatableHeaderOptions = {"DATA TYPE": options["DATA TYPE"], XUNITS: options.XUNITS, YUNITS: options.YUNITS};
 
-  const headerOptions = Object.keys(options).reduce(function (filtered, key) {
-    if (!(key in xy_units) && key !== 'rdf' ){
+  const fixedHeaderOptions = Object.keys(options).reduce(function (filtered, key) {
+    if (!(key in creatableHeaderOptions) && key !== 'rdf' ){
        filtered[key] = options[key];
     }
     return filtered;
@@ -29,14 +29,14 @@ function TableForm({
         Table header
       </div>
 
-      {Object.keys(headerOptions).map((optionKey, index) => (
+      {Object.keys(fixedHeaderOptions).map((optionKey, index) => (
         <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
-                     values={headerOptions[optionKey]} updateHeader={updateHeader}/>
+                     values={fixedHeaderOptions[optionKey]} updateHeader={updateHeader}/>
       ))}
 
-      {Object.keys(xy_units).map((optionKey, index) => (
+      {Object.keys(creatableHeaderOptions).map((optionKey, index) => (
         <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
-                             values={xy_units[optionKey]} updateHeader={updateHeader}/>
+                             values={creatableHeaderOptions[optionKey]} updateHeader={updateHeader}/>
       ))}
 
       {(table.header['DATA CLASS'] === 'NTUPLES') && (
