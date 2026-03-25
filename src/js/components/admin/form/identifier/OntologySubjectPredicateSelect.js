@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Col, Row, Container, Popover, OverlayTrigger} from 'react-bootstrap';
+import {Col, Container, Form, OverlayTrigger, Popover, Row} from 'react-bootstrap';
 import {checkTIB, findOntologyById, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 
 
@@ -75,6 +75,7 @@ const OntologySubjectPredicateSelect = ({
               </OverlayTrigger>
 
               <OntologyAsyncSelect
+                preferredType='property'
                 defaultOptions
                 additionalOptions={rdf}
                 isClearable={false}

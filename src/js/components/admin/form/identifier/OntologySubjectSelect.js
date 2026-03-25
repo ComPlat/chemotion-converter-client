@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Col, Row, OverlayTrigger, Popover} from 'react-bootstrap';
+import {Col, Form, OverlayTrigger, Popover, Row} from 'react-bootstrap';
 import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
-import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 
-const nextNameForInstance = (ontology, idx=0)=> `${ontology?.label ?? '-'}_${idx + 1}`;
+const nextNameForInstance = (ontology, idx = 0) => `${ontology?.label ?? '-'}_${idx + 1}`;
 
 const labelToInstanceOption = (instanceOption) => {
   if (!instanceOption) {
@@ -22,22 +22,9 @@ const prepareInstanceOptions = (instanceOptions, key, subjects) => {
     return [];
   }
   const instancesList = [...instanceOptions[key]];
-  const nextNum = instancesList.reduce((acc, str) => {
-    let num = parseInt(str.name.match(/\d+$/)?.[0] || NaN, 10);
-    if (isNaN(num)) {
-      return acc;
-    }
-    return Math.max(num, acc);
-  }, 0);
 
 
-  const instancesListOptions = instancesList.map((x) => labelToInstanceOption(x.name));
-  const nextName = nextNameForInstance(subjects.find((sub) => sub.id === key), nextNum)
-  instancesListOptions.push({
-    label: `New Instance: ${nextName}`,
-    value: `${nextName}`
-  });
-  return instancesListOptions;
+  return instancesList.map((x) => labelToInstanceOption(x.name));
 }
 
 const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, datatypes, subjectInstances, options}) => {
@@ -53,6 +40,12 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
     return <p>We are very sorry, but the TIB Terminology Service is currently unavailable.</p>
   }
   const {rdf} = options;
+
+  const handleCreate = (inputValue) => {
+    updateOntology({
+      instance: inputValue
+    });
+  };
   return (
     <>
       <Row>
@@ -96,6 +89,7 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
               <Form.Label column="sm">Subject Term [OPTIONAL]:</Form.Label>
             </OverlayTrigger>
             <OntologyAsyncSelect
+              preferredType="class"
               additionalOptions={rdf}
               defaultOptions
               onChange={(event) =>
@@ -133,10 +127,10 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
               >
                 <Form.Label column="sm">Subject Instance:</Form.Label>
               </OverlayTrigger>
-              <Select
+              <CreatableSelect
                 isDisabled={!instance.subject}
                 isLoading={false}
-                isClearable={false}
+                onCreateOption={handleCreate}
                 isRtl={false}
                 name="instance"
                 options={prepareInstanceOptions(subjectInstances, instance.subject?.id, subjects)}

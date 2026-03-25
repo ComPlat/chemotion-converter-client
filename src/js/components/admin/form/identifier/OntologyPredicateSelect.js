@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Col, Row, Popover, OverlayTrigger} from 'react-bootstrap';
+import {Col, Form, OverlayTrigger, Popover, Row} from 'react-bootstrap';
 import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 
 
@@ -56,6 +56,7 @@ const OntologyPredicateSelect = ({term, updateOntology, predicates, options}) =>
             <Form.Label column="sm">Ontology Term to describe the Predicate [OPTIONAL]:</Form.Label>
           </OverlayTrigger>
           <OntologyAsyncSelect
+            preferredType="property"
             defaultOptions
             additionalOptions={rdf}
             onChange={(event) => {

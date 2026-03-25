@@ -64,7 +64,30 @@ const ontologySchemaToOption = (ontologyId, ontologyList = null) => {
   };
 }
 
-const fetchProperties = async (inputValue, create = true, typeFilter = null, additionalOptions = [], ontology = null) => {
+const createChemotionTerm = (inputValue, preferredType) => {
+  const dataset = `chemotion`;
+  const newTerm = [dataset.toUpperCase(), inputValue.split(':').at(-1)];
+  const namespace = CHEMOTION_URL;
+  const iri = `${namespace}${newTerm[1]}`;
+  const termType = preferredType ?? "property";
+  return {
+    label: `Create new: ${newTerm[1]}`,
+    value: {
+      iri,
+      namespace,
+      "ontology_name": dataset.toLowerCase(),
+      "ontology_prefix": newTerm[0],
+      "short_form": newTerm.join('_'),
+      "description": ["Local entry"],
+      "id": `${newTerm[0]}:${termType}:${iri}`,
+      "label": newTerm[1],
+      "obo_id": newTerm.join(':'),
+      "type": termType
+    }
+  }
+}
+
+const fetchProperties = async (inputValue, create = true, preferredType = null, additionalOptions = [], ontology = null) => {
   if (!inputValue) return [];
   inputValue = inputValue.replaceAll(':', '_');
   try {
@@ -93,34 +116,8 @@ const fetchProperties = async (inputValue, create = true, typeFilter = null, add
       result = filteredAddedOptions.concat(result);
     }
 
-    if (typeFilter) {
-      if (!Array.isArray(typeFilter)) {
-        typeFilter = [typeFilter];
-      }
-
-      result = result.filter((x) => typeFilter.includes(x.value.type))
-    }
-
     if (create) {
-      const dataset = `chemotion`;
-      const newTerm = [dataset.toUpperCase(), inputValue.split(':').at(-1)];
-      const namespace = CHEMOTION_URL;
-      const iri = `${namespace}${newTerm[1]}`;
-      result.unshift({
-        label: `Create new: ${newTerm[1]}`,
-        value: {
-          iri,
-          namespace,
-          "ontology_name": dataset.toLowerCase(),
-          "ontology_prefix": newTerm[0],
-          "short_form": newTerm.join('_'),
-          "description": ["Local entry"],
-          "id": `${newTerm[0]}:property:${iri}`,
-          "label": newTerm[1],
-          "obo_id": newTerm.join(':'),
-          "type": "property"
-        }
-      })
+      result.unshift(createChemotionTerm(inputValue, preferredType));
     }
 
     return result;
@@ -161,8 +158,9 @@ function OntologyAsyncSelect({
                                value,
                                create = true,
                                isClearable = true,
-                               typeFilter = null,
-                               additionalOptions = []
+                               additionalOptions = [],
+                               preferredType = null,
+                               additionalTypeWarning = null,
                              }) {
   const batchStyle = {
     color: "#fff",
@@ -173,44 +171,52 @@ function OntologyAsyncSelect({
   }
 
   return (
-    <AsyncSelect
-      cacheOptions
-      defaultOptions
-      loadOptions={(a) => fetchProperties(a, create, typeFilter, additionalOptions)}
-      onChange={(newValue) => {
-        onChange(newValue);
-      }}
-      placeholder={placeholder}
-      value={value}
-      isClearable={isClearable}
-      formatOptionLabel={(option) => (
-        <div style={{position: "relative", paddingRight: "40px"}}>
-          <div style={{display: "flex", flexDirection: "column"}}>
-            <strong style={{
-              maxWidth: "60%"
-            }}>{option.label}</strong>
-            <small style={{color: "#666"}}>{option.value.iri}</small>
-            <small>{option.value.description.join(' ')}</small>
+    <div>
+      <AsyncSelect
+        cacheOptions
+        defaultOptions
+        loadOptions={(a) => fetchProperties(a, create, preferredType, additionalOptions)}
+        onChange={(newValue) => {
+          onChange(newValue);
+        }}
+        placeholder={placeholder}
+        value={value}
+        isClearable={isClearable}
+        formatOptionLabel={(option) => (
+          <div style={{position: "relative", paddingRight: "40px"}}>
+            <div style={{display: "flex", flexDirection: "column"}}>
+              <strong style={{
+                maxWidth: "60%"
+              }}>{option.label}</strong>
+              <small style={{color: "#666"}}>{option.value.iri}</small>
+              <small>{option.value.description.join(' ')}</small>
 
-            <div style={{
-              position: "absolute",
-              top: "4px",
-              right: "4px",
-              maxWidth: "40%"
-            }}>
+              <div style={{
+                position: "absolute",
+                top: "4px",
+                right: "4px",
+                maxWidth: "40%"
+              }}>
               <span style={{
                 ...batchStyle,
                 background: "#337ab7",
               }}>{option.value.ontology_prefix}</span>
-              <span style={{
-                ...batchStyle,
-                background: "#5abedb",
-              }}>{option.value.obo_id.split(':').at(-1)}</span>
+                <span style={{
+                  ...batchStyle,
+                  background: "#5abedb",
+                }}>{option.value.obo_id.split(':').at(-1)}</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+      />
+      {preferredType && value && preferredType.toLowerCase() !== value.value.type.toLowerCase() && (
+        <p className="small text-danger">
+          <b>{value.label}</b> is a <b>{value.value.type}</b> but should be a <b>{preferredType}</b>
+          {additionalTypeWarning && (<><br/>{additionalTypeWarning}</>)}
+        </p>
       )}
-    />
+    </div>
   );
 }
 
@@ -223,11 +229,9 @@ OntologyAsyncSelect.propTypes = {
   }),
   create: PropTypes.bool,
   isClearable: PropTypes.bool,
-  typeFilter: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.arrayOf(PropTypes.string)
-  ]),
-  additionalOptions: PropTypes.arrayOf(PropTypes.object)
+  additionalOptions: PropTypes.arrayOf(PropTypes.object),
+  preferredType: PropTypes.string,
+  additionalTypeWarning: PropTypes.string
 };
 
 export {
@@ -237,6 +241,7 @@ export {
   OntologyAsyncSelect,
   ontologySchemaToOption,
   findOntologyById,
+  createChemotionTerm,
   GENERIC_PREDICATE,
   GENERIC_SUBJECT_PREDICATE,
 };

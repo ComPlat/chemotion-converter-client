@@ -1,11 +1,32 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Col, Row, Popover, OverlayTrigger} from 'react-bootstrap';
-import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
+import {Col, Form, OverlayTrigger, Popover, Row} from 'react-bootstrap';
+import {checkTIB, createChemotionTerm, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
 
 
-const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
-  const [checkResult, setCheckResult] = useState(null); // null = not checked yet
+const OntologyTermSelect = ({term, updateOntology, objects, options, predicate}) => {
+  const [checkResult, setCheckResult] = useState(null);
+
+  let preferredType = 'property';
+  let additionalTypeWarning = "This applies only as long as no predicate is set.";
+  if (predicate) {
+    preferredType = 'class'
+    additionalTypeWarning = "This applies only as long as a predicate is set.";
+  }
+
+  const ontologyValue = ontologySchemaToOption(term?.id, objects);
+
+  useEffect(() => {
+    if (ontologyValue) {
+      const {value: {type, ontology_name, label}} = ontologyValue;
+      if (ontology_name === 'chemotion' && type !== preferredType) {
+        updateOntology({
+          ontology: createChemotionTerm(label, preferredType),
+          type: "object"
+        });
+      }
+    }
+  }, [ontologyValue, preferredType]);// null = not checked yet
 
   useEffect(checkTIB(setCheckResult), []);
 
@@ -60,16 +81,18 @@ const OntologyTermSelect = ({term, updateOntology, objects, options}) => {
           </OverlayTrigger>
 
           <OntologyAsyncSelect
+            preferredType={preferredType}
+            additionalTypeWarning={additionalTypeWarning}
             defaultOptions
             additionalOptions={rdf}
             onChange={(event) => {
               updateOntology({
                 ontology: event?.value,
                 type: "object"
-              })
+              });
             }}
             placeholder="Search for a property..."
-            value={ontologySchemaToOption(term?.id, objects)}
+            value={ontologyValue}
           />
         </Form.Group>
       </Col>

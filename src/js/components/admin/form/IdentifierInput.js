@@ -170,7 +170,7 @@ function IndentifierInput({
             </Col>
           </Row>
           {showOntology ? <>
-            <OntologyTermSelect term={identifier.object}
+            <OntologyTermSelect term={identifier.object} predicate={identifier.predicate}
                                 objects={profile.objects} options={options}
                                 updateOntology={(a) => updateIdentifierOntology(index, a)}/>
             <OntologyPredicateSelect term={identifier.predicate}
