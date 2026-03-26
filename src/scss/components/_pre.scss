@@ -1,21 +1,44 @@
 pre {
-    background-color: rgb(249, 249, 249);
-    counter-reset: line;
+  background-color: rgb(249, 249, 249);
+  counter-reset: line;
 
-    code {
-        display: block;
+  .code-line-index {
+    display: inline-block;
+
+    width: 4em;
+    padding-right: 1em;
+    margin-right: 1em;
+
+    text-align: right;
+    border-right: 1px solid silver;
+
+    button {
+      display: none;
     }
 
-    code:before {
-        content: counter(line);
-        counter-increment: line;
-        display: inline-block;
-
-        width: 4em;
-        padding-right: 1em;
-        margin-right: 1em;
-
-        text-align: right;
-        border-right: 1px solid silver;
+    span {
+      display: inline-block;
     }
+  }
+
+  .code-line-index.active + code {
+    background-color: #0dcaf088;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .code-line-index.active {
+    button {
+      display: inline-block;
+    }
+
+    span {
+      display: none;
+    }
+  }
+
+  code {
+    display: inline-block;
+  }
+
 }

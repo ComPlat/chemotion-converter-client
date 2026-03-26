@@ -32,7 +32,8 @@ function FileHeader({setActiveTabKey, header, tableIndex, profile, setProfile}) 
     addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
   }} header={header} updateRegex={(value) => {
     return updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});
-  }}></FileHeaderPresenter>
+  }} profile={profile} tableIndex={tableIndex}
+  ></FileHeaderPresenter>
 }
 
 function DataGrid({table}) {
