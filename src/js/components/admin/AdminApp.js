@@ -174,12 +174,20 @@ function AdminApp() {
 			.then(data => {
 				if (data) {
 					let nextProfile = {};
-					if (profile && data.metadata.reader === profile.data.metadata.reader) {
-						nextProfile = {
-							...profile,
-							data: data
-						};
-						setStatus('update');
+					if (profile) {
+						if (data.metadata.reader === profile.data.metadata.reader) {
+							nextProfile = {
+								...profile,
+								data: data
+							};
+							setStatus('update');
+						} else {
+							setError(true);
+							setErrorMessage('The uploaded file cannot be read by the reader for this profile.');
+							setIsLoading(false);
+
+							return false;
+						}
 					} else {
 						nextProfile = {
 							title: '',
