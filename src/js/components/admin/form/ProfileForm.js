@@ -30,6 +30,7 @@ function ProfileForm({
 											 updateProfile,
 											 storeProfile,
 											 error,
+											 uploadError,
 											 errorMessage,
 											 onFileChangeHandler,
 											 onSubmitFileHandler,
@@ -98,7 +99,7 @@ function ProfileForm({
 						onFileChangeHandler={onFileChangeHandler}
 						onSubmitFileHandler={submitFileHandler}
 						errorMessage={errorMessage}
-						error={error}
+						error={uploadError}
 						isLoading={isLoading}
 						disabled={false}
 					/>
@@ -148,6 +149,7 @@ ProfileForm.propTypes = {
 	updateProfile: PropTypes.func,
 	storeProfile: PropTypes.func,
 	error: PropTypes.bool,
+	uploadError: PropTypes.bool,
 	errorMessage: PropTypes.string,
 	onFileChangeHandler: PropTypes.func,
 	onSubmitFileHandler: PropTypes.func,

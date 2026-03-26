@@ -25,6 +25,7 @@ function AdminApp() {
 	const [datasets, setDatasets] = useState([]);
 	const [profile, setProfile] = useState(null);
 	const [error, setError] = useState(false);
+	const [uploadError, setUploadError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [createdModal, setCreatedModal] = useState(false);
@@ -62,6 +63,7 @@ function AdminApp() {
 		setStatus('update');
 		setProfile(nextProfile);
 		setError(false);
+		setUploadError(false);
 		setErrorMessage('');
 	};
 
@@ -148,6 +150,7 @@ function AdminApp() {
 		setSelectedFile(event.target.files[0]);
 		setIsLoading(false);
 		setError(false);
+		setUploadError(false);
 		setErrorMessage('');
 	};
 
@@ -182,7 +185,7 @@ function AdminApp() {
 							};
 							setStatus('update');
 						} else {
-							setError(true);
+							setUploadError(true);
 							setErrorMessage('The uploaded file cannot be read by the reader for this profile.');
 							setIsLoading(false);
 
@@ -207,19 +210,19 @@ function AdminApp() {
 					setProfile(nextProfile);
 					setSelectedFile(null);
 					setIsLoading(false);
-					setError(false);
+					setUploadError(false);
 					setErrorMessage('');
 				}
 				return true;
 			})
 			.catch(error => {
 				if (error.status === 413) {
-					setError(true);
+					setUploadError(true);
 					setErrorMessage('The uploaded file is too large.');
 					setIsLoading(false);
 				} else {
 					error.text().then(errorMessage => {
-						setError(true);
+						setUploadError(true);
 						setErrorMessage(JSON.parse(errorMessage).error);
 						setIsLoading(false);
 					})
@@ -260,7 +263,7 @@ function AdminApp() {
 					onFileChangeHandler={updateFile}
 					onSubmitFileHandler={handler}
 					errorMessage={errorMessage}
-					error={error}
+					error={uploadError}
 					isLoading={isLoading}
 					disabled={selectedFile === null}
 				/>
@@ -274,6 +277,7 @@ function AdminApp() {
 					datasets={datasets}
 					errorMessage={errorMessage}
 					error={error}
+					uploadError={uploadError}
 					updateProfile={updateProfile}
 					storeProfile={storeProfile}
 					onFileChangeHandler={updateFile}
