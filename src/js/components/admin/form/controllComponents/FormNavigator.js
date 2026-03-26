@@ -4,6 +4,7 @@ import {Tabs, Tab, Col, Card, Form, InputGroup} from "react-bootstrap";
 import OutputTables from "./DataTables";
 import {CheckIdentifier, MetadataIdentifier} from "./Identifier";
 import OntologyManager from "./Ontology";
+import SIunits from "./SIunits";
 import {getDataset} from "../../../../utils/profileUtils";
 
 const profileShape = PropTypes.shape({
@@ -116,6 +117,10 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
 
           <Tab eventKey="metadata" title="Metadata">
             <MetadataIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset}/>
+          </Tab>
+
+          <Tab eventKey="siUnits" title="SI Units">
+            <SIunits profile={profile}/>
           </Tab>
         </Tabs>
       </div>
