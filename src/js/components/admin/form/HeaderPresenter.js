@@ -9,7 +9,7 @@ const defaultRegex = '.+';
 const regexList = [integerRegex, floatRegex, emailRegex, defaultRegex];
 const seperatorList = ['\t', ';', ',']
 
-export default function FileHeaderPresenter({header, addIdentifier, updateRegex, profile, tableIndex}) {
+export default function FileHeaderPresenter({header, addIdentifier, updateRegex, profile, setProfile, tableIndex}) {
 	const [selection, setSelection] = useState(["", ""]);
 	const [selectionElement, setSelectionElement] = useState(null);
 	const [menuPos, setMenuPos] = useState(null);
@@ -197,9 +197,19 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
 
 	const useAsColumnHeader = (line) => {
 		const headers = line.split(seperator);
-		for (let i = 0; i < headers.length; i++) {
-			profile.data.tables[tableIndex].columns[i].name = headers[i];
-		}
+
+		const updatedProfile = {...profile};
+		updatedProfile.data = {...profile.data};
+		updatedProfile.data.tables = [...profile.data.tables];
+		updatedProfile.data.tables[tableIndex] = {
+			...profile.data.tables[tableIndex],
+			columns: profile.data.tables[tableIndex].columns.map((column, i) => ({
+				...column,
+				name: headers[i] ?? column.name,
+			})),
+		};
+
+		setProfile(updatedProfile);
 	};
 
 
@@ -281,5 +291,6 @@ FileHeaderPresenter.propTypes = {
 			tables: PropTypes.object,
 		})
 	}).isRequired,
+	setProfile: PropTypes.func.isRequired,
 	tableIndex: PropTypes.number.isRequired,
 };
