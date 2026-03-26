@@ -7,7 +7,6 @@ import ProfileListItem from './ProfileListItem'
 function ProfileList({
 											 profiles,
 											 updateProfile,
-											 replaceFile,
 											 deleteProfile,
 											 downloadProfile,
 											 isAdmin,
@@ -27,7 +26,6 @@ function ProfileList({
 					isDefaultProfile={profile.isDefaultProfile}
 					toggleDisableProfile={() => toggleDisableProfile(profile)}
 					updateProfile={() => updateProfile(profile)}
-					replaceFile={() => replaceFile(profile)}
 					deleteProfile={() => deleteProfile(profile)}
 					downloadProfile={() => downloadProfile(profile)}/>
 			))}

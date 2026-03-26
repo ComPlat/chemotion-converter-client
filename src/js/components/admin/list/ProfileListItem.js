@@ -1,13 +1,12 @@
 import React from "react"
 import PropTypes from 'prop-types';
-import {Button, ListGroup, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import {Button, ListGroup} from 'react-bootstrap';
 
 function ProfileListItem({
 													 id,
 													 title,
 													 description,
 													 updateProfile,
-													 replaceFile,
 													 deleteProfile,
 													 downloadProfile,
 													 isAdmin,
@@ -39,15 +38,6 @@ function ProfileListItem({
 					<Button variant="success" size="sm" disabled={!isAdmin}
 									onClick={downloadProfile}>Download</Button>
 					<Button variant="primary" size="sm" disabled={!isAdmin} onClick={updateProfile}>Edit</Button>
-					<OverlayTrigger
-						placement="top"
-						delay={{show: 250, hide: 400}}
-						overlay={<Tooltip id="replace-tooltip">
-							Replace input file
-						</Tooltip>}
-					>
-						<Button variant="warning" size="sm" disabled={!isAdmin} onClick={replaceFile}> Replace </Button>
-					</OverlayTrigger>
 					{!isDefaultProfile && <Button variant="danger" size="sm" disabled={!isAdmin}
 																				onClick={deleteProfile}>Delete</Button>}
 				</div>
@@ -64,7 +54,6 @@ ProfileListItem.propTypes = {
 	isDefaultProfile: PropTypes.bool,
 	toggleDisableProfile: PropTypes.func,
 	updateProfile: PropTypes.func,
-	replaceFile: PropTypes.func,
 	deleteProfile: PropTypes.func,
 	downloadProfile: PropTypes.func,
 	isAdmin: PropTypes.bool

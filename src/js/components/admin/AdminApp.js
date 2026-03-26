@@ -65,11 +65,6 @@ function AdminApp() {
 		setErrorMessage('');
 	};
 
-	const replaceFile = (profile) => {
-		setStatus('upload');
-		setProfile(profile);
-	}
-
 	const hideCreatedModal = () => {
 		setCreatedModal(false);
 	};
@@ -245,7 +240,6 @@ function AdminApp() {
 					profiles={profiles}
 					isAdmin
 					updateProfile={showUpdateView}
-					replaceFile={replaceFile}
 					deleteProfile={showDeleteModal}
 					downloadProfile={downloadProfile}
 					toggleDisableProfile={toggleDisableProfile}
