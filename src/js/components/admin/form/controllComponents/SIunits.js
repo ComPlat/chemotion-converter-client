@@ -19,6 +19,19 @@ const profileShape = PropTypes.shape({
       found: PropTypes.string
     }))
   }),
+  units: PropTypes.arrayOf(PropTypes.shape({
+    rowIndex: PropTypes.number,
+    base_unit: PropTypes.string,
+    conversion_factor: PropTypes.string,
+    found: PropTypes.string,
+    outputTableIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    inputColumn: PropTypes.shape({
+      tableIndex: PropTypes.number,
+      columnIndex: PropTypes.number
+    }),
+    axis: PropTypes.string,
+    unitMode: PropTypes.string
+  })),
   tables: PropTypes.arrayOf(PropTypes.shape({
     header: PropTypes.object,
     table: PropTypes.object
@@ -93,8 +106,67 @@ const updateAutomatedOperationDescription = (tableData, operationsKey) => {
   tableData[descriptionKey] = description;
 };
 
+const findStoredUnitConfig = (storedUnits, unit, unitIndex) => {
+  if (Array.isArray(storedUnits) === false) {
+    return null;
+  }
+
+  return storedUnits.find((entry) => (
+    entry.rowIndex === unitIndex
+    && entry.found === unit.found
+    && entry.base_unit === unit.base_unit
+    && entry.conversion_factor === unit.conversion_factor
+  )) || null;
+};
+
+const toRowConfig = (storedConfig) => {
+  if (storedConfig === null) {
+    return defaultRowConfig;
+  }
+
+  return {
+    outputTableIndex: storedConfig.outputTableIndex === null || storedConfig.outputTableIndex === undefined
+      ? ""
+      : String(storedConfig.outputTableIndex),
+    inputColumn: serializeColumnValue(storedConfig.inputColumn),
+    axis: storedConfig.axis === "Y" ? "Y" : "X",
+    unitMode: storedConfig.unitMode === "Base" ? "Base" : "Found"
+  };
+};
+
+const persistUnitConfig = (profileValue, unit, unitIndex, config) => {
+  const nextUnits = Array.isArray(profileValue.units) ? [...profileValue.units] : [];
+  const existingIndex = nextUnits.findIndex((entry) => (
+    entry.rowIndex === unitIndex
+    && entry.found === unit.found
+    && entry.base_unit === unit.base_unit
+    && entry.conversion_factor === unit.conversion_factor
+  ));
+  const parsedOutputTableIndex = Number.parseInt(config.outputTableIndex, 10);
+
+  const persistedConfig = {
+    rowIndex: unitIndex,
+    found: unit.found,
+    base_unit: unit.base_unit,
+    conversion_factor: unit.conversion_factor,
+    outputTableIndex: Number.isNaN(parsedOutputTableIndex) ? "" : parsedOutputTableIndex,
+    inputColumn: deserializeColumnValue(config.inputColumn),
+    axis: config.axis,
+    unitMode: config.unitMode
+  };
+
+  if (existingIndex === -1) {
+    nextUnits.push(persistedConfig);
+  } else {
+    nextUnits[existingIndex] = persistedConfig;
+  }
+
+  return nextUnits;
+};
+
 export default function SIunits({profile, setProfile}) {
   const units = profile?.data?.units ?? [];
+  const storedUnits = profile?.units ?? [];
   const inputColumns = getInputColumns(profile);
   const outputTables = profile?.tables ?? [];
   const [openRows, setOpenRows] = useState({});
@@ -108,21 +180,34 @@ export default function SIunits({profile, setProfile}) {
     }));
   };
 
-  const getRowConfig = (rowId) => rowConfigs[rowId] || defaultRowConfig;
+  const getRowConfig = (rowId, unit, unitIndex) => {
+    if (rowConfigs[rowId]) {
+      return rowConfigs[rowId];
+    }
 
-  const updateRowConfig = (rowId, key, value) => {
+    return toRowConfig(findStoredUnitConfig(storedUnits, unit, unitIndex));
+  };
+
+  const updateRowConfig = (rowId, unit, unitIndex, key, value) => {
+    const nextConfig = {
+      ...getRowConfig(rowId, unit, unitIndex),
+      [key]: value
+    };
+
     setRowConfigs((current) => ({
       ...current,
-      [rowId]: {
-        ...(current[rowId] || defaultRowConfig),
-        [key]: value
-      }
+      [rowId]: nextConfig
     }));
+
+    setProfile({
+      ...profile,
+      units: persistUnitConfig(profile, unit, unitIndex, nextConfig)
+    });
     setFeedback(null);
   };
 
-  const applyUnitAssignment = (unit, rowId) => {
-    const config = getRowConfig(rowId);
+  const applyUnitAssignment = (unit, unitIndex, rowId) => {
+    const config = getRowConfig(rowId, unit, unitIndex);
     const targetTableIndex = Number.parseInt(config.outputTableIndex, 10);
 
     if (Number.isNaN(targetTableIndex)) {
@@ -159,7 +244,8 @@ export default function SIunits({profile, setProfile}) {
 
     const nextProfile = {
       ...profile,
-      tables: [...outputTables]
+      tables: [...outputTables],
+      units: persistUnitConfig(profile, unit, unitIndex, config)
     };
     const currentTable = outputTables[targetTableIndex] || {};
     const nextTable = {
@@ -173,7 +259,7 @@ export default function SIunits({profile, setProfile}) {
     nextTable.header[axisConfig.unitsKey] = config.unitMode === "Base" ? unit.base_unit : unit.found;
 
     const filteredOperations = Array.isArray(nextTable.table[axisConfig.operationsKey])
-      ? nextTable.table[axisConfig.operationsKey].filter((operation) => operation.source !== "siUnits")
+      ? nextTable.table[axisConfig.operationsKey].filter((operation) => (operation.source === "siUnits" ? false : true))
       : [];
 
     if (config.unitMode === "Base") {
@@ -222,7 +308,7 @@ export default function SIunits({profile, setProfile}) {
               {units.map((unit, index) => {
                 const rowId = (unit.found || "unit") + "-" + index;
                 const isOpen = Boolean(openRows[rowId]);
-                const rowConfig = getRowConfig(rowId);
+                const rowConfig = getRowConfig(rowId, unit, index);
 
                 return (
                   <React.Fragment key={rowId}>
@@ -252,12 +338,12 @@ export default function SIunits({profile, setProfile}) {
                                   size="sm"
                                   placeholder="0"
                                   value={rowConfig.outputTableIndex}
-                                  onChange={(event) => updateRowConfig(rowId, "outputTableIndex", event.target.value)}
+                                  onChange={(event) => updateRowConfig(rowId, unit, index, "outputTableIndex", event.target.value)}
                                 />
                                 <Form.Select
                                   size="sm"
                                   value={rowConfig.inputColumn}
-                                  onChange={(event) => updateRowConfig(rowId, "inputColumn", event.target.value)}
+                                  onChange={(event) => updateRowConfig(rowId, unit, index, "inputColumn", event.target.value)}
                                 >
                                   <option value="">Select input column</option>
                                   {inputColumns.map((column) => (
@@ -275,7 +361,7 @@ export default function SIunits({profile, setProfile}) {
                               <Form.Select
                                 size="sm"
                                 value={rowConfig.axis}
-                                onChange={(event) => updateRowConfig(rowId, "axis", event.target.value)}
+                                onChange={(event) => updateRowConfig(rowId, unit, index, "axis", event.target.value)}
                               >
                                 <option value="X">X</option>
                                 <option value="Y">Y</option>
@@ -288,7 +374,7 @@ export default function SIunits({profile, setProfile}) {
                               <Form.Select
                                 size="sm"
                                 value={rowConfig.unitMode}
-                                onChange={(event) => updateRowConfig(rowId, "unitMode", event.target.value)}
+                                onChange={(event) => updateRowConfig(rowId, unit, index, "unitMode", event.target.value)}
                               >
                                 <option value="Found">Found</option>
                                 <option value="Base">Base</option>
@@ -300,7 +386,7 @@ export default function SIunits({profile, setProfile}) {
                               variant="secondary"
                               size="sm"
                               type="button"
-                              onClick={() => applyUnitAssignment(unit, rowId)}
+                              onClick={() => applyUnitAssignment(unit, index, rowId)}
                             >
                               Do
                             </Button>
