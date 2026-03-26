@@ -41,7 +41,7 @@ const profileShape = PropTypes.shape({
 function UnitAssignmentToggle({isOpen, onToggle}) {
   return (
     <Button
-      variant={isOpen ? "outline-danger" : "outline-success"}
+      variant={isOpen ? "outline-info" : "outline-success"}
       size="sm"
       onClick={onToggle}
       aria-expanded={isOpen}
@@ -54,6 +54,34 @@ function UnitAssignmentToggle({isOpen, onToggle}) {
 UnitAssignmentToggle.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired
+};
+
+function DeleteAssignmentButton({onClick}) {
+  return (
+    <Button
+      variant="outline-danger"
+      size="sm"
+      type="button"
+      onClick={onClick}
+      aria-label="Delete SI unit assignment"
+      title="Delete SI unit assignment"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M6.5 1h3l.5 1H13a.5.5 0 0 1 0 1h-.5l-.6 9.1A2 2 0 0 1 9.9 14H6.1a2 2 0 0 1-1.99-1.9L3.5 3H3a.5.5 0 0 1 0-1h3zM4.5 3l.6 9.03a1 1 0 0 0 1 .97h3.8a1 1 0 0 0 1-.97L11.5 3zm2 2a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5a.5.5 0 0 1 .5-.5m3 0a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5a.5.5 0 0 1 .5-.5" />
+      </svg>
+    </Button>
+  );
+}
+
+DeleteAssignmentButton.propTypes = {
+  onClick: PropTypes.func.isRequired
 };
 
 const defaultRowConfig = {
@@ -164,6 +192,17 @@ const persistUnitConfig = (profileValue, unit, unitIndex, config) => {
   return nextUnits;
 };
 
+const removeStoredUnitConfig = (profileValue, unit, unitIndex) => {
+  const nextUnits = Array.isArray(profileValue.units) ? [...profileValue.units] : [];
+
+  return nextUnits.filter((entry) => !(
+    entry.rowIndex === unitIndex
+    && entry.found === unit.found
+    && entry.base_unit === unit.base_unit
+    && entry.conversion_factor === unit.conversion_factor
+  ));
+};
+
 export default function SIunits({profile, setProfile}) {
   const units = profile?.data?.units ?? [];
   const storedUnits = profile?.units ?? [];
@@ -173,10 +212,10 @@ export default function SIunits({profile, setProfile}) {
   const [rowConfigs, setRowConfigs] = useState({});
   const [feedback, setFeedback] = useState(null);
 
-  const toggleRow = (rowId) => {
+  const toggleRow = (rowId, isOpen) => {
     setOpenRows((current) => ({
       ...current,
-      [rowId]: current[rowId] ? false : true
+      [rowId]: isOpen ? false : true
     }));
   };
 
@@ -203,6 +242,26 @@ export default function SIunits({profile, setProfile}) {
       ...profile,
       units: persistUnitConfig(profile, unit, unitIndex, nextConfig)
     });
+    setFeedback(null);
+  };
+
+  const deleteUnitAssignment = (unit, unitIndex, rowId) => {
+    setRowConfigs((current) => {
+      const nextConfigs = {...current};
+      delete nextConfigs[rowId];
+      return nextConfigs;
+    });
+
+    setOpenRows((current) => ({
+      ...current,
+      [rowId]: false
+    }));
+
+    setProfile({
+      ...profile,
+      units: removeStoredUnitConfig(profile, unit, unitIndex)
+    });
+
     setFeedback(null);
   };
 
@@ -307,7 +366,8 @@ export default function SIunits({profile, setProfile}) {
             <tbody>
               {units.map((unit, index) => {
                 const rowId = (unit.found || "unit") + "-" + index;
-                const isOpen = Boolean(openRows[rowId]);
+                const hasStoredConfig = findStoredUnitConfig(storedUnits, unit, index) !== null;
+                const isOpen = openRows[rowId] === undefined ? hasStoredConfig : Boolean(openRows[rowId]);
                 const rowConfig = getRowConfig(rowId, unit, index);
 
                 return (
@@ -319,7 +379,7 @@ export default function SIunits({profile, setProfile}) {
                       <td className="text-center align-middle">
                         <UnitAssignmentToggle
                           isOpen={isOpen}
-                          onToggle={() => toggleRow(rowId)}
+                          onToggle={() => toggleRow(rowId, isOpen)}
                         />
                       </td>
                     </tr>
@@ -381,15 +441,18 @@ export default function SIunits({profile, setProfile}) {
                               </Form.Select>
                             </Form.Group>
                           </td>
-                          <td className="align-bottom bg-light text-center">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              type="button"
-                              onClick={() => applyUnitAssignment(unit, index, rowId)}
-                            >
-                              Do
-                            </Button>
+                          <td className="align-top bg-light text-center">
+                            <div className="d-flex flex-column align-items-center gap-2">
+                              <DeleteAssignmentButton onClick={() => deleteUnitAssignment(unit, index, rowId)} />
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                type="button"
+                                onClick={() => applyUnitAssignment(unit, index, rowId)}
+                              >
+                                Do
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                         {feedback?.rowId === rowId && (
