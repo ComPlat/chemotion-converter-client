@@ -17,8 +17,8 @@ const ExtendedHeaderInput = ({ optionKey, value, values, updateHeader }) => {
       <Col sm={8}>
         <CreatableSelect
           options={options}
-          defaultValue={options[idx]}
-          onChange={(v) => { updateHeader(optionKey, v.value) }} />
+          value={options[idx] || null}
+          onChange={(v) => { updateHeader(optionKey, v?.value || "") }} />
       </Col>
     </Form.Group>
   )

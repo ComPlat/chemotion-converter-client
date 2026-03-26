@@ -120,7 +120,7 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
           </Tab>
 
           <Tab eventKey="siUnits" title="SI Units">
-            <SIunits profile={profile}/>
+            <SIunits profile={profile} setProfile={setProfile}/>
           </Tab>
         </Tabs>
       </div>
