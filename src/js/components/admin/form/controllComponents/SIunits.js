@@ -11,6 +11,8 @@ const TYPE_MAPPING = {
   value: "Scalar value"
 };
 
+const SI_DESCRIPTION_PREFIX = "[SI Units]";
+
 const profileShape = PropTypes.shape({
   data: PropTypes.shape({
     units: PropTypes.arrayOf(PropTypes.shape({
@@ -132,6 +134,40 @@ const updateAutomatedOperationDescription = (tableData, operationsKey) => {
   }
 
   tableData[descriptionKey] = description;
+};
+
+const buildSiUnitsDescription = (unit, config, targetTableIndex) => {
+  const axisLabel = config.axis === "X" ? "X values" : "Y values";
+
+  if (config.unitMode === "Base") {
+    return `${SI_DESCRIPTION_PREFIX} For Output Table #${targetTableIndex} ${axisLabel}, the found unit "${unit.found}" from the SI Units table is converted to the base unit "${unit.base_unit}" using conversion factor ${unit.conversion_factor}.`;
+  }
+
+  return `${SI_DESCRIPTION_PREFIX} For Output Table #${targetTableIndex} ${axisLabel}, the found unit "${unit.found}" from the SI Units table is used directly as the output unit without conversion.`;
+};
+
+const buildSiUnitsAutoText = (unit, config, targetTableIndex) => {
+  const axisLabel = config.axis === "X" ? "X values" : "Y values";
+
+  if (config.unitMode === "Base") {
+    return `${SI_DESCRIPTION_PREFIX} Output Table #${targetTableIndex} ${axisLabel} are configured from the SI Units table.`;
+  }
+
+  return `${SI_DESCRIPTION_PREFIX} Output Table #${targetTableIndex} ${axisLabel} use the found unit "${unit.found}" from the SI Units table.`;
+};
+
+const mergeSiUnitsDescription = (currentDescription, nextDescription) => {
+  const cleanedDescription = (currentDescription || "")
+    .split("\n")
+    .filter((line) => line.trim().startsWith(SI_DESCRIPTION_PREFIX) === false)
+    .join("\n")
+    .trim();
+
+  if (cleanedDescription === "") {
+    return nextDescription;
+  }
+
+  return cleanedDescription + "\n" + nextDescription;
 };
 
 const findStoredUnitConfig = (storedUnits, unit, unitIndex) => {
@@ -337,6 +373,18 @@ export default function SIunits({profile, setProfile}) {
     }
 
     updateAutomatedOperationDescription(nextTable.table, axisConfig.operationsKey);
+
+    const descriptionKey = axisConfig.operationsKey + "Description";
+    const description = nextTable.table[descriptionKey] || ["", ""];
+    description[1] = mergeSiUnitsDescription(
+      description[1],
+      buildSiUnitsDescription(unit, config, targetTableIndex)
+    );
+    if (description[0] === "") {
+      description[0] = buildSiUnitsAutoText(unit, config, targetTableIndex);
+    }
+    nextTable.table[descriptionKey] = description;
+
     setProfile(nextProfile);
     setFeedback({
       rowId,
