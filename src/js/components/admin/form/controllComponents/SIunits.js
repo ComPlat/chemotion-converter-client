@@ -22,6 +22,7 @@ const profileShape = PropTypes.shape({
     }))
   }),
   units: PropTypes.arrayOf(PropTypes.shape({
+    assignmentId: PropTypes.string,
     rowIndex: PropTypes.number,
     base_unit: PropTypes.string,
     conversion_factor: PropTypes.string,
@@ -86,12 +87,41 @@ DeleteAssignmentButton.propTypes = {
   onClick: PropTypes.func.isRequired
 };
 
-const defaultRowConfig = {
+function AddAssignmentButton({onClick}) {
+  return (
+    <Button
+      variant="outline-success"
+      size="sm"
+      type="button"
+      onClick={onClick}
+      aria-label="Add SI unit assignment"
+      title="Add SI unit assignment"
+    >
+      <b>+</b>
+    </Button>
+  );
+}
+
+AddAssignmentButton.propTypes = {
+  onClick: PropTypes.func.isRequired
+};
+
+const defaultAssignmentConfig = {
+  assignmentId: "",
   outputTableIndex: "",
   inputColumn: "",
   axis: "X",
   unitMode: "Found"
 };
+
+const createAssignmentId = () => (
+  "assignment-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8)
+);
+
+const createAssignmentConfig = (assignmentId = createAssignmentId()) => ({
+  ...defaultAssignmentConfig,
+  assignmentId
+});
 
 const serializeColumnValue = (column) => {
   if (column === null || column === undefined) {
@@ -119,6 +149,13 @@ const deserializeColumnValue = (value) => {
     columnIndex
   };
 };
+
+const isSameUnitEntry = (entry, unit, unitIndex) => (
+  entry.rowIndex === unitIndex
+  && entry.found === unit.found
+  && entry.base_unit === unit.base_unit
+  && entry.conversion_factor === unit.conversion_factor
+);
 
 const updateAutomatedOperationDescription = (tableData, operationsKey) => {
   const descriptionKey = operationsKey + "Description";
@@ -170,82 +207,81 @@ const mergeSiUnitsDescription = (currentDescription, nextDescription) => {
   return cleanedDescription + "\n" + nextDescription;
 };
 
-const findStoredUnitConfig = (storedUnits, unit, unitIndex) => {
+const normalizeStoredUnits = (storedUnits) => {
   if (Array.isArray(storedUnits) === false) {
-    return null;
+    return [];
   }
 
-  return storedUnits.find((entry) => (
-    entry.rowIndex === unitIndex
-    && entry.found === unit.found
-    && entry.base_unit === unit.base_unit
-    && entry.conversion_factor === unit.conversion_factor
-  )) || null;
+  const counters = {};
+
+  return storedUnits.map((entry) => {
+    if (entry.assignmentId) {
+      return entry;
+    }
+
+    const key = [
+      entry.rowIndex,
+      entry.found,
+      entry.base_unit,
+      entry.conversion_factor
+    ].join("|");
+    const index = counters[key] || 0;
+    counters[key] = index + 1;
+
+    return {
+      ...entry,
+      assignmentId: `legacy-${key}-${index}`
+    };
+  });
 };
 
-const toRowConfig = (storedConfig) => {
-  if (storedConfig === null) {
-    return defaultRowConfig;
-  }
+const normalizeStoredAssignment = (entry) => ({
+  assignmentId: entry.assignmentId,
+  outputTableIndex: entry.outputTableIndex === null || entry.outputTableIndex === undefined
+    ? ""
+    : String(entry.outputTableIndex),
+  inputColumn: serializeColumnValue(entry.inputColumn),
+  axis: entry.axis === "Y" ? "Y" : "X",
+  unitMode: entry.unitMode === "Base" ? "Base" : "Found"
+});
+
+const getStoredAssignments = (storedUnits, unit, unitIndex) => {
+  return storedUnits
+    .filter((entry) => isSameUnitEntry(entry, unit, unitIndex))
+    .map((entry) => normalizeStoredAssignment(entry));
+};
+
+const toPersistedAssignment = (unit, unitIndex, assignment) => {
+  const parsedOutputTableIndex = Number.parseInt(assignment.outputTableIndex, 10);
 
   return {
-    outputTableIndex: storedConfig.outputTableIndex === null || storedConfig.outputTableIndex === undefined
-      ? ""
-      : String(storedConfig.outputTableIndex),
-    inputColumn: serializeColumnValue(storedConfig.inputColumn),
-    axis: storedConfig.axis === "Y" ? "Y" : "X",
-    unitMode: storedConfig.unitMode === "Base" ? "Base" : "Found"
-  };
-};
-
-const persistUnitConfig = (profileValue, unit, unitIndex, config) => {
-  const nextUnits = Array.isArray(profileValue.units) ? [...profileValue.units] : [];
-  const existingIndex = nextUnits.findIndex((entry) => (
-    entry.rowIndex === unitIndex
-    && entry.found === unit.found
-    && entry.base_unit === unit.base_unit
-    && entry.conversion_factor === unit.conversion_factor
-  ));
-  const parsedOutputTableIndex = Number.parseInt(config.outputTableIndex, 10);
-
-  const persistedConfig = {
+    assignmentId: assignment.assignmentId,
     rowIndex: unitIndex,
     found: unit.found,
     base_unit: unit.base_unit,
     conversion_factor: unit.conversion_factor,
     outputTableIndex: Number.isNaN(parsedOutputTableIndex) ? "" : parsedOutputTableIndex,
-    inputColumn: deserializeColumnValue(config.inputColumn),
-    axis: config.axis,
-    unitMode: config.unitMode
+    inputColumn: deserializeColumnValue(assignment.inputColumn),
+    axis: assignment.axis,
+    unitMode: assignment.unitMode
   };
-
-  if (existingIndex === -1) {
-    nextUnits.push(persistedConfig);
-  } else {
-    nextUnits[existingIndex] = persistedConfig;
-  }
-
-  return nextUnits;
 };
 
-const removeStoredUnitConfig = (profileValue, unit, unitIndex) => {
-  const nextUnits = Array.isArray(profileValue.units) ? [...profileValue.units] : [];
+const replaceStoredAssignments = (profileValue, unit, unitIndex, assignments) => {
+  const normalizedUnits = normalizeStoredUnits(profileValue.units);
+  const remainingUnits = normalizedUnits.filter((entry) => isSameUnitEntry(entry, unit, unitIndex) === false);
+  const persistedAssignments = assignments.map((assignment) => toPersistedAssignment(unit, unitIndex, assignment));
 
-  return nextUnits.filter((entry) => !(
-    entry.rowIndex === unitIndex
-    && entry.found === unit.found
-    && entry.base_unit === unit.base_unit
-    && entry.conversion_factor === unit.conversion_factor
-  ));
+  return remainingUnits.concat(persistedAssignments);
 };
 
 export default function SIunits({profile, setProfile}) {
   const units = profile?.data?.units ?? [];
-  const storedUnits = profile?.units ?? [];
+  const storedUnits = normalizeStoredUnits(profile?.units ?? []);
   const inputColumns = getInputColumns(profile);
   const outputTables = profile?.tables ?? [];
   const [openRows, setOpenRows] = useState({});
-  const [rowConfigs, setRowConfigs] = useState({});
+  const [rowAssignments, setRowAssignments] = useState({});
   const [feedback, setFeedback] = useState(null);
 
   const toggleRow = (rowId, isOpen) => {
@@ -255,59 +291,102 @@ export default function SIunits({profile, setProfile}) {
     }));
   };
 
-  const getRowConfig = (rowId, unit, unitIndex) => {
-    if (rowConfigs[rowId]) {
-      return rowConfigs[rowId];
+  const getAssignments = (rowId, unit, unitIndex) => {
+    if (rowAssignments[rowId]) {
+      return rowAssignments[rowId];
     }
 
-    return toRowConfig(findStoredUnitConfig(storedUnits, unit, unitIndex));
+    const storedAssignments = getStoredAssignments(storedUnits, unit, unitIndex);
+    if (storedAssignments.length > 0) {
+      return storedAssignments;
+    }
+
+    return [createAssignmentConfig(`draft-${unitIndex}-0`)];
   };
 
-  const updateRowConfig = (rowId, unit, unitIndex, key, value) => {
-    const nextConfig = {
-      ...getRowConfig(rowId, unit, unitIndex),
-      [key]: value
-    };
-
-    setRowConfigs((current) => ({
+  const setAssignmentsForRow = (rowId, assignments) => {
+    setRowAssignments((current) => ({
       ...current,
-      [rowId]: nextConfig
+      [rowId]: assignments
     }));
+  };
 
+  const persistAssignmentsForRow = (unit, unitIndex, assignments) => {
+    return replaceStoredAssignments(profile, unit, unitIndex, assignments);
+  };
+
+  const updateAssignmentConfig = (rowId, unit, unitIndex, assignmentId, key, value) => {
+    const nextAssignments = getAssignments(rowId, unit, unitIndex).map((assignment) => {
+      if (assignment.assignmentId !== assignmentId) {
+        return assignment;
+      }
+
+      return {
+        ...assignment,
+        [key]: value
+      };
+    });
+
+    setAssignmentsForRow(rowId, nextAssignments);
     setProfile({
       ...profile,
-      units: persistUnitConfig(profile, unit, unitIndex, nextConfig)
+      units: persistAssignmentsForRow(unit, unitIndex, nextAssignments)
     });
     setFeedback(null);
   };
 
-  const deleteUnitAssignment = (unit, unitIndex, rowId) => {
-    setRowConfigs((current) => {
-      const nextConfigs = {...current};
-      delete nextConfigs[rowId];
-      return nextConfigs;
-    });
+  const addAssignment = (rowId, unit, unitIndex) => {
+    const nextAssignments = [
+      ...getAssignments(rowId, unit, unitIndex),
+      createAssignmentConfig()
+    ];
 
+    setAssignmentsForRow(rowId, nextAssignments);
     setOpenRows((current) => ({
       ...current,
-      [rowId]: false
+      [rowId]: true
     }));
-
     setProfile({
       ...profile,
-      units: removeStoredUnitConfig(profile, unit, unitIndex)
+      units: persistAssignmentsForRow(unit, unitIndex, nextAssignments)
     });
-
     setFeedback(null);
   };
 
-  const applyUnitAssignment = (unit, unitIndex, rowId) => {
-    const config = getRowConfig(rowId, unit, unitIndex);
-    const targetTableIndex = Number.parseInt(config.outputTableIndex, 10);
+  const deleteAssignment = (rowId, unit, unitIndex, assignmentId) => {
+    const remainingAssignments = getAssignments(rowId, unit, unitIndex)
+      .filter((assignment) => assignment.assignmentId !== assignmentId);
+
+    if (remainingAssignments.length === 0) {
+      setRowAssignments((current) => {
+        const nextAssignments = {...current};
+        delete nextAssignments[rowId];
+        return nextAssignments;
+      });
+      setOpenRows((current) => ({
+        ...current,
+        [rowId]: false
+      }));
+    } else {
+      setAssignmentsForRow(rowId, remainingAssignments);
+    }
+
+    setProfile({
+      ...profile,
+      units: persistAssignmentsForRow(unit, unitIndex, remainingAssignments)
+    });
+    setFeedback(null);
+  };
+
+  const applyAssignment = (rowId, unit, unitIndex, assignmentId) => {
+    const assignments = getAssignments(rowId, unit, unitIndex);
+    const assignmentConfig = assignments.find((assignment) => assignment.assignmentId === assignmentId);
+    const targetTableIndex = Number.parseInt(assignmentConfig.outputTableIndex, 10);
 
     if (Number.isNaN(targetTableIndex)) {
       setFeedback({
         rowId,
+        assignmentId,
         variant: "danger",
         message: "Please enter an output table index."
       });
@@ -317,30 +396,32 @@ export default function SIunits({profile, setProfile}) {
     if (targetTableIndex < 0 || targetTableIndex >= outputTables.length) {
       setFeedback({
         rowId,
+        assignmentId,
         variant: "danger",
         message: "Output table #" + targetTableIndex + " does not exist."
       });
       return;
     }
 
-    const selectedColumn = deserializeColumnValue(config.inputColumn);
+    const selectedColumn = deserializeColumnValue(assignmentConfig.inputColumn);
     if (selectedColumn === null) {
       setFeedback({
         rowId,
+        assignmentId,
         variant: "danger",
         message: "Please select an input column."
       });
       return;
     }
 
-    const axisConfig = config.axis === "X"
+    const axisConfig = assignmentConfig.axis === "X"
       ? {columnKey: "xColumn", operationsKey: "xOperations", unitsKey: "XUNITS"}
       : {columnKey: "yColumn", operationsKey: "yOperations", unitsKey: "YUNITS"};
 
     const nextProfile = {
       ...profile,
       tables: [...outputTables],
-      units: persistUnitConfig(profile, unit, unitIndex, config)
+      units: persistAssignmentsForRow(unit, unitIndex, assignments)
     };
     const currentTable = outputTables[targetTableIndex] || {};
     const nextTable = {
@@ -351,13 +432,13 @@ export default function SIunits({profile, setProfile}) {
     nextProfile.tables[targetTableIndex] = nextTable;
 
     nextTable.table[axisConfig.columnKey] = selectedColumn;
-    nextTable.header[axisConfig.unitsKey] = config.unitMode === "Base" ? unit.base_unit : unit.found;
+    nextTable.header[axisConfig.unitsKey] = assignmentConfig.unitMode === "Base" ? unit.base_unit : unit.found;
 
     const filteredOperations = Array.isArray(nextTable.table[axisConfig.operationsKey])
       ? nextTable.table[axisConfig.operationsKey].filter((operation) => (operation.source === "siUnits" ? false : true))
       : [];
 
-    if (config.unitMode === "Base") {
+    if (assignmentConfig.unitMode === "Base") {
       filteredOperations.push({
         type: "value",
         operator: "*",
@@ -378,16 +459,17 @@ export default function SIunits({profile, setProfile}) {
     const description = nextTable.table[descriptionKey] || ["", ""];
     description[1] = mergeSiUnitsDescription(
       description[1],
-      buildSiUnitsDescription(unit, config, targetTableIndex)
+      buildSiUnitsDescription(unit, assignmentConfig, targetTableIndex)
     );
     if (description[0] === "") {
-      description[0] = buildSiUnitsAutoText(unit, config, targetTableIndex);
+      description[0] = buildSiUnitsAutoText(unit, assignmentConfig, targetTableIndex);
     }
     nextTable.table[descriptionKey] = description;
 
     setProfile(nextProfile);
     setFeedback({
       rowId,
+      assignmentId,
       variant: "success",
       message: "Output table #" + targetTableIndex + " updated."
     });
@@ -412,11 +494,11 @@ export default function SIunits({profile, setProfile}) {
               </tr>
             </thead>
             <tbody>
-              {units.map((unit, index) => {
-                const rowId = (unit.found || "unit") + "-" + index;
-                const hasStoredConfig = findStoredUnitConfig(storedUnits, unit, index) !== null;
-                const isOpen = openRows[rowId] === undefined ? hasStoredConfig : Boolean(openRows[rowId]);
-                const rowConfig = getRowConfig(rowId, unit, index);
+              {units.map((unit, unitIndex) => {
+                const rowId = (unit.found || "unit") + "-" + unitIndex;
+                const assignments = getAssignments(rowId, unit, unitIndex);
+                const hasStoredAssignments = getStoredAssignments(storedUnits, unit, unitIndex).length > 0;
+                const isOpen = openRows[rowId] === undefined ? hasStoredAssignments : Boolean(openRows[rowId]);
 
                 return (
                   <React.Fragment key={rowId}>
@@ -431,8 +513,8 @@ export default function SIunits({profile, setProfile}) {
                         />
                       </td>
                     </tr>
-                    {isOpen && (
-                      <>
+                    {isOpen && assignments.map((assignment) => (
+                      <React.Fragment key={assignment.assignmentId}>
                         <tr>
                           <td className="align-top bg-light">
                             <Form.Group className="mb-0">
@@ -440,18 +522,38 @@ export default function SIunits({profile, setProfile}) {
                                 Assign to Output Table # using Input Column
                               </Form.Label>
                               <div className="d-flex gap-2 align-items-start">
+                                <DeleteAssignmentButton onClick={() => deleteAssignment(
+                                  rowId,
+                                  unit,
+                                  unitIndex,
+                                  assignment.assignmentId
+                                )} />
                                 <Form.Control
                                   type="number"
                                   min="0"
                                   size="sm"
                                   placeholder="0"
-                                  value={rowConfig.outputTableIndex}
-                                  onChange={(event) => updateRowConfig(rowId, unit, index, "outputTableIndex", event.target.value)}
+                                  value={assignment.outputTableIndex}
+                                  onChange={(event) => updateAssignmentConfig(
+                                    rowId,
+                                    unit,
+                                    unitIndex,
+                                    assignment.assignmentId,
+                                    "outputTableIndex",
+                                    event.target.value
+                                  )}
                                 />
                                 <Form.Select
                                   size="sm"
-                                  value={rowConfig.inputColumn}
-                                  onChange={(event) => updateRowConfig(rowId, unit, index, "inputColumn", event.target.value)}
+                                  value={assignment.inputColumn}
+                                  onChange={(event) => updateAssignmentConfig(
+                                    rowId,
+                                    unit,
+                                    unitIndex,
+                                    assignment.assignmentId,
+                                    "inputColumn",
+                                    event.target.value
+                                  )}
                                 >
                                   <option value="">Select input column</option>
                                   {inputColumns.map((column) => (
@@ -468,8 +570,15 @@ export default function SIunits({profile, setProfile}) {
                               <Form.Label className="small text-muted mb-1">For</Form.Label>
                               <Form.Select
                                 size="sm"
-                                value={rowConfig.axis}
-                                onChange={(event) => updateRowConfig(rowId, unit, index, "axis", event.target.value)}
+                                value={assignment.axis}
+                                onChange={(event) => updateAssignmentConfig(
+                                  rowId,
+                                  unit,
+                                  unitIndex,
+                                  assignment.assignmentId,
+                                  "axis",
+                                  event.target.value
+                                )}
                               >
                                 <option value="X">X</option>
                                 <option value="Y">Y</option>
@@ -481,8 +590,15 @@ export default function SIunits({profile, setProfile}) {
                               <Form.Label className="small text-muted mb-1">As</Form.Label>
                               <Form.Select
                                 size="sm"
-                                value={rowConfig.unitMode}
-                                onChange={(event) => updateRowConfig(rowId, unit, index, "unitMode", event.target.value)}
+                                value={assignment.unitMode}
+                                onChange={(event) => updateAssignmentConfig(
+                                  rowId,
+                                  unit,
+                                  unitIndex,
+                                  assignment.assignmentId,
+                                  "unitMode",
+                                  event.target.value
+                                )}
                               >
                                 <option value="Found">Found</option>
                                 <option value="Base">Base</option>
@@ -491,19 +607,24 @@ export default function SIunits({profile, setProfile}) {
                           </td>
                           <td className="align-top bg-light text-center">
                             <div className="d-flex flex-column align-items-center gap-2">
-                              <DeleteAssignmentButton onClick={() => deleteUnitAssignment(unit, index, rowId)} />
+                              <AddAssignmentButton onClick={() => addAssignment(rowId, unit, unitIndex)} />
                               <Button
                                 variant="secondary"
                                 size="sm"
                                 type="button"
-                                onClick={() => applyUnitAssignment(unit, index, rowId)}
+                                onClick={() => applyAssignment(
+                                  rowId,
+                                  unit,
+                                  unitIndex,
+                                  assignment.assignmentId
+                                )}
                               >
                                 Do
                               </Button>
                             </div>
                           </td>
                         </tr>
-                        {feedback?.rowId === rowId && (
+                        {feedback?.rowId === rowId && feedback?.assignmentId === assignment.assignmentId && (
                           <tr>
                             <td colSpan={4} className="bg-light border-top-0">
                               <Alert variant={feedback.variant} className="mb-0 py-2">
@@ -512,8 +633,8 @@ export default function SIunits({profile, setProfile}) {
                             </td>
                           </tr>
                         )}
-                      </>
-                    )}
+                      </React.Fragment>
+                    ))}
                   </React.Fragment>
                 );
               })}
