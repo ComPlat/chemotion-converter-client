@@ -18,7 +18,8 @@ const profileShape = PropTypes.shape({
     units: PropTypes.arrayOf(PropTypes.shape({
       base_unit: PropTypes.string,
       conversion_factor: PropTypes.string,
-      found: PropTypes.string
+      found: PropTypes.string,
+      uuid: PropTypes.string
     }))
   }),
   units: PropTypes.arrayOf(PropTypes.shape({
@@ -27,6 +28,7 @@ const profileShape = PropTypes.shape({
     base_unit: PropTypes.string,
     conversion_factor: PropTypes.string,
     found: PropTypes.string,
+    uuid: PropTypes.string,
     outputTableIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     inputColumn: PropTypes.shape({
       tableIndex: PropTypes.number,
@@ -123,6 +125,8 @@ const createAssignmentConfig = (assignmentId = createAssignmentId()) => ({
   assignmentId
 });
 
+const hasUuid = (value) => typeof value === "string" && value.trim() !== "";
+
 const serializeColumnValue = (column) => {
   if (column === null || column === undefined) {
     return "";
@@ -150,12 +154,29 @@ const deserializeColumnValue = (value) => {
   };
 };
 
-const isSameUnitEntry = (entry, unit, unitIndex) => (
-  entry.rowIndex === unitIndex
-  && entry.found === unit.found
-  && entry.base_unit === unit.base_unit
-  && entry.conversion_factor === unit.conversion_factor
-);
+const unitHasUuidCollision = (allUnits, unit) => {
+  if (hasUuid(unit?.uuid) === false) {
+    return false;
+  }
+
+  return allUnits.filter((candidate) => candidate.uuid === unit.uuid).length > 1;
+};
+
+const isSameUnitEntry = (entry, unit, unitIndex, allUnits) => {
+  if (hasUuid(unit?.uuid) && hasUuid(entry?.uuid)) {
+    if (entry.uuid !== unit.uuid) {
+      return false;
+    }
+
+    if (unitHasUuidCollision(allUnits, unit)) {
+      return entry.rowIndex === unitIndex;
+    }
+
+    return true;
+  }
+
+  return entry.rowIndex === unitIndex;
+};
 
 const updateAutomatedOperationDescription = (tableData, operationsKey) => {
   const descriptionKey = operationsKey + "Description";
@@ -245,16 +266,15 @@ const normalizeStoredAssignment = (entry) => ({
   unitMode: entry.unitMode === "Base" ? "Base" : "Found"
 });
 
-const getStoredAssignments = (storedUnits, unit, unitIndex) => {
+const getStoredAssignments = (storedUnits, allUnits, unit, unitIndex) => {
   return storedUnits
-    .filter((entry) => isSameUnitEntry(entry, unit, unitIndex))
+    .filter((entry) => isSameUnitEntry(entry, unit, unitIndex, allUnits))
     .map((entry) => normalizeStoredAssignment(entry));
 };
 
 const toPersistedAssignment = (unit, unitIndex, assignment) => {
   const parsedOutputTableIndex = Number.parseInt(assignment.outputTableIndex, 10);
-
-  return {
+  const persistedAssignment = {
     assignmentId: assignment.assignmentId,
     rowIndex: unitIndex,
     found: unit.found,
@@ -265,11 +285,17 @@ const toPersistedAssignment = (unit, unitIndex, assignment) => {
     axis: assignment.axis,
     unitMode: assignment.unitMode
   };
+
+  if (hasUuid(unit?.uuid)) {
+    persistedAssignment.uuid = unit.uuid;
+  }
+
+  return persistedAssignment;
 };
 
-const replaceStoredAssignments = (profileValue, unit, unitIndex, assignments) => {
+const replaceStoredAssignments = (profileValue, allUnits, unit, unitIndex, assignments) => {
   const normalizedUnits = normalizeStoredUnits(profileValue.units);
-  const remainingUnits = normalizedUnits.filter((entry) => isSameUnitEntry(entry, unit, unitIndex) === false);
+  const remainingUnits = normalizedUnits.filter((entry) => isSameUnitEntry(entry, unit, unitIndex, allUnits) === false);
   const persistedAssignments = assignments.map((assignment) => toPersistedAssignment(unit, unitIndex, assignment));
 
   return remainingUnits.concat(persistedAssignments);
@@ -296,7 +322,7 @@ export default function SIunits({profile, setProfile}) {
       return rowAssignments[rowId];
     }
 
-    const storedAssignments = getStoredAssignments(storedUnits, unit, unitIndex);
+    const storedAssignments = getStoredAssignments(storedUnits, units, unit, unitIndex);
     if (storedAssignments.length > 0) {
       return storedAssignments;
     }
@@ -312,7 +338,7 @@ export default function SIunits({profile, setProfile}) {
   };
 
   const persistAssignmentsForRow = (unit, unitIndex, assignments) => {
-    return replaceStoredAssignments(profile, unit, unitIndex, assignments);
+    return replaceStoredAssignments(profile, units, unit, unitIndex, assignments);
   };
 
   const updateAssignmentConfig = (rowId, unit, unitIndex, assignmentId, key, value) => {
@@ -497,7 +523,7 @@ export default function SIunits({profile, setProfile}) {
               {units.map((unit, unitIndex) => {
                 const rowId = (unit.found || "unit") + "-" + unitIndex;
                 const assignments = getAssignments(rowId, unit, unitIndex);
-                const hasStoredAssignments = getStoredAssignments(storedUnits, unit, unitIndex).length > 0;
+                const hasStoredAssignments = getStoredAssignments(storedUnits, units, unit, unitIndex).length > 0;
                 const isOpen = openRows[rowId] === undefined ? hasStoredAssignments : Boolean(openRows[rowId]);
 
                 return (
