@@ -200,12 +200,13 @@ function AdminApp() {
 							data: data,
 							subjects: [],
 							predicates: [],
-							datatypes: [],
-							subjectInstances: {},
-							rootOntology: GENERIC_PREDICATE
-						}
-						setStatus('create');
-					}
+							objects: [],
+                        datatypes: [],
+                        subjectInstances: {},
+                        rootOntology: GENERIC_PREDICATE
+                    }
+
+                    setStatus('create');}
 
 					setProfile(nextProfile);
 					setSelectedFile(null);
