@@ -1,4 +1,4 @@
-import {Card, Col, Row, Nav, NavDropdown, OverlayTrigger, Popover} from "react-bootstrap";
+import {Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
 import PropTypes from 'prop-types';
 import React, {useState} from "react";
 import FileHeaderPresenter from "../HeaderPresenter";
@@ -32,7 +32,8 @@ function FileHeader({setActiveTabKey, header, tableIndex, profile, setProfile}) 
     addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
   }} header={header} updateRegex={(value) => {
     return updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});
-  }}></FileHeaderPresenter>
+  }} profile={profile} setProfile={setProfile} tableIndex={tableIndex}
+  ></FileHeaderPresenter>
 }
 
 function DataGrid({table}) {
@@ -188,7 +189,7 @@ function InputTables({profile, setProfile, setActiveTabKey}) {
     </NavDropdown.Item>
   )));
 
-  // 🔁 state
+  // state
   const [activeKey, setActiveKey] = useState(0);
 
   return (<Col md={7}>
