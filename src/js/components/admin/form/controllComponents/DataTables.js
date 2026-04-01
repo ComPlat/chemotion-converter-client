@@ -1,16 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Select from 'react-select';
-import {Card, Form, InputGroup, Button, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {Button, Card, Form, InputGroup, OverlayTrigger, Tooltip} from "react-bootstrap";
 import isEqual from "lodash/isEqual";
 import {v4 as uuidv4} from "uuid";
 import {
   getDistInputColumns,
   getFileMetadataOptions,
-  getInputColumns, getInputTables,
+  getInputColumns,
+  getInputTables,
   getTableMetadataOptions
 } from "../../../../utils/profileUtils";
-import {initIdentifier, additionalInfo} from "../../../../utils/identifierUtils";
+import {additionalInfo, initIdentifier} from "../../../../utils/identifierUtils";
 import TableForm from "../TableForm";
 
 const profileShape = PropTypes.shape({
@@ -355,6 +356,7 @@ export default function OutputTables({profile, setProfile, options}) {
                   className="loop-select-container"
                   classNamePrefix="loop-select"
                   menuPortalTarget={document.body}
+                  menuPosition="fixed"
                   menuShouldBlockScroll={false}
                   menuShouldScrollIntoView={false}
                   openMenuOnScroll={false}
@@ -382,6 +384,7 @@ export default function OutputTables({profile, setProfile, options}) {
                   className="loop-select-container"
                   classNamePrefix="loop-select"
                   menuPortalTarget={document.body}
+                  menuPosition="fixed"
                   menuShouldBlockScroll={false}
                   menuShouldScrollIntoView={false}
                   openMenuOnScroll={false}
