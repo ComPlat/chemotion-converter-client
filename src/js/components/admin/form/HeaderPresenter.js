@@ -1,5 +1,6 @@
-import React, {useState, useEffect, useRef} from "react";
-import {Alert, Button} from "react-bootstrap";
+import React, {useEffect, useRef, useState} from "react";
+import PropTypes from "prop-types";
+import {Alert, Button, ButtonGroup, Container, Form, Modal, OverlayTrigger, Table, Tooltip} from "react-bootstrap";
 
 const integerRegex = '[+-]?\\d+';
 const floatRegex = '[+-]?(?:\\d*[,.]\\d+|\\d+)(?:[eE][+-]?\\d+)?';
@@ -7,11 +8,14 @@ const emailRegex = '[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}';
 const defaultRegex = '.+';
 const regexList = [integerRegex, floatRegex, emailRegex, defaultRegex];
 
-export default function FileHeaderPresenter({header, addIdentifier, updateRegex}) {
+export default function FileHeaderPresenter({header, addIdentifier, updateRegex, profile, setProfile, tableIndex}) {
   const [selection, setSelection] = useState(["", ""]);
   const [selectionElement, setSelectionElement] = useState(null);
   const [menuPos, setMenuPos] = useState(null);
   const [menuErrorMsg, setMenuErrorMsg] = useState(null);
+  const [activeLine, setActiveLine] = useState(null);
+  const [showTableHeaderModal, setShowTableHeaderModal] = useState(false);
+  const [seperator, setSeperator] = useState("");
 
   const menuRef = useRef(null);
   const paragraphRef = useRef(null);
@@ -29,7 +33,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
     }
   };
 
-  const escapeRegex = str => str.replace(/[/.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapeRegex = str => str.replace(/[/.*+?^${}()|[\]\\]/g, "\\$&").replace(/\t/g, '\\s*');
 
   function buildRegexWithSnippet(line, [prefix, snippet]) {
     // Escape regex special chars in both
@@ -76,7 +80,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
 
         const preSelectedText = preRange.toString();
 
-        if (!paragraphRef.current.contains(container)) {
+        if (!paragraphRef.current.contains(container) || container.parentElement.tagName.toLowerCase() !== 'code') {
           // Selection is outside → ignore
           hidePopover();
           return;
@@ -92,8 +96,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
 
 
         setMenuPos({
-          x: rect.left + rect.width / 2,
-          y: rect.top - 10 + window.scrollY,
+          x: rect.left + rect.width / 2, y: rect.top - 10 + window.scrollY,
         });
       } else {
         hidePopover();
@@ -124,15 +127,13 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
   const menuContent = () => {
     if (menuErrorMsg) {
       return <p className="mb-1 p-2" style={{
-        backgroundColor: '#f8f8f8',
-        fontStyle: 'bold',
+        backgroundColor: '#f8f8f8', fontStyle: 'bold',
       }}>{menuErrorMsg}</p>;
     }
     if (multilineMode) {
       return <>
         <p className="mb-1 p-2" style={{
-          backgroundColor: '#f8f8f8',
-          fontStyle: 'bold',
+          backgroundColor: '#f8f8f8', fontStyle: 'bold',
 
         }}>Generate identifier</p>
         <div className="p-2">
@@ -144,8 +145,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
             setMultilineSelection(`${newFeature}[\\s\\S]*\\n${multilineSelection}`);
             setMultilineSelectionIndex(selectionElement?.parentElement.dataset.idx);
             hidePopover();
-          }
-          }
+          }}
           variant="info"
         >Add</Button>
         </div>
@@ -153,12 +153,10 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
     }
     return <>
       <p className="mb-1 p-2" style={{
-        backgroundColor: '#f8f8f8',
-        fontStyle: 'bold',
+        backgroundColor: '#f8f8f8', fontStyle: 'bold',
 
       }}>Generate identifier</p>
       <div className="p-2">
-
         <p>To create a new selector for the value <span className="fw-bold"> {selection[1]}</span>,
           simply click <Button
             size="sm"
@@ -180,74 +178,173 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex}
           >
             New multiline Identifier
           </Button> to include information from the preceding lines in the selection of the value. </p>
-
-
       </div>
     </>
 
   }
 
-  return (
-    <div className="relative p-8 text-lg leading-relaxed">
+  const useAsColumnHeader = (line) => {
+    const headers = line.split(seperator);
 
-      {multilineMode && (
-        <Alert variant="warning" style={{
-          position: 'fixed',
-          zIndex: 10,
-          right: '3px',
-          top: '118px',
-          width: '42vw',
-          minWidth: '400px',
-          bottom: '20px'
-        }}><b className="alert-heading">Multiline mode enabled.</b>
-          <p>In this mode, you can create an identifier that identifies a value from the header based on features from multiple lines. To exit this mode, you must either press Cancel or create the Identifier.</p>
-          <p>Select additional regex features from previous lines for more precise matching.</p>
-          <p>Current regex is: <b>{multilineSelection}</b></p>
-          {updateRegex(multilineSelection)}
-          <Button variant="success"
-                  size="sm"
-                  onClick={() => {
-                    addIdentifier(multilineSelection);
-                    setMultilineSelection("");
-                    setMultilineMode(false);
-                    hidePopover();
-                  }}>Create Identifier</Button>
-          <Button variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    setMultilineSelection("");
-                    setMultilineMode(false);
-                    hidePopover();
-                  }}
-          >Cancel</Button></Alert>)}
+    const updatedProfile = {...profile};
+    updatedProfile.data = {...profile.data};
+    updatedProfile.data.tables = [...profile.data.tables];
+    updatedProfile.data.tables[tableIndex] = {
+      ...profile.data.tables[tableIndex],
+      columns: profile.data.tables[tableIndex].columns.map((column, i) => ({
+        ...column,
+        name: headers[i] ?? column.name,
+      })),
+    };
 
-      <pre>
+    setProfile(updatedProfile);
+  };
+  const headers = activeLine !== null && seperator ? header[activeLine].split(seperator) : [];
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+
+      const newValue =
+        seperator.substring(0, start) + "\t" + seperator.substring(end);
+
+      setSeperator(newValue);
+
+      // restore cursor position
+      setTimeout(() => {
+        e.target.selectionStart = e.target.selectionEnd = start + 1;
+      }, 0);
+    }
+  };
+
+  return (<div className="relative p-8 text-lg leading-relaxed">
+    <Modal show={showTableHeaderModal} onHide={() => {
+      setActiveLine(null);
+      setShowTableHeaderModal(false);
+    }
+    }>
+      <Modal.Header closeButton>Set Table Header</Modal.Header>
+      <Modal.Body>
+        The input row you have selected, which should be used as a table header:<br/>
+        <pre>{header[activeLine]}</pre>
+        <br/>
+        <p>Specify a character or combination of characters to be used to separate the row into the different column
+          headers</p>
+        <p>Common seperator:</p>
+        <ButtonGroup>
+          <Button onClick={() => setSeperator(' ')}>space</Button>
+          <Button onClick={() => setSeperator('\t')}>tab</Button>
+          <Button onClick={() => setSeperator(';')}>semicolon</Button>
+          <Button onClick={() => setSeperator(',')}>comma</Button>
+        </ButtonGroup>
+        <Form.Group>
+          <Form.Label column="sm">Seperator</Form.Label>
+          <Form.Control onKeyDown={handleKeyDown} value={seperator} onChange={(e) => setSeperator(e.target.value)}
+                        type="text"
+                        placeholder="Enter seperator"/>
+        </Form.Group>
+        {seperator && (<>
+          <p className="mt-3">The result would look like:</p>
+          <Container fluid className="overflow-auto">
+            <Table striped bordered hover>
+              <thead>
+              <tr>
+                {profile.data.tables[tableIndex].columns.map((column, i) => <th>{headers[i] ?? column.name}</th>)}
+              </tr>
+              </thead>
+              <tbody/>
+            </Table>
+          </Container>
+        </>)}
+      </Modal.Body>
+      <Modal.Footer><Button disabled={!seperator} variant="info" onClick={() => {
+        useAsColumnHeader(header[activeLine]);
+        setActiveLine(null);
+        setShowTableHeaderModal(false);
+      }}>Use as header</Button></Modal.Footer>
+    </Modal>
+
+    {multilineMode && (<Alert variant="warning" style={{
+      position: 'fixed', zIndex: 10, right: '3px', top: '118px', width: '42vw', minWidth: '400px', bottom: '20px'
+    }}><b className="alert-heading">Multiline mode enabled.</b>
+      <p>In this mode, you can create an identifier that identifies a value from the header based on features from
+        multiple lines. To exit this mode, you must either press Cancel or create the Identifier.</p>
+      <p>Select additional regex features from previous lines for more precise matching.</p>
+      <p>Current regex is: <b>{multilineSelection}</b></p>
+      {updateRegex(multilineSelection)}
+      <Button variant="success"
+              size="sm"
+              onClick={() => {
+                addIdentifier(multilineSelection);
+                setMultilineSelection("");
+                setMultilineMode(false);
+                hidePopover();
+              }}>Create Identifier</Button>
+      <Button variant="danger"
+              size="sm"
+              onClick={() => {
+                setMultilineSelection("");
+                setMultilineMode(false);
+                hidePopover();
+              }}
+      >Cancel</Button></Alert>)}
+
+    <pre>
         <div ref={paragraphRef}>
           {header.map((line, index) => {
-            return <React.Fragment key={index}>{(!multilineMode || index < multilineSelectionIndex) &&
-              (<code data-idx={index}>{line}</code>)
-            }</React.Fragment>
+            return <React.Fragment key={index}>{(!multilineMode || index < multilineSelectionIndex) && (<>
+							<span className="code-line-index"
+                                  id={index}
+                                  onMouseEnter={() => setActiveLine(index)}
+                                  onMouseLeave={() => !showTableHeaderModal && setActiveLine(null)}
+                            >
+                              {activeLine === index ? (<OverlayTrigger placement="bottom"
+                                                                       overlay={<Tooltip id="code-line-tooltip">
+                                                                         Use this line as column header
+                                                                       </Tooltip>}>
+                                <Button size="sm" variant="info"
+                                        onClick={() => setShowTableHeaderModal(true)}>    &darr;</Button>
+
+
+                              </OverlayTrigger>) : (<span>{index}</span>)}
+							</span>
+              <code className={activeLine === index ? "active-header-select" : ""} data-idx={index}>{line}</code><br/>
+            </>)}</React.Fragment>
           })}
         </div>
-        {header.map((line, index) => {
-          return <React.Fragment key={index}>{(multilineMode && index >= multilineSelectionIndex) &&
-            (<code style={{color: '#aaa'}} data-idx={index}>{line}</code>)
-          }</React.Fragment>
-        })}
+      {header.map((line, index) => {
+        return <React.Fragment key={index}>{(multilineMode && index >= multilineSelectionIndex) && (
+          <code style={{color: '#aaa'}} data-idx={index}>{line}</code>)}</React.Fragment>
+      })}
       </pre>
 
-      {menuPos && (<div
-        ref={menuRef}
-        className="bg-white border border-gray-300 rounded-xl shadow-sm gap-2 text-sm"
-        style={{
-          position: "absolute",
-          borderRadius: '8px',
-          top: menuPos.y,
-          left: Math.max(menuPos.x, 210),
-          transform: "translate(-50%, -100%)",
-          maxWidth: '400px'
-        }}
-      >{menuContent()}</div>)}
-    </div>
-  );
+    {menuPos && (<div
+      ref={menuRef}
+      className="bg-white border border-gray-300 rounded-xl shadow-sm gap-2 text-sm"
+      style={{
+        position: "absolute",
+        borderRadius: '8px',
+        top: menuPos.y,
+        left: Math.max(menuPos.x, 210),
+        transform: "translate(-50%, -100%)",
+        maxWidth: '400px'
+      }}
+    >{menuContent()}</div>)}
+  </div>);
 }
+
+FileHeaderPresenter.propTypes = {
+  header: PropTypes.arrayOf(PropTypes.string).isRequired,
+  addIdentifier: PropTypes.func.isRequired,
+  updateRegex: PropTypes.func.isRequired,
+  profile: PropTypes.shape({
+    data: PropTypes.shape({
+      tables: PropTypes.object,
+    })
+  }).isRequired,
+  setProfile: PropTypes.func.isRequired,
+  tableIndex: PropTypes.number.isRequired,
+};

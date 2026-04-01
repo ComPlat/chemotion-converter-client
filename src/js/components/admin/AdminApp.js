@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Breadcrumb, Button, Col, Container, Modal, Row} from 'react-bootstrap';
 
 import ConverterApi from '../../api/ConverterApi';
@@ -6,412 +6,359 @@ import ConverterApi from '../../api/ConverterApi';
 import ProfileList from './list/ProfileList';
 import ProfileForm from './form/ProfileForm';
 import FileUploadForm from './upload/FileUploadForm';
-import { ModuleRegistry, provideGlobalGridOptions, AllCommunityModule } from 'ag-grid-community';
+import {ModuleRegistry, provideGlobalGridOptions, AllCommunityModule} from 'ag-grid-community';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 // Mark all grids as using legacy themes
 provideGlobalGridOptions({
-    theme: "legacy",
+	theme: "legacy",
 });
 import {GENERIC_PREDICATE} from "./form/common/TibFetchService";
 
 
-class AdminApp extends Component {
+function AdminApp() {
+	const [status, setStatus] = useState('list');
+	const [selectedFile, setSelectedFile] = useState(null);
+	const [profiles, setProfiles] = useState([]);
+	const [options, setOptions] = useState([]);
+	const [datasets, setDatasets] = useState([]);
+	const [profile, setProfile] = useState(null);
+	const [error, setError] = useState(false);
+	const [uploadError, setUploadError] = useState(false);
+	const [errorMessage, setErrorMessage] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
+	const [createdModal, setCreatedModal] = useState(false);
+	const [deleteModal, setDeleteModal] = useState(false);
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            status: 'list',
-            selectedFile: null,
-            profiles: [],
-            options: [],
-            datasets: [],
-            profile: null,
-            error: false,
-            errorMessage: '',
-            isLoading: false,
-            createdModal: false,
-            deleteModal: false
-        };
+	useEffect(() => {
+		Promise.all([
+			ConverterApi.fetchProfiles(),
+			ConverterApi.fetchDatasets(),
+			ConverterApi.fetchOptions()
+		]).then(responses => {
+			const [profilesResponse, datasetsResponse, optionsResponse] = responses
+			setProfiles(profilesResponse);
+			setDatasets(datasetsResponse);
+			setOptions(optionsResponse);
+		})
+	}, []);
 
-        this.showListView = this.showListView.bind(this);
-        this.showCreateView = this.showCreateView.bind(this);
-        this.showUpdateView = this.showUpdateView.bind(this);
-        this.showImportView = this.showImportView.bind(this);
+	const showListView = () => {
+		setStatus('list');
+		setProfile(null);
+	};
 
-        this.showCreatedModal = this.showCreatedModal.bind(this);
-        this.hideCreatedModal = this.hideCreatedModal.bind(this);
+	const showImportView = () => {
+		setStatus('import');
+		setProfile(null);
+	};
 
-        this.showDeleteModal = this.showDeleteModal.bind(this);
-        this.hideDeleteModal = this.hideDeleteModal.bind(this);
+	const showCreateView = () => {
+		setStatus('upload');
+		setProfile(null);
+	};
 
-        this.updateProfile = this.updateProfile.bind(this);
-        this.storeProfile = this.storeProfile.bind(this);
-        this.deleteProfile = this.deleteProfile.bind(this);
-        this.downloadProfile = this.downloadProfile.bind(this);
-        this.toggleDisableProfile = this.toggleDisableProfile.bind(this);
+	const showUpdateView = (nextProfile) => {
+		setStatus('update');
+		setProfile(nextProfile);
+		setError(false);
+		setUploadError(false);
+		setErrorMessage('');
+	};
 
-        this.updateFile = this.updateFile.bind(this);
-        this.uploadFile = this.uploadFile.bind(this);
-        this.importFile = this.importFile.bind(this);
+	const hideCreatedModal = () => {
+		setCreatedModal(false);
+	};
 
-        this.dispatchView = this.dispatchView.bind(this);
-    }
+	const showDeleteModal = (nextProfile) => {
+		setDeleteModal(true);
+		setProfile(Object.assign({}, nextProfile));
+	};
 
-    componentDidMount() {
-        Promise.all([
-            ConverterApi.fetchProfiles(),
-            ConverterApi.fetchDatasets(),
-            ConverterApi.fetchOptions()
-        ]).then(responses => {
-            const [profiles, datasets, options] = responses
-            this.setState({
-                profiles, datasets, options
-            })
-        })
-    }
+	const hideDeleteModal = () => {
+		setDeleteModal(false);
+		setProfile(null);
+	};
 
-    showListView() {
-        this.setState({
-            status: 'list',
-            profile: null
-        });
-    }
+	const updateProfile = (nextProfile) => {
+		setProfile({...nextProfile});
+	};
 
-    showImportView() {
-        this.setState({
-            status: 'import',
-            profile: null
-        });
-    }
+	const createProfile = (nextProfile) => {
+		ConverterApi.createProfile(nextProfile)
+			.then(response => {
+				setStatus('list');
+				setProfiles(prevProfiles => [...prevProfiles, response]);
+				setProfile(null);
+				setCreatedModal(true);
+			})
+			.catch(errors => {
+				setError(true);
+				setErrorMessage(Object.values(errors.data).join(', '));
+				setIsLoading(false);
+			});
+	};
 
-    showCreateView() {
-        this.setState({
-            status: 'upload',
-            profile: null
-        });
-    }
+	const saveProfile = (nextProfile) => {
+		ConverterApi.updateProfile(nextProfile)
+			.then((response) => {
+				setProfiles(prevProfiles => {
+					const updatedProfiles = [...prevProfiles];
+					const index = updatedProfiles.findIndex(p => (p.id === response.id))
+					updatedProfiles[index] = response
+					return updatedProfiles;
+				});
+				setStatus('list');
+				setProfile(null);
+			})
+			.catch(errors => {
+				setError(true);
+				setErrorMessage(Object.values(errors.data).join(', '));
+				setIsLoading(false);
+			});
+	};
 
-    showUpdateView(profile) {
-        this.setState({
-            status: 'update',
-            profile: Object.assign({}, profile),
-            error: false,
-            errorMessage: ''
-        });
-    }
+	const storeProfile = () => {
+		if (!profile) {
+			return;
+		}
 
-    showCreatedModal() {
-        this.setState({
-            createdModal: true
-        });
-    }
+		if (Array.isArray(profile.identifiers)) {
+			profile.identifiers.forEach(identifier => {
+				delete identifier.show;
+			});
+		}
 
-    hideCreatedModal() {
-        this.setState({
-            createdModal: false
-        });
-    }
+		if (status === 'create') {
+			createProfile(profile);
+		} else if (status === 'update') {
+			saveProfile(profile);
+		}
+	};
 
-    showDeleteModal(profile) {
-        this.setState({
-            deleteModal: true,
-            profile: Object.assign({}, profile),
-        });
-    }
+	const downloadProfile = (nextProfile) => {
+		const a = document.createElement('a')
+		a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(nextProfile, null, 2))
+		a.download = nextProfile.id + '.json'
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	};
 
-    hideDeleteModal() {
-        this.setState({
-            deleteModal: false,
-            profile: null
-        });
-    }
+	const updateFile = (event) => {
+		setSelectedFile(event.target.files[0]);
+		setIsLoading(false);
+		setError(false);
+		setUploadError(false);
+		setErrorMessage('');
+	};
 
-    updateProfile(profile) {
-        this.setState({profile});
-    }
+	const toggleDisableProfile = (nextProfile) => {
+		nextProfile.isDisabled = !nextProfile.isDisabled;
+		saveProfile(nextProfile);
+	};
 
-    storeProfile() {
-        const {status, profile} = this.state;
+	const deleteProfile = () => {
+		ConverterApi.deleteProfile(profile)
+			.then(() => ConverterApi.fetchProfiles())
+			.then((profilesResponse) => {
+				hideDeleteModal();
+				setStatus('list');
+				setProfiles(profilesResponse);
+				setProfile(null);
+			})
+	};
 
-        // remove show flag
-        if (Array.isArray(profile.identifiers)) {
-            profile.identifiers.forEach(identifier => {
-                delete identifier.show;
-            });
-        }
+	const uploadFile = () => {
+		setIsLoading(true);
 
-        if (status === 'create') {
-            this._createProfile(profile);
-        } else if (status === 'update') {
-            this._saveProfile(profile);
-        }
-    }
+		return ConverterApi.fetchTables(selectedFile)
+			.then(data => {
+				if (data) {
+					let nextProfile = {};
+					if (profile) {
+						if (data.metadata.reader === profile.data.metadata.reader) {
+							nextProfile = {
+								...profile,
+								data: data
+							};
+							setStatus('update');
+						} else {
+							setUploadError(true);
+							setErrorMessage('The uploaded file cannot be read by the reader for this profile.');
+							setIsLoading(false);
 
-    _createProfile(profile) {
-        ConverterApi.createProfile(profile)
-            .then(response => {
-                const profiles = [...this.state.profiles]
-                profiles.push(response)
-                this.setState({
-                    status: 'list',
-                    profiles: profiles,
-                    profile: null,
-                    createdModal: true
-                });
-            })
-            .catch(errors => {
-                this.setState({
-                    error: true,
-                    errorMessage: Object.values(errors.data).join(', '),
-                    isLoading: false
-                });
-            });
-    }
+							return false;
+						}
+					} else {
+						nextProfile = {
+							title: '',
+							description: '',
+							tables: [],
+							identifiers: [],
+							data: data,
+							subjects: [],
+							predicates: [],
+							datatypes: [],
+							subjectInstances: {},
+							rootOntology: GENERIC_PREDICATE
+						}
+						setStatus('create');
+					}
 
-    _saveProfile(profile) {
-        ConverterApi.updateProfile(profile)
-            .then((response) => {
-                const profiles = [...this.state.profiles]
-                const index = profiles.findIndex(p => (p.id === response.id))
-                profiles[index] = response
-                this.setState({
-                    status: 'list',
-                    profiles: profiles,
-                    profile: null
-                });
-            })
-            .catch(errors => {
-                this.setState({
-                    error: true,
-                    errorMessage: Object.values(errors.data).join(', '),
-                    isLoading: false
-                });
-            });
-    }
+					setProfile(nextProfile);
+					setSelectedFile(null);
+					setIsLoading(false);
+					setUploadError(false);
+					setErrorMessage('');
+				}
+				return true;
+			})
+			.catch(error => {
+				if (error.status === 413) {
+					setUploadError(true);
+					setErrorMessage('The uploaded file is too large.');
+					setIsLoading(false);
+				} else {
+					error.text().then(errorMessage => {
+						setUploadError(true);
+						setErrorMessage(JSON.parse(errorMessage).error);
+						setIsLoading(false);
+					})
+				}
+				return false;
+			})
+	};
 
-    downloadProfile(profile) {
-        const a = document.createElement('a')
-        a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(profile, null, 2))
-        a.download = profile.id + '.json'
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
+	const importFile = () => {
+		setIsLoading(true);
 
-    updateFile(event) {
-        this.setState({
-            selectedFile: event.target.files[0],
-            loaded: 0,
-            isLoading: false,
-            error: false,
-            errorMessage: ''
-        })
-    }
+		const handleLoad = (e) => {
+			const fileProfile = JSON.parse(e.target.result);
+			createProfile(fileProfile);
+		}
 
-    toggleDisableProfile(profile) {
-        profile.isDisabled = !profile.isDisabled;
-        this._saveProfile(profile);
-    }
+		const reader = new FileReader()
+		reader.readAsText(selectedFile)
+		reader.onload = handleLoad
+	};
 
-    deleteProfile() {
-        ConverterApi.deleteProfile(this.state.profile)
-            .then(() => ConverterApi.fetchProfiles())
-            .then((profiles) => {
-                this.hideDeleteModal();
-                this.setState({
-                    status: 'list',
-                    profiles: profiles,
-                    profile: null
-                });
-            })
+	const dispatchView = () => {
+		if (status === 'list') {
+			return (
+				<ProfileList
+					profiles={profiles}
+					isAdmin
+					updateProfile={showUpdateView}
+					deleteProfile={showDeleteModal}
+					downloadProfile={downloadProfile}
+					toggleDisableProfile={toggleDisableProfile}
+				/>
+			)
+		} else if (status === 'import' || status === 'upload') {
+			let handler = status === 'import' ? importFile : uploadFile;
+			return (
+				<FileUploadForm
+					onFileChangeHandler={updateFile}
+					onSubmitFileHandler={handler}
+					errorMessage={errorMessage}
+					error={uploadError}
+					isLoading={isLoading}
+					disabled={selectedFile === null}
+				/>
+			)
+		} else {
+			return (
+				<ProfileForm
+					status={status}
+					profile={profile}
+					options={options}
+					datasets={datasets}
+					errorMessage={errorMessage}
+					error={error}
+					uploadError={uploadError}
+					updateProfile={updateProfile}
+					storeProfile={storeProfile}
+					onFileChangeHandler={updateFile}
+					onSubmitFileHandler={uploadFile}
+					isLoading={isLoading}
+				/>
+			)
+		}
+	}
 
+	return (
+		<Container fluid={['create', 'update'].includes(status)}>
+			<Breadcrumb className="mt-4">
+				<Breadcrumb.Item
+					onClick={showListView}
+					active={status === 'list'}
+				>
+					Chemotion file converter admin
+				</Breadcrumb.Item>
 
-    }
+				{['upload', 'create'].includes(status) && profile === null && (
+					<Breadcrumb.Item active>Create Profile</Breadcrumb.Item>
+				)}
+				{['upload', 'create'].includes(status) && profile !== null && (
+					<Breadcrumb.Item active>Replace File</Breadcrumb.Item>
+				)}
+				{status === 'update' && (
+					<Breadcrumb.Item active>{'Edit Profile: ' + profile.title}</Breadcrumb.Item>
+				)}
+				{status === 'import' && (
+					<Breadcrumb.Item active>Import Profile</Breadcrumb.Item>
+				)}
+			</Breadcrumb>
+			<Row className="mb-3">
+				<Col>
+					<h2>
+						{status === 'list' && 'Profiles List'}
+						{['upload', 'create'].includes(status) && profile === null && 'Create Profile'}
+						{['upload', 'create'].includes(status) && profile !== null && 'Replace File'}
+						{status === 'update' && 'Edit Profile'}
+						{status === 'import' && 'Import Profile'}
+					</h2>
+				</Col>
 
-    uploadFile() {
-        const {selectedFile} = this.state
+				{status === "list" &&
+					<Col md={4} className="d-flex justify-content-end gap-2">
+						<Button variant="success" onClick={showImportView}>
+							Import profile
+						</Button>
+						<Button variant="primary" onClick={showCreateView}>
+							Create new profile
+						</Button>
+					</Col>
+				}
+			</Row>
 
-        this.setState({
-            isLoading: true
-        })
+			<main>
+				{dispatchView()}
+			</main>
 
-        ConverterApi.fetchTables(selectedFile)
-            .then(data => {
-                if (data) {
-                    const profile = {
-                        title: '',
-                        description: '',
-                        tables: [],
-                        identifiers: [],
-                        data: data,
-                        subjects: [],
-                        predicates: [],
-                        datatypes: [],
-                        subjectInstances: {},
-                        rootOntology: GENERIC_PREDICATE
-                    }
+			<Modal show={createdModal}>
+				<Modal.Header>
+					<Modal.Title>Profile successfully created!</Modal.Title>
+				</Modal.Header>
 
-                    this.setState({
-                        status: 'create',
-                        profile: profile,
-                        selectedFile: null,
-                        isLoading: false,
-                        error: false,
-                        errorMessage: ''
-                    })
-                }
-            })
-            .catch(error => {
-                if (error.status === 413) {
-                    this.setState({
-                        error: true,
-                        errorMessage: 'The uploaded file is too large.',
-                        isLoading: false
-                    })
-                } else {
-                    error.text().then(errorMessage => {
-                        this.setState({
-                            error: true,
-                            errorMessage: JSON.parse(errorMessage).error,
-                            isLoading: false
-                        })
-                    })
-                }
-            })
-    }
+				<Modal.Footer>
+					<Button variant="primary" onClick={hideCreatedModal}>Great!</Button>
+				</Modal.Footer>
+			</Modal>
 
-    importFile() {
-        const {selectedFile} = this.state
-
-        this.setState({
-            isLoading: true
-        })
-
-        const createProfile = (e) => {
-            const fileProfile = JSON.parse(e.target.result);
-            this._createProfile(fileProfile);
-        }
-
-        const reader = new FileReader()
-        reader.readAsText(selectedFile)
-        reader.onload = createProfile.bind(this)
-    }
-
-    dispatchView() {
-        const {profiles, status} = this.state;
-        if (status === 'list') {
-            return (
-                <ProfileList
-                    profiles={profiles}
-                    isAdmin
-                    updateProfile={this.showUpdateView}
-                    deleteProfile={this.showDeleteModal}
-                    downloadProfile={this.downloadProfile}
-                    toggleDisableProfile={this.toggleDisableProfile}
-                />
-            )
-        } else if (status === 'import' || status === 'upload') {
-            let handler = status === 'import' ? this.importFile : this.uploadFile;
-            const {errorMessage, error, isLoading, selectedFile} = this.state;
-            return (
-                <FileUploadForm
-                    onFileChangeHandler={this.updateFile}
-                    onSubmitFileHandler={handler}
-                    errorMessage={errorMessage}
-                    error={error}
-                    isLoading={isLoading}
-                    disabled={selectedFile === null}
-                />
-            )
-        } else {
-            const {errorMessage, error, profile, options, datasets} = this.state;
-            return (
-                <ProfileForm
-                    status={status}
-                    profile={profile}
-                    options={options}
-                    datasets={datasets}
-                    errorMessage={errorMessage}
-                    error={error}
-                    updateProfile={this.updateProfile}
-                    storeProfile={this.storeProfile}
-                />
-            )
-        }
-    }
-
-    render() {
-        return (
-            <Container fluid={['create', 'update'].includes(this.state.status)}>
-                <Breadcrumb className="mt-4">
-                    <Breadcrumb.Item
-                        onClick={this.showListView}
-                        active={this.state.status === 'list'}
-                    >
-                        Chemotion file converter admin
-                    </Breadcrumb.Item>
-
-                    {['upload', 'create'].includes(this.state.status) && (
-                        <Breadcrumb.Item active>Create Profile</Breadcrumb.Item>
-                    )}
-                    {this.state.status === 'update' && (
-                        <Breadcrumb.Item active>{'Edit Profile: ' + this.state.profile.title}</Breadcrumb.Item>
-                    )}
-                    {this.state.status === 'import' && (
-                        <Breadcrumb.Item active>Import Profile</Breadcrumb.Item>
-                    )}
-                </Breadcrumb>
-                <Row className="mb-3">
-                    <Col>
-                        <h2>
-                            {this.state.status === 'list' && 'Profiles List'}
-                            {['upload', 'create'].includes(this.state.status) && 'Create Profile'}
-                            {this.state.status === 'update' && 'Edit Profile'}
-                            {this.state.status === 'import' && 'Import Profile'}
-                        </h2>
-                    </Col>
-
-                    {this.state.status === "list" &&
-                        <Col md={4} className="d-flex justify-content-end gap-2">
-                            <Button variant="success" onClick={this.showImportView}>
-                                Import profile
-                            </Button>
-                            <Button variant="primary" onClick={this.showCreateView}>
-                                Create new profile
-                            </Button>
-                        </Col>
-                    }
-                </Row>
-
-                <main>
-                    {this.dispatchView()}
-                </main>
-
-                <Modal show={this.state.createdModal}>
-                    <Modal.Header>
-                        <Modal.Title>Profile successfully created!</Modal.Title>
-                    </Modal.Header>
-
-                    <Modal.Footer>
-                        <Button variant="primary" onClick={this.hideCreatedModal}>Great!</Button>
-                    </Modal.Footer>
-                </Modal>
-
-                <Modal show={this.state.deleteModal}>
-                    <Modal.Header>
-                        <Modal.Title>Do you really want to delete this profile?</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Footer>
-                        <Button variant="default" onClick={this.hideDeleteModal}>Cancel</Button>
-                        <Button variant="danger" onClick={this.deleteProfile}>Delete profile</Button>
-                    </Modal.Footer>
-                </Modal>
-            </Container>
-        )
-    }
-
+			<Modal show={deleteModal}>
+				<Modal.Header>
+					<Modal.Title>Do you really want to delete this profile?</Modal.Title>
+				</Modal.Header>
+				<Modal.Footer>
+					<Button variant="default" onClick={hideDeleteModal}>Cancel</Button>
+					<Button variant="danger" onClick={deleteProfile}>Delete profile</Button>
+				</Modal.Footer>
+			</Modal>
+		</Container>
+	)
 }
 
 export default AdminApp
