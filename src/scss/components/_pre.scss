@@ -13,7 +13,7 @@ pre {
     border-right: 1px solid silver;
 
     button {
-      display: none;
+      display: inline-block;
     }
 
     span {
@@ -21,21 +21,13 @@ pre {
     }
   }
 
-  .code-line-index.active + code {
+  .active-header-select {
     background-color: #0dcaf088;
     padding: 1px 5px;
     border-radius: 3px;
   }
 
-  .code-line-index.active {
-    button {
-      display: inline-block;
-    }
 
-    span {
-      display: none;
-    }
-  }
 
   code {
     display: inline-block;

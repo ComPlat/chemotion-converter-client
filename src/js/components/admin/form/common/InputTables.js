@@ -1,4 +1,4 @@
-import {Card, Col, Row, Nav, NavDropdown, OverlayTrigger, Popover} from "react-bootstrap";
+import {Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
 import PropTypes from 'prop-types';
 import React, {useState} from "react";
 import FileHeaderPresenter from "../HeaderPresenter";
@@ -189,7 +189,7 @@ function InputTables({profile, setProfile, setActiveTabKey}) {
     </NavDropdown.Item>
   )));
 
-  // 🔁 state
+  // state
   const [activeKey, setActiveKey] = useState(0);
 
   return (<Col md={7}>
