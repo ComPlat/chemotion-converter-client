@@ -14,10 +14,19 @@ function TableForm({
   updateTable, updateHeader,
   addOperation, updateOperation, updateOperationDescription, removeOperation,
   fileMetadataOptions, tableMetadataOptions,
-  profile, setProfile
+  profile, setProfile, outputTableIndex
 }) {
   const [showSiUnits, setShowSiUnits] = useState(false);
+  const [siUnitsContext, setSiUnitsContext] = useState(null);
   const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
+
+  const openSiUnits = (axis) => {
+    setSiUnitsContext({
+      outputTableIndex,
+      axis
+    });
+    setShowSiUnits(true);
+  };
 
   const headerOptions = Object.keys(options).reduce(function (filtered, key) {
     if (!(key in xy_units) && key !== 'rdf' ){
@@ -44,7 +53,7 @@ function TableForm({
                                <Button
                                  variant="outline-info"
                                  type="button"
-                                 onClick={() => setShowSiUnits(true)}
+                                 onClick={() => openSiUnits(optionKey === "XUNITS" ? "X" : "Y")}
                                >
                                  SI Units
                                </Button>
@@ -143,7 +152,11 @@ function TableForm({
           <Offcanvas.Title>SI Units</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <SIunits profile={profile} setProfile={setProfile} />
+          <SIunits
+            profile={profile}
+            setProfile={setProfile}
+            defaultAssignmentContext={siUnitsContext}
+          />
         </Offcanvas.Body>
       </Offcanvas>
     </div>
@@ -164,7 +177,8 @@ TableForm.propTypes = {
   fileMetadataOptions: PropTypes.array,
   tableMetadataOptions: PropTypes.array,
   profile: PropTypes.object,
-  setProfile: PropTypes.func
+  setProfile: PropTypes.func,
+  outputTableIndex: PropTypes.number
 }
 
 export default TableForm

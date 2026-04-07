@@ -446,6 +446,7 @@ export default function OutputTables({profile, setProfile, options}) {
             options={options}
             profile={profile}
             setProfile={setProfile}
+            outputTableIndex={index}
             updateHeader={(key, value) => updateHeader(index, key, value)}
             updateTable={(key, value) => updateTable(index, key, value)}
             addOperation={(key, type) => addOperation(index, key, type)}

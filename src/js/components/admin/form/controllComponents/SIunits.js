@@ -43,6 +43,11 @@ const profileShape = PropTypes.shape({
   }))
 });
 
+const defaultAssignmentContextShape = PropTypes.shape({
+  outputTableIndex: PropTypes.number,
+  axis: PropTypes.oneOf(["X", "Y"])
+});
+
 function UnitAssignmentToggle({isOpen, onToggle}) {
   return (
     <Button
@@ -120,10 +125,25 @@ const createAssignmentId = () => (
   "assignment-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8)
 );
 
-const createAssignmentConfig = (assignmentId = createAssignmentId()) => ({
+const createAssignmentConfig = (assignmentId = createAssignmentId(), overrides = {}) => ({
   ...defaultAssignmentConfig,
+  ...overrides,
   assignmentId
 });
+
+const getAssignmentDefaultsFromContext = (defaultAssignmentContext) => {
+  const defaults = {};
+
+  if (Number.isInteger(defaultAssignmentContext?.outputTableIndex) && defaultAssignmentContext.outputTableIndex >= 0) {
+    defaults.outputTableIndex = String(defaultAssignmentContext.outputTableIndex);
+  }
+
+  if (defaultAssignmentContext?.axis === "X" || defaultAssignmentContext?.axis === "Y") {
+    defaults.axis = defaultAssignmentContext.axis;
+  }
+
+  return defaults;
+};
 
 const hasUuid = (value) => typeof value === "string" && value.trim() !== "";
 
@@ -301,7 +321,7 @@ const replaceStoredAssignments = (profileValue, allUnits, unit, unitIndex, assig
   return remainingUnits.concat(persistedAssignments);
 };
 
-export default function SIunits({profile, setProfile}) {
+export default function SIunits({profile, setProfile, defaultAssignmentContext}) {
   const units = profile?.data?.units ?? [];
   const storedUnits = normalizeStoredUnits(profile?.units ?? []);
   const inputColumns = getInputColumns(profile);
@@ -327,7 +347,10 @@ export default function SIunits({profile, setProfile}) {
       return storedAssignments;
     }
 
-    return [createAssignmentConfig(`draft-${unitIndex}-0`)];
+    return [createAssignmentConfig(
+      `draft-${unitIndex}-0`,
+      getAssignmentDefaultsFromContext(defaultAssignmentContext)
+    )];
   };
 
   const setAssignmentsForRow = (rowId, assignments) => {
@@ -364,7 +387,7 @@ export default function SIunits({profile, setProfile}) {
   const addAssignment = (rowId, unit, unitIndex) => {
     const nextAssignments = [
       ...getAssignments(rowId, unit, unitIndex),
-      createAssignmentConfig()
+      createAssignmentConfig(undefined, getAssignmentDefaultsFromContext(defaultAssignmentContext))
     ];
 
     setAssignmentsForRow(rowId, nextAssignments);
@@ -674,5 +697,6 @@ export default function SIunits({profile, setProfile}) {
 
 SIunits.propTypes = {
   profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired
+  setProfile: PropTypes.func.isRequired,
+  defaultAssignmentContext: defaultAssignmentContextShape
 };
