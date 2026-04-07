@@ -55,6 +55,7 @@ function UnitAssignmentToggle({isOpen, onToggle}) {
       size="sm"
       onClick={onToggle}
       aria-expanded={isOpen}
+      aria-label={isOpen ? "Hide SI unit assignment" : "Show SI unit assignment"}
     >
       <b>{isOpen ? "-" : "+"}</b>
     </Button>
