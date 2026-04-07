@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import PropTypes from "prop-types";
 import {Alert, Button, ButtonGroup, Container, Form, Modal, OverlayTrigger, Table, Tooltip} from "react-bootstrap";
+import {getProfileData} from "../../../utils/profileUtils";
 
 const integerRegex = '[+-]?\\d+';
 const floatRegex = '[+-]?(?:\\d*[,.]\\d+|\\d+)(?:[eE][+-]?\\d+)?';
@@ -8,7 +9,7 @@ const emailRegex = '[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}';
 const defaultRegex = '.+';
 const regexList = [integerRegex, floatRegex, emailRegex, defaultRegex];
 
-export default function FileHeaderPresenter({header, addIdentifier, updateRegex, profile, setProfile, tableIndex}) {
+export default function FileHeaderPresenter({header, addIdentifier, updateRegex, profile, setProfile, tableIndex, dataIndex}) {
   const [selection, setSelection] = useState(["", ""]);
   const [selectionElement, setSelectionElement] = useState(null);
   const [menuPos, setMenuPos] = useState(null);
@@ -187,18 +188,39 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
     const headers = line.split(seperator);
 
     const updatedProfile = {...profile};
-    updatedProfile.data = {...profile.data};
-    updatedProfile.data.tables = [...profile.data.tables];
-    updatedProfile.data.tables[tableIndex] = {
-      ...profile.data.tables[tableIndex],
-      columns: profile.data.tables[tableIndex].columns.map((column, i) => ({
-        ...column,
-        name: headers[i] ?? column.name,
-      })),
-    };
+    const profileData = getProfileData(profile, dataIndex);
+    if (!profileData?.tables?.[tableIndex]) {
+      return;
+    }
+
+    if (Array.isArray(profile.data)) {
+      updatedProfile.data = [...profile.data];
+      updatedProfile.data[dataIndex] = {
+        ...profileData,
+        tables: [...profileData.tables]
+      };
+      updatedProfile.data[dataIndex].tables[tableIndex] = {
+        ...profileData.tables[tableIndex],
+        columns: profileData.tables[tableIndex].columns.map((column, i) => ({
+          ...column,
+          name: headers[i] ?? column.name,
+        })),
+      };
+    } else {
+      updatedProfile.data = {...profileData};
+      updatedProfile.data.tables = [...profileData.tables];
+      updatedProfile.data.tables[tableIndex] = {
+        ...profileData.tables[tableIndex],
+        columns: profileData.tables[tableIndex].columns.map((column, i) => ({
+          ...column,
+          name: headers[i] ?? column.name,
+        })),
+      };
+    }
 
     setProfile(updatedProfile);
   };
+  const profileData = getProfileData(profile, dataIndex);
   const headers = activeLine !== null && seperator ? header[activeLine].split(seperator) : [];
 
   const handleKeyDown = (e) => {
@@ -252,7 +274,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
             <Table striped bordered hover>
               <thead>
               <tr>
-                {profile.data.tables[tableIndex].columns.map((column, i) => <th>{headers[i] ?? column.name}</th>)}
+                {profileData?.tables?.[tableIndex]?.columns.map((column, i) => <th key={column.key ?? i}>{headers[i] ?? column.name}</th>)}
               </tr>
               </thead>
               <tbody/>
@@ -268,7 +290,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
     </Modal>
 
     {multilineMode && (<Alert variant="warning" style={{
-      position: 'fixed', zIndex: 10, right: '3px', top: '118px', width: '42vw', minWidth: '400px', bottom: '20px'
+      position: 'fixed', zIndex: 202, right: '3px', top: '118px', width: '42vw', minWidth: '400px', bottom: '20px'
     }}><b className="alert-heading">Multiline mode enabled.</b>
       <p>In this mode, you can create an identifier that identifies a value from the header based on features from
         multiple lines. To exit this mode, you must either press Cancel or create the Identifier.</p>
@@ -341,10 +363,16 @@ FileHeaderPresenter.propTypes = {
   addIdentifier: PropTypes.func.isRequired,
   updateRegex: PropTypes.func.isRequired,
   profile: PropTypes.shape({
-    data: PropTypes.shape({
-      tables: PropTypes.object,
-    })
+    data: PropTypes.oneOfType([
+      PropTypes.shape({
+        tables: PropTypes.array,
+      }),
+      PropTypes.arrayOf(PropTypes.shape({
+        tables: PropTypes.array,
+      }))
+    ])
   }).isRequired,
   setProfile: PropTypes.func.isRequired,
   tableIndex: PropTypes.number.isRequired,
+  dataIndex: PropTypes.number.isRequired,
 };

@@ -6,12 +6,21 @@ function getDataset(profile, datasets) {
   }
 }
 
-function getInputTables(profile) {
-  return profile.data ? (profile.matchTables ? [profile.data.tables[0]] : profile.data.tables) : []
+function getProfileData(profile, tableIdx = 0) {
+  if (!profile?.data) {
+    return null;
+  }
+
+  return Array.isArray(profile.data) ? profile.data[tableIdx] ?? null : profile.data;
 }
 
-function getInputColumns(profile) {
-  const inputTables = getInputTables(profile)
+function getInputTables(profile, tableIdx = 0) {
+  const profileData = getProfileData(profile, tableIdx);
+  return profileData ? (profile.matchTables ? [profileData.tables[0]] : profileData.tables) : []
+}
+
+function getInputColumns(profile, tableIdx = 0) {
+  const inputTables = getInputTables(profile, tableIdx)
 
   if (inputTables.length > 0) {
     return inputTables.reduce((accumulator, table, tableIndex) => {
@@ -31,8 +40,8 @@ function getInputColumns(profile) {
   }
 }
 
-function getDistInputColumns(profile) {
-  const inputTables = getInputTables(profile);
+function getDistInputColumns(profile, tableIdx = 0) {
+  const inputTables = getInputTables(profile, tableIdx);
   const seenNames = new Set();
 
   return inputTables.map((table, tableIndex) => {
@@ -56,20 +65,22 @@ function getDistInputColumns(profile) {
   }).filter(group => group.options.length > 0); // remove empty groups
 }
 
-function getFileMetadataOptions(profile) {
-  if (profile.data) {
-    return Object.keys(profile.data.metadata).map(key => ({
+function getFileMetadataOptions(profile, tableIdx = 0) {
+  const profileData = getProfileData(profile, tableIdx);
+
+  if (profileData) {
+    return Object.keys(profileData.metadata).map(key => ({
       key,
       label: key,
-      value: profile.data.metadata[key]
+      value: profileData.metadata[key]
     }))
   } else {
     return []
   }
 }
 
-function getTableMetadataOptions(profile) {
-  const inputTables = getInputTables(profile)
+function getTableMetadataOptions(profile, tableIdx = 0) {
+  const inputTables = getInputTables(profile, tableIdx)
 
   if (inputTables.length > 0) {
     return inputTables.reduce((acc, table, tableIndex) => {
@@ -88,4 +99,4 @@ function getTableMetadataOptions(profile) {
   }
 }
 
-export { getDataset, getInputTables, getInputColumns, getDistInputColumns, getFileMetadataOptions, getTableMetadataOptions }
+export { getDataset, getProfileData, getInputTables, getInputColumns, getDistInputColumns, getFileMetadataOptions, getTableMetadataOptions }
