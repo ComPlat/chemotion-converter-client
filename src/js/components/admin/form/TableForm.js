@@ -1,19 +1,22 @@
-import React from "react"
+import React, {useState} from "react"
 import PropTypes from 'prop-types';
 
 import HeaderInput from './table/HeaderInput'
 import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
 import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
-import {Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, Offcanvas, Row} from "react-bootstrap";
+import SIunits from "./controllComponents/SIunits";
 
 
 function TableForm({
   table, inputTables, inputColumns, options,
   updateTable, updateHeader,
   addOperation, updateOperation, updateOperationDescription, removeOperation,
-  fileMetadataOptions, tableMetadataOptions
+  fileMetadataOptions, tableMetadataOptions,
+  profile, setProfile
 }) {
+  const [showSiUnits, setShowSiUnits] = useState(false);
   const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
 
   const headerOptions = Object.keys(options).reduce(function (filtered, key) {
@@ -36,7 +39,16 @@ function TableForm({
 
       {Object.keys(xy_units).map((optionKey, index) => (
         <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
-                             values={xy_units[optionKey]} updateHeader={updateHeader}/>
+                             values={xy_units[optionKey]} updateHeader={updateHeader}
+                             leftElement={(
+                               <Button
+                                 variant="outline-info"
+                                 type="button"
+                                 onClick={() => setShowSiUnits(true)}
+                               >
+                                 SI Units
+                               </Button>
+                             )}/>
       ))}
 
       {(table.header['DATA CLASS'] === 'NTUPLES') && (
@@ -120,6 +132,20 @@ function TableForm({
 
       <small className="text-muted">The data you pick will determine which table columns are going to
         converted.</small>
+
+      <Offcanvas
+        show={showSiUnits}
+        onHide={() => setShowSiUnits(false)}
+        placement="start"
+        style={{width: "min(1100px, 50vw)"}}
+      >
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>SI Units</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <SIunits profile={profile} setProfile={setProfile} />
+        </Offcanvas.Body>
+      </Offcanvas>
     </div>
   )
 }
@@ -136,7 +162,9 @@ TableForm.propTypes = {
   updateOperation: PropTypes.func,
   removeOperation: PropTypes.func,
   fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array
+  tableMetadataOptions: PropTypes.array,
+  profile: PropTypes.object,
+  setProfile: PropTypes.func
 }
 
 export default TableForm
