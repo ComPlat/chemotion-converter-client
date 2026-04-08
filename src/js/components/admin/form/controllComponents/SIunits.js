@@ -1,6 +1,6 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
-import {Alert, Button, Card, Form, Offcanvas, OverlayTrigger, Table, Tooltip} from "react-bootstrap";
+import {Alert, Button, Card, Form, Modal, OverlayTrigger, Table, Tooltip} from "react-bootstrap";
 import {additionalInfo} from "../../../../utils/identifierUtils";
 import {getInputColumns} from "../../../../utils/profileUtils";
 import OperatorSelect from "../common/OperatorSelect";
@@ -417,6 +417,41 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
   const [rowAssignments, setRowAssignments] = useState({});
   const [feedback, setFeedback] = useState(null);
   const [customConversionEditor, setCustomConversionEditor] = useState(null);
+  const [customConversionModalOffset, setCustomConversionModalOffset] = useState({x: 0, y: 0});
+  const [customConversionModalDrag, setCustomConversionModalDrag] = useState(null);
+
+  useEffect(() => {
+    const dialog = document.querySelector(".siunits-custom-conversion-dialog");
+
+    if (dialog) {
+      dialog.style.transform = `translate(${customConversionModalOffset.x}px, ${customConversionModalOffset.y}px)`;
+    }
+  }, [customConversionEditor, customConversionModalOffset]);
+
+  useEffect(() => {
+    if (customConversionModalDrag === null) {
+      return undefined;
+    }
+
+    const handleMouseMove = (event) => {
+      setCustomConversionModalOffset({
+        x: customConversionModalDrag.originX + event.clientX - customConversionModalDrag.startX,
+        y: customConversionModalDrag.originY + event.clientY - customConversionModalDrag.startY
+      });
+    };
+
+    const handleMouseUp = () => {
+      setCustomConversionModalDrag(null);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [customConversionModalDrag]);
 
   const toggleRow = (rowId, isOpen) => {
     setOpenRows((current) => ({
@@ -539,6 +574,8 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
   };
 
   const openCustomConversion = (rowId, unit, unitIndex, assignmentId) => {
+    setCustomConversionModalOffset({x: 0, y: 0});
+    setCustomConversionModalDrag(null);
     setCustomConversionEditor({
       rowId,
       unit,
@@ -596,6 +633,25 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       customOperations: normalizeCustomOperations(assignment.customOperations)
         .filter((operation, index) => index !== operationIndex)
     }));
+  };
+
+  const closeCustomConversion = () => {
+    setCustomConversionModalDrag(null);
+    setCustomConversionEditor(null);
+  };
+
+  const startCustomConversionDrag = (event) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    event.preventDefault();
+    setCustomConversionModalDrag({
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: customConversionModalOffset.x,
+      originY: customConversionModalOffset.y
+    });
   };
 
   const applyAssignment = (rowId, unit, unitIndex, assignmentId, closeCustomEditor = false) => {
@@ -680,7 +736,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
 
     setProfile(nextProfile);
     if (closeCustomEditor) {
-      setCustomConversionEditor(null);
+      closeCustomConversion();
     }
     setFeedback({
       rowId,
@@ -897,16 +953,24 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
           </Table>
         )}
       </Card.Body>
-      <Offcanvas
+      <Modal
         show={customConversionEditor !== null}
-        onHide={() => setCustomConversionEditor(null)}
-        placement="bottom"
-        style={{height: "30vh", maxHeight: "30vh"}}
+        onHide={closeCustomConversion}
+        centered
+        scrollable
+        size="lg"
+        dialogClassName="siunits-custom-conversion-dialog"
       >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Custom Conversion</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
+        <Modal.Header closeButton>
+          <div
+            role="presentation"
+            onMouseDown={startCustomConversionDrag}
+            style={{cursor: customConversionModalDrag === null ? "grab" : "grabbing"}}
+          >
+            <Modal.Title>Custom Conversion</Modal.Title>
+          </div>
+        </Modal.Header>
+        <Modal.Body>
           {(() => {
             const editorAssignment = getCurrentEditorAssignment();
 
@@ -924,6 +988,12 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
                     Define scalar operations that replace the default <code>* {customConversionEditor.unit.conversion_factor}</code> conversion when you click <code>Do</code>.
                   </div>
                 </div>
+
+                {feedback?.rowId === customConversionEditor.rowId && feedback?.assignmentId === customConversionEditor.assignmentId && (
+                  <Alert variant={feedback.variant} className="py-2">
+                    {feedback.message}
+                  </Alert>
+                )}
 
                 {customOperations.length === 0 ? (
                   <div className="text-muted mb-3">
@@ -1024,8 +1094,8 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
               </>
             );
           })()}
-        </Offcanvas.Body>
-      </Offcanvas>
+        </Modal.Body>
+      </Modal>
     </Card>
   );
 }
