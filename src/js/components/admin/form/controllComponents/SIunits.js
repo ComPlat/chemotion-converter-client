@@ -1,8 +1,9 @@
 import React, {useState} from "react";
 import PropTypes from "prop-types";
-import {Alert, Button, Card, Form, Table} from "react-bootstrap";
+import {Alert, Button, Card, Form, Offcanvas, OverlayTrigger, Table, Tooltip} from "react-bootstrap";
 import {additionalInfo} from "../../../../utils/identifierUtils";
 import {getInputColumns} from "../../../../utils/profileUtils";
+import OperatorSelect from "../common/OperatorSelect";
 
 const TYPE_MAPPING = {
   header_value: "File regexp value",
@@ -35,7 +36,12 @@ const profileShape = PropTypes.shape({
       columnIndex: PropTypes.number
     }),
     axis: PropTypes.string,
-    unitMode: PropTypes.string
+    unitMode: PropTypes.string,
+    customOperations: PropTypes.arrayOf(PropTypes.shape({
+      operator: PropTypes.string,
+      type: PropTypes.string,
+      value: PropTypes.string
+    }))
   })),
   tables: PropTypes.arrayOf(PropTypes.shape({
     header: PropTypes.object,
@@ -114,12 +120,37 @@ AddAssignmentButton.propTypes = {
   onClick: PropTypes.func.isRequired
 };
 
+function CustomConversionButton({onClick, hasCustomRules}) {
+  return (
+    <OverlayTrigger
+      placement="top"
+      overlay={<Tooltip id="custom-conversion-tooltip">Custom Conversion</Tooltip>}
+    >
+      <Button
+        variant={hasCustomRules ? "success" : "outline-secondary"}
+        size="sm"
+        type="button"
+        onClick={onClick}
+        aria-label="Custom Conversion"
+      >
+        &#9881;
+      </Button>
+    </OverlayTrigger>
+  );
+}
+
+CustomConversionButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  hasCustomRules: PropTypes.bool
+};
+
 const defaultAssignmentConfig = {
   assignmentId: "",
   outputTableIndex: "",
   inputColumn: "",
   axis: "X",
-  unitMode: "Found"
+  unitMode: "Found",
+  customOperations: []
 };
 
 const createAssignmentId = () => (
@@ -147,6 +178,41 @@ const getAssignmentDefaultsFromContext = (defaultAssignmentContext) => {
 };
 
 const hasUuid = (value) => typeof value === "string" && value.trim() !== "";
+
+const normalizeCustomOperation = (operation) => ({
+  operator: operation?.operator || "*",
+  type: "value",
+  value: operation?.value === null || operation?.value === undefined ? "" : String(operation.value)
+});
+
+const normalizeCustomOperations = (operations) => (
+  Array.isArray(operations)
+    ? operations
+      .filter((operation) => operation?.type === undefined || operation.type === "value")
+      .map((operation) => normalizeCustomOperation(operation))
+    : []
+);
+
+const getAppliedSiUnitsOperations = (unit, assignmentConfig) => {
+  if (assignmentConfig.unitMode !== "Base") {
+    return [];
+  }
+
+  const customOperations = normalizeCustomOperations(assignmentConfig.customOperations);
+  if (customOperations.length > 0) {
+    return customOperations.map((operation) => ({
+      ...operation,
+      source: "siUnits"
+    }));
+  }
+
+  return [{
+    type: "value",
+    operator: "*",
+    value: unit.conversion_factor,
+    source: "siUnits"
+  }];
+};
 
 const serializeColumnValue = (column) => {
   if (column === null || column === undefined) {
@@ -219,6 +285,10 @@ const buildSiUnitsDescription = (unit, config, targetTableIndex) => {
   const axisLabel = config.axis === "X" ? "X values" : "Y values";
 
   if (config.unitMode === "Base") {
+    if (normalizeCustomOperations(config.customOperations).length > 0) {
+      return `${SI_DESCRIPTION_PREFIX} For Output Table #${targetTableIndex} ${axisLabel}, the found unit "${unit.found}" from the SI Units table is converted to the base unit "${unit.base_unit}" using custom scalar conversion operations defined in the SI Units table.`;
+    }
+
     return `${SI_DESCRIPTION_PREFIX} For Output Table #${targetTableIndex} ${axisLabel}, the found unit "${unit.found}" from the SI Units table is converted to the base unit "${unit.base_unit}" using conversion factor ${unit.conversion_factor}.`;
   }
 
@@ -229,6 +299,10 @@ const buildSiUnitsAutoText = (unit, config, targetTableIndex) => {
   const axisLabel = config.axis === "X" ? "X values" : "Y values";
 
   if (config.unitMode === "Base") {
+    if (normalizeCustomOperations(config.customOperations).length > 0) {
+      return `${SI_DESCRIPTION_PREFIX} Output Table #${targetTableIndex} ${axisLabel} are configured with custom scalar conversion operations from the SI Units table.`;
+    }
+
     return `${SI_DESCRIPTION_PREFIX} Output Table #${targetTableIndex} ${axisLabel} are configured from the SI Units table.`;
   }
 
@@ -284,7 +358,8 @@ const normalizeStoredAssignment = (entry) => ({
     : String(entry.outputTableIndex),
   inputColumn: serializeColumnValue(entry.inputColumn),
   axis: entry.axis === "Y" ? "Y" : "X",
-  unitMode: entry.unitMode === "Base" ? "Base" : "Found"
+  unitMode: entry.unitMode === "Base" ? "Base" : "Found",
+  customOperations: normalizeCustomOperations(entry.customOperations)
 });
 
 const getStoredAssignments = (storedUnits, allUnits, unit, unitIndex) => {
@@ -304,7 +379,8 @@ const toPersistedAssignment = (unit, unitIndex, assignment) => {
     outputTableIndex: Number.isNaN(parsedOutputTableIndex) ? "" : parsedOutputTableIndex,
     inputColumn: deserializeColumnValue(assignment.inputColumn),
     axis: assignment.axis,
-    unitMode: assignment.unitMode
+    unitMode: assignment.unitMode,
+    customOperations: normalizeCustomOperations(assignment.customOperations)
   };
 
   if (hasUuid(unit?.uuid)) {
@@ -330,6 +406,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
   const [openRows, setOpenRows] = useState({});
   const [rowAssignments, setRowAssignments] = useState({});
   const [feedback, setFeedback] = useState(null);
+  const [customConversionEditor, setCustomConversionEditor] = useState(null);
 
   const toggleRow = (rowId, isOpen) => {
     setOpenRows((current) => ({
@@ -382,6 +459,26 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       ...profile,
       units: persistAssignmentsForRow(unit, unitIndex, nextAssignments)
     });
+    if (key === "unitMode" && value !== "Base" && customConversionEditor?.assignmentId === assignmentId) {
+      setCustomConversionEditor(null);
+    }
+    setFeedback(null);
+  };
+
+  const updateAssignment = (rowId, unit, unitIndex, assignmentId, updater) => {
+    const nextAssignments = getAssignments(rowId, unit, unitIndex).map((assignment) => {
+      if (assignment.assignmentId !== assignmentId) {
+        return assignment;
+      }
+
+      return updater(assignment);
+    });
+
+    setAssignmentsForRow(rowId, nextAssignments);
+    setProfile({
+      ...profile,
+      units: persistAssignmentsForRow(unit, unitIndex, nextAssignments)
+    });
     setFeedback(null);
   };
 
@@ -425,10 +522,73 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       ...profile,
       units: persistAssignmentsForRow(unit, unitIndex, remainingAssignments)
     });
+    if (customConversionEditor?.rowId === rowId && customConversionEditor?.assignmentId === assignmentId) {
+      setCustomConversionEditor(null);
+    }
     setFeedback(null);
   };
 
-  const applyAssignment = (rowId, unit, unitIndex, assignmentId) => {
+  const openCustomConversion = (rowId, unit, unitIndex, assignmentId) => {
+    setCustomConversionEditor({
+      rowId,
+      unit,
+      unitIndex,
+      assignmentId
+    });
+  };
+
+  const getCurrentEditorAssignment = () => {
+    if (customConversionEditor === null) {
+      return null;
+    }
+
+    const assignments = getAssignments(
+      customConversionEditor.rowId,
+      customConversionEditor.unit,
+      customConversionEditor.unitIndex
+    );
+
+    return assignments.find((assignment) => assignment.assignmentId === customConversionEditor.assignmentId) || null;
+  };
+
+  const addCustomScalarOperation = (rowId, unit, unitIndex, assignmentId) => {
+    updateAssignment(rowId, unit, unitIndex, assignmentId, (assignment) => ({
+      ...assignment,
+      customOperations: [
+        ...normalizeCustomOperations(assignment.customOperations),
+        normalizeCustomOperation({
+          operator: "*",
+          value: unit.conversion_factor
+        })
+      ]
+    }));
+  };
+
+  const updateCustomScalarOperation = (rowId, unit, unitIndex, assignmentId, operationIndex, key, value) => {
+    updateAssignment(rowId, unit, unitIndex, assignmentId, (assignment) => ({
+      ...assignment,
+      customOperations: normalizeCustomOperations(assignment.customOperations).map((operation, index) => {
+        if (index !== operationIndex) {
+          return operation;
+        }
+
+        return normalizeCustomOperation({
+          ...operation,
+          [key]: value
+        });
+      })
+    }));
+  };
+
+  const removeCustomScalarOperation = (rowId, unit, unitIndex, assignmentId, operationIndex) => {
+    updateAssignment(rowId, unit, unitIndex, assignmentId, (assignment) => ({
+      ...assignment,
+      customOperations: normalizeCustomOperations(assignment.customOperations)
+        .filter((operation, index) => index !== operationIndex)
+    }));
+  };
+
+  const applyAssignment = (rowId, unit, unitIndex, assignmentId, closeCustomEditor = false) => {
     const assignments = getAssignments(rowId, unit, unitIndex);
     const assignmentConfig = assignments.find((assignment) => assignment.assignmentId === assignmentId);
     const targetTableIndex = Number.parseInt(assignmentConfig.outputTableIndex, 10);
@@ -487,15 +647,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
     const filteredOperations = Array.isArray(nextTable.table[axisConfig.operationsKey])
       ? nextTable.table[axisConfig.operationsKey].filter((operation) => (operation.source === "siUnits" ? false : true))
       : [];
-
-    if (assignmentConfig.unitMode === "Base") {
-      filteredOperations.push({
-        type: "value",
-        operator: "*",
-        value: unit.conversion_factor,
-        source: "siUnits"
-      });
-    }
+    filteredOperations.push(...getAppliedSiUnitsOperations(unit, assignmentConfig));
 
     if (filteredOperations.length === 0) {
       delete nextTable.table[axisConfig.operationsKey];
@@ -517,6 +669,9 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
     nextTable.table[descriptionKey] = description;
 
     setProfile(nextProfile);
+    if (closeCustomEditor) {
+      setCustomConversionEditor(null);
+    }
     setFeedback({
       rowId,
       assignmentId,
@@ -568,9 +723,15 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
                         <tr>
                           <td className="align-top bg-light">
                             <Form.Group className="mb-0">
-                              <Form.Label className="small text-muted mb-1">
-                                Assign to Output Table # using Input Column
-                              </Form.Label>
+                              <div
+                                className="d-flex align-items-center justify-content-between mb-1"
+                                style={{minHeight: "31px"}}
+                              >
+                                <Form.Label className="small text-muted mb-0">
+                                  Assign to Output Table # using Input Column
+                                </Form.Label>
+                                <span style={{width: "31px"}}></span>
+                              </div>
                               <div className="d-flex gap-2 align-items-start">
                                 <DeleteAssignmentButton onClick={() => deleteAssignment(
                                   rowId,
@@ -617,7 +778,13 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
                           </td>
                           <td className="align-top bg-light">
                             <Form.Group className="mb-0">
-                              <Form.Label className="small text-muted mb-1">For</Form.Label>
+                              <div
+                                className="d-flex align-items-center justify-content-between mb-1"
+                                style={{minHeight: "31px"}}
+                              >
+                                <Form.Label className="small text-muted mb-0">For</Form.Label>
+                                <span style={{width: "31px"}}></span>
+                              </div>
                               <Form.Select
                                 size="sm"
                                 value={assignment.axis}
@@ -637,7 +804,25 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
                           </td>
                           <td className="align-top bg-light">
                             <Form.Group className="mb-0">
-                              <Form.Label className="small text-muted mb-1">As</Form.Label>
+                              <div
+                                className="d-flex align-items-center justify-content-between mb-1"
+                                style={{minHeight: "31px"}}
+                              >
+                                <Form.Label className="small text-muted mb-0">As</Form.Label>
+                                {assignment.unitMode === "Base" ? (
+                                  <CustomConversionButton
+                                    hasCustomRules={normalizeCustomOperations(assignment.customOperations).length > 0}
+                                    onClick={() => openCustomConversion(
+                                      rowId,
+                                      unit,
+                                      unitIndex,
+                                      assignment.assignmentId
+                                    )}
+                                  />
+                                ) : (
+                                  <span style={{width: "31px"}}></span>
+                                )}
+                              </div>
                               <Form.Select
                                 size="sm"
                                 value={assignment.unitMode}
@@ -657,6 +842,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
                           </td>
                           <td className="align-top bg-light text-center">
                             <div className="d-flex flex-column align-items-center gap-2">
+                              <div className="mb-1" style={{minHeight: "31px", width: "31px"}}></div>
                               <AddAssignmentButton onClick={() => addAssignment(rowId, unit, unitIndex)} />
                               <Button
                                 variant="secondary"
@@ -692,6 +878,135 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
           </Table>
         )}
       </Card.Body>
+      <Offcanvas
+        show={customConversionEditor !== null}
+        onHide={() => setCustomConversionEditor(null)}
+        placement="bottom"
+        style={{height: "30vh", maxHeight: "30vh"}}
+      >
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Custom Conversion</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          {(() => {
+            const editorAssignment = getCurrentEditorAssignment();
+
+            if (customConversionEditor === null || editorAssignment === null) {
+              return null;
+            }
+
+            const customOperations = normalizeCustomOperations(editorAssignment.customOperations);
+
+            return (
+              <>
+                <div className="mb-3">
+                  <strong>{customConversionEditor.unit.found}</strong> to <strong>{customConversionEditor.unit.base_unit}</strong>
+                  <div className="text-muted small">
+                    Define scalar operations that replace the default <code>* {customConversionEditor.unit.conversion_factor}</code> conversion when you click <code>Do</code>.
+                  </div>
+                </div>
+
+                {customOperations.length === 0 ? (
+                  <div className="text-muted mb-3">
+                    No custom scalar operations defined. The default conversion factor will be used.
+                  </div>
+                ) : (
+                  <>
+                    {customOperations.map((operation, index) => (
+                      <div key={`custom-scalar-operation-${editorAssignment.assignmentId}-${index}`} className="d-flex gap-2 align-items-end mb-2">
+                        <div style={{minWidth: "110px"}}>
+                          <Form.Label className="small text-muted mb-1">Operator</Form.Label>
+                          <OperatorSelect
+                            value={operation.operator}
+                            onChange={(value) => updateCustomScalarOperation(
+                              customConversionEditor.rowId,
+                              customConversionEditor.unit,
+                              customConversionEditor.unitIndex,
+                              customConversionEditor.assignmentId,
+                              index,
+                              "operator",
+                              value
+                            )}
+                          />
+                        </div>
+                        <div className="flex-grow-1">
+                          <Form.Label className="small text-muted mb-1">Scalar value</Form.Label>
+                          <Form.Control
+                            size="sm"
+                            value={operation.value}
+                            onChange={(event) => updateCustomScalarOperation(
+                              customConversionEditor.rowId,
+                              customConversionEditor.unit,
+                              customConversionEditor.unitIndex,
+                              customConversionEditor.assignmentId,
+                              index,
+                              "value",
+                              event.target.value
+                            )}
+                          />
+                        </div>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          type="button"
+                          onClick={() => removeCustomScalarOperation(
+                            customConversionEditor.rowId,
+                            customConversionEditor.unit,
+                            customConversionEditor.unitIndex,
+                            customConversionEditor.assignmentId,
+                            index
+                          )}
+                        >
+                          &times;
+                        </Button>
+                      </div>
+                    ))}
+
+                    <Form.Group controlId="si-custom-operation-preview" className="mt-3">
+                      <Form.Label column="lg">Operations description</Form.Label>
+                      <pre className="text-muted">
+                        {customOperations.map((operation) => (
+                          operation.operator + " [" + (TYPE_MAPPING[operation.type] || "??") + additionalInfo(operation) + "]"
+                        )).join(" ")}
+                      </pre>
+                    </Form.Group>
+                  </>
+                )}
+
+                <div className="d-flex gap-2 mt-3">
+                  <Button
+                    variant="success"
+                    size="sm"
+                    type="button"
+                    onClick={() => addCustomScalarOperation(
+                      customConversionEditor.rowId,
+                      customConversionEditor.unit,
+                      customConversionEditor.unitIndex,
+                      customConversionEditor.assignmentId
+                    )}
+                  >
+                    Add scalar operation
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    type="button"
+                    onClick={() => applyAssignment(
+                      customConversionEditor.rowId,
+                      customConversionEditor.unit,
+                      customConversionEditor.unitIndex,
+                      customConversionEditor.assignmentId,
+                      true
+                    )}
+                  >
+                    Do
+                  </Button>
+                </div>
+              </>
+            );
+          })()}
+        </Offcanvas.Body>
+      </Offcanvas>
     </Card>
   );
 }
