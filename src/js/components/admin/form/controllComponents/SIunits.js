@@ -54,22 +54,32 @@ const defaultAssignmentContextShape = PropTypes.shape({
   axis: PropTypes.oneOf(["X", "Y"])
 });
 
-function UnitAssignmentToggle({isOpen, onToggle}) {
+function UnitAssignmentToggle({displayState, onToggle}) {
+  const isOpen = displayState === "open";
+  const hasHiddenAssignments = displayState === "hidden";
+  const variant = isOpen
+    ? "outline-info"
+    : (hasHiddenAssignments ? "warning" : "outline-success");
+  const label = isOpen
+    ? "Hide SI unit assignments"
+    : (hasHiddenAssignments ? "Show hidden SI unit assignments" : "Create SI unit assignment");
+
   return (
     <Button
-      variant={isOpen ? "outline-info" : "outline-success"}
+      variant={variant}
       size="sm"
       onClick={onToggle}
       aria-expanded={isOpen}
-      aria-label={isOpen ? "Hide SI unit assignment" : "Show SI unit assignment"}
+      aria-label={label}
+      title={label}
     >
-      <b>{isOpen ? "-" : "+"}</b>
+      <b>{isOpen ? "-" : (hasHiddenAssignments ? "\u{1F441}" : "+")}</b>
     </Button>
   );
 }
 
 UnitAssignmentToggle.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
+  displayState: PropTypes.oneOf(["empty", "hidden", "open"]).isRequired,
   onToggle: PropTypes.func.isRequired
 };
 
@@ -703,7 +713,10 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
                 const rowId = (unit.found || "unit") + "-" + unitIndex;
                 const assignments = getAssignments(rowId, unit, unitIndex);
                 const hasStoredAssignments = getStoredAssignments(storedUnits, units, unit, unitIndex).length > 0;
+                const hasLocalAssignments = Array.isArray(rowAssignments[rowId]) && rowAssignments[rowId].length > 0;
+                const hasAssignments = hasStoredAssignments || hasLocalAssignments;
                 const isOpen = openRows[rowId] === undefined ? hasStoredAssignments : Boolean(openRows[rowId]);
+                const toggleState = isOpen ? "open" : (hasAssignments ? "hidden" : "empty");
 
                 return (
                   <React.Fragment key={rowId}>
@@ -713,7 +726,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
                       <td>{unit.base_unit}</td>
                       <td className="text-center align-middle">
                         <UnitAssignmentToggle
-                          isOpen={isOpen}
+                          displayState={toggleState}
                           onToggle={() => toggleRow(rowId, isOpen)}
                         />
                       </td>
@@ -841,22 +854,28 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
                             </Form.Group>
                           </td>
                           <td className="align-top bg-light text-center">
-                            <div className="d-flex flex-column align-items-center gap-2">
-                              <div className="mb-1" style={{minHeight: "31px", width: "31px"}}></div>
-                              <AddAssignmentButton onClick={() => addAssignment(rowId, unit, unitIndex)} />
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                type="button"
-                                onClick={() => applyAssignment(
-                                  rowId,
-                                  unit,
-                                  unitIndex,
-                                  assignment.assignmentId
-                                )}
+                            <div className="d-flex flex-column">
+                              <div
+                                className="d-flex align-items-center justify-content-center mb-1"
+                                style={{minHeight: "31px"}}
                               >
-                                Do
-                              </Button>
+                                <AddAssignmentButton onClick={() => addAssignment(rowId, unit, unitIndex)} />
+                              </div>
+                              <div className="d-flex align-items-center justify-content-center">
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  type="button"
+                                  onClick={() => applyAssignment(
+                                    rowId,
+                                    unit,
+                                    unitIndex,
+                                    assignment.assignmentId
+                                  )}
+                                >
+                                  Do
+                                </Button>
+                              </div>
                             </div>
                           </td>
                         </tr>
