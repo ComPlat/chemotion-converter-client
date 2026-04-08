@@ -408,6 +408,16 @@ const replaceStoredAssignments = (profileValue, allUnits, unit, unitIndex, assig
   return remainingUnits.concat(persistedAssignments);
 };
 
+const getRowId = (unit, unitIndex) => ((unit?.found || "unit") + "-" + unitIndex);
+
+const matchesAssignmentTarget = (entry, targetTableIndex, axis) => {
+  const entryOutputTableIndex = Number.parseInt(entry.outputTableIndex, 10);
+
+  return Number.isNaN(entryOutputTableIndex) === false
+    && entryOutputTableIndex === targetTableIndex
+    && entry.axis === axis;
+};
+
 export default function SIunits({profile, setProfile, defaultAssignmentContext}) {
   const units = profile?.data?.units ?? [];
   const storedUnits = normalizeStoredUnits(profile?.units ?? []);
@@ -416,6 +426,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
   const [openRows, setOpenRows] = useState({});
   const [rowAssignments, setRowAssignments] = useState({});
   const [feedback, setFeedback] = useState(null);
+  const [overwriteConfirmation, setOverwriteConfirmation] = useState(null);
   const [customConversionEditor, setCustomConversionEditor] = useState(null);
   const [customConversionModalOffset, setCustomConversionModalOffset] = useState({x: 0, y: 0});
   const [customConversionModalDrag, setCustomConversionModalDrag] = useState(null);
@@ -458,6 +469,10 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       ...current,
       [rowId]: isOpen ? false : true
     }));
+  };
+
+  const clearOverwriteConfirmation = () => {
+    setOverwriteConfirmation(null);
   };
 
   const getAssignments = (rowId, unit, unitIndex) => {
@@ -504,6 +519,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       ...profile,
       units: persistAssignmentsForRow(unit, unitIndex, nextAssignments)
     });
+    clearOverwriteConfirmation();
     if (key === "unitMode" && value !== "Base" && customConversionEditor?.assignmentId === assignmentId) {
       setCustomConversionEditor(null);
     }
@@ -524,6 +540,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       ...profile,
       units: persistAssignmentsForRow(unit, unitIndex, nextAssignments)
     });
+    clearOverwriteConfirmation();
     setFeedback(null);
   };
 
@@ -542,6 +559,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       ...profile,
       units: persistAssignmentsForRow(unit, unitIndex, nextAssignments)
     });
+    clearOverwriteConfirmation();
     setFeedback(null);
   };
 
@@ -567,6 +585,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       ...profile,
       units: persistAssignmentsForRow(unit, unitIndex, remainingAssignments)
     });
+    clearOverwriteConfirmation();
     if (customConversionEditor?.rowId === rowId && customConversionEditor?.assignmentId === assignmentId) {
       setCustomConversionEditor(null);
     }
@@ -693,11 +712,40 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
     const axisConfig = assignmentConfig.axis === "X"
       ? {columnKey: "xColumn", operationsKey: "xOperations", unitsKey: "XUNITS"}
       : {columnKey: "yColumn", operationsKey: "yOperations", unitsKey: "YUNITS"};
+    const nextUnits = persistAssignmentsForRow(unit, unitIndex, assignments);
+    const conflictingAssignments = nextUnits.filter((entry) => (
+      entry.assignmentId !== assignmentId
+      && matchesAssignmentTarget(entry, targetTableIndex, assignmentConfig.axis)
+    ));
+
+    if (conflictingAssignments.length > 0) {
+      const isConfirmedOverwrite = overwriteConfirmation
+        && overwriteConfirmation.rowId === rowId
+        && overwriteConfirmation.assignmentId === assignmentId
+        && overwriteConfirmation.outputTableIndex === targetTableIndex
+        && overwriteConfirmation.axis === assignmentConfig.axis;
+
+      if (isConfirmedOverwrite !== true) {
+        setOverwriteConfirmation({
+          rowId,
+          assignmentId,
+          outputTableIndex: targetTableIndex,
+          axis: assignmentConfig.axis
+        });
+        setFeedback({
+          rowId,
+          assignmentId,
+          variant: "warning",
+          message: `Output table #${targetTableIndex} ${assignmentConfig.axis} is already assigned in another SI unit row. Click Do again to overwrite it and remove the previous assignment.`
+        });
+        return;
+      }
+    }
 
     const nextProfile = {
       ...profile,
       tables: [...outputTables],
-      units: persistAssignmentsForRow(unit, unitIndex, assignments)
+      units: nextUnits
     };
     const currentTable = outputTables[targetTableIndex] || {};
     const nextTable = {
@@ -734,7 +782,53 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
     }
     nextTable.table[descriptionKey] = description;
 
+    if (conflictingAssignments.length > 0) {
+      const conflictingAssignmentIds = new Set(conflictingAssignments.map((entry) => entry.assignmentId));
+      nextProfile.units = nextProfile.units.filter((entry) => conflictingAssignmentIds.has(entry.assignmentId) === false);
+
+      setRowAssignments((current) => {
+        const next = {...current};
+
+        conflictingAssignments.forEach((entry) => {
+          const conflictUnit = units[entry.rowIndex];
+          const conflictRowId = getRowId(conflictUnit, entry.rowIndex);
+
+          if (Array.isArray(next[conflictRowId])) {
+            const filteredAssignments = next[conflictRowId]
+              .filter((currentAssignment) => conflictingAssignmentIds.has(currentAssignment.assignmentId) === false);
+
+            if (filteredAssignments.length > 0) {
+              next[conflictRowId] = filteredAssignments;
+            } else {
+              delete next[conflictRowId];
+            }
+          }
+        });
+
+        return next;
+      });
+
+      setOpenRows((current) => {
+        const next = {...current};
+
+        conflictingAssignments.forEach((entry) => {
+          const conflictUnit = units[entry.rowIndex];
+          const conflictRowId = getRowId(conflictUnit, entry.rowIndex);
+          const hasRemainingStoredAssignments = nextProfile.units.some((storedEntry) => (
+            conflictUnit ? isSameUnitEntry(storedEntry, conflictUnit, entry.rowIndex, units) : false
+          ));
+
+          if (hasRemainingStoredAssignments === false) {
+            next[conflictRowId] = false;
+          }
+        });
+
+        return next;
+      });
+    }
+
     setProfile(nextProfile);
+    clearOverwriteConfirmation();
     if (closeCustomEditor) {
       closeCustomConversion();
     }
@@ -766,7 +860,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
             </thead>
             <tbody>
               {units.map((unit, unitIndex) => {
-                const rowId = (unit.found || "unit") + "-" + unitIndex;
+                const rowId = getRowId(unit, unitIndex);
                 const assignments = getAssignments(rowId, unit, unitIndex);
                 const hasStoredAssignments = getStoredAssignments(storedUnits, units, unit, unitIndex).length > 0;
                 const hasLocalAssignments = Array.isArray(rowAssignments[rowId]) && rowAssignments[rowId].length > 0;
