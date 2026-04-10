@@ -1,10 +1,9 @@
-import React, {useEffect, useState} from "react"
+import React, {useCallback, useEffect, useState} from "react"
 import PropTypes from 'prop-types';
-import {Alert, Button, ButtonGroup, Modal, Row} from 'react-bootstrap';
+import {Alert, Button, ButtonGroup, Row} from 'react-bootstrap';
 
 import InputTables from "./common/InputTables";
 import FormNavigatorCol from "./controllComponents/FormNavigator";
-import FileUploadForm from "../upload/FileUploadForm";
 
 const profileShape = PropTypes.shape({
   data: PropTypes.oneOfType([
@@ -31,17 +30,14 @@ function ProfileForm({
                        updateProfile,
                        storeProfile,
                        error,
-                       uploadError,
                        errorMessage,
-                       onFileChangeHandler,
-                       onSubmitFileHandler,
-                       isLoading,
-                       savable
+                       savable,
+                       handleShowFileUpload,
+                       tableIdx,
+                       setTableIdx
                      }) {
 
   const [activeTabKey, setActiveTabKey] = useState("basics");
-  const [tableIdx, setTableIdx] = useState(0);
-  const [showFileUpload, setShowFileUpload] = useState(false);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -57,6 +53,16 @@ function ProfileForm({
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [savable]);
+
+  const onDeleteInputFile = useCallback((idx) => {
+    if (profile.data.length <= 1) {
+      return
+    }
+    const newData = [...profile.data];
+    newData.splice(idx, 1);
+    const newProfile = {...profile, data: newData};
+    updateProfile(newProfile)
+  }, []);
 
   const _onSubmit = (silent) => {
     const errors = [];
@@ -101,37 +107,12 @@ function ProfileForm({
     });
   }
 
-  const handleShowFileUpload = () => setShowFileUpload(true);
-  const handleCloseFileUpload = () => setShowFileUpload(false);
-  const submitFileHandler = async () => {
-    const res = await onSubmitFileHandler();
-    if (res) {
-      handleCloseFileUpload();
-    }
-  }
-
-
   if (!profile?.data) return null;
 
   profile.tables.map((table) => table.loopType = table.loopType ?? "all")
 
   return (
     <div>
-      <Modal show={showFileUpload} onHide={handleCloseFileUpload}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add File</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <FileUploadForm
-            onFileChangeHandler={onFileChangeHandler}
-            onSubmitFileHandler={submitFileHandler}
-            errorMessage={errorMessage}
-            error={uploadError}
-            isLoading={isLoading}
-            disabled={false}
-          />
-        </Modal.Body>
-      </Modal>
       <ButtonGroup style={{
         position: "fixed",
         top: '10px',
@@ -141,12 +122,12 @@ function ProfileForm({
           {status === 'create' ? 'Create profile' : 'Update profile'} & add input File
         </Button>
         <Button disabled={!savable}
-          variant="primary" onClick={onSubmitSilent}>
+                variant="primary" onClick={onSubmitSilent}>
           {status === 'create' && 'Create profile'}
           {status === 'update' && 'Update profile'}
         </Button>
         <Button disabled={!savable}
-          variant="primary" onClick={onSubmit}>
+                variant="primary" onClick={onSubmit}>
           {status === 'create' && 'Create profile & close'}
           {status === 'update' && 'Update profile & close'}
         </Button>
@@ -157,7 +138,11 @@ function ProfileForm({
             <Alert variant="danger" dismissible>{errorMessage}</Alert>
           </div>
         )}
-        <InputTables setActiveTabKey={setActiveTabKey} profile={profile} setProfile={updateProfile} tableIdx={tableIdx}
+        <InputTables setActiveTabKey={setActiveTabKey}
+                     profile={profile}
+                     setProfile={updateProfile}
+                     tableIdx={tableIdx}
+                     onDeleteInputFile={onDeleteInputFile}
                      setTableIdx={setTableIdx}/>
         <FormNavigatorCol
           profile={profile}
@@ -176,19 +161,18 @@ function ProfileForm({
 }
 
 ProfileForm.propTypes = {
-  status: PropTypes.string,
-  profile: profileShape,
-  options: PropTypes.object,
-  datasets: PropTypes.array,
-  updateProfile: PropTypes.func,
-  storeProfile: PropTypes.func,
-  error: PropTypes.bool,
-  uploadError: PropTypes.bool,
-  errorMessage: PropTypes.string,
-  onFileChangeHandler: PropTypes.func,
-  onSubmitFileHandler: PropTypes.func,
-  isLoading: PropTypes.bool,
-  savable: PropTypes.bool,
+  status: PropTypes.string.isRequired,
+  profile: profileShape.isRequired,
+  options: PropTypes.object.isRequired,
+  datasets: PropTypes.array.isRequired,
+  updateProfile: PropTypes.func.isRequired,
+  storeProfile: PropTypes.func.isRequired,
+  error: PropTypes.bool.isRequired,
+  errorMessage: PropTypes.string.isRequired,
+  savable: PropTypes.bool.isRequired,
+  onFilehandleShowFileUploadChangeHandler: PropTypes.func.isRequired,
+  setTableIdx: PropTypes.func.isRequired,
+  tableIdx: PropTypes.number.isRequired,
 }
 
 export default ProfileForm

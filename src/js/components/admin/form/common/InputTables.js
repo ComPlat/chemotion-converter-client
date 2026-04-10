@@ -1,4 +1,4 @@
-import {Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
+import {Button, Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
 import PropTypes from 'prop-types';
 import React, {useEffect, useState} from "react";
 import FileHeaderPresenter from "../HeaderPresenter";
@@ -32,14 +32,14 @@ const profileShape = PropTypes.shape({
 });
 
 function FileHeader({setActiveTabKey, header, tableIndex, profile, setProfile, tableIdx}) {
-  const { addIdentifier, updateRegex } = BuildIdentifierHandler(profile, setProfile, null, tableIdx);
+  const {addIdentifier, updateRegex} = BuildIdentifierHandler(profile, setProfile, null, tableIdx);
   return <FileHeaderPresenter addIdentifier={(value) => {
     setActiveTabKey('metadata');
     addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
   }} header={header} updateRegex={(value) => {
     return updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});
   }} profile={profile} setProfile={setProfile} tableIndex={tableIndex}
-  dataIndex={tableIdx}
+                              dataIndex={tableIdx}
   ></FileHeaderPresenter>
 }
 
@@ -160,7 +160,8 @@ function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeK
                     </span>
                 </OverlayTrigger>
               </h4>
-              <FileHeader setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile} header={activeTable.header} tableIndex={activeKey} tableIdx={tableIdx}></FileHeader>
+              <FileHeader setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile}
+                          header={activeTable.header} tableIndex={activeKey} tableIdx={tableIdx}></FileHeader>
             </div>
           )}
 
@@ -186,7 +187,7 @@ TabContents.propTypes = {
   tableIdx: PropTypes.number.isRequired
 };
 
-function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableIdx}) {
+function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableIdx, onDeleteInputFile}) {
   const profileData = getProfileData(profile, tableIdx);
 
   const handleSelect = (selectedKey) => {
@@ -243,8 +244,19 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
             >
               <NavDropdown title={profile.data[tableIdx].metadata.file_name} id="nav-data-source-dropdown">
                 {profile.data.map((dataEntry, idx) => (
-                  <NavDropdown.Item eventKey={idx} key={idx}>
-                    {profile.data[idx].metadata.file_name}
+                  <NavDropdown.Item eventKey={idx} key={idx}
+                                    className="d-flex justify-content-between align-items-center">
+                    <span>{profile.data[idx].metadata.file_name}</span>
+
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="ms-2"
+                      onClick={() => onDeleteInputFile(idx)}
+                    >
+                      ✕
+                    </Button>
+
                   </NavDropdown.Item>
                 ))}
               </NavDropdown>
@@ -262,7 +274,9 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
               {tabs}
             </NavDropdown>
           </Nav>
-          <TabContents setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile} activeTable={profileData.tables[activeKey]} activeKey={activeKey} tableIdx={tableIdx}></TabContents>
+          <TabContents setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile}
+                       activeTable={profileData.tables[activeKey]} activeKey={activeKey}
+                       tableIdx={tableIdx}></TabContents>
         </div>
       ) : (
         <p>
@@ -277,7 +291,8 @@ InputTables.propTypes = {
   setProfile: PropTypes.func.isRequired,
   setActiveTabKey: PropTypes.func.isRequired,
   tableIdx: PropTypes.number.isRequired,
-  setTableIdx: PropTypes.func.isRequired
+  setTableIdx: PropTypes.func.isRequired,
+  onDeleteInputFile: PropTypes.func.isRequired
 }
 
 export default InputTables

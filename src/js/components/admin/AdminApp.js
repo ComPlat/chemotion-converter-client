@@ -32,6 +32,10 @@ function AdminApp() {
   const [isLoading, setIsLoading] = useState(false);
   const [createdModal, setCreatedModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
+  const [identifierWarningModal, setIdentifierWarningModal] = useState(false);
+  const [pendingUploadFile, setPendingUploadFile] = useState(null);
+  const [showFileUpload, setShowFileUpload] = useState(false);
+  const [tableIdx, setTableIdx] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -188,53 +192,30 @@ function AdminApp() {
       })
   };
 
-  const uploadFile = async () => {
-
-    if (profile) {
-      const storedProfile = await storeProfile(true);
-      let profileId;
-      try {
-        const res = await (await ConverterApi.fetchConversion(selectedFile, 'metajson', false)).json();
-        profileId = res.profile_id;
-      } catch {
-      }
-      if (profileId !== storedProfile.id) {
-        setUploadError(true);
-        setErrorMessage('The file cannot be recognised by the configured identifier!');
-        return;
-      }
-    }
+  const processUploadedFile = (file) => {
     setIsLoading(true);
 
-    return ConverterApi.fetchTables(selectedFile)
+    return ConverterApi.fetchTables(file)
       .then(data => {
         if (data) {
           const uploadedProfileData = Array.isArray(data) ? data[0] : data;
           const currentProfileData = getProfileData(profile, 0);
           let nextProfile = {};
           if (profile) {
-            if (uploadedProfileData?.metadata?.reader === currentProfileData?.metadata?.reader) {
-
-              const fileExists = profile.data.some(item => item.metadata.file_name === uploadedProfileData?.metadata?.file_name);
-              if (fileExists) {
-                setUploadError(true);
-                setErrorMessage('The uploaded file already in the Profile!.');
-                setIsLoading(false);
-
-                return false;
-              }
-              nextProfile = {
-                ...profile,
-                data: [...profile.data, data]
-              };
-              setStatus('update');
-            } else {
+            const fileExists = profile.data.some(item => item.metadata.file_name === uploadedProfileData?.metadata?.file_name);
+            if (fileExists) {
               setUploadError(true);
-              setErrorMessage('The uploaded file cannot be read by the reader for this profile.');
+              setErrorMessage('The uploaded file already in the Profile!.');
               setIsLoading(false);
 
               return false;
             }
+            nextProfile = {
+              ...profile,
+              data: [...profile.data, data]
+            };
+            setTableIdx(nextProfile.data.length - 1);
+            setStatus('update');
           } else {
             nextProfile = {
               title: '',
@@ -275,6 +256,38 @@ function AdminApp() {
       })
   };
 
+  const uploadFile = async () => {
+    if (profile) {
+      const storedProfile = await storeProfile(true);
+      let profileId;
+      try {
+        const res = await (await ConverterApi.fetchConversion(selectedFile, 'metajson', false)).json();
+        profileId = res.profile_id;
+      } catch {
+      }
+      if (profileId !== storedProfile.id) {
+        setShowFileUpload(false);
+        setPendingUploadFile(selectedFile);
+        setIdentifierWarningModal(true);
+        return;
+      }
+    }
+
+    return processUploadedFile(selectedFile);
+  };
+
+  const confirmIdentifierWarning = () => {
+    setIdentifierWarningModal(false);
+    const file = pendingUploadFile;
+    setPendingUploadFile(null);
+    return processUploadedFile(file);
+  };
+
+  const cancelIdentifierWarning = () => {
+    setIdentifierWarningModal(false);
+    setPendingUploadFile(null);
+  };
+
   const importFile = () => {
     setIsLoading(true);
 
@@ -287,6 +300,15 @@ function AdminApp() {
     reader.readAsText(selectedFile)
     reader.onload = handleLoad
   };
+
+  const handleCloseFileUpload = () => setShowFileUpload(false);
+  const handleShowFileUpload = () => setShowFileUpload(true);
+  const submitFileHandler = async () => {
+    const res = await uploadFile();
+    if (res) {
+      handleCloseFileUpload();
+    }
+  }
 
   const dispatchView = () => {
     if (status === 'list') {
@@ -322,12 +344,11 @@ function AdminApp() {
           errorMessage={errorMessage}
           savable={profile !== originProfile}
           error={error}
-          uploadError={uploadError}
           updateProfile={updateProfile}
           storeProfile={storeProfile}
-          onFileChangeHandler={updateFile}
-          onSubmitFileHandler={uploadFile}
-          isLoading={isLoading}
+          handleShowFileUpload={handleShowFileUpload}
+          tableIdx={tableIdx}
+          setTableIdx={setTableIdx}
         />
       )
     }
@@ -401,6 +422,36 @@ function AdminApp() {
           <Button variant="default" onClick={hideDeleteModal}>Cancel</Button>
           <Button variant="danger" onClick={deleteProfile}>Delete profile</Button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal show={identifierWarningModal}>
+        <Modal.Header>
+          <Modal.Title>Identifier mismatch</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          The file was converted by a different profile. It is most likely that the identifiers do not match. Do you
+          still want to use this file?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cancelIdentifierWarning}>Cancel</Button>
+          <Button variant="warning" onClick={confirmIdentifierWarning}>Use file anyway</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showFileUpload} onHide={handleCloseFileUpload}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add File</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <FileUploadForm
+            onFileChangeHandler={updateFile}
+            onSubmitFileHandler={submitFileHandler}
+            errorMessage={errorMessage}
+            error={uploadError}
+            isLoading={isLoading}
+            disabled={false}
+          />
+        </Modal.Body>
       </Modal>
     </Container>
   )
