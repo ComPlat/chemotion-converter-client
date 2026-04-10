@@ -16,13 +16,13 @@ const profileShape = PropTypes.shape({
 });
 
 
-function CheckIdentifier({profile, setProfile, dataset, options}) {
+function CheckIdentifier({profile, setProfile, dataset, options, tableIdx}) {
 
-  const inputTables = getInputTables(profile);
-  const fileMetadataOptions = getFileMetadataOptions(profile);
-  const tableMetadataOptions = getTableMetadataOptions(profile);
+  const inputTables = getInputTables(profile, tableIdx);
+  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
 
-  const ih = BuildIdentifierHandler(profile, setProfile, dataset);
+  const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);
 
   return (<Card className="mt-3">
     <Card.Header>Identifiers</Card.Header>
@@ -77,17 +77,18 @@ CheckIdentifier.propTypes = {
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
   dataset: PropTypes.object,
-  options: PropTypes.object
+  options: PropTypes.object,
+  tableIdx: PropTypes.number.isRequired
 };
 
 
-function MetadataIdentifier({profile, setProfile, dataset, options}) {
+function MetadataIdentifier({profile, setProfile, dataset, options, tableIdx}) {
 
-  const inputTables = getInputTables(profile);
-  const fileMetadataOptions = getFileMetadataOptions(profile);
-  const tableMetadataOptions = getTableMetadataOptions(profile);
+  const inputTables = getInputTables(profile, tableIdx);
+  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
 
-  const ih = BuildIdentifierHandler(profile, setProfile, dataset);
+  const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);
   const [open, setOpen] = useState(false);
 
   return (<>
@@ -174,7 +175,8 @@ MetadataIdentifier.propTypes = {
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
   dataset: PropTypes.object,
-  options: PropTypes.object
+  options: PropTypes.object,
+  tableIdx: PropTypes.number.isRequired
 };
 
 export {

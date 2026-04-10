@@ -1,159 +1,178 @@
-import React, {useState} from "react"
+import React, {useCallback, useEffect, useState} from "react"
 import PropTypes from 'prop-types';
-import {
-	Button,
-	Col,
-	Row,
-	Alert, ButtonGroup, Modal
-} from 'react-bootstrap';
+import {Alert, Button, ButtonGroup, Row} from 'react-bootstrap';
 
 import InputTables from "./common/InputTables";
 import FormNavigatorCol from "./controllComponents/FormNavigator";
-import FileUploadForm from "../upload/FileUploadForm";
 
 const profileShape = PropTypes.shape({
-	data: PropTypes.shape({
-		metadata: PropTypes.object,
-		tables: PropTypes.array
-	}),
-	tables: PropTypes.arrayOf(PropTypes.shape({
-		table: PropTypes.object,
-		loopType: PropTypes.string
-	})).isRequired
+  data: PropTypes.oneOfType([
+    PropTypes.shape({
+      metadata: PropTypes.object,
+      tables: PropTypes.array
+    }),
+    PropTypes.arrayOf(PropTypes.shape({
+      metadata: PropTypes.object,
+      tables: PropTypes.array
+    }))
+  ]),
+  tables: PropTypes.arrayOf(PropTypes.shape({
+    table: PropTypes.object,
+    loopType: PropTypes.string
+  })).isRequired
 });
 
 function ProfileForm({
-											 status,
-											 profile,
-											 options,
-											 datasets,
-											 updateProfile,
-											 storeProfile,
-											 error,
-											 uploadError,
-											 errorMessage,
-											 onFileChangeHandler,
-											 onSubmitFileHandler,
-											 isLoading
-										 }) {
+                       status,
+                       profile,
+                       options,
+                       datasets,
+                       updateProfile,
+                       storeProfile,
+                       error,
+                       errorMessage,
+                       savable,
+                       handleShowFileUpload,
+                       tableIdx,
+                       setTableIdx
+                     }) {
 
-	const [activeTabKey, setActiveTabKey] = useState("basics");
-	const [showFileUpload, setShowFileUpload] = useState(false);
+  const [activeTabKey, setActiveTabKey] = useState("basics");
 
-	const onSubmit = (event) => {
-		event.preventDefault();
-		const errors = [];
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (savable) {
+        event.preventDefault();
+        event.returnValue = ""; // Required for Chrome
+      }
+    };
 
-		check_loop_fields(profile, errors);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
-		if (errors.length > 0) {
-			alert(errors.join("\n"));
-			return;
-		}
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [savable]);
 
-		storeProfile();
-	}
+  const onDeleteInputFile = useCallback((idx) => {
+    if (profile.data.length <= 1) {
+      return
+    }
+    const newData = [...profile.data];
+    newData.splice(idx, 1);
+    const newProfile = {...profile, data: newData};
+    updateProfile(newProfile)
+  }, []);
 
-	const check_loop_fields = (profile, errors) => {
-		profile.tables.forEach((t, tableIndex) => {
-			t.table['loop_header']?.forEach((lh, lhIndex) => {
-				if (lh.column?.columnIndex == null) {
-					errors.push(`In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`);
-				}
-			});
-			t.table['loop_theader']?.forEach((lh, lhIndex) => {
-				if (lh.line === "" || lh.regex === "") {
-					errors.push(`In Output Table ${tableIndex}: no line or regex selected for loop condition ${lhIndex}`);
-				}
-			});
-			t.table['loop_metadata']?.forEach((lh, lhIndex) => {
-				if (lh.metadata == null) {
-					errors.push(`In Output Table ${tableIndex}: no metadata selected for loop condition ${lhIndex}`);
-				}
-			});
-		});
-	}
+  const _onSubmit = (silent) => {
+    const errors = [];
 
-	const handleShowFileUpload = () => setShowFileUpload(true);
-	const handleCloseFileUpload = () => setShowFileUpload(false);
-	const submitFileHandler = async () => {
-		const res = await onSubmitFileHandler();
-		if (res) {
-			handleCloseFileUpload();
-		}
-	}
+    check_loop_fields(profile, errors);
 
+    if (errors.length > 0) {
+      alert(errors.join("\n"));
+      return;
+    }
 
-	if (!profile?.data) return null;
+    storeProfile(silent);
+  }
 
-	profile.tables.map((table) => table.loopType = table.loopType ?? "all")
+  const onSubmit = (event) => {
+    event.preventDefault();
+    return _onSubmit(false);
+  }
 
-	return (
-		<div>
-			<Modal show={showFileUpload} onHide={handleCloseFileUpload}>
-				<Modal.Header closeButton>
-					<Modal.Title>Replace File</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<FileUploadForm
-						onFileChangeHandler={onFileChangeHandler}
-						onSubmitFileHandler={submitFileHandler}
-						errorMessage={errorMessage}
-						error={uploadError}
-						isLoading={isLoading}
-						disabled={false}
-					/>
-				</Modal.Body>
-			</Modal>
-			<ButtonGroup style={{
-				position: "fixed",
-				top: '10px',
-				right: '10px',
-			}}>
-				<Button variant="warning" onClick={handleShowFileUpload}>
-					Replace input File
-				</Button>
-				<Button
-					variant="primary" onClick={onSubmit}>
-					{status === 'create' && 'Create profile'}
-					{status === 'update' && 'Update profile'}
-				</Button>
-			</ButtonGroup>
-			<Row>
-				{error && (
-					<div className="fixed-alert-container">
-						<Alert variant="danger" dismissible>{errorMessage}</Alert>
-					</div>
-				)}
-				<InputTables setActiveTabKey={setActiveTabKey} profile={profile} setProfile={updateProfile}/>
-				<FormNavigatorCol
-					profile={profile}
-					datasets={datasets}
-					options={options}
-					setProfile={updateProfile}
-					activeTabKey={activeTabKey}
-					setActiveTabKey={setActiveTabKey}
-				/>
+  const onSubmitSilent = (event) => {
+    event.preventDefault();
+    return _onSubmit(true);
+  }
 
-			</Row>
+  const check_loop_fields = (profile, errors) => {
+    profile.tables.forEach((t, tableIndex) => {
+      t.table['loop_header']?.forEach((lh, lhIndex) => {
+        if (lh.column?.columnIndex == null) {
+          errors.push(`In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`);
+        }
+      });
+      t.table['loop_theader']?.forEach((lh, lhIndex) => {
+        if (lh.line === "" || lh.regex === "") {
+          errors.push(`In Output Table ${tableIndex}: no line or regex selected for loop condition ${lhIndex}`);
+        }
+      });
+      t.table['loop_metadata']?.forEach((lh, lhIndex) => {
+        if (lh.metadata == null) {
+          errors.push(`In Output Table ${tableIndex}: no metadata selected for loop condition ${lhIndex}`);
+        }
+      });
+    });
+  }
 
-		</div>
-	)
+  if (!profile?.data) return null;
+
+  profile.tables.map((table) => table.loopType = table.loopType ?? "all")
+
+  return (
+    <div>
+      <ButtonGroup style={{
+        position: "fixed",
+        top: '10px',
+        right: '10px',
+      }}>
+        <Button variant="warning" onClick={handleShowFileUpload}>
+          {status === 'create' ? 'Create profile' : 'Update profile'} & add input File
+        </Button>
+        <Button disabled={!savable}
+                variant="primary" onClick={onSubmitSilent}>
+          {status === 'create' && 'Create profile'}
+          {status === 'update' && 'Update profile'}
+        </Button>
+        <Button disabled={!savable}
+                variant="primary" onClick={onSubmit}>
+          {status === 'create' && 'Create profile & close'}
+          {status === 'update' && 'Update profile & close'}
+        </Button>
+      </ButtonGroup>
+      <Row>
+        {error && (
+          <div className="fixed-alert-container">
+            <Alert variant="danger" dismissible>{errorMessage}</Alert>
+          </div>
+        )}
+        <InputTables setActiveTabKey={setActiveTabKey}
+                     profile={profile}
+                     setProfile={updateProfile}
+                     tableIdx={tableIdx}
+                     onDeleteInputFile={onDeleteInputFile}
+                     setTableIdx={setTableIdx}/>
+        <FormNavigatorCol
+          profile={profile}
+          datasets={datasets}
+          options={options}
+          setProfile={updateProfile}
+          activeTabKey={activeTabKey}
+          setActiveTabKey={setActiveTabKey}
+          tableIdx={tableIdx}
+        />
+
+      </Row>
+
+    </div>
+  )
 }
 
 ProfileForm.propTypes = {
-	status: PropTypes.string,
-	profile: profileShape,
-	options: PropTypes.object,
-	datasets: PropTypes.array,
-	updateProfile: PropTypes.func,
-	storeProfile: PropTypes.func,
-	error: PropTypes.bool,
-	uploadError: PropTypes.bool,
-	errorMessage: PropTypes.string,
-	onFileChangeHandler: PropTypes.func,
-	onSubmitFileHandler: PropTypes.func,
-	isLoading: PropTypes.bool,
+  status: PropTypes.string.isRequired,
+  profile: profileShape.isRequired,
+  options: PropTypes.object.isRequired,
+  datasets: PropTypes.array.isRequired,
+  updateProfile: PropTypes.func.isRequired,
+  storeProfile: PropTypes.func.isRequired,
+  error: PropTypes.bool.isRequired,
+  errorMessage: PropTypes.string.isRequired,
+  savable: PropTypes.bool.isRequired,
+  onFilehandleShowFileUploadChangeHandler: PropTypes.func.isRequired,
+  setTableIdx: PropTypes.func.isRequired,
+  tableIdx: PropTypes.number.isRequired,
 }
 
 export default ProfileForm

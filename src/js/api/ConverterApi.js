@@ -2,14 +2,16 @@ const converter_app_url = process.env.CONVERTER_APP_URL
 
 class ConverterApi {
 
-  static fetchProfiles () {
+  static fetchProfiles() {
     const requestOptions = {
       method: 'GET'
     }
 
     return fetch(converter_app_url + '/profiles', requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
+        if (!response.ok) {
+          throw response
+        }
         return response.json()
       })
       .then(data => {
@@ -28,11 +30,13 @@ class ConverterApi {
 
     return fetch(converter_app_url + '/tables', requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
+        if (!response.ok) {
+          throw response
+        }
         return response.json()
       })
       .then(data => {
-          return data
+        return data
       })
   }
 
@@ -90,19 +94,21 @@ class ConverterApi {
       })
   }
 
-  static deleteProfile (profile) {
+  static deleteProfile(profile) {
     const requestOptions = {
       method: 'DELETE'
     }
 
     return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
-          return response
+        if (!response.ok) {
+          throw response
+        }
+        return response
       })
   }
 
-  static fetchConversion(file, format) {
+  static fetchConversion(file, format, asDownload = true) {
     const data = new FormData()
     data.append('file', file)
     data.append('format', format)
@@ -118,6 +124,9 @@ class ConverterApi {
         if (!response.ok) {
           throw response
         }
+        if (!asDownload) {
+          return response;
+        }
         fileName = response.headers.get('content-disposition')
           .split(';')
           .find(n => n.includes('filename='))
@@ -126,6 +135,9 @@ class ConverterApi {
         return response.blob()
       })
       .then(blob => {
+        if (!asDownload) {
+          return blob;
+        }
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -138,7 +150,7 @@ class ConverterApi {
       })
   }
 
-  static fetchDatasets () {
+  static fetchDatasets() {
 
     const requestOptions = {
       method: 'GET'
@@ -146,7 +158,9 @@ class ConverterApi {
 
     return fetch(converter_app_url + '/datasets', requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
+        if (!response.ok) {
+          throw response
+        }
         return response.json()
       })
       .then(data => {
@@ -154,7 +168,7 @@ class ConverterApi {
       })
   }
 
-  static fetchOptions () {
+  static fetchOptions() {
 
     const requestOptions = {
       method: 'GET'
@@ -162,7 +176,9 @@ class ConverterApi {
 
     return fetch(converter_app_url + '/options', requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
+        if (!response.ok) {
+          throw response
+        }
         return response.json()
       })
       .then(data => {
