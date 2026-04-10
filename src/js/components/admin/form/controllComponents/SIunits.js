@@ -51,7 +51,11 @@ const profileShape = PropTypes.shape({
 
 const defaultAssignmentContextShape = PropTypes.shape({
   outputTableIndex: PropTypes.number,
-  axis: PropTypes.oneOf(["X", "Y"])
+  axis: PropTypes.oneOf(["X", "Y"]),
+  inputColumn: PropTypes.shape({
+    tableIndex: PropTypes.number,
+    columnIndex: PropTypes.number
+  })
 });
 
 function UnitAssignmentToggle({displayState, onToggle}) {
@@ -182,6 +186,14 @@ const getAssignmentDefaultsFromContext = (defaultAssignmentContext) => {
 
   if (defaultAssignmentContext?.axis === "X" || defaultAssignmentContext?.axis === "Y") {
     defaults.axis = defaultAssignmentContext.axis;
+  }
+
+  if (
+    defaultAssignmentContext?.inputColumn
+    && Number.isInteger(defaultAssignmentContext.inputColumn.tableIndex)
+    && Number.isInteger(defaultAssignmentContext.inputColumn.columnIndex)
+  ) {
+    defaults.inputColumn = serializeColumnValue(defaultAssignmentContext.inputColumn);
   }
 
   return defaults;

@@ -21,9 +21,12 @@ function TableForm({
   const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
 
   const openSiUnits = (axis) => {
+    const inputColumn = axis === "X" ? table?.table?.xColumn : table?.table?.yColumn;
+
     setSiUnitsContext({
       outputTableIndex,
-      axis
+      axis,
+      inputColumn
     });
     setShowSiUnits(true);
   };
