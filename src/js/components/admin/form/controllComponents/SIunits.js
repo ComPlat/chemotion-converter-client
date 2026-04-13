@@ -444,6 +444,45 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
   const [customConversionModalDrag, setCustomConversionModalDrag] = useState(null);
 
   useEffect(() => {
+    if (profile?.data?.units === undefined && profile?.units === undefined) {
+      return;
+    }
+
+    const currentProfileUnits = Array.isArray(profile?.data?.units) ? profile.data.units : [];
+    const currentStoredAssignments = Array.isArray(profile?.units) ? profile.units : [];
+    const nextProfileUnits = currentProfileUnits.map((unit) => {
+      if (Object.prototype.hasOwnProperty.call(unit || {}, "positionIdentifier") === false) {
+        return unit;
+      }
+
+      const {positionIdentifier, ...rest} = unit;
+      return rest;
+    });
+    const nextStoredAssignments = currentStoredAssignments.map((entry) => {
+      if (Object.prototype.hasOwnProperty.call(entry || {}, "positionIdentifier") === false) {
+        return entry;
+      }
+
+      const {positionIdentifier, ...rest} = entry;
+      return rest;
+    });
+
+    const profileUnitsChanged = nextProfileUnits.some((unit, index) => unit !== currentProfileUnits[index]);
+    const storedAssignmentsChanged = nextStoredAssignments.some((entry, index) => entry !== currentStoredAssignments[index]);
+
+    if (profileUnitsChanged || storedAssignmentsChanged) {
+      setProfile({
+        ...profile,
+        data: {
+          ...profile.data,
+          units: nextProfileUnits
+        },
+        units: nextStoredAssignments
+      });
+    }
+  }, [profile, setProfile]);
+
+  useEffect(() => {
     const dialog = document.querySelector(".siunits-custom-conversion-dialog");
 
     if (dialog) {
