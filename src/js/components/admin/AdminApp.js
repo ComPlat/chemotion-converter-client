@@ -225,7 +225,7 @@ function AdminApp() {
               data: [data],
               subjects: [],
               predicates: [],
-              datatypes: [],
+              objects: [],datatypes: [],
               subjectInstances: {},
               rootOntology: GENERIC_PREDICATE
             }

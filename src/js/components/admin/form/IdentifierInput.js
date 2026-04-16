@@ -15,6 +15,7 @@ import OntologySubjectSelect from "./identifier/OntologySubjectSelect";
 import TableIndexInput from './identifier/TableIndexInput'
 import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
+import OntologyPredicateSelect from "./identifier/OntologyPredicateSelect";
 
 function IndentifierInput({
                             index,
@@ -169,13 +170,16 @@ function IndentifierInput({
             </Col>
           </Row>
           {showOntology ? <>
-            <OntologyTermSelect term={identifier.predicate}
-                                predicates={profile.predicates} options={options}
-                                updateOntology={(a) => updateIdentifierOntology(index, a)}></OntologyTermSelect>
+            <OntologyTermSelect term={identifier.object} predicate={identifier.predicate}
+                                objects={profile.objects} options={options}
+                                updateOntology={(a) => updateIdentifierOntology(index, a)}/>
+            <OntologyPredicateSelect term={identifier.predicate}
+                                     predicates={profile.predicates} options={options}
+                                     updateOntology={(a) => updateIdentifierOntology(index, a)}/>
             <OntologySubjectSelect instance={identifier} dataset={dataset}
                                    subjects={profile.subjects} datatypes={profile.datatypes}
                                    subjectInstances={profile.subjectInstances} options={options}
-                                   updateOntology={(a) => updateIdentifierOntology(index, a)}></OntologySubjectSelect>
+                                   updateOntology={(a) => updateIdentifierOntology(index, a)}/>
           </> : <></>
           }
         </>
@@ -196,7 +200,8 @@ IndentifierInput.propTypes = {
   outputTables: PropTypes.array,
   dataset: PropTypes.object,
   updateIdentifier: PropTypes.func,
-  removeIdentifier: PropTypes.func,
+  updateIdentifierOperation: PropTypes.func,
+  removeIdentifierOperation: PropTypes.func,
   updateRegex: PropTypes.func,
   updateIdentifierOntology: PropTypes.func,
   addIdentifierOperation: PropTypes.func,
