@@ -86,7 +86,7 @@ ProfileBasics.propTypes = {
   setProfile: PropTypes.func.isRequired
 };
 
-export default function FormNavigatorCol({profile, setProfile, options, datasets, activeTabKey, setActiveTabKey}) {
+export default function FormNavigatorCol({profile, setProfile, options, datasets, activeTabKey, setActiveTabKey, tableIdx}) {
   const dataset = getDataset(profile, datasets);
 
   return (
@@ -107,15 +107,15 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
           </Tab>
 
           <Tab eventKey="identifier" title="Identifier">
-            <CheckIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset}/>
+            <CheckIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="data" title="Data tables">
-            <OutputTables profile={profile} setProfile={setProfile} options={options}/>
+            <OutputTables profile={profile} setProfile={setProfile} options={options} tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="metadata" title="Metadata">
-            <MetadataIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset}/>
+            <MetadataIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
           </Tab>
         </Tabs>
       </div>
@@ -129,5 +129,6 @@ FormNavigatorCol.propTypes = {
   options: PropTypes.object,
   datasets: PropTypes.array,
   activeTabKey: PropTypes.string.isRequired,
-  setActiveTabKey: PropTypes.func.isRequired
+  setActiveTabKey: PropTypes.func.isRequired,
+  tableIdx: PropTypes.number.isRequired
 };

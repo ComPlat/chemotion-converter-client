@@ -1,10 +1,11 @@
-import {Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
+import {Button, Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
 import PropTypes from 'prop-types';
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import FileHeaderPresenter from "../HeaderPresenter";
 import {AgGridReact} from "ag-grid-react";
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip";
 import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
+import {getProfileData} from "../../../../utils/profileUtils";
 
 const columnShape = PropTypes.shape({
   key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -18,21 +19,27 @@ const inputTableShape = PropTypes.shape({
   columns: PropTypes.arrayOf(columnShape)
 });
 
-const profileShape = PropTypes.shape({
-  data: PropTypes.shape({
-    metadata: PropTypes.object,
-    tables: PropTypes.arrayOf(inputTableShape)
-  })
+const profileDataShape = PropTypes.shape({
+  metadata: PropTypes.object,
+  tables: PropTypes.arrayOf(inputTableShape)
 });
 
-function FileHeader({setActiveTabKey, header, tableIndex, profile, setProfile}) {
-  const { addIdentifier, updateRegex } = BuildIdentifierHandler(profile, setProfile, null);
+const profileShape = PropTypes.shape({
+  data: PropTypes.oneOfType([
+    profileDataShape,
+    PropTypes.arrayOf(profileDataShape)
+  ])
+});
+
+function FileHeader({setActiveTabKey, header, tableIndex, profile, setProfile, tableIdx}) {
+  const {addIdentifier, updateRegex} = BuildIdentifierHandler(profile, setProfile, null, tableIdx);
   return <FileHeaderPresenter addIdentifier={(value) => {
     setActiveTabKey('metadata');
     addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
   }} header={header} updateRegex={(value) => {
     return updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});
   }} profile={profile} setProfile={setProfile} tableIndex={tableIndex}
+                              dataIndex={tableIdx}
   ></FileHeaderPresenter>
 }
 
@@ -76,7 +83,8 @@ FileHeader.propTypes = {
   header: PropTypes.arrayOf(PropTypes.string),
   tableIndex: PropTypes.number.isRequired,
   profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired
+  setProfile: PropTypes.func.isRequired,
+  tableIdx: PropTypes.number.isRequired
 };
 
 DataGrid.propTypes = {
@@ -105,7 +113,7 @@ Metadata.propTypes = {
   metadata: PropTypes.object.isRequired
 };
 
-function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeKey}) {
+function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeKey, tableIdx}) {
   return (
     <div className="mt-3">
       {activeTable && (
@@ -152,7 +160,8 @@ function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeK
                     </span>
                 </OverlayTrigger>
               </h4>
-              <FileHeader setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile} header={activeTable.header} tableIndex={activeKey}></FileHeader>
+              <FileHeader setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile}
+                          header={activeTable.header} tableIndex={activeKey} tableIdx={tableIdx}></FileHeader>
             </div>
           )}
 
@@ -174,16 +183,22 @@ TabContents.propTypes = {
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
   activeTable: inputTableShape,
-  activeKey: PropTypes.number.isRequired
+  activeKey: PropTypes.number.isRequired,
+  tableIdx: PropTypes.number.isRequired
 };
 
-function InputTables({profile, setProfile, setActiveTabKey}) {
+function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableIdx, onDeleteInputFile}) {
+  const profileData = getProfileData(profile, tableIdx);
+
   const handleSelect = (selectedKey) => {
     setActiveKey(Number(selectedKey));
   };
 
+  const handleSourceSelect = (selectedKey) => {
+    setTableIdx(Number(selectedKey));
+  };
 
-  const tabs = (profile.data.tables.map((table, idx) => (
+  const tabs = ((profileData?.tables ?? []).map((table, idx) => (
     <NavDropdown.Item eventKey={idx} key={idx}>
       {`Input table # ${idx}`}
     </NavDropdown.Item>
@@ -192,12 +207,65 @@ function InputTables({profile, setProfile, setActiveTabKey}) {
   // state
   const [activeKey, setActiveKey] = useState(0);
 
+  useEffect(() => {
+    if (Array.isArray(profile.data) && tableIdx >= profile.data.length) {
+      setTableIdx(0);
+      return;
+    }
+
+    if (!Array.isArray(profile.data) && tableIdx !== 0) {
+      setTableIdx(0);
+    }
+  }, [profile.data, setTableIdx, tableIdx]);
+
+  useEffect(() => {
+    if (!profileData?.tables?.length) {
+      setActiveKey(0);
+      return;
+    }
+
+    if (activeKey >= profileData.tables.length) {
+      setActiveKey(0);
+    }
+  }, [activeKey, profileData]);
+
   return (<Col md={7}>
-    {profile.data
+    {profileData
       ? (
         <div className="scroll">
           <h4>Input file metadata</h4>
-          {Object.keys(profile.data.metadata).length > 0 && (<Metadata metadata={profile.data.metadata}></Metadata>)}
+          {Array.isArray(profile.data) && profile.data.length > 1 && (
+            <Nav
+              variant="tabs"
+              activeKey={tableIdx}
+              onSelect={handleSourceSelect}
+              id="nav-data-source"
+              className="mb-3"
+            >
+              <NavDropdown title={profile.data[tableIdx].metadata.file_name} id="nav-data-source-dropdown">
+                {profile.data.map((dataEntry, idx) => (
+                  <NavDropdown.Item eventKey={idx} key={idx}
+                                    className="d-flex justify-content-between align-items-center">
+                    <span>{profile.data[idx].metadata.file_name}</span>
+
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="ms-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteInputFile(idx);
+                      }}
+                    >
+                      ✕
+                    </Button>
+
+                  </NavDropdown.Item>
+                ))}
+              </NavDropdown>
+            </Nav>
+          )}
+          {Object.keys(profileData.metadata).length > 0 && (<Metadata metadata={profileData.metadata}></Metadata>)}
           <h4 className="mt-3">Input tables</h4>
           <Nav
             variant="tabs"
@@ -209,7 +277,9 @@ function InputTables({profile, setProfile, setActiveTabKey}) {
               {tabs}
             </NavDropdown>
           </Nav>
-          <TabContents setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile} activeTable={profile.data.tables[activeKey]} activeKey={activeKey}></TabContents>
+          <TabContents setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile}
+                       activeTable={profileData.tables[activeKey]} activeKey={activeKey}
+                       tableIdx={tableIdx}></TabContents>
         </div>
       ) : (
         <p>
@@ -222,7 +292,10 @@ function InputTables({profile, setProfile, setActiveTabKey}) {
 InputTables.propTypes = {
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
-  setActiveTabKey: PropTypes.func.isRequired
+  setActiveTabKey: PropTypes.func.isRequired,
+  tableIdx: PropTypes.number.isRequired,
+  setTableIdx: PropTypes.func.isRequired,
+  onDeleteInputFile: PropTypes.func.isRequired
 }
 
 export default InputTables

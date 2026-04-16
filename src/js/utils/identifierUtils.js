@@ -1,9 +1,9 @@
 import React from "react";
-import {getFileMetadataOptions, getTableMetadataOptions} from "./profileUtils";
+import {getFileMetadataOptions, getProfileData, getTableMetadataOptions} from "./profileUtils";
 import {v4 as uuidv4} from 'uuid';
 import {addNamespaceToOntology, GENERIC_SUBJECT_PREDICATE} from "../components/admin/form/common/TibFetchService";
 
-const initIdentifier = (profile, type) => {
+const initIdentifier = (profile, type, tableIdx = 0) => {
   const identifier = {
     type: type,
     match: 'any',
@@ -11,7 +11,7 @@ const initIdentifier = (profile, type) => {
   }
 
   if (identifier.type === 'fileMetadata') {
-    const fileMetadataOptions = getFileMetadataOptions(profile)
+    const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx)
     if (fileMetadataOptions.length > 0) {
       identifier.key = fileMetadataOptions[0].key
       identifier.value = fileMetadataOptions[0].value
@@ -19,7 +19,7 @@ const initIdentifier = (profile, type) => {
       identifier.key = ''
     }
   } else if (identifier.type === 'tableMetadata') {
-    const tableMetadataOptions = getTableMetadataOptions(profile)
+    const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx)
     if (tableMetadataOptions.length > 0) {
       identifier.key = tableMetadataOptions[0].key
       identifier.tableIndex = tableMetadataOptions[0].tableIndex
@@ -123,10 +123,10 @@ const cleanOntology = (profile) => {
   profile.predicates = filterUnique(profile.predicates, usedPredicates);
 }
 
-function BuildIdentifierHandler(profile, setProfile, dataset) {
+function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
   const handlers = {
     addIdentifier: (type, optional, options = {}) => {
-      const identifier = initIdentifier(profile, type);
+      const identifier = initIdentifier(profile, type, tableIdx);
       identifier.show = true;
       identifier.optional = optional;
       identifier.id = options.id ?? uuidv4();
@@ -257,7 +257,11 @@ function BuildIdentifierHandler(profile, setProfile, dataset) {
 
       const regexPattern = value;
       lineNumber = parseInt(lineNumber);
-      let {header} = profile.data.tables[tableIndex];
+      const profileData = getProfileData(profile, tableIdx);
+      if (!profileData?.tables?.[tableIndex]) {
+        return <></>;
+      }
+      let {header} = profileData.tables[tableIndex];
 
       if (!isNaN(lineNumber) && header.length + 1 > lineNumber) {
         header = [header[lineNumber - 1]];

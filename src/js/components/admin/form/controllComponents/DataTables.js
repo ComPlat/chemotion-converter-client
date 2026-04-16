@@ -25,7 +25,7 @@ const profileShape = PropTypes.shape({
   matchTables: PropTypes.bool
 });
 
-export default function OutputTables({profile, setProfile, options}) {
+export default function OutputTables({profile, setProfile, options, tableIdx}) {
 
   const addTable = () => {
     const header = {}
@@ -35,7 +35,7 @@ export default function OutputTables({profile, setProfile, options}) {
       }
     }
 
-    const inputColumns = getInputColumns(profile)
+    const inputColumns = getInputColumns(profile, tableIdx)
     const table = {}
     if (inputColumns.length > 2) {
       table.xColumn = inputColumns[0].value
@@ -94,7 +94,7 @@ export default function OutputTables({profile, setProfile, options}) {
         operation.line = '';
         operation.ignore_missing_values = false;
       } else if (type === 'metadata_value') {
-        const mdZero = getTableMetadataOptions(profile)[0];
+        const mdZero = getTableMetadataOptions(profile, tableIdx)[0];
         operation.value = mdZero.key;
         operation.table = `${mdZero.tableIndex}`;
         operation.metadata = '0';
@@ -215,13 +215,13 @@ export default function OutputTables({profile, setProfile, options}) {
           ['FIRSTX', 'LASTX', 'DELTAX'].forEach(headerKey => {
             // ensure headerKeys are there if XYDATA is selected
             if (header[headerKey] === undefined) {
-              header[headerKey] = initIdentifier(profile, 'fileMetadata')
+              header[headerKey] = initIdentifier(profile, 'fileMetadata', tableIdx)
             }
 
             // update header identifiers if the type changed
             if (headerKey === key &&
               profile.tables[index].header[headerKey].type !== header[headerKey].type) {
-              header[headerKey] = initIdentifier(profile, header[headerKey].type)
+              header[headerKey] = initIdentifier(profile, header[headerKey].type, tableIdx)
             }
           })
         } else {
@@ -238,11 +238,11 @@ export default function OutputTables({profile, setProfile, options}) {
     }
   }
 
-  const inputTables = getInputTables(profile);
-  const inputColumns = getInputColumns(profile);
-  const distInputColumns = getDistInputColumns(profile);
-  const fileMetadataOptions = getFileMetadataOptions(profile);
-  const tableMetadataOptions = getTableMetadataOptions(profile);
+  const inputTables = getInputTables(profile, tableIdx);
+  const inputColumns = getInputColumns(profile, tableIdx);
+  const distInputColumns = getDistInputColumns(profile, tableIdx);
+  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
 
   const loopMetadataOptions = (outputTable, op_index) => {
     const seenLabels = new Set();
@@ -475,5 +475,6 @@ export default function OutputTables({profile, setProfile, options}) {
 OutputTables.propTypes = {
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
-  options: PropTypes.object
+  options: PropTypes.object,
+  tableIdx: PropTypes.number.isRequired
 };
