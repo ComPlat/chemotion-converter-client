@@ -253,8 +253,8 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
                       size="sm"
                       className="ms-2"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        onDeleteInputFile(idx)
+                        e.stopPropagation();
+                        onDeleteInputFile(idx);
                       }}
                     >
                       ✕
