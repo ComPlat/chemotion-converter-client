@@ -252,7 +252,10 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
                       variant="danger"
                       size="sm"
                       className="ms-2"
-                      onClick={() => onDeleteInputFile(idx)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDeleteInputFile(idx)
+                      }}
                     >
                       ✕
                     </Button>
