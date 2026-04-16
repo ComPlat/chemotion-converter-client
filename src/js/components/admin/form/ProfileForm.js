@@ -62,7 +62,7 @@ function ProfileForm({
     newData.splice(idx, 1);
     const newProfile = {...profile, data: newData};
     updateProfile(newProfile)
-  }, []);
+  }, [profile]);
 
   const _onSubmit = (silent) => {
     const errors = [];
