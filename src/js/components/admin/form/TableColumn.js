@@ -297,7 +297,6 @@ TableColumn.propTypes = {
     operationsKey: PropTypes.string,
     inputColumns: PropTypes.array,
     updateTable: PropTypes.func,
-    updateHeader: PropTypes.func,
     addOperation: PropTypes.func,
     updateOperation: PropTypes.func,
     updateOperationDescription: PropTypes.func,

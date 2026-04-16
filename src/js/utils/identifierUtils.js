@@ -91,6 +91,8 @@ const cleanOntology = (profile) => {
   profile.subjects = filterUnique(profile.subjects, usedSubjects);
   const usedDatatypes = profile.identifiers.map((id) => id.datatype?.id).filter(Boolean);
   profile.datatypes = filterUnique(profile.datatypes, usedDatatypes);
+  const usedObjects = profile.identifiers.map((id) => id.object?.id).filter(Boolean);
+  profile.objects = filterUnique(profile.objects, usedObjects);
 
   profile.subjectInstances = profile.identifiers.reduce((acc, id) => {
     if (!id.subject) {
@@ -140,6 +142,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset) {
         identifier.predicate = null;
         identifier.subject = null;
         identifier.datatype = null;
+        identifier.object = null;
       } else {
         identifier.match = 'exact';
       }
@@ -164,7 +167,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset) {
         const field = dataset?.layers[outputLayer]?.fields.find((x) => x.field === outputKey);
         if (field?.ontology) {
           const ontology = addNamespaceToOntology(field.ontology);
-          handlers.updateIdentifierOntology(index, {type: 'predicate', ontology});
+          handlers.updateIdentifierOntology(index, {type: 'object', ontology});
         }
       }
 
@@ -181,7 +184,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset) {
         if (data.type && data.ontology) {
           profile[`${data.type}s`].push(data.ontology);
           profile.identifiers[index][data.type] = {'id': data.ontology.id};
-          if (data.type === 'predicate') {
+          if (data.type === 'object') {
             const fieldPath = findOntologyInDataset(dataset, data.ontology);
             if (fieldPath) {
               [profile.identifiers[index].outputLayer, profile.identifiers[index].outputKey] = fieldPath[0];

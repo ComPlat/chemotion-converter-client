@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {Form, Col, Row, OverlayTrigger, Popover} from 'react-bootstrap';
+import {Col, Form, OverlayTrigger, Popover, Row} from 'react-bootstrap';
 import {checkTIB, OntologyAsyncSelect, ontologySchemaToOption} from "../common/TibFetchService";
-import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
+
+const nextNameForInstance = (ontology, idx = 0) => `${ontology?.label ?? '-'}_${idx + 1}`;
 
 const labelToInstanceOption = (instanceOption) => {
   if (!instanceOption) {
@@ -20,20 +22,9 @@ const prepareInstanceOptions = (instanceOptions, key, subjects) => {
     return [];
   }
   const instancesList = [...instanceOptions[key]];
-  const nextNum = instancesList.reduce((acc, str) => {
-    let num = parseInt(str.name.match(/\d+$/)?.[0] || NaN, 10);
-    if (isNaN(num)) {
-      return acc;
-    }
-    return Math.max(num, acc);
-  }, 0);
-  const oboId = subjects.find((sub) => sub.id === key).obo_id;
-  const instancesListOptions = instancesList.map((x) => labelToInstanceOption(x.name));
-  instancesListOptions.push({
-    label: `New Instance: ${oboId} ${nextNum + 1}`,
-    value: `${oboId} ${nextNum + 1}`
-  });
-  return instancesListOptions;
+
+
+  return instancesList.map((x) => labelToInstanceOption(x.name));
 }
 
 const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, datatypes, subjectInstances, options}) => {
@@ -49,36 +40,63 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
     return <p>We are very sorry, but the TIB Terminology Service is currently unavailable.</p>
   }
   const {rdf} = options;
+
+  const handleCreate = (inputValue) => {
+    updateOntology({
+      instance: inputValue
+    });
+  };
   return (
     <>
       <Row>
         <Col>
           <Form.Group controlId={`OntologySubjectInput`}>
             <OverlayTrigger
-              placement="bottom"
+              placement="left"
               overlay={
                 <Popover id="header-popover-select-info">
                   <Popover.Header as="h3">
                     Subject Term
                   </Popover.Header>
-                  <Popover.Body>Adding a subject is optional. If nothing is selected, the subject will be the actual
-                    measurement {dataset?.ols || 'OBI:0000070'}. When a new subject has been created, the predicates
-                    with which the measurement is associated
-                    with the new subject must be determined before the profile can be saved.
+                  <Popover.Body>
+                    <h5>What is a Subject?</h5>
+
+                    <p>In an RDF graph, the subject is the thing you are describing. It represents the starting point of
+                      a statement.
+                      A subject (what you’re talking about) is connected to an object (what you’re saying about it).</p>
+
+                    <p>You can think of the subject like the topic of a sentence.</p>
+
+                    <p>Example:
+                      “Reaction1 usedPreparation PreparationA”</p>
+                    <ul>
+                      <li>Reaction1 → subject</li>
+
+                      <li>usedPreparation → predicate</li>
+
+                      <li>PreparationA → object</li>
+                    </ul>
+                    The subject is the entity that the statement is about.
+
+                    <p>Adding a subject is optional. If nothing is selected, the subject will be the general
+                      assay {dataset?.ols || 'OBI:0000070'}. When a new subject has been created, the predicates
+                      with which the measurement is associated
+                      with the new subject must be determined before the profile can be saved.</p>
                   </Popover.Body>
                 </Popover>
               }
             >
-              <Form.Label column="sm">Subject Term:</Form.Label>
+              <Form.Label column="sm">Subject Term [OPTIONAL]:</Form.Label>
             </OverlayTrigger>
             <OntologyAsyncSelect
+              preferredType="class"
               additionalOptions={rdf}
               defaultOptions
               onChange={(event) =>
                 updateOntology({
                   ontology: event?.value,
                   type: "subject",
-                  instance: event ? `${event.value.obo_id} 1` : null
+                  instance: event ? nextNameForInstance(event.value) : null
                 })
               }
               placeholder={dataset?.ols ? `Measurement: ${dataset.ols}` : 'Measurement: Assay (OBI:0000070)'}
@@ -92,7 +110,7 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
           <Col>
             <Form.Group controlId={`OntologySubjectInstanceInput`}>
               <OverlayTrigger
-                placement="bottom"
+                placement="left"
                 overlay={
                   <Popover id="header-popover-select-info">
                     <Popover.Header as="h3">
@@ -109,10 +127,10 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
               >
                 <Form.Label column="sm">Subject Instance:</Form.Label>
               </OverlayTrigger>
-              <Select
+              <CreatableSelect
                 isDisabled={!instance.subject}
                 isLoading={false}
-                isClearable={false}
+                onCreateOption={handleCreate}
                 isRtl={false}
                 name="instance"
                 options={prepareInstanceOptions(subjectInstances, instance.subject?.id, subjects)}
@@ -131,7 +149,7 @@ const OntologySubjectSelect = ({instance, updateOntology, dataset, subjects, dat
         <Col>
           <Form.Group controlId={`OntologyDatatypeInput`}>
             <OverlayTrigger
-              placement="bottom"
+              placement="left"
               overlay={
                 <Popover id="header-popover-select-info">
                   <Popover.Header as="h3">
