@@ -4,7 +4,9 @@ import {Tabs, Tab, Col, Card, Form, InputGroup} from "react-bootstrap";
 import OutputTables from "./DataTables";
 import {CheckIdentifier, MetadataIdentifier} from "./Identifier";
 import OntologyManager from "./Ontology";
+import ReactionVariations from "./ReactionVariations";
 import {getDataset} from "../../../../utils/profileUtils";
+import {useAdminApp} from "../../AppContext";
 
 const profileShape = PropTypes.shape({
   title: PropTypes.string,
@@ -86,7 +88,8 @@ ProfileBasics.propTypes = {
   setProfile: PropTypes.func.isRequired
 };
 
-export default function FormNavigatorCol({profile, setProfile, options, datasets, activeTabKey, setActiveTabKey, tableIdx}) {
+export default function FormNavigatorCol({profile, setProfile, activeTabKey, setActiveTabKey, tableIdx}) {
+  const {options, datasets} = useAdminApp();
   const dataset = getDataset(profile, datasets);
 
   return (
@@ -117,6 +120,10 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
           <Tab eventKey="metadata" title="Metadata">
             <MetadataIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
           </Tab>
+
+          <Tab eventKey="reactionVariations" title="Reaction Variations values">
+            <ReactionVariations profile={profile} setProfile={setProfile}/>
+          </Tab>
         </Tabs>
       </div>
     </Col>
@@ -126,8 +133,6 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
 FormNavigatorCol.propTypes = {
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
-  options: PropTypes.object,
-  datasets: PropTypes.array,
   activeTabKey: PropTypes.string.isRequired,
   setActiveTabKey: PropTypes.func.isRequired,
   tableIdx: PropTypes.number.isRequired

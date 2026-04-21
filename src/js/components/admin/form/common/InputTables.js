@@ -6,6 +6,7 @@ import {AgGridReact} from "ag-grid-react";
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip";
 import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
 import {getProfileData} from "../../../../utils/profileUtils";
+import {useAdminApp} from "../../AppContext";
 
 const columnShape = PropTypes.shape({
   key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -31,10 +32,19 @@ const profileShape = PropTypes.shape({
   ])
 });
 
-function FileHeader({setActiveTabKey, header, tableIndex, profile, setProfile, tableIdx}) {
-  const {addIdentifier, updateRegex} = BuildIdentifierHandler(profile, setProfile, null, tableIdx);
+function FileHeader({header, tableIndex, profile, setProfile, tableIdx}) {
+  const {activeTabKey, setActiveTabKey} = useAdminApp();
+  console.log(activeTabKey);
+  const identifierKey = activeTabKey !== 'reactionVariations' ? 'metadata' : activeTabKey
+  const {addIdentifier, updateRegex} = BuildIdentifierHandler(profile, setProfile, null, tableIdx, identifierKey);
+
   return <FileHeaderPresenter addIdentifier={(value) => {
-    setActiveTabKey('metadata');
+    let identifierKey = 'metadata'
+    if (activeTabKey !== 'reactionVariations') {
+      setActiveTabKey('metadata');
+    } else {
+
+    }
     addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
   }} header={header} updateRegex={(value) => {
     return updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});
@@ -79,7 +89,6 @@ function DataGrid({table}) {
 }
 
 FileHeader.propTypes = {
-  setActiveTabKey: PropTypes.func.isRequired,
   header: PropTypes.arrayOf(PropTypes.string),
   tableIndex: PropTypes.number.isRequired,
   profile: profileShape.isRequired,
@@ -113,7 +122,7 @@ Metadata.propTypes = {
   metadata: PropTypes.object.isRequired
 };
 
-function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeKey, tableIdx}) {
+function TabContents({profile, setProfile, activeTable, activeKey, tableIdx}) {
   return (
     <div className="mt-3">
       {activeTable && (
@@ -160,7 +169,7 @@ function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeK
                     </span>
                 </OverlayTrigger>
               </h4>
-              <FileHeader setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile}
+              <FileHeader profile={profile} setProfile={setProfile}
                           header={activeTable.header} tableIndex={activeKey} tableIdx={tableIdx}></FileHeader>
             </div>
           )}
@@ -179,7 +188,6 @@ function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeK
 }
 
 TabContents.propTypes = {
-  setActiveTabKey: PropTypes.func.isRequired,
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
   activeTable: inputTableShape,
@@ -187,7 +195,7 @@ TabContents.propTypes = {
   tableIdx: PropTypes.number.isRequired
 };
 
-function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableIdx, onDeleteInputFile}) {
+function InputTables({profile, setProfile, tableIdx, setTableIdx, onDeleteInputFile}) {
   const profileData = getProfileData(profile, tableIdx);
 
   const handleSelect = (selectedKey) => {
@@ -277,7 +285,7 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
               {tabs}
             </NavDropdown>
           </Nav>
-          <TabContents setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile}
+          <TabContents rofile={profile} setProfile={setProfile}
                        activeTable={profileData.tables[activeKey]} activeKey={activeKey}
                        tableIdx={tableIdx}></TabContents>
         </div>
@@ -292,7 +300,6 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
 InputTables.propTypes = {
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
-  setActiveTabKey: PropTypes.func.isRequired,
   tableIdx: PropTypes.number.isRequired,
   setTableIdx: PropTypes.func.isRequired,
   onDeleteInputFile: PropTypes.func.isRequired
