@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import PropTypes from "prop-types";
 import {Alert, Button, ButtonGroup, Container, Form, Modal, OverlayTrigger, Table, Tooltip} from "react-bootstrap";
 import {getProfileData} from "../../../utils/profileUtils";
+import {useAdminApp} from "../AppContext";
 
 const integerRegex = '[+-]?\\d+';
 const floatRegex = '[+-]?(?:\\d*[,.]\\d+|\\d+)(?:[eE][+-]?\\d+)?';
@@ -9,7 +10,8 @@ const emailRegex = '[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}';
 const defaultRegex = '.+';
 const regexList = [integerRegex, floatRegex, emailRegex, defaultRegex];
 
-export default function FileHeaderPresenter({header, addIdentifier, updateRegex, profile, setProfile, tableIndex, dataIndex}) {
+export default function FileHeaderPresenter({header, addIdentifier, updateRegex, tableIndex, dataIndex}) {
+  const {profile, updateProfile: setProfile} = useAdminApp();
   const [selection, setSelection] = useState(["", ""]);
   const [selectionElement, setSelectionElement] = useState(null);
   const [menuPos, setMenuPos] = useState(null);
@@ -362,17 +364,6 @@ FileHeaderPresenter.propTypes = {
   header: PropTypes.arrayOf(PropTypes.string).isRequired,
   addIdentifier: PropTypes.func.isRequired,
   updateRegex: PropTypes.func.isRequired,
-  profile: PropTypes.shape({
-    data: PropTypes.oneOfType([
-      PropTypes.shape({
-        tables: PropTypes.array,
-      }),
-      PropTypes.arrayOf(PropTypes.shape({
-        tables: PropTypes.array,
-      }))
-    ])
-  }).isRequired,
-  setProfile: PropTypes.func.isRequired,
   tableIndex: PropTypes.number.isRequired,
   dataIndex: PropTypes.number.isRequired,
 };

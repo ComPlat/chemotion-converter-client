@@ -25,8 +25,6 @@ const profileShape = PropTypes.shape({
 
 function ProfileForm({
                        status,
-                       profile,
-                       updateProfile,
                        storeProfile,
                        error,
                        errorMessage,
@@ -36,7 +34,7 @@ function ProfileForm({
                        setTableIdx
                      }) {
 
-  const {activeTabKey, setActiveTabKey} = useAdminApp();
+  const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp();
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -137,14 +135,10 @@ function ProfileForm({
             <Alert variant="danger" dismissible>{errorMessage}</Alert>
           </div>
         )}
-        <InputTables profile={profile}
-                     setProfile={updateProfile}
-                     tableIdx={tableIdx}
+        <InputTables tableIdx={tableIdx}
                      onDeleteInputFile={onDeleteInputFile}
                      setTableIdx={setTableIdx}/>
         <FormNavigatorCol
-          profile={profile}
-          setProfile={updateProfile}
           activeTabKey={activeTabKey}
           setActiveTabKey={setActiveTabKey}
           tableIdx={tableIdx}
@@ -158,8 +152,6 @@ function ProfileForm({
 
 ProfileForm.propTypes = {
   status: PropTypes.string.isRequired,
-  profile: profileShape.isRequired,
-  updateProfile: PropTypes.func.isRequired,
   storeProfile: PropTypes.func.isRequired,
   error: PropTypes.bool.isRequired,
   errorMessage: PropTypes.string.isRequired,

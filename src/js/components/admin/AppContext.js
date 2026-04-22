@@ -9,6 +9,11 @@ export function AdminProvider({children}) {
   const [profiles, setProfiles] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [options, setOptions] = useState([]);
+  const [profile, setProfile] = useState(null);
+
+  const updateProfile = (nextProfile) => {
+    setProfile({...nextProfile});
+  };
 
   useEffect(() => {
     Promise.all([
@@ -28,7 +33,8 @@ export function AdminProvider({children}) {
       activeTabKey, setActiveTabKey,
       profiles, setProfiles,
       datasets, setDatasets,
-      options, setOptions
+      options, setOptions,
+      profile, setProfile, updateProfile
     }}>
       {children}
     </AppContext.Provider>

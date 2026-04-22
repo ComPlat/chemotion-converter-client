@@ -19,7 +19,7 @@ const TruncatedTextWithTooltip = ({ text }) => {
         <Tooltip id="tooltip-truncated">
           {text}
         </Tooltip>
-      ) : (<></>) }
+      ) : (<div></div>) }
     >
       <Col as="dt" lg={5}>
         <div ref={textRef} className='div-nowrap'>{text}:</div>

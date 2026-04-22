@@ -1,15 +1,43 @@
-import React, {useCallback, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import PropTypes from "prop-types";
-import {Card, Button, Tabs, Table, Tab} from "react-bootstrap";
-import IdentifierForm from "../IdentifierForm";
+import {Card, Button, Table, Tab} from "react-bootstrap";
+import Select from 'react-select';
 import IdentifierInput from "../IdentifierInput";
+import {useAdminApp} from "../../AppContext";
+import {
+  getFileMetadataOptions,
+  getInputTables,
+  getTableMetadataOptions
+} from "../../../../utils/profileUtils";
+import {initIdentifier} from "../../../../utils/identifierUtils";
+import {v4 as uuidv4} from 'uuid';
 
-function ReactionVariationsRow({activeButton = null, identifiers, element, onEdit}) {
+function ReactionVariationsRow({activeButton = null, onRemove = null, identifiers, element, onEdit}) {
+  const identifierText = (id) => {
+    if (!id) return 'add identifier';
+    const identifier = identifiers.find((iden) => iden.id === id);
+    if (!identifier) return '';
+
+    if (identifier.type === "fileMetadata") {
+      return `File metadata: ${identifier.key} -> ${identifier.value ?? ''}`;
+    }
+    if (identifier.type === "tableMetadata") {
+      return `Table #${identifier.tableIndex} metadata: ${identifier.key} ${identifier.value ?? ''}`;
+    }
+    return `Table #${identifier.tableIndex} headers: ${identifier.value} ${identifier.lineNumber ? 'Line: ' + identifier.lineNumber : ''}`;
+  }
   return (<tr>
-    {element.map((x, i) => <td key={i}><Button variant={x ? "info" : activeButton === i ? "warning" : "outline-warning"}
-                                               onClick={() => onEdit(i)}
-                                               className="identifier-variation-btn">{x || "add identifier"}</Button>
-    </td>)}
+    {element.map((x, i) => {
+        if (x) {
+        }
+        return <td key={i}><Button variant={x ? "outline-info" : activeButton === i ? "warning" : "outline-warning"}
+                                   onClick={() => onEdit(i, x)}
+                                   className="identifier-variation-btn">{identifierText(x)}</Button>
+          {i === 0 && onRemove &&
+            <Button className="variation-row-remove-btn" variant="danger" onClick={onRemove}>X</Button>}
+        </td>
+      }
+    )}
   </tr>);
 }
 
@@ -17,14 +45,16 @@ ReactionVariationsRow.propTypes = {
   identifiers: PropTypes.shape({}).isRequired,
   element: PropTypes.arrayOf(PropTypes.string).isRequired,
   onEdit: PropTypes.func.isRequired,
+  onRemove: PropTypes.func,
   activeButton: PropTypes.number,
 };
 
 ReactionVariationsRow.defaultProps = {
-  activeButton: null
+  activeButton: null,
+  onRemove: null
 }
 
-function ReactionVariationsOverView({reactionVariations, handleOnEdit, handleAdd}) {
+function ReactionVariationsOverView({reactionVariations, handleRemove, handleOnEdit, handleAdd}) {
   return (<>
     <div className="d-flex justify-content-between align-items-center mb-3">
       <h4>Variation sample values</h4>
@@ -37,7 +67,7 @@ function ReactionVariationsOverView({reactionVariations, handleOnEdit, handleAdd
       <thead>
       <tr>
         <th className="identifier-variation-header">Sample</th>
-        <th className="identifier-variation-header">Value</th>
+        <th className="identifier-variation-header">Amount</th>
         <th className="identifier-variation-header">Unit</th>
       </tr>
       </thead>
@@ -47,8 +77,11 @@ function ReactionVariationsOverView({reactionVariations, handleOnEdit, handleAdd
           key={i}
           identifiers={reactionVariations.identifiers}
           element={x}
+          onRemove={() => {
+            handleRemove(i);
+          }}
           onEdit={(buttonIdx) => {
-            handleOnEdit(i, buttonIdx)
+            handleOnEdit(i, buttonIdx);
           }}
         />
       })}
@@ -64,37 +97,65 @@ ReactionVariationsOverView.propTypes = {
     elements: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)).isRequired
   }).isRequired,
   handleOnEdit: PropTypes.func.isRequired,
+  handleRemove: PropTypes.func.isRequired,
   handleAdd: PropTypes.func.isRequired
 };
 
-function ReactionVariationEditView({activeRow, profile, activeButton, reactionVariations, handleOnEdit}) {
-  const [activeType, setActiveType] = useState('tableMetadata')
-  const identifier = reactionVariations.identifiers.find((x) => x.uuid !== activeButton);
+function ReactionVariationEditView({activeRow, tableIdx, activeButton, reactionVariations, handleOnEdit}) {
+  const tabOptions = [
+    {value: "fileMetadata", label: "Based on file metadata"},
+    {value: "tableMetadata", label: "Based on table metadata"},
+    {value: "tableHeader", label: "Based on table headers"},
+  ];
+  const activeId = activeRow[activeButton];
+  const [active, setActive] = useState(tabOptions[0]);
+  const {profile, updateProfile: setProfile} = useAdminApp();
+  const [identifier, _setIdentifier] = useState(null)
 
-  const tabs = [['Based on file metadata', 'fileMetadata'],
-    ['Based on table metadata', 'tableMetadata'],
-    ['Based on table headers', 'tableHeader']].map(([label, type]) => (
+  const setIdentifier = (identifier) => {
+    _setIdentifier(identifier);
+    setProfile(profile);
+  }
 
-    <IdentifierInput
-                    index={0}
-                    optional={false}
-                    options={options}
-                    identifier={identifier}
-                    profile={profile}
-                    fileMetadataOptions={fileMetadataOptions}
-                    tableMetadataOptions={tableMetadataOptions}
-                    inputTables={inputTables}
-                    outputTables={outputTables}
-                    dataset={dataset}
-                    updateIdentifier={updateIdentifier}
-                    removeIdentifier={removeIdentifier}
-                    updateIdentifierOperation={updateIdentifierOperation}
-                    updateIdentifierOntology={updateIdentifierOntology}
-                    removeIdentifierOperation={removeIdentifierOperation}
-                    updateRegex={updateRegex}
-                    addIdentifierOperation={addIdentifierOperation}
-                  />
-  ))
+  useEffect(() => {
+    if (!activeId) {
+      activeRow[activeButton] = uuidv4();
+      setProfile(profile);
+    }
+
+  }, [activeId, activeButton, activeRow])
+
+  const findIdentifier = useCallback((byId) => {
+    return reactionVariations.identifiers.find((x) => x.id === byId);
+  }, [reactionVariations.identifiers]);
+
+  useEffect(() => {
+    if (activeId) {
+      let cIdentifier = findIdentifier(activeId);
+      if (activeId && (!cIdentifier || cIdentifier.type !== active.value)) {
+        if (cIdentifier) {
+          reactionVariations.identifiers = reactionVariations.identifiers.filter((x) => x.id !== activeId)
+        }
+        cIdentifier = initIdentifier(profile, active.value, tableIdx);
+        cIdentifier.id = activeId;
+        reactionVariations.identifiers.push(cIdentifier);
+        cIdentifier.optional = false;
+        setIdentifier(cIdentifier);
+      } else {
+        _setIdentifier(cIdentifier);
+      }
+    }
+  }, [activeId, active])
+
+
+  const inputTables = getInputTables(profile, tableIdx);
+  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
+
+  const updateIdentifier = useCallback((data) => {
+    const newIdentifier = Object.assign(identifier, data)
+    setIdentifier(newIdentifier);
+  }, [identifier]);
 
 
   return (<>
@@ -109,29 +170,31 @@ function ReactionVariationEditView({activeRow, profile, activeButton, reactionVa
         activeButton={activeButton}
         identifiers={reactionVariations.identifiers}
         element={activeRow}
-        onEdit={(buttonIdx) => {
+        onEdit={(buttonIdx, id) => {
+          if (id) {
+            const newIdentifierType = findIdentifier(id)?.type;
+            const newTypeOption = tabOptions.find((x) => x.value === newIdentifierType);
+            setActive(newTypeOption);
+          }
           handleOnEdit(-1, buttonIdx);
-        }}
-      /></tbody>
+        }}/></tbody>
     </Table>
-    <Tabs activeKey={activeType}
-          onSelect={(k) => setActiveType(k)}
-          id="main-form-tabs"
-          className="mb-3">
-
-      <Tab eventKey="fileMetadata" title="File metadata">
-        <p>Based on file metadata</p>
-      </Tab>
-
-      <Tab eventKey="tableMetadata" title="Table metadata">
-        <p>Based on table metadata</p>
-      </Tab>
-
-      <Tab eventKey="tableHeader" title="Table header">
-        <p>Based on table header</p>
-      </Tab>
-    </Tabs>
-  </>);
+    <h5>Edit {activeButton === 0 ? "Sample name" : activeButton === 1 ? "Amount value" : "Unit"} Identifier</h5>
+    <Select
+      value={active}
+      onChange={setActive}
+      options={tabOptions}
+    />
+    {identifier && <IdentifierInput
+      index={0}
+      identifier={identifier}
+      inputTables={inputTables}
+      fileMetadataOptions={fileMetadataOptions}
+      tableMetadataOptions={tableMetadataOptions}
+      updateIdentifier={(x, y) => updateIdentifier(y)}
+    />}
+  </>)
+    ;
 }
 
 ReactionVariationEditView.propTypes = {
@@ -141,18 +204,27 @@ ReactionVariationEditView.propTypes = {
   }).isRequired,
   handleOnEdit: PropTypes.func.isRequired,
   activeRow: PropTypes.arrayOf(PropTypes.string).isRequired,
-  activeButton: PropTypes.number.isRequired
+  activeButton: PropTypes.number.isRequired,
+  tableIdx: PropTypes.number.isRequired
 };
 
 
-function ReactionVariations({profile, setProfile}) {
+function ReactionVariations({tableIdx}) {
+  const {profile, updateProfile: setProfile} = useAdminApp();
   const [activeRow, setActiveRow] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
 
   const handleAdd = useCallback(() => {
     profile.reactionVariations.elements.push([null, null, null]);
     setProfile(profile);
-  }, []);
+  }, [profile]);
+
+  const handleRemove = useCallback((idx) => {
+    const ids = profile.reactionVariations.elements[idx].filter(Boolean);
+    profile.reactionVariations.elements.splice(idx, 1);
+    profile.reactionVariations.identifiers = profile.reactionVariations.identifiers.filter((x) => !ids.includes(x.id));
+    setProfile(profile);
+  }, [profile]);
 
   const handleOnEdit = useCallback((rowIdx, colIdx) => {
     if (colIdx === -1) {
@@ -171,20 +243,26 @@ function ReactionVariations({profile, setProfile}) {
       <Card.Body>
         <small>
           <p className="text-muted">
-            Here you can set reaction variations autofill values. The values must be set as triplets:
-            one finds the sample by its external name, one is the amount, and the last one is the unit.
-            This is only useful if the analyses contain a datafile.
+            Here you can define autofill values for reaction variations.
+            Each entry must be provided as a triplet:
+            <ul>
+              <li>the sample (identified by its external name)</li>
+              <li>the amount (numeric value)</li>
+              <li>the unit (l, mol, g, etc.)</li>
+            </ul>
+            This feature is only applicable if the analysis is linked to a reaction variation.
           </p>
         </small>
 
 
         {activeRow ?
           <ReactionVariationEditView activeRow={activeRow}
+                                     tableIdx={tableIdx}
                                      reactionVariations={profile.reactionVariations}
                                      activeButton={activeElement}
-                                     profile={profile}
                                      handleOnEdit={handleOnEdit}/> :
-          <ReactionVariationsOverView handleAdd={handleAdd} reactionVariations={profile.reactionVariations}
+          <ReactionVariationsOverView handleAdd={handleAdd} handleRemove={handleRemove}
+                                      reactionVariations={profile.reactionVariations}
                                       handleOnEdit={handleOnEdit}/>
         }
       </Card.Body>
@@ -192,9 +270,7 @@ function ReactionVariations({profile, setProfile}) {
 }
 
 ReactionVariations.propTypes = {
-  profile: PropTypes.object.isRequired,
-  setProfile:
-  PropTypes.func.isRequired
-};
+  tableIdx: PropTypes.number.isRequired
+}
 
 export default ReactionVariations;

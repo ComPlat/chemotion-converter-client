@@ -8,21 +8,8 @@ import ReactionVariations from "./ReactionVariations";
 import {getDataset} from "../../../../utils/profileUtils";
 import {useAdminApp} from "../../AppContext";
 
-const profileShape = PropTypes.shape({
-  title: PropTypes.string,
-  description: PropTypes.string,
-  software: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-  devices: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-  subjectInstances: PropTypes.object,
-  subjects: PropTypes.array,
-  predicates: PropTypes.array,
-  identifiers: PropTypes.array,
-  tables: PropTypes.array,
-  ols: PropTypes.string
-});
-
-
-function ProfileBasics({profile, setProfile}) {
+function ProfileBasics() {
+  const {profile, updateProfile: setProfile} = useAdminApp();
   const [software, setSoftware] = useState(profile.software);
   const [devices, setDevices] = useState(profile.devices);
   const onRootPropertyChange = (e) => {
@@ -83,13 +70,8 @@ function ProfileBasics({profile, setProfile}) {
   </Card>)
 }
 
-ProfileBasics.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired
-};
-
-export default function FormNavigatorCol({profile, setProfile, activeTabKey, setActiveTabKey, tableIdx}) {
-  const {options, datasets} = useAdminApp();
+export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableIdx}) {
+  const {profile, datasets} = useAdminApp();
   const dataset = getDataset(profile, datasets);
 
   return (
@@ -101,28 +83,27 @@ export default function FormNavigatorCol({profile, setProfile, activeTabKey, set
               className="mb-3">
 
           <Tab eventKey="basics" title="Basics">
-            <ProfileBasics profile={profile} setProfile={setProfile}/>
+            <ProfileBasics/>
           </Tab>
 
           <Tab eventKey="ontology" title="Ontology">
-            <OntologyManager profile={profile} setProfile={setProfile} options={options} datasets={datasets}
-                             dataset={dataset}/>
+            <OntologyManager dataset={dataset}/>
           </Tab>
 
           <Tab eventKey="identifier" title="Identifier">
-            <CheckIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
+            <CheckIdentifier dataset={dataset} tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="data" title="Data tables">
-            <OutputTables profile={profile} setProfile={setProfile} options={options} tableIdx={tableIdx}/>
+            <OutputTables tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="metadata" title="Metadata">
-            <MetadataIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
+            <MetadataIdentifier dataset={dataset} tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="reactionVariations" title="Reaction Variations values">
-            <ReactionVariations profile={profile} setProfile={setProfile}/>
+            <ReactionVariations tableIdx={tableIdx}/>
           </Tab>
         </Tabs>
       </div>
@@ -131,8 +112,6 @@ export default function FormNavigatorCol({profile, setProfile, activeTabKey, set
 }
 
 FormNavigatorCol.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
   activeTabKey: PropTypes.string.isRequired,
   setActiveTabKey: PropTypes.func.isRequired,
   tableIdx: PropTypes.number.isRequired

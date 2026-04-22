@@ -42,3 +42,15 @@
     padding: 8px;
     border-radius: 6px;
 }
+
+.variation-row-remove-btn {
+  position: absolute;
+  left: 0;
+  display: none;
+}
+
+tr:hover {
+  .variation-row-remove-btn {
+    display: inline-block;
+  }
+}

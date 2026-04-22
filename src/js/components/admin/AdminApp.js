@@ -20,10 +20,9 @@ provideGlobalGridOptions({
 
 
 function AdminAppContent() {
-  const {profiles, setProfiles} = useAdminApp();
+  const {profiles, setProfiles, profile, setProfile} = useAdminApp();
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
-  const [profile, setProfile] = useState(null);
   const [originProfile, setOriginProfile] = useState(null);
   const [error, setError] = useState(false);
   const [uploadError, setUploadError] = useState(false);
@@ -72,10 +71,6 @@ function AdminAppContent() {
   const hideDeleteModal = () => {
     setDeleteModal(false);
     setProfile(null);
-  };
-
-  const updateProfile = (nextProfile) => {
-    setProfile({...nextProfile});
   };
 
   const createProfile = (nextProfile, silent = false) => {
@@ -325,11 +320,9 @@ function AdminAppContent() {
       return (
         <ProfileForm
           status={status}
-          profile={profile}
           errorMessage={errorMessage}
           savable={profile !== originProfile}
           error={error}
-          updateProfile={updateProfile}
           storeProfile={storeProfile}
           handleShowFileUpload={handleShowFileUpload}
           tableIdx={tableIdx}

@@ -123,7 +123,7 @@ const cleanOntology = (profile) => {
   profile.predicates = filterUnique(profile.predicates, usedPredicates);
 }
 
-function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0, activeTabKey = 'metadata') {
+function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
   const handlers = {
     addIdentifier: (type, optional, options = {}) => {
       const identifier = initIdentifier(profile, type, tableIdx);
@@ -152,11 +152,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0, acti
           identifier[key] = options[key];
         }
       }
-      if (activeTabKey !== 'reactionVariations') {
-        profile.identifiers.push(identifier)
-      }else {
-        profile.reactionVariations.identifiers.push(identifier)
-      }
+      profile.identifiers.push(identifier);
 
       setProfile(profile)
     },

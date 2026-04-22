@@ -6,19 +6,22 @@ import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
 import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
 import {Col, Form, Row} from "react-bootstrap";
+import {useAdminApp} from "../AppContext";
 
 
 function TableForm({
-  table, inputTables, inputColumns, options,
-  updateTable, updateHeader,
-  addOperation, updateOperation, updateOperationDescription, removeOperation,
-  fileMetadataOptions, tableMetadataOptions
-}) {
+                     table, inputTables, inputColumns,
+                     updateTable, updateHeader,
+                     addOperation, updateOperation, updateOperationDescription, removeOperation,
+                     fileMetadataOptions, tableMetadataOptions
+                   }) {
+  const {options} = useAdminApp()
+
   const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
 
   const headerOptions = Object.keys(options).reduce(function (filtered, key) {
-    if (!(key in xy_units) && key !== 'rdf' ){
-       filtered[key] = options[key];
+    if (!(key in xy_units) && key !== 'rdf') {
+      filtered[key] = options[key];
     }
     return filtered;
   }, {});
@@ -77,7 +80,6 @@ function TableForm({
               key={index}
               index={index + 1000}
               headerKey={headerKey}
-              opitions={options}
               table={table}
               inputTables={inputTables}
               updateHeader={updateHeader}
@@ -128,7 +130,6 @@ TableForm.propTypes = {
   table: PropTypes.object,
   inputTables: PropTypes.array,
   inputColumns: PropTypes.array,
-  options: PropTypes.object,
   updateTable: PropTypes.func,
   updateHeader: PropTypes.func,
   updateOperationDescription: PropTypes.func,
