@@ -93,6 +93,13 @@ function AdminApp() {
   };
 
   const createProfile = (nextProfile, silent = false) => {
+    const profile = profiles.find(p => p.id === nextProfile.id);
+    if (profile) {
+      setUploadError(true);
+      setErrorMessage("Profile already exists.");
+      setIsLoading(false);
+      return null;
+    }
     return ConverterApi.createProfile(nextProfile)
       .then(response => {
         setProfiles(prevProfiles => [...prevProfiles, response]);
@@ -105,10 +112,13 @@ function AdminApp() {
           setOriginProfile(response);
           setStatus('update');
         }
+        setUploadError(false);
+        setErrorMessage('');
+        setIsLoading(false);
         return response;
       })
       .catch(errors => {
-        setError(true);
+        setUploadError(true);
         setErrorMessage(Object.values(errors.data).join(', '));
         setIsLoading(false);
       });
