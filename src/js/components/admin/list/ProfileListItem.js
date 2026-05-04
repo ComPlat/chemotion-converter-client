@@ -3,64 +3,67 @@ import PropTypes from 'prop-types';
 import {Button, ListGroup} from 'react-bootstrap';
 
 function ProfileListItem({
-													 id,
-													 title,
-													 description,
-													 updateProfile,
-													 deleteProfile,
-													 downloadProfile,
-													 isAdmin,
-													 isDefaultProfile,
-													 toggleDisableProfile,
-													 isDisabled
-												 }) {
-	const disabledButton = function () {
-		if (isDisabled) {
-			return <Button variant="danger" size="sm" disabled={!isAdmin}
-										 onClick={toggleDisableProfile}> Enable < /Button>;
-		}
-		return <Button variant="success" size="sm" disabled={!isAdmin}
-									 onClick={toggleDisableProfile}> Disable < /Button>;
-	}
-	return (
-		<ListGroup.Item variant={isDefaultProfile ? "warning" : "light"}>
-			<div className="d-flex justify-content-between">
-				<div>
-					<div className="fw-bold">
-						{title} {isDefaultProfile && '[Default Profile]'}
-					</div>
-					{description}
-				</div>
+                           id,
+                           title,
+                           description,
+                           updateProfile,
+                           deleteProfile,
+                           downloadProfile,
+                           isAdmin,
+                           isDefaultProfile,
+                           toggleDisableProfile,
+                           isDisabled,
+                           profileVersion
+                         }) {
+  const disabledButton = function () {
+    if (isDisabled) {
+      return <Button variant="danger" size="sm" disabled={!isAdmin}
+                     onClick={toggleDisableProfile}> Enable < /Button>;
+    }
+    return <Button variant="success" size="sm" disabled={!isAdmin}
+                   onClick={toggleDisableProfile}> Disable < /Button>;
+  }
+  return (
+    <ListGroup.Item variant={isDefaultProfile ? "warning" : "light"}>
+      <div className="d-flex justify-content-between">
+        <div>
+          <div>
+            <span className="fw-bold">{title} {isDefaultProfile && '[Default Profile]'}</span>
+            (v{profileVersion})
+          </div>
 
-				<div className="d-flex align-items-center gap-2">
-					<code>{id}</code>
-					{disabledButton()}
-					<Button variant="success" size="sm" disabled={!isAdmin}
-									onClick={downloadProfile}>Download</Button>
-					<Button variant="primary" size="sm" disabled={!isAdmin} onClick={updateProfile}>Edit</Button>
-					{!isDefaultProfile && <Button variant="danger" size="sm" disabled={!isAdmin}
-																				onClick={deleteProfile}>Delete</Button>}
-				</div>
-			</div>
-		</ListGroup.Item>
-	)
+          {description}
+        </div>
+        <div className="d-flex align-items-center gap-2">
+          <code>{id}</code>
+          {disabledButton()}
+          <Button variant="success" size="sm" disabled={!isAdmin}
+                  onClick={downloadProfile}>Download</Button>
+          <Button variant="primary" size="sm" disabled={!isAdmin} onClick={updateProfile}>Edit</Button>
+          {!isDefaultProfile && <Button variant="danger" size="sm" disabled={!isAdmin}
+                                        onClick={deleteProfile}>Delete</Button>}
+        </div>
+      </div>
+    </ListGroup.Item>
+  )
 }
 
 ProfileListItem.propTypes = {
-	id: PropTypes.string,
-	title: PropTypes.string,
-	description: PropTypes.string,
-	isDisabled: PropTypes.bool,
-	isDefaultProfile: PropTypes.bool,
-	toggleDisableProfile: PropTypes.func,
-	updateProfile: PropTypes.func,
-	deleteProfile: PropTypes.func,
-	downloadProfile: PropTypes.func,
-	isAdmin: PropTypes.bool
+  id: PropTypes.string,
+  title: PropTypes.string,
+  description: PropTypes.string,
+  isDisabled: PropTypes.bool,
+  isDefaultProfile: PropTypes.bool,
+  toggleDisableProfile: PropTypes.func,
+  updateProfile: PropTypes.func,
+  deleteProfile: PropTypes.func,
+  downloadProfile: PropTypes.func,
+  isAdmin: PropTypes.bool,
+  profileVersion: PropTypes.string
 }
 
 ProfileListItem.defaultProps = {
-	isAdmin: false
+  isAdmin: false
 };
 
 export default ProfileListItem

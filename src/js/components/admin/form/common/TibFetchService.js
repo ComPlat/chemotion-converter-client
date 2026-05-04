@@ -6,18 +6,18 @@ import PropTypes from 'prop-types';
 const CHEMOTION_URL = 'https://chemotion.net/chemotion/#';
 
 const GENERIC_PREDICATE = {
-  "iri": "http://purl.obolibrary.org/obo/OBI_0000070",
-  "namespace": "http://purl.obolibrary.org/obo/",
-  "ontology_name": "chmo",
-  "ontology_prefix": "CHMO",
-  "short_form": "OBI_0000070",
   "description": [
     "A planned process that has the objective to produce information about a material entity (the evaluant) by examining it."
   ],
-  "id": "OBI:property:http://purl.obolibrary.org/obo/OBI_0000070",
+  "id": "obi:class:http://purl.obolibrary.org/obo/OBI_0000070",
+  "iri": "http://purl.obolibrary.org/obo/OBI_0000070",
   "label": "assay",
+  "namespace": "http://purl.obolibrary.org/obo/",
   "obo_id": "OBI:0000070",
-  "type": "property"
+  "ontology_name": "obi",
+  "ontology_prefix": "OBI",
+  "short_form": "OBI_0000070",
+  "type": "class"
 };
 
 const GENERIC_SUBJECT_PREDICATE = {

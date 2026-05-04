@@ -1,10 +1,11 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import {Tabs, Tab, Col, Card, Form, InputGroup} from "react-bootstrap";
 import OutputTables from "./DataTables";
 import {CheckIdentifier, MetadataIdentifier} from "./Identifier";
 import OntologyManager from "./Ontology";
 import {getDataset} from "../../../../utils/profileUtils";
+import ProfileHistory from "../common/ProfileHistory";
 
 const profileShape = PropTypes.shape({
   title: PropTypes.string,
@@ -23,6 +24,15 @@ const profileShape = PropTypes.shape({
 function ProfileBasics({profile, setProfile}) {
   const [software, setSoftware] = useState(profile.software);
   const [devices, setDevices] = useState(profile.devices);
+
+  useEffect(() => {
+    setSoftware(profile.software);
+  }, [profile.software]);
+
+  useEffect(() => {
+    setDevices(profile.devices);
+  }, [profile.devices]);
+
   const onRootPropertyChange = (e) => {
     const {name, value} = e.target;
     setProfile({...profile, [name]: value});
@@ -52,6 +62,8 @@ function ProfileBasics({profile, setProfile}) {
                       value={profile.title}/>
         <Form.Text>Please add a title for this profile.</Form.Text>
       </Form.Group>
+      <p>Profile version: {profile.profile_version}</p>
+      <p>Converter version: {profile.converter_version ?? '?'}</p>
 
       <Form.Group controlId="profile-description" className="mt-3">
         <Form.Label column="lg">Description</Form.Label>
@@ -86,7 +98,15 @@ ProfileBasics.propTypes = {
   setProfile: PropTypes.func.isRequired
 };
 
-export default function FormNavigatorCol({profile, setProfile, options, datasets, activeTabKey, setActiveTabKey, tableIdx}) {
+export default function FormNavigatorCol({
+                                           profile,
+                                           setProfile,
+                                           options,
+                                           datasets,
+                                           activeTabKey,
+                                           setActiveTabKey,
+                                           tableIdx
+                                         }) {
   const dataset = getDataset(profile, datasets);
 
   return (
@@ -99,6 +119,8 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
 
           <Tab eventKey="basics" title="Basics">
             <ProfileBasics profile={profile} setProfile={setProfile}/>
+            <br/>
+            <ProfileHistory profile={profile} setProfile={setProfile}/>
           </Tab>
 
           <Tab eventKey="ontology" title="Ontology">
@@ -107,7 +129,8 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
           </Tab>
 
           <Tab eventKey="identifier" title="Identifier">
-            <CheckIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
+            <CheckIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset}
+                             tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="data" title="Data tables">
@@ -115,7 +138,8 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
           </Tab>
 
           <Tab eventKey="metadata" title="Metadata">
-            <MetadataIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
+            <MetadataIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset}
+                                tableIdx={tableIdx}/>
           </Tab>
         </Tabs>
       </div>
