@@ -21,14 +21,11 @@ class ConverterApi {
 
   static fetchRestoreProfiles({hard, version, profileId}) {
     const requestOptions = {
-      method: 'GET'
+      method: 'POST',
+      body: JSON.stringify({hard})
     }
 
-    const params = new URLSearchParams({
-      hard
-    });
-
-    return fetch(`${converter_app_url}/profiles/restore/${profileId}/${version}?${params.toString()}`, requestOptions)
+    return fetch(`${converter_app_url}/profiles/restore/${profileId}/${version}`, requestOptions)
       .then(response => {
         if (!response.ok) {
           throw response
