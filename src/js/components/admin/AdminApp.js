@@ -35,15 +35,6 @@ function AdminAppContent() {
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [tableIdx, setTableIdx] = useState(0);
 
-  const updateProfileList = (profile) => {
-    setProfiles(prevProfiles => {
-      const updatedProfiles = [...prevProfiles];
-      const index = updatedProfiles.findIndex(p => (p.id === profile.id))
-      updatedProfiles[index] = profile
-      return updatedProfiles;
-    });
-  }
-
   const showListView = () => {
     setStatus('list');
     setProfile(null);
@@ -80,13 +71,6 @@ function AdminAppContent() {
   const hideDeleteModal = () => {
     setDeleteModal(false);
     setProfile(null);
-  };
-
-  const updateProfile = (nextProfile, {updateList = false} = {}) => {
-    setProfile({...nextProfile});
-    if (updateList) {
-      updateProfileList(nextProfile);
-    }
   };
 
   const createProfile = (nextProfile, silent = false) => {

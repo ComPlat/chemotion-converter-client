@@ -97,7 +97,7 @@ export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableId
           <Tab eventKey="basics" title="Basics">
             <ProfileBasics/>
             <br/>
-            <ProfileHistory profile={profile} setProfile={setProfile}/>
+            <ProfileHistory />
           </Tab>
 
           <Tab eventKey="ontology" title="Ontology">

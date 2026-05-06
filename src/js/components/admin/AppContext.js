@@ -11,8 +11,20 @@ export function AdminProvider({children}) {
   const [options, setOptions] = useState([]);
   const [profile, setProfile] = useState(null);
 
-  const updateProfile = (nextProfile) => {
+  const updateProfileList = (profile) => {
+    setProfiles(prevProfiles => {
+      const updatedProfiles = [...prevProfiles];
+      const index = updatedProfiles.findIndex(p => (p.id === profile.id))
+      updatedProfiles[index] = profile
+      return updatedProfiles;
+    });
+  }
+
+  const updateProfile = (nextProfile, {updateList = false} = {}) => {
     setProfile({...nextProfile});
+    if (updateList) {
+      updateProfileList(nextProfile);
+    }
   };
 
   useEffect(() => {

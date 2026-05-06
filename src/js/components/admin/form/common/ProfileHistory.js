@@ -2,9 +2,13 @@ import {Button, Container, Row, Col, Card, ListGroup} from "react-bootstrap";
 import React, {useCallback, useState} from "react";
 import ConverterApi from "../../../../api/ConverterApi";
 import JsonPatchHistoryViewer from "./HistoryChangeView";
+import {useAdminApp} from "../../AppContext";
 
 
-export default function ProfileHistory({profile, setProfile}) {
+export default function ProfileHistory({}) {
+
+  const {profile, updateProfile} = useAdminApp();
+
   const [selectedVersion, setSelectedVersion] = useState(null);
   const {diff_history: versions} = profile;
   const restoreHandler = useCallback(async (hard) => {
@@ -12,7 +16,7 @@ export default function ProfileHistory({profile, setProfile}) {
     const {profile_version: version} = selectedVersion;
     const {id: profileId} = profile;
     const newProfile = await ConverterApi.fetchRestoreProfiles({hard, version, profileId});
-    setProfile(newProfile, {updateList: true});
+    updateProfile(newProfile, {updateList: true});
   }, [profile, selectedVersion]);
   return (<Card>
     <Card.Header>
