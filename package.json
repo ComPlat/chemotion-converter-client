@@ -22,7 +22,7 @@
   "dependencies": {
     "@rdfjs/namespace": "^2.0.1",
     "bootstrap": "^5.3.8",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "lucide-react": "^1.14.0",
     "prop-types": "^15.8.1",
     "react-select": "^5.10.2",
