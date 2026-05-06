@@ -1,5 +1,5 @@
 import React from "react";
-import {getFileMetadataOptions, getProfileData, getTableMetadataOptions} from "./profileUtils";
+import {getFileMetadataOptions, getInputTables, getProfileData, getTableMetadataOptions} from "./profileUtils";
 import {v4 as uuidv4} from 'uuid';
 import {addNamespaceToOntology, GENERIC_SUBJECT_PREDICATE} from "../components/admin/form/common/TibFetchService";
 
@@ -124,19 +124,29 @@ const cleanOntology = (profile) => {
 }
 
 
-const getSelectedMatch = ({identifier, profile, tableIdx}) => {
-  console.log(profile.data)
-  if (identifier.type === 'fileMetadata') {
-    const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+const getSelectedMatch = ({identifier: {lineNumber, key, type, value, tableIndex, match}, profile, tableIdx}) => {
+
+  if (type === 'fileMetadata') {
+    const {metadata} = getProfileData(profile, tableIdx);
+    return [metadata?.[key]];
 
   }
-  if (identifier.type === 'tableMetadata') {
-    const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
-
+  if (type === 'tableMetadata') {
+    const {metadata} = getInputTables(profile, tableIdx)[tableIndex];
+    return [metadata?.[key]];
   }
-  if (identifier.type === 'tableHeader') {
+  if (type === 'tableHeader') {
+    const {header} = getInputTables(profile, tableIdx)[tableIndex];
 
+    lineNumber = parseInt(lineNumber);
+
+    if (!isNaN(lineNumber) && header.length + 1 > lineNumber) {
+      return [header[lineNumber - 1]];
+    }
+    return header;
   }
+
+  return []
 }
 
 function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
@@ -276,24 +286,15 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
       }
     },
 
-    updateRegex: ({lineNumber, value, tableIndex, match}) => {
-
+    updateRegex: ({lineNumber, key, type = 'tableHeader', value, tableIndex, match}) => {
+      let header = getSelectedMatch({identifier: {lineNumber, key, type, value, tableIndex, match}, profile, tableIdx});
 
       if (match !== 'regex') {
-        return <></>;
+        return <p>Current match: <b>{header[0]?.substring(0,100) ?? '-'}</b></p>;
       }
 
       const regexPattern = value;
-      lineNumber = parseInt(lineNumber);
-      const profileData = getProfileData(profile, tableIdx);
-      if (!profileData?.tables?.[tableIndex]) {
-        return <></>;
-      }
-      let {header} = profileData.tables[tableIndex];
-
-      if (!isNaN(lineNumber) && header.length + 1 > lineNumber) {
-        header = [header[lineNumber - 1]];
-      } else if (!String(regexPattern).startsWith('^') && !String(regexPattern).endsWith('$')) {
+      if (!String(regexPattern).startsWith('^') && !String(regexPattern).endsWith('$')) {
         header = [header.join('\n')];
       }
       try {

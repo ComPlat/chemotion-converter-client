@@ -37,7 +37,7 @@ function FileHeader({setActiveTabKey, header, tableIndex, profile, setProfile, t
     setActiveTabKey('metadata');
     addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
   }} header={header} updateRegex={(value) => {
-    return updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});
+    return updateRegex({type: 'tableHeader', tableIndex, value, match: 'regex'});
   }} profile={profile} setProfile={setProfile} tableIndex={tableIndex}
                               dataIndex={tableIdx}
   ></FileHeaderPresenter>

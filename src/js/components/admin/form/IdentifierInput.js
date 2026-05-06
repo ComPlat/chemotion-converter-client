@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useMemo, useState} from "react"
 import PropTypes from 'prop-types';
 import {Button, Col, Form, Row} from 'react-bootstrap';
 
@@ -137,7 +137,7 @@ function MetadataIdentifierInput({
                                    addIdentifierOperation = null
                                  }) {
   const [showOntology, setShowOntology] = useState(false);
-
+  const matchResult = useMemo(()=> updateRegex({...identifier}), [Object.keys(identifier)]);
   return (
     <form>
 
@@ -156,22 +156,20 @@ function MetadataIdentifierInput({
         checked={identifier.match === 'regex'}
         onChange={(e) => updateIdentifier(index, {match: e.currentTarget.checked ? 'regex' : 'any' })}
       />
-      <p>{identifier.match}</p>
-
-
-        <Form.Group controlId={`valueInput${index}`}>
+      {identifier.match === 'regex' && (<Form.Group controlId={`valueInput${index}`}>
           <Form.Label column="lg">Regex</Form.Label>
           <Form.Control
             size="sm"
             value={identifier.value || ''}
             onChange={(event) => updateIdentifier(index, { value: event.target.value })}
           />
-        </Form.Group>
+        </Form.Group>)}
+
 
       {identifier.optional && (<>
-          {updateRegex &&
+          {matchResult &&
             (<Row><Col>
-              {updateRegex({...identifier})}
+              {matchResult}
             </Col></Row>)
           }
           {addIdentifierOperation && (
