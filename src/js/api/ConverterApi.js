@@ -19,6 +19,24 @@ class ConverterApi {
       })
   }
 
+  static fetchRestoreProfiles({hard, version, profileId}) {
+    const requestOptions = {
+      method: 'POST',
+      body: JSON.stringify({hard})
+    }
+
+    return fetch(`${converter_app_url}/profiles/restore/${profileId}/${version}`, requestOptions)
+      .then(response => {
+        if (!response.ok) {
+          throw response
+        }
+        return response.json()
+      })
+      .then(data => {
+        return data
+      })
+  }
+
   static fetchTables(file) {
     const data = new FormData()
     data.append('file', file)

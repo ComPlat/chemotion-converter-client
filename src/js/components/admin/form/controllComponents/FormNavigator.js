@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import {Tabs, Tab, Col, Card, Form, InputGroup} from "react-bootstrap";
 import OutputTables from "./DataTables";
@@ -7,11 +7,21 @@ import OntologyManager from "./Ontology";
 import ReactionVariations from "./ReactionVariations";
 import {getDataset} from "../../../../utils/profileUtils";
 import {useAdminApp} from "../../AppContext";
+import ProfileHistory from "../common/ProfileHistory";
 
 function ProfileBasics() {
   const {profile, updateProfile: setProfile} = useAdminApp();
   const [software, setSoftware] = useState(profile.software);
   const [devices, setDevices] = useState(profile.devices);
+
+  useEffect(() => {
+    setSoftware(profile.software);
+  }, [profile.software]);
+
+  useEffect(() => {
+    setDevices(profile.devices);
+  }, [profile.devices]);
+
   const onRootPropertyChange = (e) => {
     const {name, value} = e.target;
     setProfile({...profile, [name]: value});
@@ -41,6 +51,8 @@ function ProfileBasics() {
                       value={profile.title}/>
         <Form.Text>Please add a title for this profile.</Form.Text>
       </Form.Group>
+      <p>Profile version: {profile.profile_version}</p>
+      <p>Converter version: {profile.converter_version ?? '?'}</p>
 
       <Form.Group controlId="profile-description" className="mt-3">
         <Form.Label column="lg">Description</Form.Label>
@@ -84,6 +96,8 @@ export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableId
 
           <Tab eventKey="basics" title="Basics">
             <ProfileBasics/>
+            <br/>
+            <ProfileHistory profile={profile} setProfile={setProfile}/>
           </Tab>
 
           <Tab eventKey="ontology" title="Ontology">
@@ -91,7 +105,8 @@ export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableId
           </Tab>
 
           <Tab eventKey="identifier" title="Identifier">
-            <CheckIdentifier dataset={dataset} tableIdx={tableIdx}/>
+            <CheckIdentifier dataset={dataset}
+                             tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="data" title="Data tables">
@@ -99,7 +114,8 @@ export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableId
           </Tab>
 
           <Tab eventKey="metadata" title="Metadata">
-            <MetadataIdentifier dataset={dataset} tableIdx={tableIdx}/>
+            <MetadataIdentifier dataset={dataset}
+                                tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="reactionVariations" title="Reaction Variations values">

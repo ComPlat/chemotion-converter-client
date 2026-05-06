@@ -24,6 +24,7 @@ function ProfileList({
 					description={profile.description}
 					isDisabled={profile.isDisabled ?? false}
 					isDefaultProfile={profile.isDefaultProfile}
+					profileVersion={profile.profile_version}
 					toggleDisableProfile={() => toggleDisableProfile(profile)}
 					updateProfile={() => updateProfile(profile)}
 					deleteProfile={() => deleteProfile(profile)}

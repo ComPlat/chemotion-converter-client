@@ -35,6 +35,15 @@ function AdminAppContent() {
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [tableIdx, setTableIdx] = useState(0);
 
+  const updateProfileList = (profile) => {
+    setProfiles(prevProfiles => {
+      const updatedProfiles = [...prevProfiles];
+      const index = updatedProfiles.findIndex(p => (p.id === profile.id))
+      updatedProfiles[index] = profile
+      return updatedProfiles;
+    });
+  }
+
   const showListView = () => {
     setStatus('list');
     setProfile(null);
@@ -73,6 +82,13 @@ function AdminAppContent() {
     setProfile(null);
   };
 
+  const updateProfile = (nextProfile, {updateList = false} = {}) => {
+    setProfile({...nextProfile});
+    if (updateList) {
+      updateProfileList(nextProfile);
+    }
+  };
+
   const createProfile = (nextProfile, silent = false) => {
     const profile = profiles.find(p => p.id === nextProfile.id);
     if (profile) {
@@ -108,12 +124,7 @@ function AdminAppContent() {
   const saveProfile = (nextProfile, silent = false) => {
     return ConverterApi.updateProfile(nextProfile)
       .then((response) => {
-        setProfiles(prevProfiles => {
-          const updatedProfiles = [...prevProfiles];
-          const index = updatedProfiles.findIndex(p => (p.id === response.id))
-          updatedProfiles[index] = response
-          return updatedProfiles;
-        });
+        updateProfileList(response);
         if (!silent) {
           setStatus('list');
           setProfile(null);
@@ -210,13 +221,19 @@ function AdminAppContent() {
           } else {
             nextProfile = {
               title: '',
+              diff_history: [],
+              profile_version: '1.0',
               description: '',
               tables: [],
               identifiers: [],
               data: [data],
               subjects: [],
               predicates: [],
+              devices: [],
+              software: [],
+              ontology: '',
               objects: [], datatypes: [],
+              converter_version: options?.VERSION ?? '0.0',
               subjectInstances: {},
               rootOntology: GENERIC_PREDICATE,
               reactionVariations: {elements: [], identifiers: []}

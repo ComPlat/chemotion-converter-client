@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useMemo} from "react"
 import PropTypes from 'prop-types';
 
 import HeaderInput from './table/HeaderInput'
@@ -15,16 +15,16 @@ function TableForm({
                      addOperation, updateOperation, updateOperationDescription, removeOperation,
                      fileMetadataOptions, tableMetadataOptions
                    }) {
-  const {options} = useAdminApp()
+  const {options} = useAdminApp();
+  const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS};
 
-  const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
-
-  const headerOptions = Object.keys(options).reduce(function (filtered, key) {
-    if (!(key in xy_units) && key !== 'rdf') {
-      filtered[key] = options[key];
-    }
-    return filtered;
-  }, {});
+  const headerOptions = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(options).filter(
+        ([key]) => !(key in xy_units) && !["rdf", "VERSION"].includes(key)
+      )
+    );
+  }, [options]);
 
   return (
     <div>
