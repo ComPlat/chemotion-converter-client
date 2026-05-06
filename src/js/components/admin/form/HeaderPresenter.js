@@ -331,15 +331,15 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
                                         onClick={() => setShowTableHeaderModal(true)}>    &darr;</Button>
 
 
-                              </OverlayTrigger>) : (<span>{index}</span>)}
+                              </OverlayTrigger>) : (<span>{index + 1}</span>)}
 							</span>
-              <code className={activeLine === index ? "active-header-select" : ""} data-idx={index}>{line}</code><br/>
+              <code className={activeLine === index ? "active-header-select" : ""} data-idx={index}>{line + 1}</code><br/>
             </>)}</React.Fragment>
           })}
         </div>
       {header.map((line, index) => {
         return <React.Fragment key={index}>{(multilineMode && index >= multilineSelectionIndex) && (
-          <code style={{color: '#aaa'}} data-idx={index}>{line}</code>)}</React.Fragment>
+          <code style={{color: '#aaa'}} data-idx={index}>{line + 1}</code>)}</React.Fragment>
       })}
       </pre>
 

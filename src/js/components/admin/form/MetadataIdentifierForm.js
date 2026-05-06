@@ -2,16 +2,17 @@ import React, {useState} from "react"
 import PropTypes from 'prop-types';
 import {Button, Collapse, ListGroup} from 'react-bootstrap';
 
-import { IdentifierInput } from './IdentifierInput'
+import { MetadataIdentifierInput } from './IdentifierInput'
 import IdentifierHeader from './IdentifierHeader'
 
 
-function IdentifierForm({
-                          label, type, identifiers, fileMetadataOptions,
-                          tableMetadataOptions, inputTables,
-                          addIdentifier, updateIdentifier, removeIdentifier
+function MetadataIdentifierForm({
+                          label, type, optional, identifiers, fileMetadataOptions,
+                          tableMetadataOptions, inputTables, outputTables, dataset,
+                          addIdentifier, updateIdentifier, removeIdentifier, profile,
+                          addIdentifierOperation, updateIdentifierOperation,
+                          options, removeIdentifierOperation, updateIdentifierOntology, updateRegex
                         }) {
-  const optional = false;
   const toggleIdentifier = (index) => {
     updateIdentifier(index, {show: !identifiers[index].show})
   }
@@ -38,13 +39,24 @@ function IdentifierForm({
                 />
                 <Collapse in={identifier.show || hovered === index}>
                   <div>
-                    <IdentifierInput
+                    <MetadataIdentifierInput
                       index={index}
+                      optional={optional}
+                      options={options}
                       identifier={identifier}
+                      profile={profile}
                       fileMetadataOptions={fileMetadataOptions}
                       tableMetadataOptions={tableMetadataOptions}
                       inputTables={inputTables}
+                      outputTables={outputTables}
+                      dataset={dataset}
                       updateIdentifier={updateIdentifier}
+                      removeIdentifier={removeIdentifier}
+                      updateIdentifierOperation={updateIdentifierOperation}
+                      updateIdentifierOntology={updateIdentifierOntology}
+                      removeIdentifierOperation={removeIdentifierOperation}
+                      updateRegex={updateRegex}
+                      addIdentifierOperation={addIdentifierOperation}
                     />
                   </div>
                 </Collapse>
@@ -66,16 +78,26 @@ function IdentifierForm({
   )
 }
 
-IdentifierForm.propTypes = {
+MetadataIdentifierForm.propTypes = {
   label: PropTypes.string,
   type: PropTypes.string,
+  optional: PropTypes.bool,
   identifiers: PropTypes.array,
   fileMetadataOptions: PropTypes.array,
   tableMetadataOptions: PropTypes.array,
   inputTables: PropTypes.array,
+  outputTables: PropTypes.array,
+  dataset: PropTypes.object,
+  options: PropTypes.object,
+  profile: PropTypes.object,
   addIdentifier: PropTypes.func,
   updateIdentifier: PropTypes.func,
-  removeIdentifier: PropTypes.func
+  removeIdentifier: PropTypes.func,
+  addIdentifierOperation: PropTypes.func,
+  updateIdentifierOperation: PropTypes.func,
+  removeIdentifierOperation: PropTypes.func,
+  updateIdentifierOntology: PropTypes.func,
+  updateRegex: PropTypes.func
 }
 
-export default IdentifierForm
+export default MetadataIdentifierForm

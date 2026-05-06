@@ -8,6 +8,7 @@ import {
   getTableMetadataOptions
 } from "../../../../utils/profileUtils";
 import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
+import MetadataIdentifierForm from "../MetadataIdentifierForm";
 
 const profileShape = PropTypes.shape({
   identifiers: PropTypes.array.isRequired,
@@ -35,23 +36,13 @@ function CheckIdentifier({profile, setProfile, dataset, options, tableIdx}) {
             key={type}
             label={label}
             type={type}
-            optional={false}
             identifiers={profile.identifiers}
             fileMetadataOptions={fileMetadataOptions}
             tableMetadataOptions={tableMetadataOptions}
             inputTables={inputTables}
-            outputTables={profile.tables}
-            dataset={dataset}
-            profile={profile}
-            options={options}
             addIdentifier={ih.addIdentifier}
             updateIdentifier={ih.updateIdentifier}
             removeIdentifier={ih.removeIdentifier}
-            addIdentifierOperation={ih.addIdentifierOperation}
-            updateIdentifierOperation={ih.updateIdentifierOperation}
-            updateIdentifierOntology={ih.updateIdentifierOntology}
-            removeIdentifierOperation={ih.removeIdentifierOperation}
-            updateRegex={ih.updateRegex}
           />
         ))
       }
@@ -142,7 +133,7 @@ function MetadataIdentifier({profile, setProfile, dataset, options, tableIdx}) {
           [['Based on file metadata', 'fileMetadata'],
             ['Based on table metadata', 'tableMetadata'],
             ['Based on table headers', 'tableHeader']].map(([label, type]) => (
-            <IdentifierForm
+            <MetadataIdentifierForm
               key={type}
               label={label}
               type={type}

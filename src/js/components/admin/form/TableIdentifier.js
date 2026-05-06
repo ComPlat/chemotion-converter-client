@@ -1,16 +1,16 @@
 import React from "react"
 import PropTypes from 'prop-types';
-import { Col, Form, Row } from 'react-bootstrap';
+import {Col, Form, Row} from 'react-bootstrap';
 
 import TypeSelect from './identifier/TypeSelect'
-import IdentifierInput from './IdentifierInput'
+import { IdentifierInput } from './IdentifierInput'
 
 
 function TableIdentifier({
-  index, headerKey, table, inputTables,
-  fileMetadataOptions, tableMetadataOptions,
-  options, updateHeader
-}) {
+                           index, headerKey, table, inputTables,
+                           fileMetadataOptions, tableMetadataOptions,
+                           options, updateHeader
+                         }) {
   const updateTableIdentifier = (identifierIndex, data) => {
     const headerKeyIdentifier = Object.assign({}, table.header[headerKey], data)
 
@@ -27,7 +27,7 @@ function TableIdentifier({
           <TypeSelect
             index={index}
             identifier={table.header[headerKey]}
-            updateIdentifier={updateTableIdentifier} />
+            updateIdentifier={updateTableIdentifier}/>
         </Col>
       </Form.Group>
 

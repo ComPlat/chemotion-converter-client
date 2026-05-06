@@ -17,28 +17,18 @@ import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
 import OntologyPredicateSelect from "./identifier/OntologyPredicateSelect";
 
-function IndentifierInput({
-                            index,
-                            identifier,
-                            fileMetadataOptions,
-                            tableMetadataOptions,
-                            inputTables,
-                            outputTables,
-                            updateIdentifier,
-                            updateIdentifierOntology,
-                            updateIdentifierOperation,
-                            removeIdentifierOperation,
-                            dataset,
-                            profile,
-                            options,
-                            updateRegex = null,
-                            addIdentifierOperation = null
-                          }) {
-  const valueDisabled = identifier.match === 'any'
-  const [showOntology, setShowOntology] = useState(false);
+
+function CommonIdentifierInput({
+                                 index,
+                                 identifier,
+                                 fileMetadataOptions,
+                                 tableMetadataOptions,
+                                 inputTables,
+                                 updateIdentifier
+                               }) {
 
   return (
-    <form>
+    <>
       <Row className="mb-3">
         {(identifier.type === 'fileMetadata' || identifier.type === 'tableMetadata') && (
           <Col>
@@ -79,6 +69,32 @@ function IndentifierInput({
         </Row>
       )}
 
+    </>
+  )
+
+}
+
+function IdentifierInput({
+                           index,
+                           identifier,
+                           fileMetadataOptions,
+                           tableMetadataOptions,
+                           inputTables,
+                           updateIdentifier
+                         }) {
+  const valueDisabled = identifier.match === 'any'
+
+  return (
+    <form>
+      <CommonIdentifierInput
+        index={index}
+        identifier={identifier}
+        fileMetadataOptions={fileMetadataOptions}
+        tableMetadataOptions={tableMetadataOptions}
+        inputTables={inputTables}
+        updateIdentifier={updateIdentifier}
+      />
+
       <Row className="mb-3">
         <Col md={4}>
           <MatchSelect index={index} identifier={identifier} updateIdentifier={updateIdentifier}/>
@@ -88,6 +104,69 @@ function IndentifierInput({
                       disabled={valueDisabled}/>
         </Col>
       </Row>
+
+    </form>
+  )
+
+}
+
+IdentifierInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  fileMetadataOptions: PropTypes.array,
+  tableMetadataOptions: PropTypes.array,
+  inputTables: PropTypes.array,
+  updateIdentifier: PropTypes.func,
+}
+
+function MetadataIdentifierInput({
+                                   index,
+                                   identifier,
+                                   fileMetadataOptions,
+                                   tableMetadataOptions,
+                                   inputTables,
+                                   outputTables,
+                                   updateIdentifier,
+                                   updateIdentifierOntology,
+                                   updateIdentifierOperation,
+                                   removeIdentifierOperation,
+                                   dataset,
+                                   profile,
+                                   options,
+                                   updateRegex = null,
+                                   addIdentifierOperation = null
+                                 }) {
+  const [showOntology, setShowOntology] = useState(false);
+
+  return (
+    <form>
+
+      <CommonIdentifierInput
+        index={index}
+        identifier={identifier}
+        fileMetadataOptions={fileMetadataOptions}
+        tableMetadataOptions={tableMetadataOptions}
+        inputTables={inputTables}
+        updateIdentifier={updateIdentifier}
+      />
+
+      <Form.Check
+        type="checkbox"
+        label="Enable Regular expression"
+        checked={identifier.match === 'regex'}
+        onChange={(e) => updateIdentifier(index, {match: e.currentTarget.checked ? 'regex' : 'any' })}
+      />
+      <p>{identifier.match}</p>
+
+
+        <Form.Group controlId={`valueInput${index}`}>
+          <Form.Label column="lg">Regex</Form.Label>
+          <Form.Control
+            size="sm"
+            value={identifier.value || ''}
+            onChange={(event) => updateIdentifier(index, { value: event.target.value })}
+          />
+        </Form.Group>
 
       {identifier.optional && (<>
           {updateRegex &&
@@ -190,7 +269,7 @@ function IndentifierInput({
 
 }
 
-IndentifierInput.propTypes = {
+MetadataIdentifierInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
   options: PropTypes.object,
@@ -208,4 +287,4 @@ IndentifierInput.propTypes = {
   profile: PropTypes.object,
 }
 
-export default IndentifierInput
+export {IdentifierInput, MetadataIdentifierInput}

@@ -123,6 +123,22 @@ const cleanOntology = (profile) => {
   profile.predicates = filterUnique(profile.predicates, usedPredicates);
 }
 
+
+const getSelectedMatch = ({identifier, profile, tableIdx}) => {
+  console.log(profile.data)
+  if (identifier.type === 'fileMetadata') {
+    const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+
+  }
+  if (identifier.type === 'tableMetadata') {
+    const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
+
+  }
+  if (identifier.type === 'tableHeader') {
+
+  }
+}
+
 function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
   const handlers = {
     addIdentifier: (type, optional, options = {}) => {
@@ -143,7 +159,11 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
         identifier.subject = null;
         identifier.datatype = null;
         identifier.object = null;
+
       } else {
+        if (identifier.type === 'tableHeader') {
+          identifier.lineNumber = 1;
+        }
         identifier.match = 'exact';
       }
 
@@ -174,6 +194,12 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
       if (index !== -1) {
         profile.identifiers[index] = Object.assign(profile.identifiers[index], data);
         cleanOntology(profile);
+
+        if (profile.identifiers[index].type === 'tableHeader' &&
+          !profile.identifiers[index].optional &&
+          !profile.identifiers[index].lineNumber) {
+          profile.identifiers[index] = Object.assign(profile.identifiers[index], {lineNumber: 1});
+        }
         setProfile(profile);
       }
     },
@@ -251,6 +277,8 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
     },
 
     updateRegex: ({lineNumber, value, tableIndex, match}) => {
+
+
       if (match !== 'regex') {
         return <></>;
       }

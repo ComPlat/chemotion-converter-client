@@ -2,14 +2,15 @@ import React, { Component } from "react"
 import PropTypes from 'prop-types';
 import { Form } from 'react-bootstrap';
 
+
 const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOptions, updateIdentifier }) => {
-  const options = (identifier.type == 'fileMetadata') ? fileMetadataOptions : tableMetadataOptions
+  const options = (identifier.type === 'fileMetadata') ? fileMetadataOptions : tableMetadataOptions
 
   const getOptionIndex = identifier => {
-    if (identifier.type == 'fileMetadata') {
-      return options.findIndex(option => option.key == identifier.key)
+    if (identifier.type === 'fileMetadata') {
+      return options.findIndex(option => option.key === identifier.key)
     } else {
-      return options.findIndex(option => (option.key == identifier.key && option.tableIndex == identifier.tableIndex))
+      return options.findIndex(option => (option.key === identifier.key && option.tableIndex === identifier.tableIndex))
     }
   }
 
@@ -19,7 +20,7 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
       key: option.key,
       value: option.value
     }
-    if (identifier.type == 'tableMetadata') {
+    if (identifier.type === 'tableMetadata') {
       data.tableIndex = option.tableIndex
     }
     updateIdentifier(index, data)
@@ -27,7 +28,7 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
 
   return (
     <Form.Group controlId={`keySelect${index}`}>
-      <Form.Label>Key</Form.Label>
+      <Form.Label column="sm">Key</Form.Label>
       <Form.Select
         size="sm"
         value={getOptionIndex(identifier)}
