@@ -19,9 +19,7 @@ function getInputTables(profile, tableIdx = 0) {
   return profileData ? (profile.matchTables ? [profileData.tables[0]] : profileData.tables) : []
 }
 
-function getInputColumns(profile, tableIdx = 0) {
-  const inputTables = getInputTables(profile, tableIdx)
-
+function getInputColumns(inputTables) {
   if (inputTables.length > 0) {
     return inputTables.reduce((accumulator, table, tableIndex) => {
       const tableColumns = table.columns.map((tableColumn, columnIndex) => {
@@ -40,29 +38,23 @@ function getInputColumns(profile, tableIdx = 0) {
   }
 }
 
-function getDistInputColumns(profile, tableIdx = 0) {
+function getDistInputColumns(profile, tableIdx = 0, tableIndex) {
   const inputTables = getInputTables(profile, tableIdx);
-  const seenNames = new Set();
-
-  return inputTables.map((table, tableIndex) => {
-    const columns = table.columns.map((tableColumn, columnIndex) => {
-      if (seenNames.has(tableColumn.name)) return null;
-      seenNames.add(tableColumn.name);
-
-      return {
+  const table = inputTables[tableIndex];
+  const columns = table.columns.map((tableColumn, columnIndex) => {
+    return {
         label: tableColumn.name,
         value: {
           tableIndex,
           columnIndex
         }
       };
-    }).filter(Boolean); // remove nulls
+  });
 
-    return {
+  return [{
       label: `Table #${tableIndex}`,
       options: columns
-    };
-  }).filter(group => group.options.length > 0); // remove empty groups
+    }];
 }
 
 function getFileMetadataOptions(profile, tableIdx = 0) {

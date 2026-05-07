@@ -1,6 +1,6 @@
 import React, {useMemo, useState} from "react"
 import PropTypes from 'prop-types';
-import {Button, Col, Form, Row} from 'react-bootstrap';
+import {Button, Col, Form, Row, Tab, Tabs} from 'react-bootstrap';
 
 import KeyInput from './identifier/KeyInput'
 import KeySelect from './identifier/KeySelect'
@@ -136,8 +136,9 @@ function MetadataIdentifierInput({
                                    updateRegex = null,
                                    addIdentifierOperation = null
                                  }) {
-  const [showOntology, setShowOntology] = useState(false);
-  const matchResult = useMemo(()=> updateRegex({...identifier}), [Object.keys(identifier)]);
+  const matchResult = useMemo(() => updateRegex({...identifier}), [Object.keys(identifier)]);
+  const [activeOutputTab, setActiveOutputTab] = useState('dataset')
+
   return (
     <form>
 
@@ -154,73 +155,96 @@ function MetadataIdentifierInput({
         type="checkbox"
         label="Enable Regular expression"
         checked={identifier.match === 'regex'}
-        onChange={(e) => updateIdentifier(index, {match: e.currentTarget.checked ? 'regex' : 'any' })}
+        onChange={(e) => updateIdentifier(index, {match: e.currentTarget.checked ? 'regex' : 'any'})}
       />
       {identifier.match === 'regex' && (<Form.Group controlId={`valueInput${index}`}>
-          <Form.Label column="lg">Regex</Form.Label>
-          <Form.Control
+        <Form.Label column="lg">Regex</Form.Label>
+        <Form.Control
+          size="sm"
+          value={identifier.value || ''}
+          onChange={(event) => updateIdentifier(index, {value: event.target.value})}
+        />
+      </Form.Group>)}
+
+
+      {matchResult &&
+        (<Row><Col>
+          {matchResult}
+        </Col></Row>)
+      }
+      {addIdentifierOperation && (
+        <Row><Col>
+          <Button
+            className="mt-1"
+            variant="success"
             size="sm"
-            value={identifier.value || ''}
-            onChange={(event) => updateIdentifier(index, { value: event.target.value })}
-          />
-        </Form.Group>)}
+            onClick={() => addIdentifierOperation(index)}
+          >
+            Add scalar operation
+          </Button>
+          <p></p>
+        </Col></Row>
+      )}
 
+      {Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
+        <Row key={opIndex} className="mb-3">
+          <Form.Group as={Col} sm={4} controlId={`identifierOperationOperator${index}${opIndex}`}>
+            <Form.Label column="sm">Operator</Form.Label>
+            <OperatorSelect
+              value={operation.operator}
+              onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)}
+            />
+          </Form.Group>
 
-      {identifier.optional && (<>
-          {matchResult &&
-            (<Row><Col>
-              {matchResult}
-            </Col></Row>)
-          }
-          {addIdentifierOperation && (
-            <Row><Col>
-              <Button
-                className="mt-1"
-                variant="success"
-                size="sm"
-                onClick={() => addIdentifierOperation(index)}
-              >
-                Add scalar operation
-              </Button>
-              <p></p>
-            </Col></Row>
-          )}
+          <Form.Group as={Col} sm={7} controlId={`identifierOperationValue${index}${opIndex}`}>
+            <Form.Label column="sm">Value</Form.Label>
+            <Form.Control
+              size="sm"
+              value={operation.value || ''}
+              onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
+            />
+          </Form.Group>
 
-          {Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
-            <Row key={opIndex} className="mb-3">
-              <Form.Group as={Col} sm={4} controlId={`identifierOperationOperator${index}${opIndex}`}>
-                <Form.Label column="sm">Operator</Form.Label>
-                <OperatorSelect
-                  value={operation.operator}
-                  onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)}
-                />
-              </Form.Group>
+          <Col sm={1} className="d-flex align-items-end justify-content-end">
+            <Button variant="danger" size="sm"
+                    onClick={() => removeIdentifierOperation(index, opIndex)}>
+              &times;
+            </Button>
+          </Col>
+        </Row>
+      ))}
+      <h3>Output</h3>
+      <Tabs activeKey={activeOutputTab}
+            onSelect={(k) => setActiveOutputTab(k)}
+            id="main-form-tabs"
+            className="mb-3">
 
-              <Form.Group as={Col} sm={7} controlId={`identifierOperationValue${index}${opIndex}`}>
-                <Form.Label column="sm">Value</Form.Label>
-                <Form.Control
-                  size="sm"
-                  value={operation.value || ''}
-                  onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
-                />
-              </Form.Group>
-
-              <Col sm={1} className="d-flex align-items-end justify-content-end">
-                <Button variant="danger" size="sm"
-                        onClick={() => removeIdentifierOperation(index, opIndex)}>
-                  &times;
-                </Button>
-              </Col>
-            </Row>
-          ))}
-
-          <Row>
-            <Col>
-              <h4>Output Dataset</h4>
+        <Tab eventKey="dataset" title="Dataset">
+          <Form.Check
+            type="checkbox"
+            onChange={(e) => updateIdentifier(index, {'isDatasetOutput': e.target.checked})}
+            checked={identifier.isDatasetOutput}
+            label={`Enable output in the dataset`}/>
+          {identifier.isDatasetOutput && (<Row className="mb-3">
+            <Col sm={6}>
+              <OutputLayerInput index={index} identifier={identifier}
+                                updateIdentifier={updateIdentifier} dataset={dataset}/>
             </Col>
-          </Row>
-          <Row className="mb-3">
-            <Col sm={4}>
+            <Col sm={6}>
+              <OutputKeyInput index={index} identifier={identifier}
+                              updateIdentifier={updateIdentifier} dataset={dataset}/>
+            </Col>
+          </Row>)}
+        </Tab>
+
+        <Tab eventKey="data" title="Datatables">
+          <Form.Check
+            type="checkbox"
+            onChange={(e) => updateIdentifier(index, {'isDatatableOutput': e.target.checked})}
+            checked={identifier.isDatatableOutput}
+            label={`Enable output in datatables`}/>
+          {identifier.isDatatableOutput && (<Row>
+            <Col sm={6}>
               <OutputTableIndexSelect
                 index={index}
                 identifier={identifier}
@@ -228,25 +252,22 @@ function MetadataIdentifierInput({
                 updateIdentifier={updateIdentifier}
               />
             </Col>
-            <Col sm={4}>
-              <OutputLayerInput index={index} identifier={identifier}
-                                updateIdentifier={updateIdentifier} dataset={dataset}/>
-            </Col>
-            <Col sm={4}>
+            <Col sm={6}>
               <OutputKeyInput index={index} identifier={identifier}
                               updateIdentifier={updateIdentifier} dataset={dataset}/>
             </Col>
-          </Row>
-          <Row>
-            <Col>
-              <h4>Output Ontology <Button variant="info"
-                                          onClick={() => setShowOntology(!showOntology)}>{showOntology ? 'Hide' : 'Show'}</Button>
-              </h4>
-              <p>We use the TIB Terminology Service to allow you to assign an ontology terms to
-                properties.</p>
-            </Col>
-          </Row>
-          {showOntology ? <>
+          </Row>)}
+        </Tab>
+
+        <Tab eventKey="ontology" title="Rdf Graph">
+          <Form.Check
+            type="checkbox"
+            onChange={(e) => updateIdentifier(index, {'isRdfOutput': e.target.checked})}
+            checked={identifier.isRdfOutput}
+            label={`Enable output in rdf graph`}/>
+          {identifier.isRdfOutput && (<>
+            <p>We use the TIB Terminology Service to allow you to assign an ontology terms to
+              properties.</p>
             <OntologyTermSelect term={identifier.object} predicate={identifier.predicate}
                                 objects={profile.objects} options={options}
                                 updateOntology={(a) => updateIdentifierOntology(index, a)}/>
@@ -257,10 +278,9 @@ function MetadataIdentifierInput({
                                    subjects={profile.subjects} datatypes={profile.datatypes}
                                    subjectInstances={profile.subjectInstances} options={options}
                                    updateOntology={(a) => updateIdentifierOntology(index, a)}/>
-          </> : <></>
-          }
-        </>
-      )}
+          </>)}
+        </Tab>
+      </Tabs>
 
     </form>
   )

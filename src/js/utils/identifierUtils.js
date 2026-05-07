@@ -162,7 +162,10 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
       identifier.editable = options.editable ?? true;
 
       if (identifier.optional) {
-        identifier.outputTableIndex = 0;
+        identifier.isDatasetOutput = true;
+        identifier.isDatatableOutput = false;
+        identifier.isRdfOutput = false;
+        identifier.outputTableIndex = [];
         identifier.outputLayer = '';
         identifier.outputKey = '';
         identifier.predicate = null;

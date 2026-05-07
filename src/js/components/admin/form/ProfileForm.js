@@ -170,7 +170,6 @@ ProfileForm.propTypes = {
   error: PropTypes.bool.isRequired,
   errorMessage: PropTypes.string.isRequired,
   savable: PropTypes.bool.isRequired,
-  onFilehandleShowFileUploadChangeHandler: PropTypes.func.isRequired,
   setTableIdx: PropTypes.func.isRequired,
   tableIdx: PropTypes.number.isRequired,
 }
