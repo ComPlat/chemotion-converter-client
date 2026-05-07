@@ -2,8 +2,8 @@ import React from "react"
 import PropTypes from 'prop-types';
 import {Col, Form, Row} from 'react-bootstrap';
 
-import TypeSelect from './identifier/TypeSelect'
-import { IdentifierInput } from './IdentifierInput'
+import TypeSelect from '../../identifier/TypeSelect'
+import { IdentifierInput } from '../../IdentifierInput'
 
 
 function TableIdentifier({
@@ -45,14 +45,16 @@ function TableIdentifier({
 }
 
 TableIdentifier.propTypes = {
-  index: PropTypes.number,
-  headerKey: PropTypes.string,
-  table: PropTypes.object,
-  options: PropTypes.object,
-  inputTables: PropTypes.array,
-  updateHeader: PropTypes.func,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array
+  index: PropTypes.number.isRequired,
+  headerKey: PropTypes.string.isRequired,
+  table: PropTypes.shape({
+    header: PropTypes.object
+  }).isRequired,
+  options: PropTypes.object.isRequired,
+  inputTables: PropTypes.array.isRequired,
+  updateHeader: PropTypes.func.isRequired,
+  fileMetadataOptions: PropTypes.array.isRequired,
+  tableMetadataOptions: PropTypes.array.isRequired
 }
 
 export default TableIdentifier

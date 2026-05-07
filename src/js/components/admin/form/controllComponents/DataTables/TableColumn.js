@@ -2,9 +2,9 @@ import React from "react"
 import PropTypes from 'prop-types';
 import {Button, Col, Form, Row, OverlayTrigger, Popover} from 'react-bootstrap';
 
-import ColumnInput from './table/ColumnInput'
-import ColumnSelect from './table/ColumnSelect'
-import OperatorSelect from './common/OperatorSelect'
+import ColumnInput from '../../table/ColumnInput'
+import ColumnSelect from '../../table/ColumnSelect'
+import OperatorSelect from '../../common/OperatorSelect'
 
 
 function TableColumn({
@@ -291,18 +291,18 @@ function TableColumn({
 }
 
 TableColumn.propTypes = {
-    table: PropTypes.object,
-    label: PropTypes.string,
-    columnKey: PropTypes.string,
-    operationsKey: PropTypes.string,
-    inputColumns: PropTypes.array,
-    updateTable: PropTypes.func,
-    addOperation: PropTypes.func,
-    updateOperation: PropTypes.func,
-    updateOperationDescription: PropTypes.func,
-    removeOperation: PropTypes.func,
-    tableMetadataOptions: PropTypes.array,
-    inputTables: PropTypes.array
+    table: PropTypes.object.isRequired,
+    label: PropTypes.string.isRequired,
+    columnKey: PropTypes.string.isRequired,
+    operationsKey: PropTypes.string.isRequired,
+    inputColumns: PropTypes.array.isRequired,
+    updateTable: PropTypes.func.isRequired,
+    addOperation: PropTypes.func.isRequired,
+    updateOperation: PropTypes.func.isRequired,
+    updateOperationDescription: PropTypes.func.isRequired,
+    removeOperation: PropTypes.func.isRequired,
+    tableMetadataOptions: PropTypes.array.isRequired,
+    inputTables: PropTypes.array.isRequired
 }
 
 export default TableColumn

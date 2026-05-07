@@ -1,10 +1,10 @@
 import React, {useMemo} from "react"
 import PropTypes from 'prop-types';
 
-import HeaderInput from './table/HeaderInput'
+import HeaderInput from '../../table/HeaderInput'
 import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
-import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
+import ExtendedHeaderInput from "../../table/ExtendedHeaderInput";
 import {Col, Form, Row} from "react-bootstrap";
 
 
@@ -78,7 +78,7 @@ function TableForm({
               key={index}
               index={index + 1000}
               headerKey={headerKey}
-              opitions={options}
+              options={options}
               table={table}
               inputTables={inputTables}
               updateHeader={updateHeader}
@@ -126,18 +126,21 @@ function TableForm({
 }
 
 TableForm.propTypes = {
-  table: PropTypes.object,
-  inputTables: PropTypes.array,
-  inputColumns: PropTypes.array,
-  options: PropTypes.object,
-  updateTable: PropTypes.func,
-  updateHeader: PropTypes.func,
-  updateOperationDescription: PropTypes.func,
-  addOperation: PropTypes.func,
-  updateOperation: PropTypes.func,
-  removeOperation: PropTypes.func,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array
+  table: PropTypes.shape({
+    header: PropTypes.object,
+    table: PropTypes.object
+  }).isRequired,
+  inputTables: PropTypes.array.isRequired,
+  inputColumns: PropTypes.array.isRequired,
+  options: PropTypes.object.isRequired,
+  updateTable: PropTypes.func.isRequired,
+  updateHeader: PropTypes.func.isRequired,
+  updateOperationDescription: PropTypes.func.isRequired,
+  addOperation: PropTypes.func.isRequired,
+  updateOperation: PropTypes.func.isRequired,
+  removeOperation: PropTypes.func.isRequired,
+  fileMetadataOptions: PropTypes.array.isRequired,
+  tableMetadataOptions: PropTypes.array.isRequired
 }
 
 export default TableForm
