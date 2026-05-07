@@ -37,12 +37,7 @@ function FileHeader({header, tableIndex, tableIdx}) {
   const {addIdentifier, updateRegex} = BuildIdentifierHandler(profile, updateProfile, null, tableIdx);
 
   return <FileHeaderPresenter addIdentifier={(value) => {
-    let identifierKey = 'metadata'
-    if (activeTabKey !== 'reactionVariations') {
-      setActiveTabKey('metadata');
-    } else {
-
-    }
+    setActiveTabKey('metadata');
     addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
   }} header={header} updateRegex={(value) => {
     return updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});

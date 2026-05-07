@@ -1,14 +1,10 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import PropTypes from "prop-types";
-import {Card, Button, Table, Tab} from "react-bootstrap";
+import {Button, Card, Table} from "react-bootstrap";
 import Select from 'react-select';
 import IdentifierInput from "../IdentifierInput";
 import {useAdminApp} from "../../AppContext";
-import {
-  getFileMetadataOptions,
-  getInputTables,
-  getTableMetadataOptions
-} from "../../../../utils/profileUtils";
+import {getFileMetadataOptions, getInputTables, getTableMetadataOptions} from "../../../../utils/profileUtils";
 import {initIdentifier} from "../../../../utils/identifierUtils";
 import {v4 as uuidv4} from 'uuid';
 
@@ -28,8 +24,6 @@ function ReactionVariationsRow({activeButton = null, onRemove = null, identifier
   }
   return (<tr>
     {element.map((x, i) => {
-        if (x) {
-        }
         return <td key={i}><Button variant={x ? "outline-info" : activeButton === i ? "warning" : "outline-warning"}
                                    onClick={() => onEdit(i, x)}
                                    className="identifier-variation-btn">{identifierText(x)}</Button>
@@ -132,7 +126,7 @@ function ReactionVariationEditView({activeRow, tableIdx, activeButton, reactionV
   useEffect(() => {
     if (activeId) {
       let cIdentifier = findIdentifier(activeId);
-      if (activeId && (!cIdentifier || cIdentifier.type !== active.value)) {
+      if (!cIdentifier || cIdentifier.type !== active.value) {
         if (cIdentifier) {
           reactionVariations.identifiers = reactionVariations.identifiers.filter((x) => x.id !== activeId)
         }
