@@ -8,15 +8,11 @@ import {
   getTableMetadataOptions
 } from "../../../../utils/profileUtils";
 import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
-
-const profileShape = PropTypes.shape({
-  identifiers: PropTypes.array.isRequired,
-  tables: PropTypes.array.isRequired,
-  data: PropTypes.object
-});
+import {useAdminApp} from "../../AppContext";
 
 
-function CheckIdentifier({profile, setProfile, dataset, options, tableIdx}) {
+function CheckIdentifier({dataset, tableIdx}) {
+  const {profile, updateProfile: setProfile} = useAdminApp();
 
   const inputTables = getInputTables(profile, tableIdx);
   const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
@@ -42,8 +38,6 @@ function CheckIdentifier({profile, setProfile, dataset, options, tableIdx}) {
             inputTables={inputTables}
             outputTables={profile.tables}
             dataset={dataset}
-            profile={profile}
-            options={options}
             addIdentifier={ih.addIdentifier}
             updateIdentifier={ih.updateIdentifier}
             removeIdentifier={ih.removeIdentifier}
@@ -74,15 +68,13 @@ function CheckIdentifier({profile, setProfile, dataset, options, tableIdx}) {
 }
 
 CheckIdentifier.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
   dataset: PropTypes.object,
-  options: PropTypes.object,
   tableIdx: PropTypes.number.isRequired
 };
 
 
-function MetadataIdentifier({profile, setProfile, dataset, options, tableIdx}) {
+function MetadataIdentifier({dataset, tableIdx}) {
+  const {profile, updateProfile: setProfile, options} = useAdminApp();
 
   const inputTables = getInputTables(profile, tableIdx);
   const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
@@ -153,7 +145,6 @@ function MetadataIdentifier({profile, setProfile, dataset, options, tableIdx}) {
               inputTables={inputTables}
               outputTables={profile.tables}
               dataset={dataset}
-              profile={profile}
               options={options}
               addIdentifier={ih.addIdentifier}
               updateIdentifier={ih.updateIdentifier}
@@ -172,10 +163,7 @@ function MetadataIdentifier({profile, setProfile, dataset, options, tableIdx}) {
 }
 
 MetadataIdentifier.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
   dataset: PropTypes.object,
-  options: PropTypes.object,
   tableIdx: PropTypes.number.isRequired
 };
 

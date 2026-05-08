@@ -13,19 +13,10 @@ import {
 } from "../../../../utils/profileUtils";
 import {additionalInfo, initIdentifier} from "../../../../utils/identifierUtils";
 import TableForm from "../TableForm";
+import {useAdminApp} from "../../AppContext";
 
-const profileShape = PropTypes.shape({
-	data: PropTypes.object,
-	tables: PropTypes.arrayOf(PropTypes.shape({
-		header: PropTypes.object,
-		table: PropTypes.object,
-		loopType: PropTypes.string,
-		matchTables: PropTypes.bool
-	})),
-	matchTables: PropTypes.bool
-});
-
-export default function OutputTables({profile, setProfile, options, tableIdx}) {
+export default function OutputTables({tableIdx}) {
+  const {profile, updateProfile: setProfile, options} = useAdminApp();
 
 	const addTable = () => {
 		const header = {}
@@ -444,19 +435,18 @@ export default function OutputTables({profile, setProfile, options, tableIdx}) {
 						table={table}
 						inputTables={inputTables}
 						inputColumns={inputColumns}
-						options={options}
 						updateHeader={(key, value) => updateHeader(index, key, value)}
-						updateTable={(key, value) => updateTable(index, key, value)}
-						addOperation={(key, type) => addOperation(index, key, type)}
-						updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
-						updateOperationDescription={(key, value) => updateOperationDescription(index, key, value)}
-						removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)}
-						fileMetadataOptions={fileMetadataOptions}
-						tableMetadataOptions={tableMetadataOptions}
-					/>
-				</Card.Body>
-			</Card>
-		))}
+            updateTable={(key, value) => updateTable(index, key, value)}
+            addOperation={(key, type) => addOperation(index, key, type)}
+            updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
+            updateOperationDescription={(key, value) => updateOperationDescription(index, key, value)}
+            removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)}
+            fileMetadataOptions={fileMetadataOptions}
+            tableMetadataOptions={tableMetadataOptions}
+          />
+        </Card.Body>
+      </Card>
+    ))}
 
 		<div className="mt-2">
 			<Button
@@ -471,8 +461,5 @@ export default function OutputTables({profile, setProfile, options, tableIdx}) {
 }
 
 OutputTables.propTypes = {
-	profile: profileShape.isRequired,
-	setProfile: PropTypes.func.isRequired,
-	options: PropTypes.object,
 	tableIdx: PropTypes.number.isRequired
 };

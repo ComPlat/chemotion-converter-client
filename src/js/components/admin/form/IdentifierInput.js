@@ -16,6 +16,7 @@ import TableIndexInput from './identifier/TableIndexInput'
 import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
 import OntologyPredicateSelect from "./identifier/OntologyPredicateSelect";
+import {useAdminApp} from "../AppContext";
 
 function IndentifierInput({
                             index,
@@ -29,13 +30,13 @@ function IndentifierInput({
                             updateIdentifierOperation,
                             removeIdentifierOperation,
                             dataset,
-                            profile,
-                            options,
                             updateRegex = null,
                             addIdentifierOperation = null
                           }) {
+  const {profile, options} = useAdminApp();
   const valueDisabled = identifier.match === 'any'
   const [showOntology, setShowOntology] = useState(false);
+
 
   return (
     <form>
@@ -193,7 +194,6 @@ function IndentifierInput({
 IndentifierInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
-  options: PropTypes.object,
   fileMetadataOptions: PropTypes.array,
   tableMetadataOptions: PropTypes.array,
   inputTables: PropTypes.array,
@@ -205,7 +205,6 @@ IndentifierInput.propTypes = {
   updateRegex: PropTypes.func,
   updateIdentifierOntology: PropTypes.func,
   addIdentifierOperation: PropTypes.func,
-  profile: PropTypes.object,
 }
 
 export default IndentifierInput

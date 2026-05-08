@@ -6,14 +6,16 @@ import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
 import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
 import {Col, Form, Row} from "react-bootstrap";
+import {useAdminApp} from "../AppContext";
 
 
 function TableForm({
-                     table, inputTables, inputColumns, options,
+                     table, inputTables, inputColumns,
                      updateTable, updateHeader,
                      addOperation, updateOperation, updateOperationDescription, removeOperation,
                      fileMetadataOptions, tableMetadataOptions
                    }) {
+  const {options} = useAdminApp();
   const creatableHeaderOptions = {"DATA TYPE": options["DATA TYPE"], XUNITS: options.XUNITS, YUNITS: options.YUNITS};
 
   const fixedHeaderOptions  = useMemo(() => {
@@ -78,7 +80,6 @@ function TableForm({
               key={index}
               index={index + 1000}
               headerKey={headerKey}
-              opitions={options}
               table={table}
               inputTables={inputTables}
               updateHeader={updateHeader}
@@ -129,7 +130,6 @@ TableForm.propTypes = {
   table: PropTypes.object,
   inputTables: PropTypes.array,
   inputColumns: PropTypes.array,
-  options: PropTypes.object,
   updateTable: PropTypes.func,
   updateHeader: PropTypes.func,
   updateOperationDescription: PropTypes.func,

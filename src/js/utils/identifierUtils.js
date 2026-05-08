@@ -152,8 +152,8 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
           identifier[key] = options[key];
         }
       }
+      profile.identifiers.push(identifier);
 
-      profile.identifiers.push(identifier)
       setProfile(profile)
     },
 

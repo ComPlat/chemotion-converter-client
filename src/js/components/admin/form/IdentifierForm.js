@@ -9,9 +9,9 @@ import IdentifierHeader from './IdentifierHeader'
 function IdentifierForm({
   label, type, optional, identifiers, fileMetadataOptions,
   tableMetadataOptions, inputTables, outputTables, dataset,
-  addIdentifier, updateIdentifier, removeIdentifier, profile,
+  addIdentifier, updateIdentifier, removeIdentifier,
   addIdentifierOperation, updateIdentifierOperation,
-  options, removeIdentifierOperation, updateIdentifierOntology, updateRegex
+  removeIdentifierOperation, updateIdentifierOntology, updateRegex
 }) {
   const toggleIdentifier = (index) => {
     updateIdentifier(index, { show: !identifiers[index].show})
@@ -38,9 +38,7 @@ function IdentifierForm({
                   <IdentifierInput
                     index={index}
                     optional={optional}
-                    options={options}
                     identifier={identifier}
-                    profile={profile}
                     fileMetadataOptions={fileMetadataOptions}
                     tableMetadataOptions={tableMetadataOptions}
                     inputTables={inputTables}
@@ -83,8 +81,6 @@ IdentifierForm.propTypes = {
   inputTables: PropTypes.array,
   outputTables: PropTypes.array,
   dataset: PropTypes.object,
-  options: PropTypes.object,
-  profile: PropTypes.object,
   addIdentifier: PropTypes.func,
   updateIdentifier: PropTypes.func,
   removeIdentifier: PropTypes.func,
