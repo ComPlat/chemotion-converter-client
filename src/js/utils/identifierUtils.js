@@ -165,6 +165,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
         identifier.isDatasetOutput = true;
         identifier.isDatatableOutput = false;
         identifier.isRdfOutput = false;
+        identifier.isLoobDatatableOutput = true;
         identifier.outputTableIndex = [];
         identifier.outputLayer = '';
         identifier.outputKey = '';

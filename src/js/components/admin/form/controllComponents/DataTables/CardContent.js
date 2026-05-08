@@ -61,14 +61,14 @@ export default function DataTableCardContent({
       }
 
       if (type === 'header_value') {
-        operation.table = '0';
+        operation.table = inputTable;
         operation.regex = '';
         operation.line = '';
         operation.ignore_missing_values = false;
       } else if (type === 'metadata_value') {
         const mdZero = getTableMetadataOptions(profile, tableIdx)[0];
         operation.value = mdZero.key;
-        operation.table = `${mdZero.tableIndex}`;
+        operation.table = inputTable;
         operation.metadata = '0';
         operation.ignore_missing_values = false;
       } else if (type === 'column') {
@@ -114,10 +114,7 @@ export default function DataTableCardContent({
   const updateOperation = (index, key, opIndex, opKey, value) => {
 
     if (opKey === 'metadata') {
-      const data = value.split(':');
-      updateOperation(index, key, opIndex, 'value', data[1].trim());
-      updateOperation(index, key, opIndex, 'table', data[2]);
-      value = data[0];
+      updateOperation(index, key, opIndex, 'value', value);
     }
     if (index !== -1) {
       profile.tables[index].table[key][opIndex][opKey] = value;
@@ -203,7 +200,8 @@ export default function DataTableCardContent({
 
 
   const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
-  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
+  const tableMetadataOptions = useMemo(()=>  getTableMetadataOptions(profile, tableIdx, inputTable), [tableIdx, inputTable]);
+  //const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx, inputTable)
 
 
   return (<>
@@ -232,6 +230,8 @@ export default function DataTableCardContent({
           tableIdx={tableIdx}
           inputTable={inputTable}
           addOperation={addOperation}
+          updateOperation={updateOperation}
+          removeOperation={removeOperation}
         />
       </Card.Body>
     </Card>

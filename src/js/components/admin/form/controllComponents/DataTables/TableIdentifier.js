@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {Col, Form, Row} from 'react-bootstrap';
 
 import TypeSelect from '../../identifier/TypeSelect'
-import { IdentifierInput } from '../../IdentifierInput'
+import { DatatableIdentifierInput } from '../../IdentifierInput'
 
 
 function TableIdentifier({
@@ -31,7 +31,7 @@ function TableIdentifier({
         </Col>
       </Form.Group>
 
-      <IdentifierInput
+      <DatatableIdentifierInput
         index={index}
         identifier={table.header[headerKey]}
         inputTables={inputTables}

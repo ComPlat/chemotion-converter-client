@@ -26,14 +26,15 @@ export default function OutputTables({profile, setProfile, options, tableIdx}) {
   const inputTables = useMemo(() => getInputTables(profile, tableIdx), [tableIdx]);
   const inputColumns = getInputColumns(inputTables);
   const addTable = () => {
+    const inputTable = 0
     const header = {}
     if (options) {
       for (let key of ["DATA CLASS", "DATA TYPE", "XUNITS", "YUNITS"]) {
         header[key] = options[key][0];
       }
-    }
+    };
 
-    const inputColumns = getDistInputColumns(profile, tableIdx, 0)
+    const inputColumns = getDistInputColumns(profile, tableIdx, inputTable);
     const table = {}
     if (inputColumns.length > 2) {
       table.xColumn = inputColumns[0].value
@@ -41,9 +42,10 @@ export default function OutputTables({profile, setProfile, options, tableIdx}) {
     }
 
     profile.tables.push({
-      header: header,
-      table: table
-    })
+      header,
+      table,
+      inputTable
+    });
 
     setProfile(profile)
   }

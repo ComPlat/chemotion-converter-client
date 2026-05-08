@@ -108,9 +108,7 @@ function TableColumn({
                                 size="sm"
                                 value={operation.metadata || ''}
                                 onChange={event => {
-                                    updateOperation(operationsKey, index, 'metadata',
-                                        `${event.target.value}:${tableMetadataOptions[event.target.value].key}
-                                :${tableMetadataOptions[event.target.value].tableIndex}`);
+                                    updateOperation(operationsKey, index, 'metadata', tableMetadataOptions[event.target.value].key);
                                 }}
                             >
                                 {tableMetadataOptions.map((option, optionIndex) => (
@@ -122,21 +120,7 @@ function TableColumn({
 
                     {(operation.type === 'header_value') && (
                         <>
-                            <Col sm={9}>
-                                <Form.Select
-                                    size="sm"
-                                    value={operation.table || ''}
-                                    onChange={event => {
-                                        updateOperation(operationsKey, index, 'table', event.target.value);
-                                    }}
-                                >
-                                    {inputTables.map((table, tableIndex) => (
-                                        <option key={tableIndex} value={tableIndex}>Input table
-                                            #{tableIndex}</option>
-                                    ))}
-                                </Form.Select>
-                            </Col>
-                            <Col sm={5}>
+                            <Col sm={10}>
                                 <Form.Control
                                     size="sm"
                                     value={operation.line || ''}
@@ -146,7 +130,7 @@ function TableColumn({
                                     }}
                                 />
                             </Col>
-                            <Col sm={6}>
+                            <Col sm={11}>
                                 <Form.Control
                                     size="sm"
                                     value={operation.regex || ''}

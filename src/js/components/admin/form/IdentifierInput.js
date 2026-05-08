@@ -119,29 +119,20 @@ IdentifierInput.propTypes = {
   updateIdentifier: PropTypes.func,
 }
 
-function MetadataIdentifierInput({
+function DatatableIdentifierInput({
                                    index,
                                    identifier,
                                    fileMetadataOptions,
                                    tableMetadataOptions,
                                    inputTables,
-                                   outputTables,
                                    updateIdentifier,
-                                   updateIdentifierOntology,
-                                   updateIdentifierOperation,
-                                   removeIdentifierOperation,
-                                   dataset,
-                                   profile,
-                                   options,
                                    updateRegex = null,
-                                   addIdentifierOperation = null
                                  }) {
-  const matchResult = useMemo(() => updateRegex({...identifier}), [Object.keys(identifier)]);
-  const [activeOutputTab, setActiveOutputTab] = useState('dataset')
+  const matchResult = useMemo(() => updateRegex && updateRegex({...identifier}), [Object.keys(identifier)]);
+
 
   return (
-    <form>
-
+    <>
       <CommonIdentifierInput
         index={index}
         identifier={identifier}
@@ -172,6 +163,57 @@ function MetadataIdentifierInput({
           {matchResult}
         </Col></Row>)
       }
+
+    </>
+  )
+
+}
+
+DatatableIdentifierInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  fileMetadataOptions: PropTypes.array,
+  tableMetadataOptions: PropTypes.array,
+  inputTables: PropTypes.array,
+
+  updateIdentifier: PropTypes.func,
+  updateRegex: PropTypes.func,
+}
+
+
+
+function MetadataIdentifierInput({
+                                   index,
+                                   identifier,
+                                   fileMetadataOptions,
+                                   tableMetadataOptions,
+                                   inputTables,
+                                   outputTables,
+                                   updateIdentifier,
+                                   updateIdentifierOntology,
+                                   updateIdentifierOperation,
+                                   removeIdentifierOperation,
+                                   dataset,
+                                   profile,
+                                   options,
+                                   updateRegex = null,
+                                   addIdentifierOperation = null
+                                 }) {
+  const [activeOutputTab, setActiveOutputTab] = useState('dataset')
+
+  return (
+    <form>
+
+      <DatatableIdentifierInput
+        index={index}
+        identifier={identifier}
+        fileMetadataOptions={fileMetadataOptions}
+        tableMetadataOptions={tableMetadataOptions}
+        inputTables={inputTables}
+        updateIdentifier={updateIdentifier}
+        updateRegex={updateRegex}
+      />
+
       {addIdentifierOperation && (
         <Row><Col>
           <Button
@@ -253,6 +295,13 @@ function MetadataIdentifierInput({
               />
             </Col>
             <Col sm={6}>
+
+              <Form.Check
+                type="checkbox"
+                onChange={(e) => updateIdentifier(index, {'isLoobDatatableOutput': e.target.checked})}
+                checked={identifier.isLoobDatatableOutput || false}
+                label={`If this option is checked, the value from the corresponding input table is used. If it is not checked, it uses the value selected by the origin identifier.`}/>
+
               <OutputKeyInput index={index} identifier={identifier}
                               updateIdentifier={updateIdentifier} dataset={dataset}/>
             </Col>
@@ -305,4 +354,4 @@ MetadataIdentifierInput.propTypes = {
   profile: PropTypes.object,
 }
 
-export {IdentifierInput, MetadataIdentifierInput}
+export {IdentifierInput, MetadataIdentifierInput, DatatableIdentifierInput}

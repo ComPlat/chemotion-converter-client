@@ -15,7 +15,9 @@ export default function LoopForm({
                                    tableMetadataOptions,
                                    tableIdx,
                                    inputTable,
-                                   addOperation
+                                   addOperation,
+                                   updateOperation,
+                                   removeOperation
                                  }) {
   const toggleMatchTables = (index, op_index = -1) => {
     const profile_table = profile.tables[index]
@@ -47,15 +49,19 @@ export default function LoopForm({
   }
 
   const loopMetadataOptions = (outputTable, op_index) => {
-    return [tableMetadataOptions.filter((x) => x.tableIndex === inputTable).map((item) => {
-      const cleanLabel = item.label.replace(/^Input table #\d+ /, "");
-      const showValue = !profile.tables[outputTable].table.loop_metadata[op_index].ignoreValue && true
-      return {
-        value: item.key,
-        metadata: cleanLabel,
-        label: showValue ? `${cleanLabel} (${item.value})` : cleanLabel
-      }
-    })];
+    return [{
+      label: `Input table #${inputTable}`,
+      options: tableMetadataOptions.map((item) => {
+        const cleanLabel = item.label.replace(/^Input table #\d+ /, "");
+        const showValue = !profile.tables[outputTable].table.loop_metadata[op_index].ignoreValue && true
+        return {
+          value: item.key,
+          key: item.key,
+          metadata: cleanLabel,
+          label: showValue ? `${cleanLabel} (${item.value})` : cleanLabel
+        }
+      })
+    }];
   };
 
   return (<>          <InputGroup>
@@ -97,7 +103,7 @@ export default function LoopForm({
     </Form.Select>
   </InputGroup>
     {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_header']
-      && <div><p className="mb-0">File metadata:</p>{profile.tables[index].table['loop_header'].map((operation, op_index) => (
+      && <div><p className="mb-0">Column header:</p>{profile.tables[index].table['loop_header'].map((operation, op_index) => (
         <InputGroup key={op_index}>
           <InputGroup.Text>&#8627;</InputGroup.Text>
           <Button
@@ -150,9 +156,7 @@ export default function LoopForm({
                 updateOperation(index, 'loop_metadata', op_index, 'metadata', '');
                 return;
               }
-
-              const selectedOption = tableMetadataOptions[selected.value];
-              const metadataString = `${selected.value}:${selectedOption.key}:${selectedOption.tableIndex}`;
+              const metadataString = `${selected.value}`;
 
               updateOperation(index, 'loop_metadata', op_index, 'metadata', metadataString);
             }}
@@ -210,5 +214,7 @@ LoopForm.propTypes = {
   tableMetadataOptions: PropTypes.array.isRequired,
   tableIdx: PropTypes.number.isRequired,
   inputTable: PropTypes.number.isRequired,
-  addOperation: PropTypes.func.isRequired
+  addOperation: PropTypes.func.isRequired,
+  updateOperation: PropTypes.func.isRequired,
+  removeOperation: PropTypes.func.isRequired
 }

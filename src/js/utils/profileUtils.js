@@ -71,24 +71,30 @@ function getFileMetadataOptions(profile, tableIdx = 0) {
   }
 }
 
-function getTableMetadataOptions(profile, tableIdx = 0) {
-  const inputTables = getInputTables(profile, tableIdx)
+function getTableMetadataOptions(profile, tableIdx = 0, inputTableIndex = -1) {
+  const inputTables = getInputTables(profile, tableIdx);
 
-  if (inputTables.length > 0) {
-    return inputTables.reduce((acc, table, tableIndex) => {
-      if (table.metadata !== undefined) {
-        return acc.concat(Object.keys(table.metadata).map(key => ({
-          key,
-          tableIndex,
-          value: table.metadata[key],
-          label: `Input table #${tableIndex} ${key}` })))
-      } else {
-        return acc
-      }
-    }, [])
-  } else {
-    return []
-  }
+  if (!inputTables.length) return [];
+
+  const tables =
+    inputTableIndex >= 0
+      ? [inputTables[inputTableIndex]]
+      : inputTables;
+
+  const startOffset = inputTableIndex >= 0 ? inputTableIndex : 0;
+
+  return tables.flatMap((table, index) => {
+    if (!table.metadata) return [];
+
+    const tableIndex = index + startOffset;
+
+    return Object.entries(table.metadata).map(([key, value]) => ({
+      key,
+      tableIndex,
+      value,
+      label: `Input table #${tableIndex} ${key}`,
+    }));
+  });
 }
 
 export { getDataset, getProfileData, getInputTables, getInputColumns, getDistInputColumns, getFileMetadataOptions, getTableMetadataOptions }
