@@ -1,21 +1,21 @@
 import React, { Component } from "react"
 import PropTypes from 'prop-types';
 import { Form } from 'react-bootstrap';
+import Select from "react-select";
 
 
 const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOptions, updateIdentifier }) => {
-  const options = (identifier.type === 'fileMetadata') ? fileMetadataOptions : tableMetadataOptions
+  const selectOptions = (identifier.type === 'fileMetadata') ? fileMetadataOptions : tableMetadataOptions
 
   const getOptionIndex = identifier => {
     if (identifier.type === 'fileMetadata') {
-      return options.findIndex(option => option.key === identifier.key)
+      return selectOptions.find(option => option.key === identifier.key)
     } else {
-      return options.findIndex(option => (option.key === identifier.key && option.tableIndex === identifier.tableIndex))
+      return selectOptions.find(option => (option.key === identifier.key && option.tableIndex === identifier.tableIndex))
     }
   }
 
-  const onChange = (optionIndex) => {
-    const option = options[optionIndex]
+  const onChange = (option) => {
     const data = {
       key: option.key,
       value: option.value
@@ -29,15 +29,12 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
   return (
     <Form.Group controlId={`keySelect${index}`}>
       <Form.Label column="sm">Key</Form.Label>
-      <Form.Select
+      <Select
         size="sm"
         value={getOptionIndex(identifier)}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {options.map((option, optionIndex) => (
-          <option key={optionIndex} value={optionIndex}>{option.label}</option>
-        ))}
-      </Form.Select>
+        onChange={(selectedOption) => onChange(selectedOption)}
+        options={selectOptions}
+      />
     </Form.Group>
   )
 }

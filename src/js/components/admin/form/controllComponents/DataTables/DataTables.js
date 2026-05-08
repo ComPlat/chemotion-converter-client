@@ -8,23 +8,15 @@ import {
 } from "../../../../../utils/profileUtils";
 
 import DataTableCardContent from "./CardContent";
+import {useAdminApp} from "../../../AppContext";
 
-const profileShape = PropTypes.shape({
-  data: PropTypes.object,
-  tables: PropTypes.arrayOf(PropTypes.shape({
-    header: PropTypes.object,
-    table: PropTypes.object,
-    loopType: PropTypes.string,
-    matchTables: PropTypes.bool
-  })),
-  matchTables: PropTypes.bool
-});
 
-export default function OutputTables({profile, setProfile, options, tableIdx}) {
+export default function OutputTables({tableIdx}) {
+  const {profile, updateProfile: setProfile, options} = useAdminApp();
 
 
   const inputTables = useMemo(() => getInputTables(profile, tableIdx), [tableIdx]);
-  const inputColumns = getInputColumns(inputTables);
+
   const addTable = () => {
     const inputTable = 0
     const header = {}
@@ -36,15 +28,22 @@ export default function OutputTables({profile, setProfile, options, tableIdx}) {
 
     const inputColumns = getDistInputColumns(profile, tableIdx, inputTable);
     const table = {}
-    if (inputColumns.length > 2) {
+    if (inputColumns.length > 1) {
       table.xColumn = inputColumns[0].value
-      table.yColumn = inputColumns[1].value
+      if (inputColumns.length > 2) {
+        table.yColumn = inputColumns[1].value
+      } else {
+        table.yColumn = inputColumns[0].value
+      }
+    } else {
+      table.xColumn = {columnIndex: 0}
+      table.xColumn = {columnIndex: 1}
     }
 
     profile.tables.push({
       header,
       table,
-      inputTable
+      inputTableIndex: tableIdx
     });
 
     setProfile(profile)
@@ -71,12 +70,10 @@ export default function OutputTables({profile, setProfile, options, tableIdx}) {
         </Card.Header>
         <Card.Body>
           <DataTableCardContent
-          profile={profile}
           table={table}
           index={index}
           inputTables={inputTables}
-          inputColumns={inputColumns}
-          setProfile={setProfile} options={options} tableIdx={tableIdx}/>
+          tableIdx={tableIdx}/>
         </Card.Body>
       </Card>
     ))}
@@ -94,8 +91,5 @@ export default function OutputTables({profile, setProfile, options, tableIdx}) {
 }
 
 OutputTables.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
-  options: PropTypes.object.isRequired,
   tableIdx: PropTypes.number.isRequired
 };

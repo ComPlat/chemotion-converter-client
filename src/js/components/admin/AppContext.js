@@ -11,6 +11,8 @@ export function AdminProvider({children}) {
   const [options, setOptions] = useState([]);
   const [profile, setProfile] = useState(null);
 
+
+
   const updateProfileList = (profile) => {
     setProfiles(prevProfiles => {
       const updatedProfiles = [...prevProfiles];
@@ -46,7 +48,8 @@ export function AdminProvider({children}) {
       profiles, setProfiles,
       datasets, setDatasets,
       options, setOptions,
-      profile, setProfile, updateProfile
+      profile, setProfile,
+      updateProfile, updateProfileList
     }}>
       {children}
     </AppContext.Provider>

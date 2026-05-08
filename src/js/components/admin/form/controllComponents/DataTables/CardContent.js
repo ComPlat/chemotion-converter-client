@@ -1,29 +1,34 @@
 import TableForm from "./TableForm";
 import Select from 'react-select';
 import {Card} from 'react-bootstrap'
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import PropTypes from 'prop-types';
 import {v4 as uuidv4} from "uuid";
 import {
-  getFileMetadataOptions,
+  getFileMetadataOptions, getInputColumns,
   getTableMetadataOptions
 } from "../../../../../utils/profileUtils";
 import {additionalInfo, initIdentifier} from "../../../../../utils/identifierUtils";
 import LoopForm from "./LoopForm";
+import {useAdminApp} from "../../../AppContext";
 
 
 export default function DataTableCardContent({
-                                               profile,
                                                table,
                                                index,
-                                               inputColumns,
                                                inputTables,
-                                               setProfile,
-                                               options,
                                                tableIdx
                                              }) {
-  const [inputTable, setInputTable] = useState(0);
 
+  const {profile, updateProfile: setProfile} = useAdminApp();
+  console.log({table, XXX:profile.tables[index]});
+  const inputTable = table.inputTableIndex;
+
+  const inputColumns = useMemo(()=> getInputColumns(inputTables, inputTable), [inputTable]);
+  const setInputTable = useCallback((value)=> {
+    profile.tables[index].inputTableIndex = value;
+    setProfile(profile);
+  }, [table]);
   useEffect(() => {
     setInputTable(0);
   }, [tableIdx]);
@@ -53,37 +58,58 @@ export default function DataTableCardContent({
     setProfile(profile);
   }
 
-  const addOperation = (index, key, type) => {
-    if (index !== -1) {
-      const operation = {
-        type: type,
-        operator: (key.includes('loop') ? '&' : '+')
-      }
+  const newOperation = (key, type) => {
+    const operation = {
+      type: type,
+      operator: (key.includes('loop') ? '&' : '+')
+    }
 
-      if (type === 'header_value') {
-        operation.table = inputTable;
-        operation.regex = '';
-        operation.line = '';
-        operation.ignore_missing_values = false;
-      } else if (type === 'metadata_value') {
-        const mdZero = getTableMetadataOptions(profile, tableIdx)[0];
-        operation.value = mdZero.key;
-        operation.table = inputTable;
-        operation.metadata = '0';
-        operation.ignore_missing_values = false;
-      } else if (type === 'column') {
-        operation['column'] = {
-          tableIndex: null,
-          columnIndex: null
-        };
-      }
+    if (type === 'header_value') {
+      operation.regex = '';
+      operation.line = '';
+      operation.ignore_missing_values = false;
+    } else if (type === 'metadata_value') {
+      const mdZero = getTableMetadataOptions(profile, tableIdx)[0];
+      operation.value = mdZero.key;
+      operation.metadata = '0';
+      operation.ignore_missing_values = false;
+    } else if (type === 'column') {
+      operation['column'] = {
+        columnIndex: null
+      };
+    }
+    return operation;
+  }
+
+  const addOperationToProfile = (index, key, operation) => {
 
       if (profile.tables[index].table[key] === undefined) {
         profile.tables[index].table[key] = [];
       }
       profile.tables[index].table[key].push(operation);
       updateAutomatedOperationDescription(profile, index, key);
-      setProfile(profile)
+      setProfile(profile);
+  }
+
+  const addOperation = (index, key, type) => {
+    if (index !== -1) {
+      const operation = newOperation(key, type);
+      if (type === 'header_value') {
+        operation.table = inputTable;
+      } else if (type === 'metadata_value') {
+        operation.table = inputTable;
+      } else if (type === 'column') {
+        operation['column']['tableIndex'] = null
+      }
+    addOperationToProfile(index, key, operation);
+    }
+  }
+
+  const addLoopOperation = (index, key, type) => {
+    if (index !== -1) {
+      const operation = newOperation(key, type);
+      addOperationToProfile(index, key, operation);
+
     }
   }
 
@@ -200,7 +226,7 @@ export default function DataTableCardContent({
 
 
   const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
-  const tableMetadataOptions = useMemo(()=>  getTableMetadataOptions(profile, tableIdx, inputTable), [tableIdx, inputTable]);
+  const tableMetadataOptions = useMemo(() => getTableMetadataOptions(profile, tableIdx, inputTable), [tableIdx, inputTable]);
   //const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx, inputTable)
 
 
@@ -209,7 +235,7 @@ export default function DataTableCardContent({
       <Card.Header>
         Use this output table configuration for:
       </Card.Header>
-      <Card.Body style={{ zIndex: '1000' }}>
+      <Card.Body style={{zIndex: '1000'}}>
         <Select value={inputTableOptions[inputTable]}
                 onChange={(selectedOption) => setInputTable(selectedOption.value)}
                 options={inputTableOptions}/>
@@ -223,13 +249,11 @@ export default function DataTableCardContent({
       <Card.Body>
 
         <LoopForm
-          profile={profile}
-          setProfile={setProfile}
           index={index}
           tableMetadataOptions={tableMetadataOptions}
           tableIdx={tableIdx}
           inputTable={inputTable}
-          addOperation={addOperation}
+          addOperation={addLoopOperation}
           updateOperation={updateOperation}
           removeOperation={removeOperation}
         />
@@ -240,7 +264,6 @@ export default function DataTableCardContent({
       table={table}
       inputTables={inputTables}
       inputColumns={inputColumns}
-      options={options}
       updateHeader={(key, value) => updateHeader(index, key, value)}
       updateTable={(key, value) => updateTable(index, key, value)}
       addOperation={(key, type) => addOperation(index, key, type)}
@@ -253,16 +276,8 @@ export default function DataTableCardContent({
 }
 
 DataTableCardContent.propTypes = {
-  profile: PropTypes.shape({
-    data: PropTypes.object,
-    tables: PropTypes.array,
-    matchTables: PropTypes.bool
-  }).isRequired,
   table: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
-  inputColumns: PropTypes.array.isRequired,
   inputTables: PropTypes.array.isRequired,
-  setProfile: PropTypes.func.isRequired,
-  options: PropTypes.object.isRequired,
   tableIdx: PropTypes.number.isRequired
 }

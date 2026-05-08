@@ -12,9 +12,8 @@ function TableIdentifier({
                             updateHeader
                          }) {
   const updateTableIdentifier = (identifierIndex, data) => {
-    const headerKeyIdentifier = Object.assign({}, table.header[headerKey], data)
-
-    updateHeader(headerKey, headerKeyIdentifier)
+    const headerKeyIdentifier = Object.assign({}, table.header[headerKey], data);
+    updateHeader(headerKey, headerKeyIdentifier);
   }
 
   return (

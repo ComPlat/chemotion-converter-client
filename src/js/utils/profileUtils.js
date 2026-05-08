@@ -19,23 +19,24 @@ function getInputTables(profile, tableIdx = 0) {
   return profileData ? (profile.matchTables ? [profileData.tables[0]] : profileData.tables) : []
 }
 
-function getInputColumns(inputTables) {
+function getInputColumns(inputTables, inputTableIdx) {
   if (inputTables.length > 0) {
-    return inputTables.reduce((accumulator, table, tableIndex) => {
-      const tableColumns = table.columns.map((tableColumn, columnIndex) => {
-        return Object.assign({}, tableColumn, {
-          label: `Input table #${tableIndex} ${tableColumn.name}`,
-          value: {
-            tableIndex: tableIndex,
-            columnIndex: columnIndex
-          }
+    return [
+      {
+        label: `Input table #${inputTableIdx}`,
+        options: inputTables[inputTableIdx].columns.map((tableColumn, columnIndex) => {
+          return Object.assign({}, tableColumn, {
+            label: `${tableColumn.name}`,
+            value: {
+              columnIndex: columnIndex
+            }
+          });
         })
-      })
-      return accumulator.concat(tableColumns)
-    }, [])
-  } else {
-    return []
+      }
+
+    ]
   }
+  return [];
 }
 
 function getDistInputColumns(profile, tableIdx = 0, tableIndex) {
@@ -45,7 +46,6 @@ function getDistInputColumns(profile, tableIdx = 0, tableIndex) {
     return {
         label: tableColumn.name,
         value: {
-          tableIndex,
           columnIndex
         }
       };

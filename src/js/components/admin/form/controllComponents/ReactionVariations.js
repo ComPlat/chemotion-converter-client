@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import {Button, Card, Table} from "react-bootstrap";
 import Select from 'react-select';
-import IdentifierInput from "../IdentifierInput";
+import {DatatableIdentifierInput} from "../IdentifierInput";
 import {useAdminApp} from "../../AppContext";
 import {getFileMetadataOptions, getInputTables, getTableMetadataOptions} from "../../../../utils/profileUtils";
 import {initIdentifier} from "../../../../utils/identifierUtils";
@@ -179,7 +179,7 @@ function ReactionVariationEditView({activeRow, tableIdx, activeButton, reactionV
       onChange={setActive}
       options={tabOptions}
     />
-    {identifier && <IdentifierInput
+    {identifier && <DatatableIdentifierInput
       index={0}
       identifier={identifier}
       inputTables={inputTables}
@@ -236,7 +236,7 @@ function ReactionVariations({tableIdx}) {
       <Card.Header>Reaction Variations</Card.Header>
       <Card.Body>
         <small>
-          <p className="text-muted">
+          <div className="text-muted">
             Here you can define autofill values for reaction variations.
             Each entry must be provided as a triplet:
             <ul>
@@ -245,7 +245,7 @@ function ReactionVariations({tableIdx}) {
               <li>the unit (l, mol, g, etc.)</li>
             </ul>
             This feature is only applicable if the analysis is linked to a reaction variation.
-          </p>
+          </div>
         </small>
 
 

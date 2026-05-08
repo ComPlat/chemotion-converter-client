@@ -6,7 +6,7 @@ import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
 import ExtendedHeaderInput from "../../table/ExtendedHeaderInput";
 import {Col, Form, Row} from "react-bootstrap";
-import {useAdminApp} from "../AppContext";
+import {useAdminApp} from "../../../AppContext";
 
 
 function TableForm({
@@ -44,7 +44,7 @@ function TableForm({
 
       {(table.header['DATA CLASS'] === 'NTUPLES') && (
         <Form.Group as={Row}>
-          <Form.Label as={Col} sm={4}>NTUPLES PAGE HEADER</Form.Label>
+          <Form.Label as={Col} sm={4} column="lg">NTUPLES PAGE HEADER</Form.Label>
           <Col sm={8}>
             <Form.Select
               size="sm"

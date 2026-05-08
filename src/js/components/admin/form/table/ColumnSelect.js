@@ -1,54 +1,38 @@
-import React, { useEffect } from "react"
+import React, {useEffect} from "react"
 import PropTypes from 'prop-types';
-import { Form } from 'react-bootstrap'
+import Select from "react-select";
 
-const ColumnSelect = ({ column, columnList, onChange }) => {
-	useEffect(() => {
-		const current = getColumn(column);
+const ColumnSelect = ({column, columnList, onChange}) => {
+  useEffect(() => {
+    const current = getColumn(column);
 
-		// If nothing selected AND list has values → auto-select index 0
-		if (current === "" && columnList.length > 0) {
-			onChange(columnList[0].value);
-		}
-	}, [columnList]);
-
-
-  const handleChange = (event) => {
-    const indexStr = event.target.value;
-
-    if (indexStr === "") {
-      onChange(false);
-      return;
+    // If nothing selected AND list has values → auto-select index 0
+    if (!current && columnList.length > 0) {
+      onChange(columnList[0].options[0].value);
     }
+  }, [columnList[0]?.options.length]);
 
-    const index = Number(indexStr);
-    onChange(columnList[index].value);
+
+  const handleChange = (columnSelected) => {
+    onChange(columnSelected.value);
   };
 
   const getColumn = (column) => {
     if (!column) return "";
 
-    const idx = columnList.findIndex(
+    return columnList.map((x) => x.options).flat().find(
       (cur) =>
-        cur.value.tableIndex === column.tableIndex &&
         cur.value.columnIndex === column.columnIndex
     );
-
-    return idx >= 0 ? String(idx) : "";
   };
 
   return (
-    <Form.Select
+    <Select
       size="sm"
       value={getColumn(column)}
       onChange={handleChange}
-    >
-      <>
-				{columnList.map((item, index) => (
-          <option value={String(index)} key={index}>{item.label}</option>
-        ))}
-      </>
-    </Form.Select>
+      options={columnList}
+    />
   )
 }
 

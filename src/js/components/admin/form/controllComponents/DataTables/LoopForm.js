@@ -3,14 +3,12 @@ import PropTypes from 'prop-types';
 import {Button, Form, InputGroup, OverlayTrigger, Tooltip} from "react-bootstrap";
 import isEqual from "lodash/isEqual";
 import {
-  getDistInputColumns,
-  getInputColumns
+  getDistInputColumns
 } from "../../../../../utils/profileUtils";
 import Select from "react-select";
+import {useAdminApp} from "../../../AppContext";
 
 export default function LoopForm({
-                                   profile,
-                                   setProfile,
                                    index,
                                    tableMetadataOptions,
                                    tableIdx,
@@ -19,6 +17,7 @@ export default function LoopForm({
                                    updateOperation,
                                    removeOperation
                                  }) {
+  const {profile, updateProfile: setProfile} = useAdminApp();
   const toggleMatchTables = (index, op_index = -1) => {
     const profile_table = profile.tables[index]
     if (op_index === -1) {
@@ -45,6 +44,9 @@ export default function LoopForm({
   };
   const handleChangeLoop = (value, index) => {
     profile.tables[index].loopType = value;
+    if(value !== 'all') {
+      profile.tables[index].matchTables = false;
+    }
     setProfile(profile);
   }
 
@@ -177,7 +179,7 @@ export default function LoopForm({
       ))}</div>}
     {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_theader']
       && <div><p className="mb-0">Header:</p>{profile.tables[index].table['loop_theader'].map((operation, op_index) => (
-        <InputGroup>
+        <InputGroup  key={op_index}>
           <InputGroup.Text>&#8627;</InputGroup.Text>
           <Button
             variant="outline-danger"
@@ -205,11 +207,6 @@ export default function LoopForm({
 }
 
 LoopForm.propTypes = {
-  profile: PropTypes.shape({
-    tables: PropTypes.array,
-    matchTables: PropTypes.bool
-  }).isRequired,
-  setProfile: PropTypes.func.isRequired,
   index: PropTypes.number.isRequired,
   tableMetadataOptions: PropTypes.array.isRequired,
   tableIdx: PropTypes.number.isRequired,
