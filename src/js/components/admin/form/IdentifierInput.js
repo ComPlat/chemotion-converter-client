@@ -16,6 +16,7 @@ import TableIndexInput from './identifier/TableIndexInput'
 import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
 import OntologyPredicateSelect from "./identifier/OntologyPredicateSelect";
+import {useAdminApp} from "../AppContext";
 
 
 function CommonIdentifierInput({
@@ -26,6 +27,7 @@ function CommonIdentifierInput({
                                  inputTables,
                                  updateIdentifier
                                }) {
+
 
   return (
     <>
@@ -339,7 +341,6 @@ function MetadataIdentifierInput({
 MetadataIdentifierInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
-  options: PropTypes.object,
   fileMetadataOptions: PropTypes.array,
   tableMetadataOptions: PropTypes.array,
   inputTables: PropTypes.array,
@@ -351,7 +352,6 @@ MetadataIdentifierInput.propTypes = {
   updateRegex: PropTypes.func,
   updateIdentifierOntology: PropTypes.func,
   addIdentifierOperation: PropTypes.func,
-  profile: PropTypes.object,
 }
 
 export {IdentifierInput, MetadataIdentifierInput, DatatableIdentifierInput}

@@ -9,7 +9,7 @@ import { DatatableIdentifierInput } from '../../IdentifierInput'
 function TableIdentifier({
                            index, headerKey, table, inputTables,
                            fileMetadataOptions, tableMetadataOptions,
-                           options, updateHeader
+                            updateHeader
                          }) {
   const updateTableIdentifier = (identifierIndex, data) => {
     const headerKeyIdentifier = Object.assign({}, table.header[headerKey], data)
@@ -35,7 +35,6 @@ function TableIdentifier({
         index={index}
         identifier={table.header[headerKey]}
         inputTables={inputTables}
-        options={options}
         fileMetadataOptions={fileMetadataOptions}
         tableMetadataOptions={tableMetadataOptions}
         updateIdentifier={updateTableIdentifier}
@@ -50,7 +49,6 @@ TableIdentifier.propTypes = {
   table: PropTypes.shape({
     header: PropTypes.object
   }).isRequired,
-  options: PropTypes.object.isRequired,
   inputTables: PropTypes.array.isRequired,
   updateHeader: PropTypes.func.isRequired,
   fileMetadataOptions: PropTypes.array.isRequired,

@@ -5,9 +5,11 @@ import DatasetCard from "../common/DatasetCard";
 import {addNamespaceToOntology, GENERIC_PREDICATE} from "../common/TibFetchService";
 import {cleanOntology} from "../../../../utils/identifierUtils";
 import OntologySubjectPredicateSelect from "../identifier/OntologySubjectPredicateSelect";
+import {useAdminApp} from "../../AppContext";
 
 
-export default function OntologyManager({dataset, datasets, profile, options, setProfile}) {
+export default function OntologyManager({dataset}) {
+  const {datasets, options, profile, updateProfile: setProfile} = useAdminApp();
 
   const updateOntology = (ontology) => {
     if (typeof profile != 'undefined' && profile !== null) {
@@ -77,15 +79,5 @@ export default function OntologyManager({dataset, datasets, profile, options, se
 }
 
 OntologyManager.propTypes = {
-  dataset: PropTypes.object,
-  datasets: PropTypes.array,
-  profile: PropTypes.shape({
-    ols: PropTypes.string,
-    rootOntology: PropTypes.object,
-    subjects: PropTypes.array.isRequired,
-    predicates: PropTypes.array.isRequired,
-    subjectInstances: PropTypes.object.isRequired
-  }).isRequired,
-  options: PropTypes.object,
-  setProfile: PropTypes.func.isRequired
+  dataset: PropTypes.object
 };

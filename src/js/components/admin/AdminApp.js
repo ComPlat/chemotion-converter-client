@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Breadcrumb, Button, Col, Container, Modal, Row} from 'react-bootstrap';
 
 import ConverterApi from '../../api/ConverterApi';
@@ -9,6 +9,7 @@ import FileUploadForm from './upload/FileUploadForm';
 import {AllCommunityModule, ModuleRegistry, provideGlobalGridOptions} from 'ag-grid-community';
 import {getProfileData} from "../../utils/profileUtils";
 import {GENERIC_PREDICATE} from "./form/common/TibFetchService";
+import {AdminProvider, useAdminApp} from "./AppContext";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -18,13 +19,10 @@ provideGlobalGridOptions({
 });
 
 
-function AdminApp() {
+function AdminAppContent() {
+  const {profiles, setProfiles, profile, setProfile} = useAdminApp();
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
-  const [profiles, setProfiles] = useState([]);
-  const [options, setOptions] = useState([]);
-  const [datasets, setDatasets] = useState([]);
-  const [profile, setProfile] = useState(null);
   const [originProfile, setOriginProfile] = useState(null);
   const [error, setError] = useState(false);
   const [uploadError, setUploadError] = useState(false);
@@ -36,28 +34,6 @@ function AdminApp() {
   const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [tableIdx, setTableIdx] = useState(0);
-
-  useEffect(() => {
-    Promise.all([
-      ConverterApi.fetchProfiles(),
-      ConverterApi.fetchDatasets(),
-      ConverterApi.fetchOptions()
-    ]).then(responses => {
-      const [profilesResponse, datasetsResponse, optionsResponse] = responses
-      setProfiles(profilesResponse);
-      setDatasets(datasetsResponse);
-      setOptions(optionsResponse);
-    })
-  }, []);
-
-  const updateProfileList = (profile) => {
-    setProfiles(prevProfiles => {
-      const updatedProfiles = [...prevProfiles];
-      const index = updatedProfiles.findIndex(p => (p.id === profile.id))
-      updatedProfiles[index] = profile
-      return updatedProfiles;
-    });
-  }
 
   const showListView = () => {
     setStatus('list');
@@ -95,13 +71,6 @@ function AdminApp() {
   const hideDeleteModal = () => {
     setDeleteModal(false);
     setProfile(null);
-  };
-
-  const updateProfile = (nextProfile, {updateList = false} = {}) => {
-    setProfile({...nextProfile});
-    if (updateList) {
-      updateProfileList(nextProfile);
-    }
   };
 
   const createProfile = (nextProfile, silent = false) => {
@@ -250,7 +219,8 @@ function AdminApp() {
               objects: [], datatypes: [],
               converter_version: options?.VERSION ?? '0.0',
               subjectInstances: {},
-              rootOntology: GENERIC_PREDICATE
+              rootOntology: GENERIC_PREDICATE,
+              reactionVariations: {elements: [], identifiers: []}
             }
             setStatus('create');
           }
@@ -361,18 +331,13 @@ function AdminApp() {
       return (
         <ProfileForm
           status={status}
-          profile={profile}
-          options={options}
-          datasets={datasets}
           errorMessage={errorMessage}
           savable={profile !== originProfile}
           error={error}
-          updateProfile={updateProfile}
           storeProfile={storeProfile}
           handleShowFileUpload={handleShowFileUpload}
           tableIdx={tableIdx}
-          setTableIdx={setTableIdx}
-        />
+          setTableIdx={setTableIdx}/>
       )
     }
   }
@@ -477,6 +442,14 @@ function AdminApp() {
         </Modal.Body>
       </Modal>
     </Container>
+  )
+}
+
+function AdminApp() {
+  return (
+    <AdminProvider>
+      <AdminAppContent/>
+    </AdminProvider>
   )
 }
 

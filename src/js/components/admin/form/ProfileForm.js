@@ -4,6 +4,7 @@ import {Alert, Button, ButtonGroup, Row} from 'react-bootstrap';
 
 import InputTables from "./common/InputTables";
 import FormNavigatorCol from "./controllComponents/FormNavigator";
+import {useAdminApp} from "../AppContext";
 
 const profileShape = PropTypes.shape({
   data: PropTypes.oneOfType([
@@ -24,10 +25,6 @@ const profileShape = PropTypes.shape({
 
 function ProfileForm({
                        status,
-                       profile,
-                       options,
-                       datasets,
-                       updateProfile,
                        storeProfile,
                        error,
                        errorMessage,
@@ -37,7 +34,7 @@ function ProfileForm({
                        setTableIdx
                      }) {
 
-  const [activeTabKey, setActiveTabKey] = useState("basics");
+  const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp();
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -138,17 +135,10 @@ function ProfileForm({
             <Alert variant="danger" dismissible>{errorMessage}</Alert>
           </div>
         )}
-        <InputTables setActiveTabKey={setActiveTabKey}
-                     profile={profile}
-                     setProfile={updateProfile}
-                     tableIdx={tableIdx}
+        <InputTables tableIdx={tableIdx}
                      onDeleteInputFile={onDeleteInputFile}
                      setTableIdx={setTableIdx}/>
         <FormNavigatorCol
-          profile={profile}
-          datasets={datasets}
-          options={options}
-          setProfile={updateProfile}
           activeTabKey={activeTabKey}
           setActiveTabKey={setActiveTabKey}
           tableIdx={tableIdx}
@@ -162,16 +152,13 @@ function ProfileForm({
 
 ProfileForm.propTypes = {
   status: PropTypes.string.isRequired,
-  profile: profileShape.isRequired,
-  options: PropTypes.object.isRequired,
-  datasets: PropTypes.array.isRequired,
-  updateProfile: PropTypes.func.isRequired,
   storeProfile: PropTypes.func.isRequired,
   error: PropTypes.bool.isRequired,
   errorMessage: PropTypes.string.isRequired,
   savable: PropTypes.bool.isRequired,
-  setTableIdx: PropTypes.func.isRequired,
+  handleShowFileUpload: PropTypes.func.isRequired,
   tableIdx: PropTypes.number.isRequired,
+  setTableIdx: PropTypes.func.isRequired,
 }
 
 export default ProfileForm
