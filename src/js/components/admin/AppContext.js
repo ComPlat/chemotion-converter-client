@@ -46,7 +46,8 @@ export function AdminProvider({children}) {
       profiles, setProfiles,
       datasets, setDatasets,
       options, setOptions,
-      profile, setProfile, updateProfile
+      profile, setProfile,
+      updateProfileList, updateProfile
     }}>
       {children}
     </AppContext.Provider>
