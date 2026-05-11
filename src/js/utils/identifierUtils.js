@@ -168,6 +168,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
         identifier.isLoobDatatableOutput = true;
         identifier.outputTableIndex = [];
         identifier.outputLayer = '';
+        identifier.outputDatatableKey = '';
         identifier.outputKey = '';
         identifier.predicate = null;
         identifier.subject = null;

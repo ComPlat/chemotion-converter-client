@@ -21,28 +21,30 @@ export default function DataTableCardContent({
                                              }) {
 
   const {profile, updateProfile: setProfile} = useAdminApp();
-  console.log({table, XXX:profile.tables[index]});
-  const inputTable = table.inputTableIndex;
 
-  const inputColumns = useMemo(()=> getInputColumns(inputTables, inputTable), [inputTable]);
+  const inputTable = table.inputTableIndex ?? 0;
   const setInputTable = useCallback((value)=> {
     profile.tables[index].inputTableIndex = value;
     setProfile(profile);
   }, [table]);
-  useEffect(() => {
-    setInputTable(0);
-  }, [tableIdx]);
 
-  const updateTable = (index, key, value) => {
+  const inputColumns = useMemo(()=> getInputColumns(inputTables, inputTable), [inputTable]);
+
+
+  const updateTable = (index, key, value, rootObj=false) => {
     if (index !== -1) {
-      profile.tables[index].table[key] = value
+      if (rootObj)  {
+        profile.tables[index][key] = value;
+      } else {
+        profile.tables[index].table[key] = value;
 
-      // remove the column if it set to null
-      if (profile.tables[index].table[key] === null) {
-        delete profile.tables[index].table[key]
-        // remove the column if tableIndex and columnIndex is null
-      } else if (Object.values(profile.tables[index].table[key]).every(value => (value === null || isNaN(value)))) {
-        delete profile.tables[index].table[key]
+        // remove the column if it set to null
+        if (profile.tables[index].table[key] === null) {
+          delete profile.tables[index].table[key]
+          // remove the column if tableIndex and columnIndex is null
+        } else if (Object.values(profile.tables[index].table[key]).every(value => (value === null || isNaN(value)))) {
+          delete profile.tables[index].table[key]
+        }
       }
 
       setProfile(profile)
@@ -181,13 +183,6 @@ export default function DataTableCardContent({
       }
 
       if (key === 'DATA CLASS') {
-        if (value === 'NTUPLES') {
-          header.NTUPLES_PAGE_HEADER = header.NTUPLES_PAGE_HEADER || '___+';
-          header.NTUPLES_ID = header.NTUPLES_ID || uuidv4();
-        } else if (header['NTUPLES_PAGE_HEADER']) {
-          delete header.NTUPLES_PAGE_HEADER;
-          delete header.NTUPLES_ID;
-        }
 
         if (value === 'XYDATA') {
           ['FIRSTX', 'LASTX', 'DELTAX'].forEach(headerKey => {
@@ -228,14 +223,14 @@ export default function DataTableCardContent({
   const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
   const tableMetadataOptions = useMemo(() => getTableMetadataOptions(profile, tableIdx, inputTable), [tableIdx, inputTable]);
   //const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx, inputTable)
-
+console.log({inputTable, xx: inputTableOptions[inputTable]})
 
   return (<>
     <Card>
       <Card.Header>
         Use this output table configuration for:
       </Card.Header>
-      <Card.Body style={{zIndex: '1000'}}>
+      <Card.Body>
         <Select value={inputTableOptions[inputTable]}
                 onChange={(selectedOption) => setInputTable(selectedOption.value)}
                 options={inputTableOptions}/>
@@ -265,7 +260,7 @@ export default function DataTableCardContent({
       inputTables={inputTables}
       inputColumns={inputColumns}
       updateHeader={(key, value) => updateHeader(index, key, value)}
-      updateTable={(key, value) => updateTable(index, key, value)}
+      updateTable={(key, value, rootObj = false) => updateTable(index, key, value, rootObj)}
       addOperation={(key, type) => addOperation(index, key, type)}
       updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
       updateOperationDescription={(key, value) => updateOperationDescription(index, key, value)}

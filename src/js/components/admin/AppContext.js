@@ -10,6 +10,7 @@ export function AdminProvider({children}) {
   const [datasets, setDatasets] = useState([]);
   const [options, setOptions] = useState([]);
   const [profile, setProfile] = useState(null);
+  const [inData, setInData] = useState(null);
 
 
 
@@ -41,6 +42,12 @@ export function AdminProvider({children}) {
       setOptions(optionsResponse);
     })
   }, []);
+
+  useEffect(() => {
+    if (profile) {
+      setInData(profile.data);
+    }
+  }, [profile?.data.length]);
 
   return (
     <AppContext.Provider value={{

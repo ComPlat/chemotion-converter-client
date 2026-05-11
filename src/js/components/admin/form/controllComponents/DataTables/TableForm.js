@@ -21,7 +21,7 @@ function TableForm({
   const fixedHeaderOptions  = useMemo(() => {
     return Object.fromEntries(
       Object.entries(options).filter(
-        ([key]) => !(key in creatableHeaderOptions) && !["rdf", "VERSION"].includes(key)
+        ([key]) => !(key in creatableHeaderOptions) && !["rdf", "VERSION", "DATA_LOOP_CLASSES"].includes(key)
       )
     );
   }, [options]);
@@ -42,16 +42,16 @@ function TableForm({
                              values={creatableHeaderOptions[optionKey]} updateHeader={updateHeader}/>
       ))}
 
-      {(table.header['DATA CLASS'] === 'NTUPLES') && (
+      {(table.loopType !== 'none' && table.loopOutput === 'SINGLE FILE (NTUPLES)') && (
         <Form.Group as={Row}>
-          <Form.Label as={Col} sm={4} column="lg">NTUPLES PAGE HEADER</Form.Label>
+          <Form.Label as={Col} sm={4} column="sm">NTUPLES PAGE HEADER</Form.Label>
           <Col sm={8}>
             <Form.Select
               size="sm"
-              value={table.header['NTUPLES_PAGE_HEADER']}
+              value={table.nTuplePageHeader}
               onChange={event => {
                 const {value} = event.target;
-                updateHeader('NTUPLES_PAGE_HEADER', value);
+                updateTable('nTuplePageHeader', value, true);
               }}
             >
               <option value="___+">Incrementing Page Index</option>

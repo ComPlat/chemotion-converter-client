@@ -1,6 +1,6 @@
 import {Button, Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
 import PropTypes from 'prop-types';
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import FileHeaderPresenter from "../HeaderPresenter";
 import {AgGridReact} from "ag-grid-react";
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip";
@@ -185,7 +185,7 @@ TabContents.propTypes = {
 
 function InputTables({tableIdx, setTableIdx, onDeleteInputFile}) {
   const {profile} = useAdminApp();
-  const profileData = getProfileData(profile, tableIdx);
+  const profileData = useMemo(()=> getProfileData(profile, tableIdx), [tableIdx]);
 
   const handleSelect = (selectedKey) => {
     setActiveKey(Number(selectedKey));
@@ -195,11 +195,11 @@ function InputTables({tableIdx, setTableIdx, onDeleteInputFile}) {
     setTableIdx(Number(selectedKey));
   };
 
-  const tabs = ((profileData?.tables ?? []).map((table, idx) => (
+  const tabs = useMemo(()=>(profileData?.tables ?? []).map((table, idx) => (
     <NavDropdown.Item eventKey={idx} key={idx}>
       {`Input table # ${idx}`}
     </NavDropdown.Item>
-  )));
+  )), [tableIdx]);
 
   // state
   const [activeKey, setActiveKey] = useState(0);

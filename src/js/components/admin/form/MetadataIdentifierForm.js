@@ -2,16 +2,16 @@ import React, {useState} from "react"
 import PropTypes from 'prop-types';
 import {Button, Collapse, ListGroup} from 'react-bootstrap';
 
-import { MetadataIdentifierInput } from './IdentifierInput'
-import IdentifierHeader from './IdentifierHeader'
+import { MetadataIdentifierInput } from './IdentifierInput';
+import IdentifierHeader from './IdentifierHeader';
 
 
 function MetadataIdentifierForm({
                           label, type, optional, identifiers, fileMetadataOptions,
                           tableMetadataOptions, inputTables, outputTables, dataset,
-                          addIdentifier, updateIdentifier, removeIdentifier, profile,
+                          addIdentifier, updateIdentifier, removeIdentifier,
                           addIdentifierOperation, updateIdentifierOperation,
-                          options, removeIdentifierOperation, updateIdentifierOntology, updateRegex
+                           removeIdentifierOperation, updateIdentifierOntology, updateRegex
                         }) {
   const toggleIdentifier = (index) => {
     updateIdentifier(index, {show: !identifiers[index].show})
@@ -42,9 +42,7 @@ function MetadataIdentifierForm({
                     <MetadataIdentifierInput
                       index={index}
                       optional={optional}
-                      options={options}
                       identifier={identifier}
-                      profile={profile}
                       fileMetadataOptions={fileMetadataOptions}
                       tableMetadataOptions={tableMetadataOptions}
                       inputTables={inputTables}
@@ -88,8 +86,6 @@ MetadataIdentifierForm.propTypes = {
   inputTables: PropTypes.array,
   outputTables: PropTypes.array,
   dataset: PropTypes.object,
-  options: PropTypes.object,
-  profile: PropTypes.object,
   addIdentifier: PropTypes.func,
   updateIdentifier: PropTypes.func,
   removeIdentifier: PropTypes.func,

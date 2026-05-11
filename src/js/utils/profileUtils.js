@@ -24,14 +24,14 @@ function getInputColumns(inputTables, inputTableIdx) {
     return [
       {
         label: `Input table #${inputTableIdx}`,
-        options: inputTables[inputTableIdx].columns.map((tableColumn, columnIndex) => {
+        options: inputTables[inputTableIdx]?.columns.map((tableColumn, columnIndex) => {
           return Object.assign({}, tableColumn, {
             label: `${tableColumn.name}`,
             value: {
               columnIndex: columnIndex
             }
           });
-        })
+        }) ?? []
       }
 
     ]

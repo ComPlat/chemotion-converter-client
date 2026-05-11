@@ -122,14 +122,14 @@ IdentifierInput.propTypes = {
 }
 
 function DatatableIdentifierInput({
-                                   index,
-                                   identifier,
-                                   fileMetadataOptions,
-                                   tableMetadataOptions,
-                                   inputTables,
-                                   updateIdentifier,
-                                   updateRegex = null,
-                                 }) {
+                                    index,
+                                    identifier,
+                                    fileMetadataOptions,
+                                    tableMetadataOptions,
+                                    inputTables,
+                                    updateIdentifier,
+                                    updateRegex = null,
+                                  }) {
   const matchResult = useMemo(() => updateRegex && updateRegex({...identifier}), [Object.keys(identifier)]);
 
 
@@ -183,7 +183,6 @@ DatatableIdentifierInput.propTypes = {
 }
 
 
-
 function MetadataIdentifierInput({
                                    index,
                                    identifier,
@@ -195,13 +194,12 @@ function MetadataIdentifierInput({
                                    updateIdentifierOntology,
                                    updateIdentifierOperation,
                                    removeIdentifierOperation,
-                                   dataset,
-                                   profile,
-                                   options,
+                                    dataset,
                                    updateRegex = null,
                                    addIdentifierOperation = null
                                  }) {
-  const [activeOutputTab, setActiveOutputTab] = useState('dataset')
+  const [activeOutputTab, setActiveOutputTab] = useState('dataset');
+  const {profile, options} = useAdminApp();
 
   return (
     <form>
@@ -304,8 +302,16 @@ function MetadataIdentifierInput({
                 checked={identifier.isLoobDatatableOutput || false}
                 label={`If this option is checked, the value from the corresponding input table is used. If it is not checked, it uses the value selected by the origin identifier.`}/>
 
-              <OutputKeyInput index={index} identifier={identifier}
-                              updateIdentifier={updateIdentifier} dataset={dataset}/>
+              <Form.Group controlId={`outputKeyInput${index}`}>
+                <Form.Label column="lg">Output key</Form.Label>
+                <Form.Control
+                  size="sm"
+                  value={identifier.outputDatatableKey || ""}
+                  onChange={(event) =>
+                    updateIdentifier(index, {outputDatatableKey: event.target.value})
+                  }
+                />
+              </Form.Group>
             </Col>
           </Row>)}
         </Tab>

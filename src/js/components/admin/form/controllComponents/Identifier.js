@@ -1,6 +1,6 @@
 import {Button, Card, Collapse} from "react-bootstrap";
 import IdentifierForm from "../IdentifierForm";
-import React, {useState} from "react";
+import React, {useMemo, useState} from "react";
 import PropTypes from "prop-types";
 import {
   getFileMetadataOptions,
@@ -69,9 +69,9 @@ CheckIdentifier.propTypes = {
 function MetadataIdentifier({dataset, tableIdx}) {
   const {profile, updateProfile: setProfile, options} = useAdminApp();
 
-  const inputTables = getInputTables(profile, tableIdx);
-  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
-  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
+  const inputTables = useMemo(()=> getInputTables(profile, tableIdx), [!!profile, tableIdx]);
+  const fileMetadataOptions = useMemo(()=> getFileMetadataOptions(profile, tableIdx), [!!profile, tableIdx]);
+  const tableMetadataOptions = useMemo(()=> getTableMetadataOptions(profile, tableIdx), [!!profile, tableIdx]);
 
   const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);
   const [open, setOpen] = useState(false);

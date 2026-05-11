@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Breadcrumb, Button, Col, Container, Modal, Row} from 'react-bootstrap';
 
 import ConverterApi from '../../api/ConverterApi';
@@ -20,7 +20,7 @@ provideGlobalGridOptions({
 
 
 function AdminAppContent() {
-  const {profiles, setProfiles, profile, setProfile, updateProfileList} = useAdminApp();
+  const {profiles, setProfiles, profile, setProfile, updateProfileList, options} = useAdminApp();
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
   const [originProfile, setOriginProfile] = useState(null);

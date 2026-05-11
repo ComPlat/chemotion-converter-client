@@ -7,7 +7,7 @@ const ColumnSelect = ({column, columnList, onChange}) => {
     const current = getColumn(column);
 
     // If nothing selected AND list has values → auto-select index 0
-    if (!current && columnList.length > 0) {
+    if (!current && columnList[0].length > 0) {
       onChange(columnList[0].options[0].value);
     }
   }, [columnList[0]?.options.length]);

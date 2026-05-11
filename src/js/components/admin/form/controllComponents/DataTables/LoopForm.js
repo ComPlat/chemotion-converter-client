@@ -1,12 +1,45 @@
 import React, {useMemo} from "react";
 import PropTypes from 'prop-types';
-import {Button, Form, InputGroup, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {Button, Col, Form, InputGroup, OverlayTrigger, Row, Tooltip} from "react-bootstrap";
 import isEqual from "lodash/isEqual";
 import {
   getDistInputColumns
 } from "../../../../../utils/profileUtils";
 import Select from "react-select";
 import {useAdminApp} from "../../../AppContext";
+import {initIdentifier} from "../../../../../utils/identifierUtils";
+
+function LoopTypeHeader({addOperation, index, loopType}) {
+
+  const header = {
+    loop_header: 'Column header',
+    loop_metadata: 'Metadata',
+    loop_theader: 'Header',
+
+  }
+
+  const opType = {
+    loop_header: 'header_value',
+    loop_metadata: 'metadata_value',
+    loop_theader: 'header_value',
+
+  }
+
+  return (<p className="mb-0">
+    <Button
+      className="mr-2"
+      size="sm"
+      variant="outline-success"
+      onClick={() => addOperation(
+        index, loopType,
+        opType[loopType]
+      )}>
+      +
+    </Button>
+
+    {header[loopType]}:
+  </p>);
+}
 
 export default function LoopForm({
                                    index,
@@ -17,7 +50,7 @@ export default function LoopForm({
                                    updateOperation,
                                    removeOperation
                                  }) {
-  const {profile, updateProfile: setProfile} = useAdminApp();
+  const {profile, updateProfile: setProfile, options: {DATA_LOOP_CLASSES}} = useAdminApp();
   const toggleMatchTables = (index, op_index = -1) => {
     const profile_table = profile.tables[index]
     if (op_index === -1) {
@@ -27,11 +60,13 @@ export default function LoopForm({
         profile_table.matchTables = !profile_table.matchTables
       }
     } else {
-      profile_table.table.loop_metadata[op_index].ignoreValue = !profile_table.table.loop_metadata[op_index].ignoreValue
+      const {loop_metadata: loopMetadata} = profile_table.table;
+      loopMetadata[op_index].ignoreValue = !loopMetadata[op_index].ignoreValue;
     }
     setProfile(profile)
   }
   const distInputColumns = useMemo(() => getDistInputColumns(profile, tableIdx, inputTable), [tableIdx, inputTable]);
+
   const getSelectedMetadataOption = (metadata, outputTable, op_index) => {
     if (metadata == null) return null;
 
@@ -44,10 +79,15 @@ export default function LoopForm({
   };
   const handleChangeLoop = (value, index) => {
     profile.tables[index].loopType = value;
-    if(value !== 'all') {
-      profile.tables[index].matchTables = false;
+    setProfile(profile);''
+  }
+  const handleChangeLoopOutput = (value, index) => {
+    profile.tables[index].loopOutput = value;
+    if (value === 'SINGLE FILE (NTUPLES)') {
+      profile.tables[index].nTuplePageHeader |= '___+';
     }
-    setProfile(profile);
+
+    setProfile({...profile});
   }
 
   const loopMetadataOptions = (outputTable, op_index) => {
@@ -66,46 +106,49 @@ export default function LoopForm({
     }];
   };
 
-  return (<>          <InputGroup>
-    {profile.tables[index].loopType === "all" && (
-      <InputGroup.Checkbox
-        id="match-tables-checkbox"
-        checked={profile.matchTables || profile.tables[index].matchTables || false}
-        onChange={() => toggleMatchTables(index)}
-      />
-    )}
-    {profile.tables[index].loopType === "header" ? (
-      <Button
-        variant="outline-success"
-        onClick={() => addOperation(
-          index, 'loop_header',
-          'column'
-        )}>
-        +
-      </Button>
-    ) : (profile.tables[index].loopType !== "all" && (
-      <Button
-        variant="outline-success"
-        onClick={() => addOperation(
-          index, `loop_${profile.tables[index].loopType}`,
-          profile.tables[index].loopType === 'metadata' ? 'metadata' : 'header_value'
-        )}>
-        +
-      </Button>))}
-    <Form.Select
-      id="loop_select"
-      aria-label="Select looping"
-      value={profile.tables[index].loopType}
-      onChange={(e) => handleChangeLoop(e.target.value, index)}
-    >
-      <option value="all">all input tables.</option>
-      <option value="header">all input tables that have the same column header.</option>
-      <option value="theader">all input tables that have the same table header.</option>
-      <option value="metadata">all input tables that have the same metadata.</option>
-    </Form.Select>
-  </InputGroup>
-    {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_header']
-      && <div><p className="mb-0">Column header:</p>{profile.tables[index].table['loop_header'].map((operation, op_index) => (
+  const {
+    table: {loop_header: loopHeader = [], loop_metadata: loopMetadata = [], loop_theader: loopTheader = []},
+    loopType,
+    loopOutput
+  } = profile.tables[index]
+  const isLooped = loopType !== 'none'
+  const isCondition = loopType === 'condition'
+
+  return (<>
+    <InputGroup>
+      <Form.Select
+        id="loop_select"
+        aria-label="Select looping"
+        value={loopType}
+        onChange={(e) => handleChangeLoop(e.target.value, index)}
+      >
+        <option value="none">no loop.</option>
+        <option value="all">all input tables.</option>
+        <option value="condition">Conditioned</option>
+      </Form.Select>
+    </InputGroup>
+    {isLooped && (<div
+      style={{
+        zIndex: 100,
+        position: 'relative'
+      }}>
+      <Form.Group controlId="loop_select"
+                  className="mb-2">
+        <Form.Label column="sm">
+          Output as:
+        </Form.Label>
+        <Select
+          onChange={(selected) => handleChangeLoopOutput(selected.value, index)}
+          options={DATA_LOOP_CLASSES.map((x) => {
+            return {label: x, value: x}
+          })}
+          value={{label: loopOutput, value: loopOutput}}
+        />
+      </Form.Group>
+    </div>)}
+    {isCondition && <>
+      <LoopTypeHeader addOperation={addOperation} index={index} loopType="loop_header"/>
+      {loopHeader.map((operation, op_index) => (
         <InputGroup key={op_index}>
           <InputGroup.Text>&#8627;</InputGroup.Text>
           <Button
@@ -131,10 +174,11 @@ export default function LoopForm({
             }
           />
         </InputGroup>
-      ))}</div>}
-    {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_metadata']
-      &&
-      <div><p className="mb-0">Metadata:</p>{profile.tables[index].table['loop_metadata'].map((operation, op_index) => (
+      ))}
+    </>}
+    {isCondition && <>
+      <LoopTypeHeader addOperation={addOperation} index={index} loopType="loop_metadata"/>
+      {loopMetadata.map((operation, op_index) => (
         <InputGroup key={op_index}>
           <InputGroup.Text>&#8627;</InputGroup.Text>
           <Button
@@ -170,16 +214,18 @@ export default function LoopForm({
           >
             <div className="input-group-text" style={{cursor: 'pointer'}}>
               <input type="checkbox"
-                     checked={profile.tables[index].table.loop_metadata[op_index].ignoreValue || false}
+                     checked={loopMetadata[op_index].ignoreValue || false}
                      onChange={() => toggleMatchTables(index, op_index)}
               />
             </div>
           </OverlayTrigger>
         </InputGroup>
-      ))}</div>}
-    {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_theader']
-      && <div><p className="mb-0">Header:</p>{profile.tables[index].table['loop_theader'].map((operation, op_index) => (
-        <InputGroup  key={op_index}>
+      ))}
+    </>}
+    {isCondition && <>
+      <LoopTypeHeader addOperation={addOperation} index={index} loopType="loop_theader"/>
+      {loopTheader.map((operation, op_index) => (
+        <InputGroup key={op_index}>
           <InputGroup.Text>&#8627;</InputGroup.Text>
           <Button
             variant="outline-danger"
@@ -202,7 +248,7 @@ export default function LoopForm({
             }}
           />
         </InputGroup>
-      ))}</div>}
+      ))}</>}
   </>)
 }
 
