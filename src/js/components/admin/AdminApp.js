@@ -20,7 +20,7 @@ provideGlobalGridOptions({
 
 
 function AdminAppContent() {
-  const {profiles, setProfiles, profile, setProfile, updateProfileList, options} = useAdminApp();
+  const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp();
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
   const [originProfile, setOriginProfile] = useState(null);
@@ -33,7 +33,6 @@ function AdminAppContent() {
   const [identifierWarningModal, setIdentifierWarningModal] = useState(false);
   const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
-  const [tableIdx, setTableIdx] = useState(0);
 
   const showListView = () => {
     setStatus('list');
@@ -335,9 +334,7 @@ function AdminAppContent() {
           savable={profile !== originProfile}
           error={error}
           storeProfile={storeProfile}
-          handleShowFileUpload={handleShowFileUpload}
-          tableIdx={tableIdx}
-          setTableIdx={setTableIdx}/>
+          handleShowFileUpload={handleShowFileUpload}/>
       )
     }
   }

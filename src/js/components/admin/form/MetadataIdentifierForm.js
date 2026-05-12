@@ -2,17 +2,16 @@ import React, {useState} from "react"
 import PropTypes from 'prop-types';
 import {Button, Collapse, ListGroup} from 'react-bootstrap';
 
-import { MetadataIdentifierInput } from './IdentifierInput';
+import {MetadataIdentifierInput} from './IdentifierInput';
 import IdentifierHeader from './IdentifierHeader';
 
 
 function MetadataIdentifierForm({
-                          label, type, optional, identifiers, fileMetadataOptions,
-                          tableMetadataOptions, inputTables, outputTables, dataset,
-                          addIdentifier, updateIdentifier, removeIdentifier,
-                          addIdentifierOperation, updateIdentifierOperation,
-                           removeIdentifierOperation, updateIdentifierOntology, updateRegex
-                        }) {
+                                  label, type, optional, identifiers,outputTables, dataset,
+                                  addIdentifier, updateIdentifier, removeIdentifier,
+                                  addIdentifierOperation, updateIdentifierOperation,
+                                  removeIdentifierOperation, updateIdentifierOntology, updateRegex
+                                }) {
   const toggleIdentifier = (index) => {
     updateIdentifier(index, {show: !identifiers[index].show})
   }
@@ -43,9 +42,6 @@ function MetadataIdentifierForm({
                       index={index}
                       optional={optional}
                       identifier={identifier}
-                      fileMetadataOptions={fileMetadataOptions}
-                      tableMetadataOptions={tableMetadataOptions}
-                      inputTables={inputTables}
                       outputTables={outputTables}
                       dataset={dataset}
                       updateIdentifier={updateIdentifier}
@@ -81,9 +77,6 @@ MetadataIdentifierForm.propTypes = {
   type: PropTypes.string,
   optional: PropTypes.bool,
   identifiers: PropTypes.array,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array,
-  inputTables: PropTypes.array,
   outputTables: PropTypes.array,
   dataset: PropTypes.object,
   addIdentifier: PropTypes.func,

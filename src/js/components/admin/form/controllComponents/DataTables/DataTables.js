@@ -2,9 +2,7 @@ import React, {useMemo} from "react";
 import PropTypes from "prop-types";
 import {Button, Card} from "react-bootstrap";
 import {
-  getDistInputColumns,
-  getInputTables,
-  getInputColumns
+  getDistInputColumns
 } from "../../../../../utils/profileUtils";
 
 import DataTableCardContent from "./CardContent";
@@ -12,10 +10,9 @@ import {useAdminApp} from "../../../AppContext";
 
 
 export default function OutputTables({tableIdx}) {
-  const {profile, updateProfile: setProfile, options} = useAdminApp();
+  const {profile, updateProfile: setProfile, options, inData: {inputTables}} = useAdminApp();
 
 
-  const inputTables = useMemo(() => getInputTables(profile, tableIdx), [tableIdx]);
 
   const addTable = () => {
     const inputTable = 0
@@ -26,7 +23,7 @@ export default function OutputTables({tableIdx}) {
       }
     };
 
-    const inputColumns = getDistInputColumns(profile, tableIdx, inputTable);
+    const inputColumns = getDistInputColumns(inputTables, inputTable);
     const table = {}
     if (inputColumns.length > 1) {
       table.xColumn = inputColumns[0].value

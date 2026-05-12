@@ -14,10 +14,6 @@ function getProfileData(profile, tableIdx = 0) {
   return Array.isArray(profile.data) ? profile.data[tableIdx] ?? null : profile.data;
 }
 
-function getInputTables(profile, tableIdx = 0) {
-  const profileData = getProfileData(profile, tableIdx);
-  return profileData ? (profile.matchTables ? [profileData.tables[0]] : profileData.tables) : []
-}
 
 function getInputColumns(inputTables, inputTableIdx) {
   if (inputTables.length > 0) {
@@ -39,8 +35,7 @@ function getInputColumns(inputTables, inputTableIdx) {
   return [];
 }
 
-function getDistInputColumns(profile, tableIdx = 0, tableIndex) {
-  const inputTables = getInputTables(profile, tableIdx);
+function getDistInputColumns(inputTables, tableIndex) {
   const table = inputTables[tableIndex];
   const columns = table.columns.map((tableColumn, columnIndex) => {
     return {
@@ -57,22 +52,19 @@ function getDistInputColumns(profile, tableIdx = 0, tableIndex) {
     }];
 }
 
-function getFileMetadataOptions(profile, tableIdx = 0) {
-  const profileData = getProfileData(profile, tableIdx);
-
-  if (profileData) {
-    return Object.keys(profileData.metadata).map(key => ({
+function getFileMetadataOptions(activeData) {
+  if (activeData) {
+    return Object.keys(activeData.metadata).map(key => ({
       key,
       label: key,
-      value: profileData.metadata[key]
+      value: activeData.metadata[key]
     }))
   } else {
     return []
   }
 }
 
-function getTableMetadataOptions(profile, tableIdx = 0, inputTableIndex = -1) {
-  const inputTables = getInputTables(profile, tableIdx);
+function getTableMetadataOptions(inputTables, inputTableIndex = -1) {
 
   if (!inputTables.length) return [];
 
@@ -92,9 +84,9 @@ function getTableMetadataOptions(profile, tableIdx = 0, inputTableIndex = -1) {
       key,
       tableIndex,
       value,
-      label: `Input table #${tableIndex} ${key}`,
+      label: `(#${tableIndex+1}) ${key}`,
     }));
   });
 }
 
-export { getDataset, getProfileData, getInputTables, getInputColumns, getDistInputColumns, getFileMetadataOptions, getTableMetadataOptions }
+export { getDataset, getProfileData, getInputColumns, getDistInputColumns, getFileMetadataOptions, getTableMetadataOptions }

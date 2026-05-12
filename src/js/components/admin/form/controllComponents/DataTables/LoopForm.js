@@ -7,7 +7,6 @@ import {
 } from "../../../../../utils/profileUtils";
 import Select from "react-select";
 import {useAdminApp} from "../../../AppContext";
-import {initIdentifier} from "../../../../../utils/identifierUtils";
 
 function LoopTypeHeader({addOperation, index, loopType}) {
 
@@ -43,14 +42,13 @@ function LoopTypeHeader({addOperation, index, loopType}) {
 
 export default function LoopForm({
                                    index,
-                                   tableMetadataOptions,
                                    tableIdx,
                                    inputTable,
                                    addOperation,
                                    updateOperation,
                                    removeOperation
                                  }) {
-  const {profile, updateProfile: setProfile, options: {DATA_LOOP_CLASSES}} = useAdminApp();
+  const {profile, updateProfile: setProfile, options: {DATA_LOOP_CLASSES},  inData: {inputTables, getTableMetadataOptions}} = useAdminApp();
   const toggleMatchTables = (index, op_index = -1) => {
     const profile_table = profile.tables[index]
     if (op_index === -1) {
@@ -65,13 +63,13 @@ export default function LoopForm({
     }
     setProfile(profile)
   }
-  const distInputColumns = useMemo(() => getDistInputColumns(profile, tableIdx, inputTable), [tableIdx, inputTable]);
-
+  const distInputColumns = useMemo(() => getDistInputColumns(inputTables, inputTable), [tableIdx, inputTable]);
+  const tableMetadataOptions = getTableMetadataOptions(inputTable);
   const getSelectedMetadataOption = (metadata, outputTable, op_index) => {
     if (metadata == null) return null;
 
     for (const group of loopMetadataOptions(outputTable, op_index)) {
-      const found = group.options.find(opt => opt.metadata === metadata);
+      const found = group.options.find(opt => opt.key === metadata);
       if (found) return found;
     }
 
@@ -79,7 +77,7 @@ export default function LoopForm({
   };
   const handleChangeLoop = (value, index) => {
     profile.tables[index].loopType = value;
-    setProfile(profile);''
+    setProfile(profile);
   }
   const handleChangeLoopOutput = (value, index) => {
     profile.tables[index].loopOutput = value;
@@ -94,13 +92,12 @@ export default function LoopForm({
     return [{
       label: `Input table #${inputTable}`,
       options: tableMetadataOptions.map((item) => {
-        const cleanLabel = item.label.replace(/^Input table #\d+ /, "");
         const showValue = !profile.tables[outputTable].table.loop_metadata[op_index].ignoreValue && true
         return {
           value: item.key,
           key: item.key,
-          metadata: cleanLabel,
-          label: showValue ? `${cleanLabel} (${item.value})` : cleanLabel
+          metadata: item.key,
+          label: showValue ? `${item.label} (${item.value})` : item.label
         }
       })
     }];
@@ -254,7 +251,6 @@ export default function LoopForm({
 
 LoopForm.propTypes = {
   index: PropTypes.number.isRequired,
-  tableMetadataOptions: PropTypes.array.isRequired,
   tableIdx: PropTypes.number.isRequired,
   inputTable: PropTypes.number.isRequired,
   addOperation: PropTypes.func.isRequired,

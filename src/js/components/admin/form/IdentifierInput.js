@@ -12,19 +12,15 @@ import OutputLayerInput from './identifier/OutputLayerInput'
 import OutputTableIndexSelect from './identifier/OutputTableIndexSelect'
 import OntologyTermSelect from './identifier/OntologyTermSelect'
 import OntologySubjectSelect from "./identifier/OntologySubjectSelect";
-import TableIndexInput from './identifier/TableIndexInput'
-import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
 import OntologyPredicateSelect from "./identifier/OntologyPredicateSelect";
 import {useAdminApp} from "../AppContext";
+import {DelayedActiveInputTableInput} from "./common/InputTables";
 
 
 function CommonIdentifierInput({
                                  index,
                                  identifier,
-                                 fileMetadataOptions,
-                                 tableMetadataOptions,
-                                 inputTables,
                                  updateIdentifier
                                }) {
 
@@ -34,21 +30,11 @@ function CommonIdentifierInput({
       <Row className="mb-3">
         {(identifier.type === 'fileMetadata' || identifier.type === 'tableMetadata') && (
           <Col>
-            {fileMetadataOptions.length > 0 ? (
-              <KeySelect
-                index={index}
-                identifier={identifier}
-                fileMetadataOptions={fileMetadataOptions}
-                tableMetadataOptions={tableMetadataOptions}
-                updateIdentifier={updateIdentifier}
-              />
-            ) : (
-              <KeyInput
-                index={index}
-                identifier={identifier}
-                updateIdentifier={updateIdentifier}
-              />
-            )}
+            <KeySelect
+              index={index}
+              identifier={identifier}
+              updateIdentifier={updateIdentifier}
+            />
           </Col>
         )}
       </Row>
@@ -56,13 +42,10 @@ function CommonIdentifierInput({
       {(identifier.type === 'tableHeader') && (
         <Row className="mb-3">
           <Col md={10}>
-            {inputTables.length > 0 ? (
-              <TableIndexSelect index={index} identifier={identifier} tables={inputTables}
-                                updateIdentifier={updateIdentifier}/>
-            ) : (
-              <TableIndexInput index={index} identifier={identifier}
-                               updateIdentifier={updateIdentifier}/>
-            )}
+            <DelayedActiveInputTableInput
+              delayTime={200}
+              activeInputTable={identifier.tableIndex}
+              setActiveInputTable={(value) => updateIdentifier(index, {tableIndex: value})}/>
           </Col>
 
           <Col md={2}>
@@ -79,9 +62,6 @@ function CommonIdentifierInput({
 function IdentifierInput({
                            index,
                            identifier,
-                           fileMetadataOptions,
-                           tableMetadataOptions,
-                           inputTables,
                            updateIdentifier
                          }) {
   const valueDisabled = identifier.match === 'any'
@@ -91,9 +71,6 @@ function IdentifierInput({
       <CommonIdentifierInput
         index={index}
         identifier={identifier}
-        fileMetadataOptions={fileMetadataOptions}
-        tableMetadataOptions={tableMetadataOptions}
-        inputTables={inputTables}
         updateIdentifier={updateIdentifier}
       />
 
@@ -116,7 +93,6 @@ IdentifierInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
   fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array,
   inputTables: PropTypes.array,
   updateIdentifier: PropTypes.func,
 }
@@ -124,9 +100,6 @@ IdentifierInput.propTypes = {
 function DatatableIdentifierInput({
                                     index,
                                     identifier,
-                                    fileMetadataOptions,
-                                    tableMetadataOptions,
-                                    inputTables,
                                     updateIdentifier,
                                     updateRegex = null,
                                   }) {
@@ -138,9 +111,6 @@ function DatatableIdentifierInput({
       <CommonIdentifierInput
         index={index}
         identifier={identifier}
-        fileMetadataOptions={fileMetadataOptions}
-        tableMetadataOptions={tableMetadataOptions}
-        inputTables={inputTables}
         updateIdentifier={updateIdentifier}
       />
 
@@ -174,9 +144,6 @@ function DatatableIdentifierInput({
 DatatableIdentifierInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array,
-  inputTables: PropTypes.array,
 
   updateIdentifier: PropTypes.func,
   updateRegex: PropTypes.func,
@@ -186,15 +153,12 @@ DatatableIdentifierInput.propTypes = {
 function MetadataIdentifierInput({
                                    index,
                                    identifier,
-                                   fileMetadataOptions,
-                                   tableMetadataOptions,
-                                   inputTables,
                                    outputTables,
                                    updateIdentifier,
                                    updateIdentifierOntology,
                                    updateIdentifierOperation,
                                    removeIdentifierOperation,
-                                    dataset,
+                                   dataset,
                                    updateRegex = null,
                                    addIdentifierOperation = null
                                  }) {
@@ -207,9 +171,6 @@ function MetadataIdentifierInput({
       <DatatableIdentifierInput
         index={index}
         identifier={identifier}
-        fileMetadataOptions={fileMetadataOptions}
-        tableMetadataOptions={tableMetadataOptions}
-        inputTables={inputTables}
         updateIdentifier={updateIdentifier}
         updateRegex={updateRegex}
       />
@@ -258,7 +219,6 @@ function MetadataIdentifierInput({
       <h3>Output</h3>
       <Tabs activeKey={activeOutputTab}
             onSelect={(k) => setActiveOutputTab(k)}
-            id="main-form-tabs"
             className="mb-3">
 
         <Tab eventKey="dataset" title="Dataset">
@@ -347,9 +307,6 @@ function MetadataIdentifierInput({
 MetadataIdentifierInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array,
-  inputTables: PropTypes.array,
   outputTables: PropTypes.array,
   dataset: PropTypes.object,
   updateIdentifier: PropTypes.func,

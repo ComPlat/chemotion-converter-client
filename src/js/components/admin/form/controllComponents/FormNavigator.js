@@ -82,8 +82,8 @@ function ProfileBasics() {
   </Card>)
 }
 
-export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableIdx}) {
-  const {profile, datasets} = useAdminApp();
+export default function FormNavigatorCol({activeTabKey, setActiveTabKey}) {
+  const {profile, datasets, tableIdx} = useAdminApp();
   const dataset = getDataset(profile, datasets);
 
   return (
@@ -129,6 +129,5 @@ export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableId
 
 FormNavigatorCol.propTypes = {
   activeTabKey: PropTypes.string.isRequired,
-  setActiveTabKey: PropTypes.func.isRequired,
-  tableIdx: PropTypes.number.isRequired
+  setActiveTabKey: PropTypes.func.isRequired
 };

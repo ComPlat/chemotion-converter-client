@@ -10,15 +10,14 @@ import {useAdminApp} from "../../../AppContext";
 
 
 function TableForm({
-                     table, inputTables, inputColumns,
+                     table, inputTables, inputTable, inputColumns,
                      updateTable, updateHeader,
-                     addOperation, updateOperation, updateOperationDescription, removeOperation,
-                     fileMetadataOptions, tableMetadataOptions
+                     addOperation, updateOperation, updateOperationDescription, removeOperation
                    }) {
-  const {options} = useAdminApp();
+  const {options, inData: {getTableMetadataOptions}} = useAdminApp();
   const creatableHeaderOptions = {"DATA TYPE": options["DATA TYPE"], XUNITS: options.XUNITS, YUNITS: options.YUNITS};
-
-  const fixedHeaderOptions  = useMemo(() => {
+  const tableMetadataOptions = getTableMetadataOptions(inputTable);
+  const fixedHeaderOptions = useMemo(() => {
     return Object.fromEntries(
       Object.entries(options).filter(
         ([key]) => !(key in creatableHeaderOptions) && !["rdf", "VERSION", "DATA_LOOP_CLASSES"].includes(key)
@@ -83,8 +82,6 @@ function TableForm({
               table={table}
               inputTables={inputTables}
               updateHeader={updateHeader}
-              fileMetadataOptions={fileMetadataOptions}
-              tableMetadataOptions={tableMetadataOptions}
             />
           ))}
         </div>
@@ -101,8 +98,7 @@ function TableForm({
           updateOperationDescription={updateOperationDescription}
           removeOperation={removeOperation}
           tableMetadataOptions={tableMetadataOptions}
-          inputTables={inputTables}
-        />
+          inputTables={inputTables}/>
       )}
 
       <TableColumn
@@ -132,6 +128,7 @@ TableForm.propTypes = {
     table: PropTypes.object
   }).isRequired,
   inputTables: PropTypes.array.isRequired,
+  inputTable: PropTypes.number.isRequired,
   inputColumns: PropTypes.array.isRequired,
   updateTable: PropTypes.func.isRequired,
   updateHeader: PropTypes.func.isRequired,
@@ -139,8 +136,6 @@ TableForm.propTypes = {
   addOperation: PropTypes.func.isRequired,
   updateOperation: PropTypes.func.isRequired,
   removeOperation: PropTypes.func.isRequired,
-  fileMetadataOptions: PropTypes.array.isRequired,
-  tableMetadataOptions: PropTypes.array.isRequired
 }
 
 export default TableForm

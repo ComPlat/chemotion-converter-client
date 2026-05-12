@@ -1,13 +1,26 @@
-import React, { Component } from "react"
+import React, {useMemo, useState} from "react"
 import PropTypes from 'prop-types';
-import { Form } from 'react-bootstrap';
+import {Col, Form, Row} from 'react-bootstrap';
 import Select from "react-select";
+import {DelayedActiveInputTableInput} from "../common/InputTables";
+import {useAdminApp} from "../../AppContext";
 
 
-const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOptions, updateIdentifier }) => {
-  const selectOptions = (identifier.type === 'fileMetadata') ? fileMetadataOptions : tableMetadataOptions
+const KeySelect = ({index, identifier, updateIdentifier}) => {
+  const [inputTableIndex, setInputTableIndex] = useState(identifier.tableIndex);
+  const {inData: {fileMetadataOptions, getTableMetadataOptions}} = useAdminApp();
 
-  const getOptionIndex = identifier => {
+  const [selectOptions, needsTableSelect] = useMemo(() => {
+    if (identifier.type === 'fileMetadata') {
+      return [fileMetadataOptions, false];
+    } else {
+      return [getTableMetadataOptions(inputTableIndex), true];
+    }
+  }, [inputTableIndex, fileMetadataOptions, identifier?.type]);
+
+
+  const getOptionIndex = (identifier) => {
+
     if (identifier.type === 'fileMetadata') {
       return selectOptions.find(option => option.key === identifier.key)
     } else {
@@ -26,24 +39,31 @@ const KeySelect = ({ index, identifier, fileMetadataOptions, tableMetadataOption
     updateIdentifier(index, data)
   }
 
+
   return (
-    <Form.Group controlId={`keySelect${index}`}>
-      <Form.Label column="sm">Key</Form.Label>
-      <Select
-        size="sm"
-        value={getOptionIndex(identifier)}
-        onChange={(selectedOption) => onChange(selectedOption)}
-        options={selectOptions}
-      />
-    </Form.Group>
+    <Row>
+      {needsTableSelect && (<Col>
+        <DelayedActiveInputTableInput activeInputTable={inputTableIndex} setActiveInputTable={setInputTableIndex} delayTime={100}/>
+
+      </Col>)}
+      <Col>
+        <Form.Group style={{zIndex: 200}} controlId={`keySelect${index}`}>
+          <Form.Label column="sm">Key</Form.Label>
+          <Select
+            size="sm"
+            value={getOptionIndex(identifier)}
+            onChange={(selectedOption) => onChange(selectedOption)}
+            options={selectOptions}
+          />
+        </Form.Group>
+      </Col>
+    </Row>
   )
 }
 
 KeySelect.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array,
   updateIdentifier: PropTypes.func
 }
 

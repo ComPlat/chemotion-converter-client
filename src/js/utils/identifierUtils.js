@@ -1,5 +1,5 @@
 import React from "react";
-import {getFileMetadataOptions, getInputTables, getProfileData, getTableMetadataOptions} from "./profileUtils";
+import {getFileMetadataOptions, getProfileData, getTableMetadataOptions} from "./profileUtils";
 import {v4 as uuidv4} from 'uuid';
 import {addNamespaceToOntology, GENERIC_SUBJECT_PREDICATE} from "../components/admin/form/common/TibFetchService";
 
@@ -11,7 +11,7 @@ const initIdentifier = (profile, type, tableIdx = 0) => {
   }
 
   if (identifier.type === 'fileMetadata') {
-    const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx)
+    const fileMetadataOptions = getFileMetadataOptions(getProfileData(profile, tableIdx))
     if (fileMetadataOptions.length > 0) {
       identifier.key = fileMetadataOptions[0].key
       identifier.value = fileMetadataOptions[0].value
@@ -19,7 +19,7 @@ const initIdentifier = (profile, type, tableIdx = 0) => {
       identifier.key = ''
     }
   } else if (identifier.type === 'tableMetadata') {
-    const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx)
+    const tableMetadataOptions = getTableMetadataOptions(getProfileData(profile, tableIdx))
     if (tableMetadataOptions.length > 0) {
       identifier.key = tableMetadataOptions[0].key
       identifier.tableIndex = tableMetadataOptions[0].tableIndex
@@ -132,11 +132,11 @@ const getSelectedMatch = ({identifier: {lineNumber, key, type, value, tableIndex
 
   }
   if (type === 'tableMetadata') {
-    const {metadata} = getInputTables(profile, tableIdx)[tableIndex];
+    const {metadata} = getProfileData(profile, tableIdx).tables[tableIndex];
     return [metadata?.[key]];
   }
   if (type === 'tableHeader') {
-    const {header} = getInputTables(profile, tableIdx)[tableIndex];
+    const {header} = getProfileData(profile, tableIdx).tables[tableIndex];
 
     lineNumber = parseInt(lineNumber);
 

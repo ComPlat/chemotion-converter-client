@@ -7,8 +7,7 @@ import IdentifierHeader from './IdentifierHeader'
 
 
 function IdentifierForm({
-                          label, type, identifiers, fileMetadataOptions,
-                          tableMetadataOptions, inputTables,
+                          label, type, identifiers,
                           addIdentifier, updateIdentifier, removeIdentifier
                         }) {
   const optional = false;
@@ -41,9 +40,6 @@ function IdentifierForm({
                     <IdentifierInput
                       index={index}
                       identifier={identifier}
-                      fileMetadataOptions={fileMetadataOptions}
-                      tableMetadataOptions={tableMetadataOptions}
-                      inputTables={inputTables}
                       updateIdentifier={updateIdentifier}
                     />
                   </div>
@@ -70,9 +66,6 @@ IdentifierForm.propTypes = {
   label: PropTypes.string,
   type: PropTypes.string,
   identifiers: PropTypes.array,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array,
-  inputTables: PropTypes.array,
   addIdentifier: PropTypes.func,
   updateIdentifier: PropTypes.func,
   removeIdentifier: PropTypes.func

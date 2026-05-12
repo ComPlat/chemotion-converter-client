@@ -1,11 +1,21 @@
-import {Button, Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Col,
+  InputGroup,
+  Nav,
+  NavDropdown,
+  OverlayTrigger,
+  Popover,
+  Row,
+  Form
+} from "react-bootstrap";
 import PropTypes from 'prop-types';
 import React, {useEffect, useMemo, useState} from "react";
 import FileHeaderPresenter from "../HeaderPresenter";
 import {AgGridReact} from "ag-grid-react";
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip";
 import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
-import {getProfileData} from "../../../../utils/profileUtils";
 import {useAdminApp} from "../../AppContext";
 
 const columnShape = PropTypes.shape({
@@ -20,17 +30,6 @@ const inputTableShape = PropTypes.shape({
   columns: PropTypes.arrayOf(columnShape)
 });
 
-const profileDataShape = PropTypes.shape({
-  metadata: PropTypes.object,
-  tables: PropTypes.arrayOf(inputTableShape)
-});
-
-const profileShape = PropTypes.shape({
-  data: PropTypes.oneOfType([
-    profileDataShape,
-    PropTypes.arrayOf(profileDataShape)
-  ])
-});
 
 function FileHeader({header, tableIndex, tableIdx}) {
   const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp();
@@ -183,26 +182,64 @@ TabContents.propTypes = {
   tableIdx: PropTypes.number.isRequired
 };
 
-function InputTables({tableIdx, setTableIdx, onDeleteInputFile}) {
-  const {profile} = useAdminApp();
-  const profileData = useMemo(()=> getProfileData(profile, tableIdx), [tableIdx]);
 
-  const handleSelect = (selectedKey) => {
-    setActiveKey(Number(selectedKey));
-  };
+function DelayedActiveInputTableInput({activeInputTable, setActiveInputTable, delayTime = 500}) {
+  const {inData: {activeData}} = useAdminApp();
+
+  const [localValue, setLocalValue] = useState(activeInputTable);
+  const {tables} = activeData;
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localValue < 0) {
+        setLocalValue(0);
+        return;
+      }
+      if (localValue >= tables.length) {
+        setLocalValue(tables.length - 1);
+        return;
+      }
+      setActiveInputTable(localValue);
+    }, delayTime);
+
+    return () => clearTimeout(timeout);
+  }, [localValue]);
+  if (!activeData) return;
+
+  return (<Form.Group className="mb-3">
+      <InputGroup>
+        <InputGroup.Text>{`Select input table: (1-${tables.length})`}</InputGroup.Text>
+
+        <Form.Control
+          style={{minWidth: '30%'}}
+          type="number"
+          min={1}
+          max={tables.length}
+          value={localValue + 1}
+          onChange={(e) => setLocalValue(Number(e.target.value - 1))}
+        />
+      </InputGroup>
+    </Form.Group>
+  )
+}
+
+
+DelayedActiveInputTableInput.propTypes = {
+  activeInputTable: PropTypes.number.isRequired,
+  delayTime: PropTypes.number.isRequired,
+  setActiveInputTable: PropTypes.func.isRequired
+}
+
+function InputTables({onDeleteInputFile}) {
+  const {profile, tableIdx, setTableIdx, activeInputTable, setActiveInputTable, inData: {activeData}} = useAdminApp();
 
   const handleSourceSelect = (selectedKey) => {
     setTableIdx(Number(selectedKey));
   };
 
-  const tabs = useMemo(()=>(profileData?.tables ?? []).map((table, idx) => (
-    <NavDropdown.Item eventKey={idx} key={idx}>
-      {`Input table # ${idx}`}
-    </NavDropdown.Item>
-  )), [tableIdx]);
+  const tabs = useMemo(() => {
 
-  // state
-  const [activeKey, setActiveKey] = useState(0);
+  }, [tableIdx, activeInputTable]);
 
   useEffect(() => {
     if (Array.isArray(profile.data) && tableIdx >= profile.data.length) {
@@ -216,18 +253,18 @@ function InputTables({tableIdx, setTableIdx, onDeleteInputFile}) {
   }, [profile.data, setTableIdx, tableIdx]);
 
   useEffect(() => {
-    if (!profileData?.tables?.length) {
-      setActiveKey(0);
+    if (!activeData?.tables?.length) {
+      setActiveInputTable(0);
       return;
     }
 
-    if (activeKey >= profileData.tables.length) {
-      setActiveKey(0);
+    if (activeInputTable >= activeData.tables.length) {
+      setActiveInputTable(0);
     }
-  }, [activeKey, profileData]);
+  }, [activeInputTable, activeData]);
 
   return (<Col md={7}>
-    {profileData
+    {activeData
       ? (
         <div className="scroll">
           <h4>Input file metadata</h4>
@@ -243,7 +280,7 @@ function InputTables({tableIdx, setTableIdx, onDeleteInputFile}) {
                 {profile.data.map((dataEntry, idx) => (
                   <NavDropdown.Item eventKey={idx} key={idx}
                                     className="d-flex justify-content-between align-items-center">
-                    <span>{profile.data[idx].metadata.file_name}</span>
+                    <span>{dataEntry.metadata.file_name}</span>
 
                     <Button
                       variant="danger"
@@ -262,19 +299,12 @@ function InputTables({tableIdx, setTableIdx, onDeleteInputFile}) {
               </NavDropdown>
             </Nav>
           )}
-          {Object.keys(profileData.metadata).length > 0 && (<Metadata metadata={profileData.metadata}></Metadata>)}
+          {Object.keys(activeData.metadata).length > 0 && (<Metadata metadata={activeData.metadata}></Metadata>)}
           <h4 className="mt-3">Input tables</h4>
-          <Nav
-            variant="tabs"
-            activeKey={activeKey}
-            onSelect={handleSelect}
-            id="nav-tab-example"
-          >
-            <NavDropdown title={`Input table # ${activeKey}`} id="nav-dropdown">
-              {tabs}
-            </NavDropdown>
-          </Nav>
-          <TabContents activeTable={profileData.tables[activeKey]} activeKey={activeKey}
+
+          <DelayedActiveInputTableInput activeInputTable={activeInputTable}
+                                        setActiveInputTable={setActiveInputTable}/>
+          <TabContents activeTable={activeData.tables[activeInputTable]} activeKey={activeInputTable}
                        tableIdx={tableIdx}></TabContents>
         </div>
       ) : (
@@ -286,9 +316,8 @@ function InputTables({tableIdx, setTableIdx, onDeleteInputFile}) {
 }
 
 InputTables.propTypes = {
-  tableIdx: PropTypes.number.isRequired,
-  setTableIdx: PropTypes.func.isRequired,
   onDeleteInputFile: PropTypes.func.isRequired
 }
 
 export default InputTables
+export {DelayedActiveInputTableInput}

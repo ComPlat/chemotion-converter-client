@@ -1,16 +1,14 @@
 import TableForm from "./TableForm";
-import Select from 'react-select';
 import {Card} from 'react-bootstrap'
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useCallback, useMemo} from "react";
 import PropTypes from 'prop-types';
-import {v4 as uuidv4} from "uuid";
 import {
-  getFileMetadataOptions, getInputColumns,
-  getTableMetadataOptions
+  getInputColumns
 } from "../../../../../utils/profileUtils";
 import {additionalInfo, initIdentifier} from "../../../../../utils/identifierUtils";
 import LoopForm from "./LoopForm";
 import {useAdminApp} from "../../../AppContext";
+import {DelayedActiveInputTableInput} from "../../common/InputTables";
 
 
 export default function DataTableCardContent({
@@ -20,20 +18,20 @@ export default function DataTableCardContent({
                                                tableIdx
                                              }) {
 
-  const {profile, updateProfile: setProfile} = useAdminApp();
+  const {profile, updateProfile: setProfile, inData: {getTableMetadataOptions}} = useAdminApp();
 
   const inputTable = table.inputTableIndex ?? 0;
-  const setInputTable = useCallback((value)=> {
+  const setInputTable = useCallback((value) => {
     profile.tables[index].inputTableIndex = value;
     setProfile(profile);
-  }, [table]);
+  }, [table, index]);
 
-  const inputColumns = useMemo(()=> getInputColumns(inputTables, inputTable), [inputTable]);
+  const inputColumns = useMemo(() => getInputColumns(inputTables, inputTable), [inputTable]);
 
 
-  const updateTable = (index, key, value, rootObj=false) => {
+  const updateTable = (index, key, value, rootObj = false) => {
     if (index !== -1) {
-      if (rootObj)  {
+      if (rootObj) {
         profile.tables[index][key] = value;
       } else {
         profile.tables[index].table[key] = value;
@@ -71,9 +69,9 @@ export default function DataTableCardContent({
       operation.line = '';
       operation.ignore_missing_values = false;
     } else if (type === 'metadata_value') {
-      const mdZero = getTableMetadataOptions(profile, tableIdx)[0];
+      const mdZero = getTableMetadataOptions(inputTable)[0];
       operation.value = mdZero.key;
-      operation.metadata = '0';
+      operation.metadata = mdZero.key;
       operation.ignore_missing_values = false;
     } else if (type === 'column') {
       operation['column'] = {
@@ -85,12 +83,12 @@ export default function DataTableCardContent({
 
   const addOperationToProfile = (index, key, operation) => {
 
-      if (profile.tables[index].table[key] === undefined) {
-        profile.tables[index].table[key] = [];
-      }
-      profile.tables[index].table[key].push(operation);
-      updateAutomatedOperationDescription(profile, index, key);
-      setProfile(profile);
+    if (profile.tables[index].table[key] === undefined) {
+      profile.tables[index].table[key] = [];
+    }
+    profile.tables[index].table[key].push(operation);
+    updateAutomatedOperationDescription(profile, index, key);
+    setProfile(profile);
   }
 
   const addOperation = (index, key, type) => {
@@ -103,7 +101,7 @@ export default function DataTableCardContent({
       } else if (type === 'column') {
         operation['column']['tableIndex'] = null
       }
-    addOperationToProfile(index, key, operation);
+      addOperationToProfile(index, key, operation);
     }
   }
 
@@ -212,28 +210,14 @@ export default function DataTableCardContent({
   }
 
 
-  const inputTableOptions = useMemo(() => inputTables.map((tablr, idx) => {
-    return {
-      value: idx,
-      label: `Input tables ${idx}`,
-    }
-  }), [tableIdx]);
-
-
-  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
-  const tableMetadataOptions = useMemo(() => getTableMetadataOptions(profile, tableIdx, inputTable), [tableIdx, inputTable]);
-  //const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx, inputTable)
-console.log({inputTable, xx: inputTableOptions[inputTable]})
-
   return (<>
     <Card>
       <Card.Header>
         Use this output table configuration for:
       </Card.Header>
-      <Card.Body>
-        <Select value={inputTableOptions[inputTable]}
-                onChange={(selectedOption) => setInputTable(selectedOption.value)}
-                options={inputTableOptions}/>
+      <Card.Body style={{zIndex: 200}}>
+        <DelayedActiveInputTableInput activeInputTable={inputTable} setActiveInputTable={setInputTable}
+                                      delayTime={100}/>
       </Card.Body>
     </Card>
 
@@ -245,7 +229,6 @@ console.log({inputTable, xx: inputTableOptions[inputTable]})
 
         <LoopForm
           index={index}
-          tableMetadataOptions={tableMetadataOptions}
           tableIdx={tableIdx}
           inputTable={inputTable}
           addOperation={addLoopOperation}
@@ -257,6 +240,7 @@ console.log({inputTable, xx: inputTableOptions[inputTable]})
 
     <TableForm
       table={table}
+      inputTable={inputTable}
       inputTables={inputTables}
       inputColumns={inputColumns}
       updateHeader={(key, value) => updateHeader(index, key, value)}
@@ -265,8 +249,6 @@ console.log({inputTable, xx: inputTableOptions[inputTable]})
       updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
       updateOperationDescription={(key, value) => updateOperationDescription(index, key, value)}
       removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)}
-      fileMetadataOptions={fileMetadataOptions}
-      tableMetadataOptions={tableMetadataOptions}
     /></>)
 }
 

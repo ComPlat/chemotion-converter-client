@@ -29,9 +29,7 @@ function ProfileForm({
                        error,
                        errorMessage,
                        savable,
-                       handleShowFileUpload,
-                       tableIdx,
-                       setTableIdx
+                       handleShowFileUpload
                      }) {
 
   const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp();
@@ -135,13 +133,10 @@ function ProfileForm({
             <Alert variant="danger" dismissible>{errorMessage}</Alert>
           </div>
         )}
-        <InputTables tableIdx={tableIdx}
-                     onDeleteInputFile={onDeleteInputFile}
-                     setTableIdx={setTableIdx}/>
+        <InputTables onDeleteInputFile={onDeleteInputFile}/>
         <FormNavigatorCol
           activeTabKey={activeTabKey}
           setActiveTabKey={setActiveTabKey}
-          tableIdx={tableIdx}
         />
 
       </Row>
@@ -157,8 +152,6 @@ ProfileForm.propTypes = {
   errorMessage: PropTypes.string.isRequired,
   savable: PropTypes.bool.isRequired,
   handleShowFileUpload: PropTypes.func.isRequired,
-  tableIdx: PropTypes.number.isRequired,
-  setTableIdx: PropTypes.func.isRequired,
 }
 
 export default ProfileForm

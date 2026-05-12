@@ -4,7 +4,6 @@ import {Button, Card, Table} from "react-bootstrap";
 import Select from 'react-select';
 import {DatatableIdentifierInput} from "../IdentifierInput";
 import {useAdminApp} from "../../AppContext";
-import {getFileMetadataOptions, getInputTables, getTableMetadataOptions} from "../../../../utils/profileUtils";
 import {initIdentifier} from "../../../../utils/identifierUtils";
 import {v4 as uuidv4} from 'uuid';
 
@@ -139,12 +138,7 @@ function ReactionVariationEditView({activeRow, tableIdx, activeButton, reactionV
         _setIdentifier(cIdentifier);
       }
     }
-  }, [activeId, active])
-
-
-  const inputTables = getInputTables(profile, tableIdx);
-  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
-  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
+  }, [activeId, active]);
 
   const updateIdentifier = useCallback((data) => {
     const newIdentifier = Object.assign(identifier, data)
@@ -182,9 +176,6 @@ function ReactionVariationEditView({activeRow, tableIdx, activeButton, reactionV
     {identifier && <DatatableIdentifierInput
       index={0}
       identifier={identifier}
-      inputTables={inputTables}
-      fileMetadataOptions={fileMetadataOptions}
-      tableMetadataOptions={tableMetadataOptions}
       updateIdentifier={(x, y) => updateIdentifier(y)}
     />}
   </>)
