@@ -37,7 +37,7 @@ function getInputColumns(inputTables, inputTableIdx) {
 
 function getDistInputColumns(inputTables, tableIndex) {
   const table = inputTables[tableIndex];
-  const columns = table.columns.map((tableColumn, columnIndex) => {
+  const columns = table?.columns.map((tableColumn, columnIndex) => {
     return {
         label: tableColumn.name,
         value: {
@@ -48,7 +48,7 @@ function getDistInputColumns(inputTables, tableIndex) {
 
   return [{
       label: `Table #${tableIndex}`,
-      options: columns
+      options: columns || []
     }];
 }
 
@@ -66,7 +66,7 @@ function getFileMetadataOptions(activeData) {
 
 function getTableMetadataOptions(inputTables, inputTableIndex = -1) {
 
-  if (!inputTables.length) return [];
+  if (!inputTables?.length) return [];
 
   const tables =
     inputTableIndex >= 0
@@ -76,7 +76,7 @@ function getTableMetadataOptions(inputTables, inputTableIndex = -1) {
   const startOffset = inputTableIndex >= 0 ? inputTableIndex : 0;
 
   return tables.flatMap((table, index) => {
-    if (!table.metadata) return [];
+    if (!table?.metadata) return [];
 
     const tableIndex = index + startOffset;
 

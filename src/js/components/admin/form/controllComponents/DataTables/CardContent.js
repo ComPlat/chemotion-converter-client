@@ -1,5 +1,5 @@
 import TableForm from "./TableForm";
-import {Card} from 'react-bootstrap'
+import {Card, Form, InputGroup} from 'react-bootstrap'
 import React, {useCallback, useMemo} from "react";
 import PropTypes from 'prop-types';
 import {
@@ -23,6 +23,11 @@ export default function DataTableCardContent({
   const inputTable = table.inputTableIndex ?? 0;
   const setInputTable = useCallback((value) => {
     profile.tables[index].inputTableIndex = value;
+    setProfile(profile);
+  }, [table, index]);
+
+  const setInputTableName = useCallback((value) => {
+    profile.tables[index].tableName = value;
     setProfile(profile);
   }, [table, index]);
 
@@ -67,17 +72,12 @@ export default function DataTableCardContent({
     if (type === 'header_value') {
       operation.regex = '';
       operation.line = '';
-      operation.ignore_missing_values = false;
     } else if (type === 'metadata_value') {
       const mdZero = getTableMetadataOptions(inputTable)[0];
-      operation.value = mdZero.key;
+      operation.value = null;
       operation.metadata = mdZero.key;
-      operation.ignore_missing_values = false;
-    } else if (type === 'column') {
-      operation['column'] = {
-        columnIndex: null
-      };
     }
+
     return operation;
   }
 
@@ -96,10 +96,15 @@ export default function DataTableCardContent({
       const operation = newOperation(key, type);
       if (type === 'header_value') {
         operation.table = inputTable;
+        operation.ignore_missing_values = false;
       } else if (type === 'metadata_value') {
         operation.table = inputTable;
+        operation.ignore_missing_values = false;
       } else if (type === 'column') {
-        operation['column']['tableIndex'] = null
+        operation['column'] = {
+          columnIndex: '',
+          tableIndex: null
+        };
       }
       addOperationToProfile(index, key, operation);
     }
@@ -108,6 +113,12 @@ export default function DataTableCardContent({
   const addLoopOperation = (index, key, type) => {
     if (index !== -1) {
       const operation = newOperation(key, type);
+      if (type === 'column') {
+        operation['column'] = '';
+      }
+      if (type === 'metadata_value') {
+        operation['matchMode'] = 'key';
+      }
       addOperationToProfile(index, key, operation);
 
     }
@@ -138,9 +149,11 @@ export default function DataTableCardContent({
 
 
   const updateOperation = (index, key, opIndex, opKey, value) => {
-
-    if (opKey === 'metadata') {
-      updateOperation(index, key, opIndex, 'value', value);
+    if (!value && typeof opKey === 'object') {
+      Object.entries(opKey).forEach(([innerOpKey, value]) => {
+        updateOperation(index, key, opIndex, innerOpKey, value);
+      });
+      return;
     }
     if (index !== -1) {
       profile.tables[index].table[key][opIndex][opKey] = value;
@@ -211,11 +224,26 @@ export default function DataTableCardContent({
 
 
   return (<>
-    <Card>
+    <Card style={{marginBottom: '20px'}}>
       <Card.Header>
         Use this output table configuration for:
       </Card.Header>
-      <Card.Body style={{zIndex: 200}}>
+      <Card.Body>
+        <InputGroup className="mb-1">
+          <InputGroup.Text>Table name</InputGroup.Text>
+          <Form.Control
+            size="sm"
+            value={table.tableName}
+            onChange={event => {
+              const {target: {value}} = event;
+              setInputTableName(value);
+            }}
+          >
+          </Form.Control>
+        </InputGroup>
+        <p>Select an input table. If conditions have been selected, the input table serves only as a reference for
+          creating the output table. However, if no conditions have been selected, the input table from the index
+          selected here will be used during conversion to create the output table.</p>
         <DelayedActiveInputTableInput activeInputTable={inputTable} setActiveInputTable={setInputTable}
                                       delayTime={100}/>
       </Card.Body>
@@ -223,7 +251,7 @@ export default function DataTableCardContent({
 
     <Card>
       <Card.Header>
-        Loop conditions
+        Input table select conditions
       </Card.Header>
       <Card.Body>
 

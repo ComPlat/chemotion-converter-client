@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, {} from "react";
 import PropTypes from "prop-types";
 import {Button, Card} from "react-bootstrap";
 import {
@@ -7,6 +7,7 @@ import {
 
 import DataTableCardContent from "./CardContent";
 import {useAdminApp} from "../../../AppContext";
+import {v4 as uuidv4} from 'uuid';
 
 
 export default function OutputTables({tableIdx}) {
@@ -14,6 +15,7 @@ export default function OutputTables({tableIdx}) {
 
 
 
+  const {DATA_LOOP_CLASSES} = options;
   const addTable = () => {
     const inputTable = 0
     const header = {}
@@ -21,13 +23,23 @@ export default function OutputTables({tableIdx}) {
       for (let key of ["DATA CLASS", "DATA TYPE", "XUNITS", "YUNITS"]) {
         header[key] = options[key][0];
       }
-    };
+    }
 
-    const inputColumns = getDistInputColumns(inputTables, inputTable);
+    let name_t_idx =  profile.tables.length;
+    let tableName;
+    const loopType = 'none';
+
+    const titles = profile.tables.map((x) => x.title);
+    do {
+      name_t_idx++;
+      tableName = `Table #${name_t_idx}`
+    } while (titles.includes(tableName))
+    const {options: inputColumns} = getDistInputColumns(inputTables, inputTable)[0];
+
     const table = {}
-    if (inputColumns.length > 1) {
+    if (inputColumns.length >= 1) {
       table.xColumn = inputColumns[0].value
-      if (inputColumns.length > 2) {
+      if (inputColumns.length >= 2) {
         table.yColumn = inputColumns[1].value
       } else {
         table.yColumn = inputColumns[0].value
@@ -40,7 +52,11 @@ export default function OutputTables({tableIdx}) {
     profile.tables.push({
       header,
       table,
-      inputTableIndex: tableIdx
+      loopOutput: DATA_LOOP_CLASSES[0],
+      inputTableIndex: tableIdx,
+      tableName,
+      loopType,
+      uuid: uuidv4()
     });
 
     setProfile(profile)
@@ -53,10 +69,21 @@ export default function OutputTables({tableIdx}) {
 
 
   return (<>
+
+    <div className="mt-2">
+      <Button
+        variant="success"
+        size="sm"
+        onClick={() => addTable()}
+      >
+        Add table
+      </Button>
+    </div>
+
     {profile.tables.map((table, index) => (
       <Card key={index} className="mt-3">
         <Card.Header className="d-flex align-items-baseline justify-content-between">
-          Output table #{index}
+          <span>Output table: <b>{table.tableName}</b></span>
           <Button
             variant="danger"
             size="sm"
@@ -74,16 +101,6 @@ export default function OutputTables({tableIdx}) {
         </Card.Body>
       </Card>
     ))}
-
-    <div className="mt-2">
-      <Button
-        variant="success"
-        size="sm"
-        onClick={() => addTable()}
-      >
-        Add table
-      </Button>
-    </div>
   </>);
 }
 

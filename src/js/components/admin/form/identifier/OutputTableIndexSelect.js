@@ -1,4 +1,4 @@
-import React, {Component} from "react"
+import React, {} from "react"
 import PropTypes from 'prop-types';
 import {Form} from 'react-bootstrap';
 
@@ -20,9 +20,9 @@ const OutputTableIndexSelect = ({index, identifier, tables, updateIdentifier}) =
       {tables.map((outputTable, outputTableIndex) => (<Form.Check
           type="checkbox"
           key={outputTableIndex}
-          onChange={(e) => toggleTable(outputTableIndex)}
-          checked={identifier.outputTableIndex.includes(outputTableIndex)}
-          label={`Output table #${outputTableIndex}`}/>
+          onChange={(e) => toggleTable(outputTable.uuid)}
+          checked={identifier.outputTableIndex.includes(outputTable.uuid)}
+          label={`Output table: ${outputTable.tableName}`}/>
       ))}
     </Form.Group>
   )

@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from "react"
+import React, {} from "react"
 import PropTypes from 'prop-types';
-import {Button, Collapse, ListGroup} from 'react-bootstrap';
+import {Button, ListGroup} from 'react-bootstrap';
 
 import { IdentifierInput } from './IdentifierInput'
-import IdentifierHeader from './IdentifierHeader'
+import IdentifierWithHeader from './IdentifierHeader'
 
 
 function IdentifierForm({
@@ -11,10 +11,6 @@ function IdentifierForm({
                           addIdentifier, updateIdentifier, removeIdentifier
                         }) {
   const optional = false;
-  const toggleIdentifier = (index) => {
-    updateIdentifier(index, {show: !identifiers[index].show})
-  }
-  const [hovered, setHovered] = useState(-1);
 
   const isRelevantIdentifier = (identifier) => (identifier.type === type && identifier.optional === optional && identifier.editable)
   const hasIdentifiers = identifiers.some(isRelevantIdentifier)
@@ -25,26 +21,17 @@ function IdentifierForm({
       {hasIdentifiers && (
         <ListGroup>
           {identifiers.map((identifier, index) => (
-            isRelevantIdentifier(identifier) && (
-              <ListGroup.Item key={index}
-                              onMouseEnter={() => setHovered(index)}
-                              onMouseLeave={() => setHovered(-1)}>
-                <IdentifierHeader
-                  identifier={identifier}
-                  show={identifier.show}
-                  onToggle={() => toggleIdentifier(index)}
-                  onRemove={() => removeIdentifier(index)}
-                />
-                <Collapse in={identifier.show || hovered === index}>
-                  <div>
-                    <IdentifierInput
-                      index={index}
-                      identifier={identifier}
-                      updateIdentifier={updateIdentifier}
-                    />
-                  </div>
-                </Collapse>
-              </ListGroup.Item>
+            isRelevantIdentifier(identifier) && ( <IdentifierWithHeader
+                key={index}
+                identifier={identifier}
+                index={index}
+                removeIdentifier={removeIdentifier}
+                identifierInputTag={
+                  <IdentifierInput
+                    index={index}
+                    identifier={identifier}
+                    updateIdentifier={updateIdentifier}
+                  />}/>
             )
           ))}
         </ListGroup>

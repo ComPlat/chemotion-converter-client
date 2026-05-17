@@ -1,6 +1,6 @@
 import React, {useMemo} from "react";
 import PropTypes from 'prop-types';
-import {Button, Col, Form, InputGroup, OverlayTrigger, Row, Tooltip} from "react-bootstrap";
+import {Button, ButtonGroup, Form, InputGroup, OverlayTrigger, Popover, ToggleButton, Tooltip} from "react-bootstrap";
 import isEqual from "lodash/isEqual";
 import {
   getDistInputColumns
@@ -11,9 +11,9 @@ import {useAdminApp} from "../../../AppContext";
 function LoopTypeHeader({addOperation, index, loopType}) {
 
   const header = {
-    loop_header: 'Column header',
-    loop_metadata: 'Metadata',
-    loop_theader: 'Header',
+    loop_header: '... Column header',
+    loop_metadata: '... Metadata',
+    loop_theader: '... Header',
 
   }
 
@@ -48,23 +48,24 @@ export default function LoopForm({
                                    updateOperation,
                                    removeOperation
                                  }) {
-  const {profile, updateProfile: setProfile, options: {DATA_LOOP_CLASSES},  inData: {inputTables, getTableMetadataOptions}} = useAdminApp();
-  const toggleMatchTables = (index, op_index = -1) => {
+  const {
+    profile,
+    updateProfile: setProfile,
+    options: {DATA_LOOP_CLASSES},
+    inData: {inputTables, getTableMetadataOptions}
+  } = useAdminApp();
+
+  const toggleMatchTables = (index, op_index = -1, value) => {
     const profile_table = profile.tables[index]
-    if (op_index === -1) {
-      if (profile.matchTables) { // handling for old profiles
-        profile.matchTables = false
-      } else {
-        profile_table.matchTables = !profile_table.matchTables
-      }
-    } else {
-      const {loop_metadata: loopMetadata} = profile_table.table;
-      loopMetadata[op_index].ignoreValue = !loopMetadata[op_index].ignoreValue;
-    }
+    const {loop_metadata: loopMetadata} = profile_table.table;
+    loopMetadata[op_index].matchMode = value;
+
     setProfile(profile)
   }
+
   const distInputColumns = useMemo(() => getDistInputColumns(inputTables, inputTable), [tableIdx, inputTable]);
   const tableMetadataOptions = getTableMetadataOptions(inputTable);
+
   const getSelectedMetadataOption = (metadata, outputTable, op_index) => {
     if (metadata == null) return null;
 
@@ -75,6 +76,7 @@ export default function LoopForm({
 
     return null;
   };
+
   const handleChangeLoop = (value, index) => {
     profile.tables[index].loopType = value;
     setProfile(profile);
@@ -82,7 +84,7 @@ export default function LoopForm({
   const handleChangeLoopOutput = (value, index) => {
     profile.tables[index].loopOutput = value;
     if (value === 'SINGLE FILE (NTUPLES)') {
-      profile.tables[index].nTuplePageHeader |= '___+';
+      profile.tables[index].nTuplePageHeader ||= '___+';
     }
 
     setProfile({...profile});
@@ -92,11 +94,10 @@ export default function LoopForm({
     return [{
       label: `Input table #${inputTable}`,
       options: tableMetadataOptions.map((item) => {
-        const showValue = !profile.tables[outputTable].table.loop_metadata[op_index].ignoreValue && true
+        const showValue = profile.tables[outputTable].table.loop_metadata[op_index].matchMode === 'exact';
         return {
-          value: item.key,
+          value: item.value,
           key: item.key,
-          metadata: item.key,
           label: showValue ? `${item.label} (${item.value})` : item.label
         }
       })
@@ -119,8 +120,8 @@ export default function LoopForm({
         value={loopType}
         onChange={(e) => handleChangeLoop(e.target.value, index)}
       >
-        <option value="none">no loop.</option>
-        <option value="all">all input tables.</option>
+        <option value="none">Use input table {inputTable + 1}</option>
+        <option value="all">Use all input tables</option>
         <option value="condition">Conditioned</option>
       </Form.Select>
     </InputGroup>
@@ -143,6 +144,7 @@ export default function LoopForm({
         />
       </Form.Group>
     </div>)}
+    {isCondition && <h5>Input table must have...</h5>}
     {isCondition && <>
       <LoopTypeHeader addOperation={addOperation} index={index} loopType="loop_header"/>
       {loopHeader.map((operation, op_index) => (
@@ -164,10 +166,10 @@ export default function LoopForm({
             openMenuOnScroll={false}
             closeMenuOnScroll={false}
             value={distInputColumns.flatMap(group => group.options)
-              .find(col => isEqual(col.value, operation.column))}
+              .find(col => isEqual(col.label, operation.column))}
             options={distInputColumns}
             onChange={selectedOption =>
-              updateOperation(index, 'loop_header', op_index, 'column', selectedOption.value)
+              updateOperation(index, 'loop_header', op_index, 'column', selectedOption.label)
             }
           />
         </InputGroup>
@@ -193,28 +195,62 @@ export default function LoopForm({
             menuShouldScrollIntoView={false}
             openMenuOnScroll={false}
             closeMenuOnScroll={false}
-            value={getSelectedMetadataOption(operation.value, index, op_index)}
+            value={getSelectedMetadataOption(operation.metadata, index, op_index)}
             onChange={(selected) => {
               if (!selected) {
                 updateOperation(index, 'loop_metadata', op_index, 'metadata', '');
                 return;
               }
-              const metadataString = `${selected.value}`;
+              const metadata = {
+                value: selected.value,
+                metadata: selected.key,
+              }
 
-              updateOperation(index, 'loop_metadata', op_index, 'metadata', metadataString);
+              updateOperation(index, 'loop_metadata', op_index, metadata);
             }}
             options={loopMetadataOptions(index, op_index)}
           />
+
           <OverlayTrigger
-            placement="bottom-end"
-            overlay={<Tooltip>Ignore Value</Tooltip>}
+            placement="top"
+            overlay={<Popover id="match-mode-tooltip">
+              <Popover.Header as="h3">
+                Input tables match mode
+              </Popover.Header>
+              <Popover.Body>
+                Choose how input tables are matched using the selected key:
+                <dl>
+                  <dt>Has key only</dt>
+                  <dd>key exists, value ignored</dd>
+                  <br/>
+                  <dt>Group by same value</dt>
+                  <dd>Input tables are grouped according to the value of the selected key.
+                    If the output is not an NTUPLES file, this option behaves like <b>Has key only</b></dd>
+                  .
+                </dl>
+                <dt>Exact match</dt>
+                <dd>matches teaching file value</dd>
+              </Popover.Body>
+            </Popover>
+            }
           >
-            <div className="input-group-text" style={{cursor: 'pointer'}}>
-              <input type="checkbox"
-                     checked={loopMetadata[op_index].ignoreValue || false}
-                     onChange={() => toggleMatchTables(index, op_index)}
-              />
-            </div>
+            <ButtonGroup>
+              {[['Has Key', 'key'], ['Group', 'group'], ['Exact match', 'exact']].map(([label, value]) => {
+                const name = `${index}-${op_index}`;
+                const id = `${name}-${value}`;
+                return (<ToggleButton
+                  key={id}
+                  id={`mode-${id}`}
+                  type="radio"
+                  variant="outline-primary"
+                  name={`matchMode-${name}`}
+                  value={value}
+                  checked={operation.matchMode === value}
+                  onChange={(e) => toggleMatchTables(index, op_index, e.currentTarget.value)}
+                >{label}</ToggleButton>);
+
+              })}
+            </ButtonGroup>
           </OverlayTrigger>
         </InputGroup>
       ))}

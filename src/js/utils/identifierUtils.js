@@ -132,11 +132,11 @@ const getSelectedMatch = ({identifier: {lineNumber, key, type, value, tableIndex
 
   }
   if (type === 'tableMetadata') {
-    const {metadata} = getProfileData(profile, tableIdx).tables[tableIndex];
+    const {metadata} = getProfileData(profile, tableIdx)?.tables?.[tableIndex] || {};
     return [metadata?.[key]];
   }
   if (type === 'tableHeader') {
-    const {header} = getProfileData(profile, tableIdx).tables[tableIndex];
+    const {header} = getProfileData(profile, tableIdx)?.tables?.[tableIndex] || {};
 
     lineNumber = parseInt(lineNumber);
 

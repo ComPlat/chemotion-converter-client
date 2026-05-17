@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Breadcrumb, Button, Col, Container, Modal, Row} from 'react-bootstrap';
 
 import ConverterApi from '../../api/ConverterApi';
@@ -23,7 +23,8 @@ function AdminAppContent() {
   const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp();
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
-  const [originProfile, setOriginProfile] = useState(null);
+  const [originProfile, _setOriginProfile] = useState(null);
+  const [saveabel, setSaveabel] = useState(false);
   const [error, setError] = useState(false);
   const [uploadError, setUploadError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -33,6 +34,15 @@ function AdminAppContent() {
   const [identifierWarningModal, setIdentifierWarningModal] = useState(false);
   const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
+
+  const setOriginProfile = (obj1) => {
+    setSaveabel(false);
+    if (obj1) {
+      _setOriginProfile(JSON.stringify(obj1));
+    } else {
+      _setOriginProfile(null);
+    }
+  }
 
   const showListView = () => {
     setStatus('list');
@@ -128,12 +138,6 @@ function AdminAppContent() {
   const storeProfile = (silent = false) => {
     if (!profile) {
       return;
-    }
-
-    if (Array.isArray(profile.identifiers)) {
-      profile.identifiers.forEach(identifier => {
-        delete identifier.show;
-      });
     }
 
     if (status === 'create') {
@@ -289,8 +293,8 @@ function AdminAppContent() {
     }
 
     const reader = new FileReader()
-    reader.readAsText(selectedFile)
-    reader.onload = handleLoad
+    reader.readAsText(selectedFile);
+    reader.onload = handleLoad;
   };
 
   const handleCloseFileUpload = () => setShowFileUpload(false);
@@ -300,6 +304,10 @@ function AdminAppContent() {
     if (res) {
       handleCloseFileUpload();
     }
+  }
+
+  if (!saveabel && profile && JSON.stringify(profile) !== originProfile) {
+    setSaveabel(true);
   }
 
   const dispatchView = () => {
@@ -331,13 +339,15 @@ function AdminAppContent() {
         <ProfileForm
           status={status}
           errorMessage={errorMessage}
-          savable={profile !== originProfile}
+          savable={saveabel}
           error={error}
           storeProfile={storeProfile}
           handleShowFileUpload={handleShowFileUpload}/>
       )
     }
   }
+
+
 
   return (
     <Container fluid={['create', 'update'].includes(status)}>
@@ -448,6 +458,10 @@ function AdminApp() {
       <AdminAppContent/>
     </AdminProvider>
   )
+}
+
+function jsonDiff(obj1, obj2) {
+  return obj2 !== JSON.stringify(obj1)
 }
 
 export default AdminApp
