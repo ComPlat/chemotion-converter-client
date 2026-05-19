@@ -1,8 +1,6 @@
-import React, {useMemo, useState} from "react"
+import React, { useMemo, useState } from "react"
 import PropTypes from 'prop-types';
-import {Button, Col, Form, Row, Tab, Tabs} from 'react-bootstrap';
-
-import KeyInput from './identifier/KeyInput'
+import { Button, Col, Form, OverlayTrigger, Row, Tab, Tabs, Tooltip } from 'react-bootstrap';
 import KeySelect from './identifier/KeySelect'
 import LineNumberInput from './identifier/LineNumberInput'
 import MatchSelect from './identifier/MatchSelect'
@@ -14,8 +12,8 @@ import OntologyTermSelect from './identifier/OntologyTermSelect'
 import OntologySubjectSelect from "./identifier/OntologySubjectSelect";
 import ValueInput from './identifier/ValueInput'
 import OntologyPredicateSelect from "./identifier/OntologyPredicateSelect";
-import {useAdminApp} from "../AppContext";
-import {DelayedActiveInputTableInput} from "./common/InputTables";
+import { useAdminApp } from "../AppContext";
+import { DelayedActiveInputTableInput } from "./common/InputTables";
 
 
 function CommonIdentifierInput({
@@ -45,7 +43,7 @@ function CommonIdentifierInput({
             <DelayedActiveInputTableInput
               delayTime={200}
               activeInputTable={identifier.tableIndex}
-              setActiveInputTable={(value) => updateIdentifier(index, {tableIndex: value})}/>
+              setActiveInputTable={(value) => updateIdentifier(index, { tableIndex: value })}/>
           </Col>
 
           <Col md={2}>
@@ -103,7 +101,7 @@ function DatatableIdentifierInput({
                                     updateIdentifier,
                                     updateRegex = null,
                                   }) {
-  const matchResult = useMemo(() => updateRegex && updateRegex({...identifier}), [Object.keys(identifier)]);
+  const matchResult = useMemo(() => updateRegex && updateRegex({ ...identifier }), [Object.keys(identifier)]);
 
 
   return (
@@ -118,14 +116,14 @@ function DatatableIdentifierInput({
         type="checkbox"
         label="Enable Regular expression"
         checked={identifier.match === 'regex'}
-        onChange={(e) => updateIdentifier(index, {match: e.currentTarget.checked ? 'regex' : 'any'})}
+        onChange={(e) => updateIdentifier(index, { match: e.currentTarget.checked ? 'regex' : 'any' })}
       />
       {identifier.match === 'regex' && (<Form.Group controlId={`valueInput${index}`}>
         <Form.Label column="lg">Regex</Form.Label>
         <Form.Control
           size="sm"
           value={identifier.value || ''}
-          onChange={(event) => updateIdentifier(index, {value: event.target.value})}
+          onChange={(event) => updateIdentifier(index, { value: event.target.value })}
         />
       </Form.Group>)}
 
@@ -163,7 +161,7 @@ function MetadataIdentifierInput({
                                    addIdentifierOperation = null
                                  }) {
   const [activeOutputTab, setActiveOutputTab] = useState('dataset');
-  const {profile, options} = useAdminApp();
+  const { profile, options } = useAdminApp();
 
   return (
     <form>
@@ -224,7 +222,7 @@ function MetadataIdentifierInput({
         <Tab eventKey="dataset" title="Dataset">
           <Form.Check
             type="checkbox"
-            onChange={(e) => updateIdentifier(index, {'isDatasetOutput': e.target.checked})}
+            onChange={(e) => updateIdentifier(index, { 'isDatasetOutput': e.target.checked })}
             checked={identifier.isDatasetOutput}
             label={`Enable output in the dataset`}/>
           {identifier.isDatasetOutput && (<Row className="mb-3">
@@ -242,44 +240,81 @@ function MetadataIdentifierInput({
         <Tab eventKey="data" title="Datatables">
           <Form.Check
             type="checkbox"
-            onChange={(e) => updateIdentifier(index, {'isDatatableOutput': e.target.checked})}
+            onChange={(e) => updateIdentifier(index, { 'isDatatableOutput': e.target.checked })}
             checked={identifier.isDatatableOutput}
             label={`Enable output in datatables`}/>
-          {identifier.isDatatableOutput && (<Row>
-            <Col sm={6}>
-              <OutputTableIndexSelect
-                index={index}
-                identifier={identifier}
-                tables={outputTables}
-                updateIdentifier={updateIdentifier}
-              />
-            </Col>
-            <Col sm={6}>
-
-              <Form.Check
-                type="checkbox"
-                onChange={(e) => updateIdentifier(index, {'isLoobDatatableOutput': e.target.checked})}
-                checked={identifier.isLoobDatatableOutput || false}
-                label={`If this option is checked, the value from the corresponding input table is used. If it is not checked, it uses the value selected by the origin identifier.`}/>
-
-              <Form.Group controlId={`outputKeyInput${index}`}>
-                <Form.Label column="lg">Output key</Form.Label>
-                <Form.Control
-                  size="sm"
-                  value={identifier.outputDatatableKey || ""}
-                  onChange={(event) =>
-                    updateIdentifier(index, {outputDatatableKey: event.target.value})
-                  }
+          {identifier.isDatatableOutput && (<>
+            <Row>
+              <Col sm={6}>
+                <OutputTableIndexSelect
+                  index={index}
+                  identifier={identifier}
+                  tables={outputTables}
+                  updateIdentifier={updateIdentifier}
                 />
+              </Col>
+              <Col sm={6}>
+                <Form.Group controlId={`outputKeyInput${index}`}>
+                  <Form.Label column="lg">Output key</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    value={identifier.outputDatatableKey || ""}
+                    onChange={(event) =>
+                      updateIdentifier(index, { outputDatatableKey: event.target.value })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <div>
+              <hr/>
+              <OverlayTrigger
+                placement="left"
+                overlay={
+                  <Tooltip id="metadata-tooltip">
+                    If enabled, metadata is read from the same input table as the data.<br/>
+                    If no metadata is found, values from <b>input table #{identifier.tableIndex + 1}</b> are used
+                    instead.<br/>
+                    If disabled, metadata is always taken from <b>input table #{identifier.tableIndex + 1}</b>.
+                  </Tooltip>
+                }
+              >
+                <Form.Check
+                  type="checkbox"
+                  onChange={(e) => {
+                    const isFirstMatch = e.target.checked ? identifier.isFirstMatch : false;
+                    updateIdentifier(index, { 'isLoobDatatableOutput': e.target.checked, isFirstMatch })
+                  }}
+                  checked={identifier.isLoobDatatableOutput || false}
+                  label={`Prefer source table metadata (fallback: table #${identifier.tableIndex + 1})`}/>
+              </OverlayTrigger>
+
+              <Form.Group>
+                <OverlayTrigger
+                  placement="left"
+                  overlay={
+                    <Tooltip id="first-match-tooltip">
+                      This is only interesting for <b>NTUPLES</b> output tables. If enabled, only the first matching value per group is written to the<br/>
+                      output data. If disabled, all matching values from each input table are included as a list.
+                    </Tooltip>
+                  }
+                ><Form.Check
+                  type="checkbox"
+                  disabled={!identifier.isLoobDatatableOutput}
+                  onChange={(e) => updateIdentifier(index, { 'isFirstMatch': e.target.checked })}
+                  checked={identifier.isFirstMatch || false}
+                  label={`Only use first match per group`}/>
+                </OverlayTrigger>
               </Form.Group>
-            </Col>
-          </Row>)}
+            </div>
+
+          </>)}
         </Tab>
 
         <Tab eventKey="ontology" title="Rdf Graph">
           <Form.Check
             type="checkbox"
-            onChange={(e) => updateIdentifier(index, {'isRdfOutput': e.target.checked})}
+            onChange={(e) => updateIdentifier(index, { 'isRdfOutput': e.target.checked })}
             checked={identifier.isRdfOutput}
             label={`Enable output in rdf graph`}/>
           {identifier.isRdfOutput && (<>
@@ -306,15 +341,26 @@ function MetadataIdentifierInput({
 
 MetadataIdentifierInput.propTypes = {
   index: PropTypes.number,
-  identifier: PropTypes.object,
-  outputTables: PropTypes.array,
-  dataset: PropTypes.object,
-  updateIdentifier: PropTypes.func,
-  updateIdentifierOperation: PropTypes.func,
-  removeIdentifierOperation: PropTypes.func,
-  updateRegex: PropTypes.func,
-  updateIdentifierOntology: PropTypes.func,
-  addIdentifierOperation: PropTypes.func,
+  identifier:
+  PropTypes.object,
+  outputTables:
+  PropTypes.array,
+  dataset:
+  PropTypes.object,
+  updateIdentifier:
+  PropTypes.func,
+  updateIdentifierOperation:
+  PropTypes.func,
+  removeIdentifierOperation:
+  PropTypes.func,
+  updateRegex:
+  PropTypes.func,
+  updateIdentifierOntology:
+  PropTypes.func,
+  addIdentifierOperation:
+  PropTypes.func,
 }
 
-export {IdentifierInput, MetadataIdentifierInput, DatatableIdentifierInput}
+export {
+  IdentifierInput, MetadataIdentifierInput, DatatableIdentifierInput
+}

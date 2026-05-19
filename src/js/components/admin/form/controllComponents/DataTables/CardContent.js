@@ -1,14 +1,12 @@
 import TableForm from "./TableForm";
-import {Card, Form, InputGroup} from 'react-bootstrap'
-import React, {useCallback, useMemo} from "react";
+import { Card, Form, InputGroup } from 'react-bootstrap'
+import React, { useCallback, useMemo } from "react";
 import PropTypes from 'prop-types';
-import {
-  getInputColumns
-} from "../../../../../utils/profileUtils";
-import {additionalInfo, initIdentifier} from "../../../../../utils/identifierUtils";
+import { getInputColumns } from "../../../../../utils/profileUtils";
+import { additionalInfo, initIdentifier } from "../../../../../utils/identifierUtils";
 import LoopForm from "./LoopForm";
-import {useAdminApp} from "../../../AppContext";
-import {DelayedActiveInputTableInput} from "../../common/InputTables";
+import { useAdminApp } from "../../../AppContext";
+import { DelayedActiveInputTableInput } from "../../common/InputTables";
 
 
 export default function DataTableCardContent({
@@ -18,7 +16,7 @@ export default function DataTableCardContent({
                                                tableIdx
                                              }) {
 
-  const {profile, updateProfile: setProfile, inData: {getTableMetadataOptions}} = useAdminApp();
+  const { profile, updateProfile: setProfile, inData: { getTableMetadataOptions } } = useAdminApp();
 
   const inputTable = table.inputTableIndex ?? 0;
   const setInputTable = useCallback((value) => {
@@ -175,23 +173,11 @@ export default function DataTableCardContent({
       setProfile(profile)
     }
   }
-  const updateHeader = (index, key, value, oldKey) => {
+  const updateHeader = (index, key, value) => {
     let header = Object.assign({}, profile.tables[index].header)
 
     if (index !== -1) {
-      if (oldKey === undefined) {
-        header[key] = value
-      } else {
-        // create a new header to preserve the order
-        header = Object.keys(header).reduce((agg, cur) => {
-          if (cur === oldKey) {
-            agg[key] = value
-          } else {
-            agg[cur] = header[cur]
-          }
-          return agg
-        }, {})
-      }
+      header[key] = value
 
       if (key === 'DATA CLASS') {
 
@@ -200,12 +186,6 @@ export default function DataTableCardContent({
             // ensure headerKeys are there if XYDATA is selected
             if (header[headerKey] === undefined) {
               header[headerKey] = initIdentifier(profile, 'fileMetadata', tableIdx)
-            }
-
-            // update header identifiers if the type changed
-            if (headerKey === key &&
-              profile.tables[index].header[headerKey].type !== header[headerKey].type) {
-              header[headerKey] = initIdentifier(profile, header[headerKey].type, tableIdx)
             }
           })
         } else {
@@ -224,7 +204,7 @@ export default function DataTableCardContent({
 
 
   return (<>
-    <Card style={{marginBottom: '20px'}}>
+    <Card style={{ marginBottom: '20px' }}>
       <Card.Header>
         Use this output table configuration for:
       </Card.Header>
@@ -235,7 +215,7 @@ export default function DataTableCardContent({
             size="sm"
             value={table.tableName}
             onChange={event => {
-              const {target: {value}} = event;
+              const { target: { value } } = event;
               setInputTableName(value);
             }}
           >

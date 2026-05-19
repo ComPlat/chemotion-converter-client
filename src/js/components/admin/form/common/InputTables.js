@@ -1,22 +1,11 @@
-import {
-  Button,
-  Card,
-  Col,
-  InputGroup,
-  Nav,
-  NavDropdown,
-  OverlayTrigger,
-  Popover,
-  Row,
-  Form
-} from "react-bootstrap";
+import { Button, Card, Col, Form, InputGroup, Nav, NavDropdown, OverlayTrigger, Popover, Row } from "react-bootstrap";
 import PropTypes from 'prop-types';
-import React, {useEffect, useMemo, useState} from "react";
+import React, { useEffect, useState } from "react";
 import FileHeaderPresenter from "../HeaderPresenter";
-import {AgGridReact} from "ag-grid-react";
+import { AgGridReact } from "ag-grid-react";
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip";
-import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
-import {useAdminApp} from "../../AppContext";
+import { BuildIdentifierHandler } from "../../../../utils/identifierUtils";
+import { useAdminApp } from "../../AppContext";
 
 const columnShape = PropTypes.shape({
   key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -236,10 +225,6 @@ function InputTables({onDeleteInputFile}) {
   const handleSourceSelect = (selectedKey) => {
     setTableIdx(Number(selectedKey));
   };
-
-  const tabs = useMemo(() => {
-
-  }, [tableIdx, activeInputTable]);
 
   useEffect(() => {
     if (Array.isArray(profile.data) && tableIdx >= profile.data.length) {

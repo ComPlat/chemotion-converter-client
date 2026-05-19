@@ -1,6 +1,6 @@
 import React from "react"
 import PropTypes from 'prop-types';
-import {Col, Form, Row} from 'react-bootstrap';
+import { Col, Form, Row } from 'react-bootstrap';
 
 import TypeSelect from '../../identifier/TypeSelect'
 import { DatatableIdentifierInput } from '../../IdentifierInput'
@@ -32,9 +32,6 @@ function TableIdentifier({
       <DatatableIdentifierInput
         index={index}
         identifier={table.header[headerKey]}
-        inputTables={inputTables}
-        fileMetadataOptions={fileMetadataOptions}
-        tableMetadataOptions={tableMetadataOptions}
         updateIdentifier={updateTableIdentifier}
       />
     </div>
