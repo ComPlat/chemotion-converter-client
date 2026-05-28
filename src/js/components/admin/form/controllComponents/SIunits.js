@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import {Alert, Button, Card, Form, Modal, OverlayTrigger, Table, Tooltip} from "react-bootstrap";
 import {additionalInfo} from "../../../../utils/identifierUtils";
-import {getInputColumns} from "../../../../utils/profileUtils";
+import {getInputColumns, getProfileData} from "../../../../utils/profileUtils";
 import OperatorSelect from "../common/OperatorSelect";
 
 const TYPE_MAPPING = {
@@ -15,14 +15,24 @@ const TYPE_MAPPING = {
 const SI_DESCRIPTION_PREFIX = "[SI Units]";
 
 const profileShape = PropTypes.shape({
-  data: PropTypes.shape({
-    units: PropTypes.arrayOf(PropTypes.shape({
-      base_unit: PropTypes.string,
-      conversion_factor: PropTypes.string,
-      found: PropTypes.string,
-      uuid: PropTypes.string
+  data: PropTypes.oneOfType([
+    PropTypes.shape({
+      units: PropTypes.arrayOf(PropTypes.shape({
+        base_unit: PropTypes.string,
+        conversion_factor: PropTypes.string,
+        found: PropTypes.string,
+        uuid: PropTypes.string
+      }))
+    }),
+    PropTypes.arrayOf(PropTypes.shape({
+      units: PropTypes.arrayOf(PropTypes.shape({
+        base_unit: PropTypes.string,
+        conversion_factor: PropTypes.string,
+        found: PropTypes.string,
+        uuid: PropTypes.string
+      }))
     }))
-  }),
+  ]),
   units: PropTypes.arrayOf(PropTypes.shape({
     assignmentId: PropTypes.string,
     rowIndex: PropTypes.number,
@@ -420,6 +430,24 @@ const replaceStoredAssignments = (profileValue, allUnits, unit, unitIndex, assig
   return remainingUnits.concat(persistedAssignments);
 };
 
+const replaceProfileDataUnits = (profileValue, tableIdx, nextUnits) => {
+  if (Array.isArray(profileValue?.data)) {
+    return profileValue.data.map((dataEntry, index) => (
+      index === tableIdx
+        ? {
+          ...dataEntry,
+          units: nextUnits
+        }
+        : dataEntry
+    ));
+  }
+
+  return {
+    ...(profileValue?.data || {}),
+    units: nextUnits
+  };
+};
+
 const getRowId = (unit, unitIndex) => ((unit?.found || "unit") + "-" + unitIndex);
 
 const matchesAssignmentTarget = (entry, targetTableIndex, axis) => {
@@ -430,10 +458,11 @@ const matchesAssignmentTarget = (entry, targetTableIndex, axis) => {
     && entry.axis === axis;
 };
 
-export default function SIunits({profile, setProfile, defaultAssignmentContext}) {
-  const units = profile?.data?.units ?? [];
+export default function SIunits({profile, setProfile, defaultAssignmentContext, tableIdx = 0}) {
+  const profileData = getProfileData(profile, tableIdx);
+  const units = profileData?.units ?? [];
   const storedUnits = normalizeStoredUnits(profile?.units ?? []);
-  const inputColumns = getInputColumns(profile);
+  const inputColumns = getInputColumns(profile, tableIdx);
   const outputTables = profile?.tables ?? [];
   const [openRows, setOpenRows] = useState({});
   const [rowAssignments, setRowAssignments] = useState({});
@@ -444,11 +473,11 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
   const [customConversionModalDrag, setCustomConversionModalDrag] = useState(null);
 
   useEffect(() => {
-    if (profile?.data?.units === undefined && profile?.units === undefined) {
+    if (profileData?.units === undefined && profile?.units === undefined) {
       return;
     }
 
-    const currentProfileUnits = Array.isArray(profile?.data?.units) ? profile.data.units : [];
+    const currentProfileUnits = Array.isArray(profileData?.units) ? profileData.units : [];
     const currentStoredAssignments = Array.isArray(profile?.units) ? profile.units : [];
     const nextProfileUnits = currentProfileUnits.map((unit) => {
       if (Object.prototype.hasOwnProperty.call(unit || {}, "positionIdentifier") === false) {
@@ -473,14 +502,11 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
     if (profileUnitsChanged || storedAssignmentsChanged) {
       setProfile({
         ...profile,
-        data: {
-          ...profile.data,
-          units: nextProfileUnits
-        },
+        data: replaceProfileDataUnits(profile, tableIdx, nextProfileUnits),
         units: nextStoredAssignments
       });
     }
-  }, [profile, setProfile]);
+  }, [profile, profileData, setProfile, tableIdx]);
 
   useEffect(() => {
     const dialog = document.querySelector(".siunits-custom-conversion-dialog");
@@ -897,7 +923,7 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
       <Card.Body>
         {units.length === 0 ? (
           <small className="text-muted">
-            No SI unit mappings found in <code>profile.data.units</code>.
+            No SI unit mappings found in <code>profile.data[{tableIdx}].units</code>.
           </small>
         ) : (
           <Table striped bordered hover size="sm" responsive>
@@ -1248,5 +1274,6 @@ export default function SIunits({profile, setProfile, defaultAssignmentContext})
 SIunits.propTypes = {
   profile: profileShape.isRequired,
   setProfile: PropTypes.func.isRequired,
-  defaultAssignmentContext: defaultAssignmentContextShape
+  defaultAssignmentContext: defaultAssignmentContextShape,
+  tableIdx: PropTypes.number
 };

@@ -84,7 +84,7 @@ function ProfileBasics() {
 }
 
 export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableIdx}) {
-  const {profile, datasets} = useAdminApp();
+  const {profile, updateProfile: setProfile, datasets} = useAdminApp();
   const dataset = getDataset(profile, datasets);
 
     return (
@@ -121,6 +121,14 @@ export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableId
 
           <Tab eventKey="reactionVariations" title="Reaction Variations values">
             <ReactionVariations tableIdx={tableIdx}/>
+          </Tab>
+
+          <Tab eventKey="siUnits" title="SI Units">
+            <SIunits
+              profile={profile}
+              setProfile={setProfile}
+              tableIdx={tableIdx}
+            />
           </Tab>
         </Tabs>
       </div>

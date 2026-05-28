@@ -15,7 +15,8 @@ function TableForm({
                        updateTable, updateHeader,
                        addOperation, updateOperation, updateOperationDescription, removeOperation,
                        fileMetadataOptions, tableMetadataOptions,
-                       outputTableIndex
+                       outputTableIndex,
+                       tableIdx
                    }) {
     const [showSiUnits, setShowSiUnits] = useState(false);
     const [siUnitsContext, setSiUnitsContext] = useState(null);
@@ -31,6 +32,12 @@ function TableForm({
             inputColumn
         });
         setShowSiUnits(true);
+    };
+
+    const axisForHeaderOption = (optionKey) => {
+        if (optionKey === "XUNITS") return "X";
+        if (optionKey === "YUNITS") return "Y";
+        return null;
     };
 
     const fixedHeaderOptions  = useMemo(() => {
@@ -52,19 +59,22 @@ function TableForm({
                              values={fixedHeaderOptions[optionKey]} updateHeader={updateHeader}/>
             ))}
 
-            {Object.keys(creatableHeaderOptions).map((optionKey, index) => (
-                <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
-                                     values={creatableHeaderOptions[optionKey]} updateHeader={updateHeader}
-                                     leftElement={(
-                                         <Button
-                                             variant="outline-info"
-                                             type="button"
-                                             onClick={() => openSiUnits(optionKey === "XUNITS" ? "X" : "Y")}
-                                         >
-                                             SI Units
-                                         </Button>
-                                     )}/>
-            ))}
+            {Object.keys(creatableHeaderOptions).map((optionKey, index) => {
+                const axis = axisForHeaderOption(optionKey);
+                return (
+                    <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
+                                         values={creatableHeaderOptions[optionKey]} updateHeader={updateHeader}
+                                         leftElement={axis ? (
+                                             <Button
+                                                 variant="outline-info"
+                                                 type="button"
+                                                 onClick={() => openSiUnits(axis)}
+                                             >
+                                                 SI Units
+                                             </Button>
+                                         ) : null}/>
+                );
+            })}
 
             {(table.header['DATA CLASS'] === 'NTUPLES') && (
                 <Form.Group as={Row}>
@@ -162,6 +172,7 @@ function TableForm({
                         profile={profile}
                         setProfile={setProfile}
                         defaultAssignmentContext={siUnitsContext}
+                        tableIdx={tableIdx}
                     />
                 </Offcanvas.Body>
             </Offcanvas>
@@ -184,7 +195,8 @@ TableForm.propTypes = {
     tableMetadataOptions: PropTypes.array,
     profile: PropTypes.object,
     setProfile: PropTypes.func,
-    outputTableIndex: PropTypes.number
+    outputTableIndex: PropTypes.number,
+    tableIdx: PropTypes.number
 }
 
 export default TableForm

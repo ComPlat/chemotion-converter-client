@@ -433,6 +433,7 @@ export default function OutputTables({tableIdx}) {
 						table={table}
 						inputTables={inputTables}
 						inputColumns={inputColumns}
+                        tableIdx={tableIdx}
                         outputTableIndex={index}
 						updateHeader={(key, value) => updateHeader(index, key, value)}
                         updateTable={(key, value) => updateTable(index, key, value)}
