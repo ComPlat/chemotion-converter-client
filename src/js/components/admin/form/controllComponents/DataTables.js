@@ -433,14 +433,15 @@ export default function OutputTables({tableIdx}) {
 						table={table}
 						inputTables={inputTables}
 						inputColumns={inputColumns}
+                        outputTableIndex={index}
 						updateHeader={(key, value) => updateHeader(index, key, value)}
-            updateTable={(key, value) => updateTable(index, key, value)}
-            addOperation={(key, type) => addOperation(index, key, type)}
-            updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
-            updateOperationDescription={(key, value) => updateOperationDescription(index, key, value)}
-            removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)}
-            fileMetadataOptions={fileMetadataOptions}
-            tableMetadataOptions={tableMetadataOptions}
+                        updateTable={(key, value) => updateTable(index, key, value)}
+                        addOperation={(key, type) => addOperation(index, key, type)}
+                        updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
+                        updateOperationDescription={(key, value) => updateOperationDescription(index, key, value)}
+                        removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)}
+                        fileMetadataOptions={fileMetadataOptions}
+                        tableMetadataOptions={tableMetadataOptions}
           />
         </Card.Body>
       </Card>

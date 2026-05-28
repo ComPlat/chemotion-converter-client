@@ -15,11 +15,11 @@ function TableForm({
                        updateTable, updateHeader,
                        addOperation, updateOperation, updateOperationDescription, removeOperation,
                        fileMetadataOptions, tableMetadataOptions,
-                       profile, setProfile, outputTableIndex
+                       outputTableIndex
                    }) {
     const [showSiUnits, setShowSiUnits] = useState(false);
     const [siUnitsContext, setSiUnitsContext] = useState(null);
-    const {options} = useAdminApp();
+    const {options, profile, setProfile} = useAdminApp();
   const creatableHeaderOptions = {"DATA TYPE": options["DATA TYPE"], XUNITS: options.XUNITS, YUNITS: options.YUNITS};
 
     const openSiUnits = (axis) => {
