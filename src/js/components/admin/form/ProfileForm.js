@@ -1,20 +1,22 @@
-import React, {useState} from "react"
+import React, {useCallback, useEffect, useState} from "react"
 import PropTypes from 'prop-types';
-import {
-  Button,
-  Col,
-  Row,
-  Alert
-} from 'react-bootstrap';
+import {Alert, Button, ButtonGroup, Row} from 'react-bootstrap';
 
 import InputTables from "./common/InputTables";
 import FormNavigatorCol from "./controllComponents/FormNavigator";
+import {useAdminApp} from "../AppContext";
 
 const profileShape = PropTypes.shape({
-  data: PropTypes.shape({
-    metadata: PropTypes.object,
-    tables: PropTypes.array
-  }),
+  data: PropTypes.oneOfType([
+    PropTypes.shape({
+      metadata: PropTypes.object,
+      tables: PropTypes.array
+    }),
+    PropTypes.arrayOf(PropTypes.shape({
+      metadata: PropTypes.object,
+      tables: PropTypes.array
+    }))
+  ]),
   tables: PropTypes.arrayOf(PropTypes.shape({
     table: PropTypes.object,
     loopType: PropTypes.string
@@ -23,19 +25,43 @@ const profileShape = PropTypes.shape({
 
 function ProfileForm({
                        status,
-                       profile,
-                       options,
-                       datasets,
-                       updateProfile,
                        storeProfile,
                        error,
-                       errorMessage
+                       errorMessage,
+                       savable,
+                       handleShowFileUpload,
+                       tableIdx,
+                       setTableIdx
                      }) {
 
-  const [activeTabKey, setActiveTabKey] = useState("basics");
+  const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp();
 
-  const onSubmit = (event) => {
-    event.preventDefault();
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (savable) {
+        event.preventDefault();
+        event.returnValue = ""; // Required for Chrome
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [savable]);
+
+  const onDeleteInputFile = useCallback((idx) => {
+    if (profile.data.length <= 1) {
+      return
+    }
+    const newData = [...profile.data];
+    newData.splice(idx, 1);
+    const newProfile = {...profile, data: newData};
+    updateProfile(newProfile)
+  }, [profile]);
+
+  const _onSubmit = (silent) => {
     const errors = [];
 
     check_loop_fields(profile, errors);
@@ -45,7 +71,17 @@ function ProfileForm({
       return;
     }
 
-    storeProfile();
+    storeProfile(silent);
+  }
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    return _onSubmit(false);
+  }
+
+  const onSubmitSilent = (event) => {
+    event.preventDefault();
+    return _onSubmit(true);
   }
 
   const check_loop_fields = (profile, errors) => {
@@ -68,36 +104,44 @@ function ProfileForm({
     });
   }
 
-
   if (!profile?.data) return null;
 
   profile.tables.map((table) => table.loopType = table.loopType ?? "all")
 
   return (
     <div>
-      <Button className="mt-3"
-              style={{
-                position: "fixed",
-                top: '10px',
-                right: '10px',
-              }} variant="primary" onClick={onSubmit}>
-            {status === 'create' && 'Create profile'}
-            {status === 'update' && 'Update profile'}
-      </Button>
+      <ButtonGroup style={{
+        position: "fixed",
+        top: '10px',
+        right: '10px',
+      }}>
+        <Button variant="warning" onClick={handleShowFileUpload}>
+          {status === 'create' ? 'Create profile' : 'Update profile'} & add input File
+        </Button>
+        <Button disabled={!savable}
+                variant="primary" onClick={onSubmitSilent}>
+          {status === 'create' && 'Create profile'}
+          {status === 'update' && 'Update profile'}
+        </Button>
+        <Button disabled={!savable}
+                variant="primary" onClick={onSubmit}>
+          {status === 'create' && 'Create profile & close'}
+          {status === 'update' && 'Update profile & close'}
+        </Button>
+      </ButtonGroup>
       <Row>
         {error && (
           <div className="fixed-alert-container">
-            <Alert variant="danger">{errorMessage}</Alert>
+            <Alert variant="danger" dismissible>{errorMessage}</Alert>
           </div>
         )}
-        <InputTables setActiveTabKey={setActiveTabKey} profile={profile} setProfile={updateProfile}/>
+        <InputTables tableIdx={tableIdx}
+                     onDeleteInputFile={onDeleteInputFile}
+                     setTableIdx={setTableIdx}/>
         <FormNavigatorCol
-          profile={profile}
-          datasets={datasets}
-          options={options}
-          setProfile={updateProfile}
           activeTabKey={activeTabKey}
           setActiveTabKey={setActiveTabKey}
+          tableIdx={tableIdx}
         />
 
       </Row>
@@ -107,14 +151,14 @@ function ProfileForm({
 }
 
 ProfileForm.propTypes = {
-  status: PropTypes.string,
-  profile: profileShape,
-  options: PropTypes.object,
-  datasets: PropTypes.array,
-  updateProfile: PropTypes.func,
-  storeProfile: PropTypes.func,
-  error: PropTypes.bool,
-  errorMessage: PropTypes.string
+  status: PropTypes.string.isRequired,
+  storeProfile: PropTypes.func.isRequired,
+  error: PropTypes.bool.isRequired,
+  errorMessage: PropTypes.string.isRequired,
+  savable: PropTypes.bool.isRequired,
+  handleShowFileUpload: PropTypes.func.isRequired,
+  tableIdx: PropTypes.number.isRequired,
+  setTableIdx: PropTypes.func.isRequired,
 }
 
 export default ProfileForm

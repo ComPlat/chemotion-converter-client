@@ -15,6 +15,8 @@ import OntologySubjectSelect from "./identifier/OntologySubjectSelect";
 import TableIndexInput from './identifier/TableIndexInput'
 import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
+import OntologyPredicateSelect from "./identifier/OntologyPredicateSelect";
+import {useAdminApp} from "../AppContext";
 
 function IndentifierInput({
                             index,
@@ -28,13 +30,13 @@ function IndentifierInput({
                             updateIdentifierOperation,
                             removeIdentifierOperation,
                             dataset,
-                            profile,
-                            options,
                             updateRegex = null,
                             addIdentifierOperation = null
                           }) {
+  const {profile, options} = useAdminApp();
   const valueDisabled = identifier.match === 'any'
   const [showOntology, setShowOntology] = useState(false);
+
 
   return (
     <form>
@@ -169,13 +171,16 @@ function IndentifierInput({
             </Col>
           </Row>
           {showOntology ? <>
-            <OntologyTermSelect term={identifier.predicate}
-                                predicates={profile.predicates} options={options}
-                                updateOntology={(a) => updateIdentifierOntology(index, a)}></OntologyTermSelect>
+            <OntologyTermSelect term={identifier.object} predicate={identifier.predicate}
+                                objects={profile.objects} options={options}
+                                updateOntology={(a) => updateIdentifierOntology(index, a)}/>
+            <OntologyPredicateSelect term={identifier.predicate}
+                                     predicates={profile.predicates} options={options}
+                                     updateOntology={(a) => updateIdentifierOntology(index, a)}/>
             <OntologySubjectSelect instance={identifier} dataset={dataset}
                                    subjects={profile.subjects} datatypes={profile.datatypes}
                                    subjectInstances={profile.subjectInstances} options={options}
-                                   updateOntology={(a) => updateIdentifierOntology(index, a)}></OntologySubjectSelect>
+                                   updateOntology={(a) => updateIdentifierOntology(index, a)}/>
           </> : <></>
           }
         </>
@@ -189,18 +194,17 @@ function IndentifierInput({
 IndentifierInput.propTypes = {
   index: PropTypes.number,
   identifier: PropTypes.object,
-  options: PropTypes.object,
   fileMetadataOptions: PropTypes.array,
   tableMetadataOptions: PropTypes.array,
   inputTables: PropTypes.array,
   outputTables: PropTypes.array,
   dataset: PropTypes.object,
   updateIdentifier: PropTypes.func,
-  removeIdentifier: PropTypes.func,
+  updateIdentifierOperation: PropTypes.func,
+  removeIdentifierOperation: PropTypes.func,
   updateRegex: PropTypes.func,
   updateIdentifierOntology: PropTypes.func,
   addIdentifierOperation: PropTypes.func,
-  profile: PropTypes.object,
 }
 
 export default IndentifierInput

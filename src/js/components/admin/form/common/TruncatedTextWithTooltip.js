@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import { Tooltip, OverlayTrigger, Col } from "react-bootstrap";
 
 const TruncatedTextWithTooltip = ({ text }) => {
@@ -18,13 +19,17 @@ const TruncatedTextWithTooltip = ({ text }) => {
         <Tooltip id="tooltip-truncated">
           {text}
         </Tooltip>
-      ) : (<></>) }
+      ) : (<div></div>) }
     >
       <Col as="dt" lg={5}>
         <div ref={textRef} className='div-nowrap'>{text}:</div>
       </Col>
     </OverlayTrigger>
   );
+};
+
+TruncatedTextWithTooltip.propTypes = {
+  text: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
 };
 
 export default TruncatedTextWithTooltip;

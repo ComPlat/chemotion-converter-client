@@ -1,33 +1,32 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import {Tabs, Tab, Col, Card, Form, InputGroup} from "react-bootstrap";
 import OutputTables from "./DataTables";
 import {CheckIdentifier, MetadataIdentifier} from "./Identifier";
 import OntologyManager from "./Ontology";
 import SIunits from "./SIunits";
+import ReactionVariations from "./ReactionVariations";
 import {getDataset} from "../../../../utils/profileUtils";
+import {useAdminApp} from "../../AppContext";
+import ProfileHistory from "../common/ProfileHistory";
 
-const profileShape = PropTypes.shape({
-    title: PropTypes.string,
-    description: PropTypes.string,
-    software: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    devices: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-    subjectInstances: PropTypes.object,
-    subjects: PropTypes.array,
-    predicates: PropTypes.array,
-    identifiers: PropTypes.array,
-    tables: PropTypes.array,
-    ols: PropTypes.string
-});
+function ProfileBasics() {
+  const {profile, updateProfile: setProfile} = useAdminApp();
+  const [software, setSoftware] = useState(profile.software);
+  const [devices, setDevices] = useState(profile.devices);
 
+  useEffect(() => {
+    setSoftware(profile.software);
+  }, [profile.software]);
 
-function ProfileBasics({profile, setProfile}) {
-    const [software, setSoftware] = useState(profile.software);
-    const [devices, setDevices] = useState(profile.devices);
-    const onRootPropertyChange = (e) => {
-        const {name, value} = e.target;
-        setProfile({...profile, [name]: value});
-    }
+  useEffect(() => {
+    setDevices(profile.devices);
+  }, [profile.devices]);
+
+  const onRootPropertyChange = (e) => {
+    const {name, value} = e.target;
+    setProfile({...profile, [name]: value});
+  }
 
     const updateSoftwareOrDevice = (e) => {
         const {name, value} = e.target;
@@ -40,19 +39,21 @@ function ProfileBasics({profile, setProfile}) {
         setProfile({...profile, [name]: listValue});
     }
 
-    return (<Card>
-        <Card.Header>
-            Profile
-        </Card.Header>
-        <Card.Body>
-            <Form.Group controlId="profile-title">
-                <Form.Label column="lg">Title</Form.Label>
-                <Form.Control size="sm"
-                              name="title"
-                              onChange={onRootPropertyChange}
-                              value={profile.title}/>
-                <Form.Text>Please add a title for this profile.</Form.Text>
-            </Form.Group>
+  return (<Card>
+    <Card.Header>
+      Profile
+    </Card.Header>
+    <Card.Body>
+      <Form.Group controlId="profile-title">
+        <Form.Label column="lg">Title</Form.Label>
+        <Form.Control size="sm"
+                      name="title"
+                      onChange={onRootPropertyChange}
+                      value={profile.title}/>
+        <Form.Text>Please add a title for this profile.</Form.Text>
+      </Form.Group>
+      <p>Profile version: {profile.profile_version}</p>
+      <p>Converter version: {profile.converter_version ?? '?'}</p>
 
             <Form.Group controlId="profile-description" className="mt-3">
                 <Form.Label column="lg">Description</Form.Label>
@@ -82,13 +83,9 @@ function ProfileBasics({profile, setProfile}) {
     </Card>)
 }
 
-ProfileBasics.propTypes = {
-    profile: profileShape.isRequired,
-    setProfile: PropTypes.func.isRequired
-};
-
-export default function FormNavigatorCol({profile, setProfile, options, datasets, activeTabKey, setActiveTabKey}) {
-    const dataset = getDataset(profile, datasets);
+export default function FormNavigatorCol({activeTabKey, setActiveTabKey, tableIdx}) {
+  const {profile, datasets} = useAdminApp();
+  const dataset = getDataset(profile, datasets);
 
     return (
         <Col md={5}>
@@ -98,42 +95,41 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
                       id="main-form-tabs"
                       className="mb-3">
 
-                    <Tab eventKey="basics" title="Basics">
-                        <ProfileBasics profile={profile} setProfile={setProfile}/>
-                    </Tab>
+          <Tab eventKey="basics" title="Basics">
+            <ProfileBasics/>
+            <br/>
+            <ProfileHistory />
+          </Tab>
 
-                    <Tab eventKey="ontology" title="Ontology">
-                        <OntologyManager profile={profile} setProfile={setProfile} options={options} datasets={datasets}
-                                         dataset={dataset}/>
-                    </Tab>
+          <Tab eventKey="ontology" title="Ontology">
+            <OntologyManager dataset={dataset}/>
+          </Tab>
 
-                    <Tab eventKey="identifier" title="Identifier">
-                        <CheckIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset}/>
-                    </Tab>
+          <Tab eventKey="identifier" title="Identifier">
+            <CheckIdentifier dataset={dataset}
+                             tableIdx={tableIdx}/>
+          </Tab>
 
-                    <Tab eventKey="data" title="Data tables">
-                        <OutputTables profile={profile} setProfile={setProfile} options={options}/>
-                    </Tab>
+          <Tab eventKey="data" title="Data tables">
+            <OutputTables tableIdx={tableIdx}/>
+          </Tab>
 
-                    <Tab eventKey="metadata" title="Metadata">
-                        <MetadataIdentifier profile={profile} setProfile={setProfile} options={options}
-                                            dataset={dataset}/>
-                    </Tab>
+          <Tab eventKey="metadata" title="Metadata">
+            <MetadataIdentifier dataset={dataset}
+                                tableIdx={tableIdx}/>
+          </Tab>
 
-                    <Tab eventKey="siUnits" title="SI Units">
-                        <SIunits profile={profile} setProfile={setProfile}/>
-                    </Tab>
-                </Tabs>
-            </div>
-        </Col>
-    )
+          <Tab eventKey="reactionVariations" title="Reaction Variations values">
+            <ReactionVariations tableIdx={tableIdx}/>
+          </Tab>
+        </Tabs>
+      </div>
+    </Col>
+  )
 }
 
 FormNavigatorCol.propTypes = {
-    profile: profileShape.isRequired,
-    setProfile: PropTypes.func.isRequired,
-    options: PropTypes.object,
-    datasets: PropTypes.array,
-    activeTabKey: PropTypes.string.isRequired,
-    setActiveTabKey: PropTypes.func.isRequired
+  activeTabKey: PropTypes.string.isRequired,
+  setActiveTabKey: PropTypes.func.isRequired,
+  tableIdx: PropTypes.number.isRequired
 };

@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useMemo} from "react"
 import PropTypes from 'prop-types';
 
 import HeaderInput from './table/HeaderInput'
@@ -7,10 +7,11 @@ import TableIdentifier from './TableIdentifier'
 import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
 import {Button, Col, Form, Offcanvas, Row} from "react-bootstrap";
 import SIunits from "./controllComponents/SIunits";
+import {useAdminApp} from "../AppContext";
 
 
 function TableForm({
-                       table, inputTables, inputColumns, options,
+                       table, inputTables, inputColumns,
                        updateTable, updateHeader,
                        addOperation, updateOperation, updateOperationDescription, removeOperation,
                        fileMetadataOptions, tableMetadataOptions,
@@ -18,7 +19,8 @@ function TableForm({
                    }) {
     const [showSiUnits, setShowSiUnits] = useState(false);
     const [siUnitsContext, setSiUnitsContext] = useState(null);
-    const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
+    const {options} = useAdminApp();
+  const creatableHeaderOptions = {"DATA TYPE": options["DATA TYPE"], XUNITS: options.XUNITS, YUNITS: options.YUNITS};
 
     const openSiUnits = (axis) => {
         const inputColumn = axis === "X" ? table?.table?.xColumn : table?.table?.yColumn;
@@ -31,12 +33,13 @@ function TableForm({
         setShowSiUnits(true);
     };
 
-    const headerOptions = Object.keys(options).reduce(function (filtered, key) {
-        if (!(key in xy_units) && key !== 'rdf') {
-            filtered[key] = options[key];
-        }
-        return filtered;
-    }, {});
+    const fixedHeaderOptions  = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(options).filter(
+         ([key]) => !(key in creatableHeaderOptions) && !["rdf", "VERSION"].includes(key)
+        )
+        );
+    }, [options]);
 
     return (
         <div>
@@ -44,14 +47,14 @@ function TableForm({
                 Table header
             </div>
 
-            {Object.keys(headerOptions).map((optionKey, index) => (
+            {Object.keys(fixedHeaderOptions).map((optionKey, index) => (
                 <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
-                             values={headerOptions[optionKey]} updateHeader={updateHeader}/>
+                             values={fixedHeaderOptions[optionKey]} updateHeader={updateHeader}/>
             ))}
 
-            {Object.keys(xy_units).map((optionKey, index) => (
+            {Object.keys(creatableHeaderOptions).map((optionKey, index) => (
                 <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
-                                     values={xy_units[optionKey]} updateHeader={updateHeader}
+                                     values={creatableHeaderOptions[optionKey]} updateHeader={updateHeader}
                                      leftElement={(
                                          <Button
                                              variant="outline-info"
@@ -101,7 +104,7 @@ function TableForm({
                             key={index}
                             index={index + 1000}
                             headerKey={headerKey}
-                            opitions={options}
+
                             table={table}
                             inputTables={inputTables}
                             updateHeader={updateHeader}

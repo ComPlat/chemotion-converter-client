@@ -8,21 +8,17 @@ import {
   getTableMetadataOptions
 } from "../../../../utils/profileUtils";
 import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
-
-const profileShape = PropTypes.shape({
-  identifiers: PropTypes.array.isRequired,
-  tables: PropTypes.array.isRequired,
-  data: PropTypes.object
-});
+import {useAdminApp} from "../../AppContext";
 
 
-function CheckIdentifier({profile, setProfile, dataset, options}) {
+function CheckIdentifier({dataset, tableIdx}) {
+  const {profile, updateProfile: setProfile} = useAdminApp();
 
-  const inputTables = getInputTables(profile);
-  const fileMetadataOptions = getFileMetadataOptions(profile);
-  const tableMetadataOptions = getTableMetadataOptions(profile);
+  const inputTables = getInputTables(profile, tableIdx);
+  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
 
-  const ih = BuildIdentifierHandler(profile, setProfile, dataset);
+  const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);
 
   return (<Card className="mt-3">
     <Card.Header>Identifiers</Card.Header>
@@ -42,8 +38,6 @@ function CheckIdentifier({profile, setProfile, dataset, options}) {
             inputTables={inputTables}
             outputTables={profile.tables}
             dataset={dataset}
-            profile={profile}
-            options={options}
             addIdentifier={ih.addIdentifier}
             updateIdentifier={ih.updateIdentifier}
             removeIdentifier={ih.removeIdentifier}
@@ -74,20 +68,19 @@ function CheckIdentifier({profile, setProfile, dataset, options}) {
 }
 
 CheckIdentifier.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
   dataset: PropTypes.object,
-  options: PropTypes.object
+  tableIdx: PropTypes.number.isRequired
 };
 
 
-function MetadataIdentifier({profile, setProfile, dataset, options}) {
+function MetadataIdentifier({dataset, tableIdx}) {
+  const {profile, updateProfile: setProfile, options} = useAdminApp();
 
-  const inputTables = getInputTables(profile);
-  const fileMetadataOptions = getFileMetadataOptions(profile);
-  const tableMetadataOptions = getTableMetadataOptions(profile);
+  const inputTables = getInputTables(profile, tableIdx);
+  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
 
-  const ih = BuildIdentifierHandler(profile, setProfile, dataset);
+  const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);
   const [open, setOpen] = useState(false);
 
   return (<>
@@ -152,7 +145,6 @@ function MetadataIdentifier({profile, setProfile, dataset, options}) {
               inputTables={inputTables}
               outputTables={profile.tables}
               dataset={dataset}
-              profile={profile}
               options={options}
               addIdentifier={ih.addIdentifier}
               updateIdentifier={ih.updateIdentifier}
@@ -171,10 +163,8 @@ function MetadataIdentifier({profile, setProfile, dataset, options}) {
 }
 
 MetadataIdentifier.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
   dataset: PropTypes.object,
-  options: PropTypes.object
+  tableIdx: PropTypes.number.isRequired
 };
 
 export {

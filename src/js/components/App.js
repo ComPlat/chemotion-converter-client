@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { Alert, Button, Col, Container, Form, Row } from 'react-bootstrap';
+import {Alert, Button, Col, Container, Form, Row} from 'react-bootstrap';
 
 import ConverterApi from '../api/ConverterApi'
 
@@ -68,6 +68,7 @@ function App() {
                 <option value="jcampzip">Zip file containing JCAMP files</option>
                 <option value="jcamp">Single JCAMP file</option>
                 <option value="rdf">The Resource Description Framework (.ttl)</option>
+                <option value="metajson">Meta JSON (.json)</option>
               </Form.Select>
             </Form.Group>
           </Form>

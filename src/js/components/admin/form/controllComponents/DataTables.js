@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Select from 'react-select';
-import {Card, Form, InputGroup, Button, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {Button, Card, Form, InputGroup, OverlayTrigger, Tooltip} from "react-bootstrap";
 import isEqual from "lodash/isEqual";
 import {v4 as uuidv4} from "uuid";
 import {
@@ -10,21 +10,12 @@ import {
     getInputColumns, getInputTables,
     getTableMetadataOptions
 } from "../../../../utils/profileUtils";
-import {initIdentifier, additionalInfo} from "../../../../utils/identifierUtils";
+import {additionalInfo, initIdentifier} from "../../../../utils/identifierUtils";
 import TableForm from "../TableForm";
+import {useAdminApp} from "../../AppContext";
 
-const profileShape = PropTypes.shape({
-    data: PropTypes.object,
-    tables: PropTypes.arrayOf(PropTypes.shape({
-        header: PropTypes.object,
-        table: PropTypes.object,
-        loopType: PropTypes.string,
-        matchTables: PropTypes.bool
-    })),
-    matchTables: PropTypes.bool
-});
-
-export default function OutputTables({profile, setProfile, options}) {
+export default function OutputTables({tableIdx}) {
+  const {profile, updateProfile: setProfile, options} = useAdminApp();
 
     const addTable = () => {
         const header = {}
@@ -34,7 +25,7 @@ export default function OutputTables({profile, setProfile, options}) {
             }
         }
 
-        const inputColumns = getInputColumns(profile)
+        const inputColumns = getInputColumns(profile, tableIdx)
         const table = {}
         if (inputColumns.length > 2) {
             table.xColumn = inputColumns[0].value
@@ -93,7 +84,7 @@ export default function OutputTables({profile, setProfile, options}) {
                 operation.line = '';
                 operation.ignore_missing_values = false;
             } else if (type === 'metadata_value') {
-                const mdZero = getTableMetadataOptions(profile)[0];
+                const mdZero = getTableMetadataOptions(profile, tableIdx)[0];
                 operation.value = mdZero.key;
                 operation.table = `${mdZero.tableIndex}`;
                 operation.metadata = '0';
@@ -214,13 +205,13 @@ export default function OutputTables({profile, setProfile, options}) {
                     ['FIRSTX', 'LASTX', 'DELTAX'].forEach(headerKey => {
                         // ensure headerKeys are there if XYDATA is selected
                         if (header[headerKey] === undefined) {
-                            header[headerKey] = initIdentifier(profile, 'fileMetadata')
+                            header[headerKey] = initIdentifier(profile, 'fileMetadata', tableIdx)
                         }
 
                         // update header identifiers if the type changed
                         if (headerKey === key &&
                             profile.tables[index].header[headerKey].type !== header[headerKey].type) {
-                            header[headerKey] = initIdentifier(profile, header[headerKey].type)
+                            header[headerKey] = initIdentifier(profile, header[headerKey].type, tableIdx)
                         }
                     })
                 } else {
@@ -237,11 +228,11 @@ export default function OutputTables({profile, setProfile, options}) {
         }
     }
 
-    const inputTables = getInputTables(profile);
-    const inputColumns = getInputColumns(profile);
-    const distInputColumns = getDistInputColumns(profile);
-    const fileMetadataOptions = getFileMetadataOptions(profile);
-    const tableMetadataOptions = getTableMetadataOptions(profile);
+    const inputTables = getInputTables(profile, tableIdx);
+    const inputColumns = getInputColumns(profile, tableIdx);
+    const distInputColumns = getDistInputColumns(profile, tableIdx);
+    const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
+    const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
 
     const loopMetadataOptions = (outputTable, op_index) => {
         const seenLabels = new Set();
@@ -264,7 +255,7 @@ export default function OutputTables({profile, setProfile, options}) {
 
             acc[groupIndex].options.push({
                 value: index,
-                label: showValue ? `${cleanLabel} (${item.value})` : cleanLabel
+                metadata: cleanLabel,label: showValue ? `${cleanLabel} (${item.value})` : cleanLabel
             });
 
             seenLabels.add(cleanLabel);
@@ -275,13 +266,12 @@ export default function OutputTables({profile, setProfile, options}) {
     };
 
     const getSelectedMetadataOption = (metadata, outputTable, op_index) => {
-        if (!metadata) return null;
+        if (metadata == null) return null;
 
-        const [indexString] = metadata.split(":");
-        const optionIndex = Number(indexString);
+
 
         for (const group of loopMetadataOptions(outputTable, op_index)) {
-            const found = group.options.find(opt => opt.value === optionIndex);
+            const found = group.options.find(opt => opt.metadata === metadata);
             if (found) return found;
         }
 
@@ -355,7 +345,7 @@ export default function OutputTables({profile, setProfile, options}) {
                                     className="loop-select-container"
                                     classNamePrefix="loop-select"
                                     menuPortalTarget={document.body}
-                                    menuShouldBlockScroll={false}
+                                    menuPosition="fixed"menuShouldBlockScroll={false}
                                     menuShouldScrollIntoView={false}
                                     openMenuOnScroll={false}
                                     closeMenuOnScroll={false}
@@ -382,11 +372,11 @@ export default function OutputTables({profile, setProfile, options}) {
                                     className="loop-select-container"
                                     classNamePrefix="loop-select"
                                     menuPortalTarget={document.body}
-                                    menuShouldBlockScroll={false}
+                                    menuPosition="fixed"menuShouldBlockScroll={false}
                                     menuShouldScrollIntoView={false}
                                     openMenuOnScroll={false}
                                     closeMenuOnScroll={false}
-                                    value={getSelectedMetadataOption(operation.metadata, index, op_index)}
+                                    value={getSelectedMetadataOption(operation.value, index, op_index)}
                                     onChange={(selected) => {
                                         if (!selected) {
                                             updateOperation(index, 'loop_metadata', op_index, 'metadata', '');
@@ -396,69 +386,65 @@ export default function OutputTables({profile, setProfile, options}) {
                                         const selectedOption = tableMetadataOptions[selected.value];
                                         const metadataString = `${selected.value}:${selectedOption.key}:${selectedOption.tableIndex}`;
 
-                                        updateOperation(index, 'loop_metadata', op_index, 'metadata', metadataString);
-                                    }}
-                                    options={loopMetadataOptions(index, op_index)}
-                                />
-                                <OverlayTrigger
-                                    placement="bottom-end"
-                                    overlay={<Tooltip>Ignore Value</Tooltip>}
-                                >
-                                    <div className="input-group-text" style={{cursor: 'pointer'}}>
-                                        <input type="checkbox"
-                                               checked={profile.tables[index].table.loop_metadata[op_index].ignoreValue || false}
-                                               onChange={() => toggleMatchTables(index, op_index)}
-                                        />
-                                    </div>
-                                </OverlayTrigger>
-                            </InputGroup>
-                        ))}
-                    {profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_theader']
-                        && profile.tables[index].table['loop_theader'].map((operation, op_index) => (
-                            <InputGroup>
-                                <InputGroup.Text>&#8627;</InputGroup.Text>
-                                <Button
-                                    variant="outline-danger"
-                                    onClick={() => removeOperation(index, 'loop_theader', op_index)}
-                                >
-                                    &times;
-                                </Button>
-                                <Form.Control
-                                    value={operation.line || ''}
-                                    placeholder='Line'
-                                    onChange={(event) => {
-                                        updateOperation(index, 'loop_theader', op_index, 'line', event.target.value)
-                                    }}
-                                />
-                                <Form.Control
-                                    value={operation.regex || ''}
-                                    placeholder='Regex'
-                                    onChange={(event) => {
-                                        updateOperation(index, 'loop_theader', op_index, 'regex', event.target.value)
-                                    }}
-                                />
-                            </InputGroup>
-                        ))}
-                    <TableForm
-                        table={table}
-                        inputTables={inputTables}
-                        inputColumns={inputColumns}
-                        options={options}
-                        profile={profile}
-                        setProfile={setProfile}
-                        outputTableIndex={index}
-                        updateHeader={(key, value) => updateHeader(index, key, value)}
-                        updateTable={(key, value) => updateTable(index, key, value)}
-                        addOperation={(key, type) => addOperation(index, key, type)}
-                        updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
-                        updateOperationDescription={(key, value) => updateOperationDescription(index, key, value)}
-                        removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)}
-                        fileMetadataOptions={fileMetadataOptions}
-                        tableMetadataOptions={tableMetadataOptions}
-                    />
-                </Card.Body>
-            </Card>
-        ))}
+										updateOperation(index, 'loop_metadata', op_index, 'metadata', metadataString);
+									}}
+									options={loopMetadataOptions(index, op_index)}
+								/>
+								<OverlayTrigger
+									placement="bottom-end"
+									overlay={<Tooltip>Ignore Value</Tooltip>}
+								>
+									<div className="input-group-text" style={{cursor: 'pointer'}}>
+										<input type="checkbox"
+										       checked={profile.tables[index].table.loop_metadata[op_index].ignoreValue || false}
+										       onChange={() => toggleMatchTables(index, op_index)}
+										/>
+									</div>
+								</OverlayTrigger>
+							</InputGroup>
+						))}
+					{profile.tables[index].loopType !== "all" && profile.tables[index].table['loop_theader']
+						&& profile.tables[index].table['loop_theader'].map((operation, op_index) => (
+							<InputGroup>
+								<InputGroup.Text>&#8627;</InputGroup.Text>
+								<Button
+									variant="outline-danger"
+									onClick={() => removeOperation(index, 'loop_theader', op_index)}
+								>
+									&times;
+								</Button>
+								<Form.Control
+									value={operation.line || ''}
+									placeholder='Line'
+									onChange={(event) => {
+										updateOperation(index, 'loop_theader', op_index, 'line', event.target.value)
+									}}
+								/>
+								<Form.Control
+									value={operation.regex || ''}
+									placeholder='Regex'
+									onChange={(event) => {
+										updateOperation(index, 'loop_theader', op_index, 'regex', event.target.value)
+									}}
+								/>
+							</InputGroup>
+						))}
+					<TableForm
+						table={table}
+						inputTables={inputTables}
+						inputColumns={inputColumns}
+						updateHeader={(key, value) => updateHeader(index, key, value)}
+            updateTable={(key, value) => updateTable(index, key, value)}
+            addOperation={(key, type) => addOperation(index, key, type)}
+            updateOperation={(key, opIndex, opKey, value) => updateOperation(index, key, opIndex, opKey, value)}
+            updateOperationDescription={(key, value) => updateOperationDescription(index, key, value)}
+            removeOperation={(key, opIndex) => removeOperation(index, key, opIndex)}
+            fileMetadataOptions={fileMetadataOptions}
+            tableMetadataOptions={tableMetadataOptions}
+          />
+        </Card.Body>
+      </Card>
+    ))}
 
         <div className="mt-2">
             <Button
@@ -473,7 +459,5 @@ export default function OutputTables({profile, setProfile, options}) {
 }
 
 OutputTables.propTypes = {
-    profile: profileShape.isRequired,
-    setProfile: PropTypes.func.isRequired,
-    options: PropTypes.object
+    tableIdx: PropTypes.number.isRequired
 };
