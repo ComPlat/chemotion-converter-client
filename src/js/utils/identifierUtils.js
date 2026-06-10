@@ -11,7 +11,7 @@ const initIdentifier = (profile, type, tableIdx = 0) => {
   }
 
   if (identifier.type === 'fileMetadata') {
-    const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx)
+    const fileMetadataOptions = getFileMetadataOptions(getProfileData(profile, tableIdx))
     if (fileMetadataOptions.length > 0) {
       identifier.key = fileMetadataOptions[0].key
       identifier.value = fileMetadataOptions[0].value
@@ -19,7 +19,7 @@ const initIdentifier = (profile, type, tableIdx = 0) => {
       identifier.key = ''
     }
   } else if (identifier.type === 'tableMetadata') {
-    const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx)
+    const tableMetadataOptions = getTableMetadataOptions(getProfileData(profile, tableIdx))
     if (tableMetadataOptions.length > 0) {
       identifier.key = tableMetadataOptions[0].key
       identifier.tableIndex = tableMetadataOptions[0].tableIndex
@@ -123,6 +123,32 @@ const cleanOntology = (profile) => {
   profile.predicates = filterUnique(profile.predicates, usedPredicates);
 }
 
+
+const getSelectedMatch = ({identifier: {lineNumber, key, type, value, tableIndex, match}, profile, tableIdx}) => {
+
+  if (type === 'fileMetadata') {
+    const {metadata} = getProfileData(profile, tableIdx);
+    return [metadata?.[key]];
+
+  }
+  if (type === 'tableMetadata') {
+    const {metadata} = getProfileData(profile, tableIdx)?.tables?.[tableIndex] || {};
+    return [metadata?.[key]];
+  }
+  if (type === 'tableHeader') {
+    const {header} = getProfileData(profile, tableIdx)?.tables?.[tableIndex] || {};
+
+    lineNumber = parseInt(lineNumber);
+
+    if (!isNaN(lineNumber) && header.length + 1 > lineNumber) {
+      return [header[lineNumber - 1]];
+    }
+    return header;
+  }
+
+  return []
+}
+
 function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
   const handlers = {
     addIdentifier: (type, optional, options = {}) => {
@@ -136,14 +162,24 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
       identifier.editable = options.editable ?? true;
 
       if (identifier.optional) {
-        identifier.outputTableIndex = 0;
+        identifier.isDatasetOutput = true;
+        identifier.isDatatableOutput = false;
+        identifier.isRdfOutput = false;
+        identifier.isLoobDatatableOutput = true;
+        identifier.isFirstMatch = false;
+        identifier.outputTableIndex = [];
         identifier.outputLayer = '';
+        identifier.outputDatatableKey = '';
         identifier.outputKey = '';
         identifier.predicate = null;
         identifier.subject = null;
         identifier.datatype = null;
         identifier.object = null;
+
       } else {
+        if (identifier.type === 'tableHeader') {
+          identifier.lineNumber = 1;
+        }
         identifier.match = 'exact';
       }
 
@@ -174,6 +210,12 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
       if (index !== -1) {
         profile.identifiers[index] = Object.assign(profile.identifiers[index], data);
         cleanOntology(profile);
+
+        if (profile.identifiers[index].type === 'tableHeader' &&
+          !profile.identifiers[index].optional &&
+          !profile.identifiers[index].lineNumber) {
+          profile.identifiers[index] = Object.assign(profile.identifiers[index], {lineNumber: 1});
+        }
         setProfile(profile);
       }
     },
@@ -250,22 +292,15 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
       }
     },
 
-    updateRegex: ({lineNumber, value, tableIndex, match}) => {
+    updateRegex: ({lineNumber, key, type = 'tableHeader', value, tableIndex, match}) => {
+      let header = getSelectedMatch({identifier: {lineNumber, key, type, value, tableIndex, match}, profile, tableIdx});
+
       if (match !== 'regex') {
-        return <></>;
+        return <p>Current match: <b>{header[0]?.substring(0,100) ?? '-'}</b></p>;
       }
 
       const regexPattern = value;
-      lineNumber = parseInt(lineNumber);
-      const profileData = getProfileData(profile, tableIdx);
-      if (!profileData?.tables?.[tableIndex]) {
-        return <></>;
-      }
-      let {header} = profileData.tables[tableIndex];
-
-      if (!isNaN(lineNumber) && header.length + 1 > lineNumber) {
-        header = [header[lineNumber - 1]];
-      } else if (!String(regexPattern).startsWith('^') && !String(regexPattern).endsWith('$')) {
+      if (!String(regexPattern).startsWith('^') && !String(regexPattern).endsWith('$')) {
         header = [header.join('\n')];
       }
       try {

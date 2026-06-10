@@ -1,22 +1,15 @@
 import {Button, Card, Collapse} from "react-bootstrap";
 import IdentifierForm from "../IdentifierForm";
-import React, {useState} from "react";
+import React, {useMemo, useState} from "react";
 import PropTypes from "prop-types";
-import {
-  getFileMetadataOptions,
-  getInputTables,
-  getTableMetadataOptions
-} from "../../../../utils/profileUtils";
 import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
+import MetadataIdentifierForm from "../MetadataIdentifierForm";
 import {useAdminApp} from "../../AppContext";
 
 
 function CheckIdentifier({dataset, tableIdx}) {
   const {profile, updateProfile: setProfile} = useAdminApp();
 
-  const inputTables = getInputTables(profile, tableIdx);
-  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
-  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
 
   const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);
 
@@ -31,21 +24,10 @@ function CheckIdentifier({dataset, tableIdx}) {
             key={type}
             label={label}
             type={type}
-            optional={false}
             identifiers={profile.identifiers}
-            fileMetadataOptions={fileMetadataOptions}
-            tableMetadataOptions={tableMetadataOptions}
-            inputTables={inputTables}
-            outputTables={profile.tables}
-            dataset={dataset}
             addIdentifier={ih.addIdentifier}
             updateIdentifier={ih.updateIdentifier}
             removeIdentifier={ih.removeIdentifier}
-            addIdentifierOperation={ih.addIdentifierOperation}
-            updateIdentifierOperation={ih.updateIdentifierOperation}
-            updateIdentifierOntology={ih.updateIdentifierOntology}
-            removeIdentifierOperation={ih.removeIdentifierOperation}
-            updateRegex={ih.updateRegex}
           />
         ))
       }
@@ -76,9 +58,6 @@ CheckIdentifier.propTypes = {
 function MetadataIdentifier({dataset, tableIdx}) {
   const {profile, updateProfile: setProfile, options} = useAdminApp();
 
-  const inputTables = getInputTables(profile, tableIdx);
-  const fileMetadataOptions = getFileMetadataOptions(profile, tableIdx);
-  const tableMetadataOptions = getTableMetadataOptions(profile, tableIdx);
 
   const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);
   const [open, setOpen] = useState(false);
@@ -88,13 +67,13 @@ function MetadataIdentifier({dataset, tableIdx}) {
       <Card.Header>Info
         <Button
           className="m-lg-2"
-        variant="outline-dark"
-        onClick={() => setOpen(!open)}
-        aria-controls="card-content"
-        aria-expanded={open}
-      >
+          variant="outline-dark"
+          onClick={() => setOpen(!open)}
+          aria-controls="card-content"
+          aria-expanded={open}
+        >
           <b>{open ? '-' : '+'}</b>
-      </Button>
+        </Button>
       </Card.Header>
       <Collapse in={open}>
         <Card.Body>
@@ -134,15 +113,12 @@ function MetadataIdentifier({dataset, tableIdx}) {
           [['Based on file metadata', 'fileMetadata'],
             ['Based on table metadata', 'tableMetadata'],
             ['Based on table headers', 'tableHeader']].map(([label, type]) => (
-            <IdentifierForm
+            <MetadataIdentifierForm
               key={type}
               label={label}
               type={type}
               optional={true}
               identifiers={profile.identifiers}
-              fileMetadataOptions={fileMetadataOptions}
-              tableMetadataOptions={tableMetadataOptions}
-              inputTables={inputTables}
               outputTables={profile.tables}
               dataset={dataset}
               options={options}

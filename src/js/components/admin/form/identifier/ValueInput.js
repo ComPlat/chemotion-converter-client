@@ -8,7 +8,7 @@ const ValueInput = ({ index, identifier, updateIdentifier, disabled }) => {
       <Form.Label>Value</Form.Label>
       <Form.Control
         size="sm"
-        value={identifier.value || ''}
+        value={disabled ? '' : identifier.value || ''}
         onChange={(event) => updateIdentifier(index, { value: event.target.value })}
         disabled={disabled}
       />

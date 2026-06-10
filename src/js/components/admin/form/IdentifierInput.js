@@ -1,8 +1,6 @@
-import React, {useState} from "react"
+import React, { useMemo, useState } from "react"
 import PropTypes from 'prop-types';
-import {Button, Col, Form, Row} from 'react-bootstrap';
-
-import KeyInput from './identifier/KeyInput'
+import { Button, Col, Form, OverlayTrigger, Row, Tab, Tabs, Tooltip } from 'react-bootstrap';
 import KeySelect from './identifier/KeySelect'
 import LineNumberInput from './identifier/LineNumberInput'
 import MatchSelect from './identifier/MatchSelect'
@@ -12,52 +10,29 @@ import OutputLayerInput from './identifier/OutputLayerInput'
 import OutputTableIndexSelect from './identifier/OutputTableIndexSelect'
 import OntologyTermSelect from './identifier/OntologyTermSelect'
 import OntologySubjectSelect from "./identifier/OntologySubjectSelect";
-import TableIndexInput from './identifier/TableIndexInput'
-import TableIndexSelect from './identifier/TableIndexSelect'
 import ValueInput from './identifier/ValueInput'
 import OntologyPredicateSelect from "./identifier/OntologyPredicateSelect";
-import {useAdminApp} from "../AppContext";
+import { useAdminApp } from "../AppContext";
+import { DelayedActiveInputTableInput } from "./common/InputTables";
 
-function IndentifierInput({
-                            index,
-                            identifier,
-                            fileMetadataOptions,
-                            tableMetadataOptions,
-                            inputTables,
-                            outputTables,
-                            updateIdentifier,
-                            updateIdentifierOntology,
-                            updateIdentifierOperation,
-                            removeIdentifierOperation,
-                            dataset,
-                            updateRegex = null,
-                            addIdentifierOperation = null
-                          }) {
-  const {profile, options} = useAdminApp();
-  const valueDisabled = identifier.match === 'any'
-  const [showOntology, setShowOntology] = useState(false);
+
+function CommonIdentifierInput({
+                                 index,
+                                 identifier,
+                                 updateIdentifier
+                               }) {
 
 
   return (
-    <form>
+    <>
       <Row className="mb-3">
         {(identifier.type === 'fileMetadata' || identifier.type === 'tableMetadata') && (
           <Col>
-            {fileMetadataOptions.length > 0 ? (
-              <KeySelect
-                index={index}
-                identifier={identifier}
-                fileMetadataOptions={fileMetadataOptions}
-                tableMetadataOptions={tableMetadataOptions}
-                updateIdentifier={updateIdentifier}
-              />
-            ) : (
-              <KeyInput
-                index={index}
-                identifier={identifier}
-                updateIdentifier={updateIdentifier}
-              />
-            )}
+            <KeySelect
+              index={index}
+              identifier={identifier}
+              updateIdentifier={updateIdentifier}
+            />
           </Col>
         )}
       </Row>
@@ -65,13 +40,10 @@ function IndentifierInput({
       {(identifier.type === 'tableHeader') && (
         <Row className="mb-3">
           <Col md={10}>
-            {inputTables.length > 0 ? (
-              <TableIndexSelect index={index} identifier={identifier} tables={inputTables}
-                                updateIdentifier={updateIdentifier}/>
-            ) : (
-              <TableIndexInput index={index} identifier={identifier}
-                               updateIdentifier={updateIdentifier}/>
-            )}
+            <DelayedActiveInputTableInput
+              delayTime={200}
+              activeInputTable={identifier.tableIndex}
+              setActiveInputTable={(value) => updateIdentifier(index, { tableIndex: value })}/>
           </Col>
 
           <Col md={2}>
@@ -79,6 +51,26 @@ function IndentifierInput({
           </Col>
         </Row>
       )}
+
+    </>
+  )
+
+}
+
+function IdentifierInput({
+                           index,
+                           identifier,
+                           updateIdentifier
+                         }) {
+  const valueDisabled = identifier.match === 'any'
+
+  return (
+    <form>
+      <CommonIdentifierInput
+        index={index}
+        identifier={identifier}
+        updateIdentifier={updateIdentifier}
+      />
 
       <Row className="mb-3">
         <Col md={4}>
@@ -90,87 +82,244 @@ function IndentifierInput({
         </Col>
       </Row>
 
-      {identifier.optional && (<>
-          {updateRegex &&
-            (<Row><Col>
-              {updateRegex({...identifier})}
-            </Col></Row>)
-          }
-          {addIdentifierOperation && (
-            <Row><Col>
-              <Button
-                className="mt-1"
-                variant="success"
-                size="sm"
-                onClick={() => addIdentifierOperation(index)}
-              >
-                Add scalar operation
-              </Button>
-              <p></p>
-            </Col></Row>
-          )}
+    </form>
+  )
 
-          {Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
-            <Row key={opIndex} className="mb-3">
-              <Form.Group as={Col} sm={4} controlId={`identifierOperationOperator${index}${opIndex}`}>
-                <Form.Label column="sm">Operator</Form.Label>
-                <OperatorSelect
-                  value={operation.operator}
-                  onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)}
-                />
-              </Form.Group>
+}
 
-              <Form.Group as={Col} sm={7} controlId={`identifierOperationValue${index}${opIndex}`}>
-                <Form.Label column="sm">Value</Form.Label>
-                <Form.Control
-                  size="sm"
-                  value={operation.value || ''}
-                  onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
-                />
-              </Form.Group>
+IdentifierInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  fileMetadataOptions: PropTypes.array,
+  inputTables: PropTypes.array,
+  updateIdentifier: PropTypes.func,
+}
 
-              <Col sm={1} className="d-flex align-items-end justify-content-end">
-                <Button variant="danger" size="sm"
-                        onClick={() => removeIdentifierOperation(index, opIndex)}>
-                  &times;
-                </Button>
-              </Col>
-            </Row>
-          ))}
+function DatatableIdentifierInput({
+                                    index,
+                                    identifier,
+                                    updateIdentifier,
+                                    updateRegex = null,
+                                  }) {
+  const matchResult = useMemo(() => updateRegex && updateRegex({ ...identifier }), [Object.keys(identifier)]);
 
-          <Row>
-            <Col>
-              <h4>Output Dataset</h4>
-            </Col>
-          </Row>
-          <Row className="mb-3">
-            <Col sm={4}>
-              <OutputTableIndexSelect
-                index={index}
-                identifier={identifier}
-                tables={outputTables}
-                updateIdentifier={updateIdentifier}
-              />
-            </Col>
-            <Col sm={4}>
+
+  return (
+    <>
+      <CommonIdentifierInput
+        index={index}
+        identifier={identifier}
+        updateIdentifier={updateIdentifier}
+      />
+
+      <Form.Check
+        type="checkbox"
+        label="Enable Regular expression"
+        checked={identifier.match === 'regex'}
+        onChange={(e) => updateIdentifier(index, { match: e.currentTarget.checked ? 'regex' : 'any' })}
+      />
+      {identifier.match === 'regex' && (<Form.Group controlId={`valueInput${index}`}>
+        <Form.Label column="lg">Regex</Form.Label>
+        <Form.Control
+          size="sm"
+          value={identifier.value || ''}
+          onChange={(event) => updateIdentifier(index, { value: event.target.value })}
+        />
+      </Form.Group>)}
+
+
+      {matchResult &&
+        (<Row><Col>
+          {matchResult}
+        </Col></Row>)
+      }
+
+    </>
+  )
+
+}
+
+DatatableIdentifierInput.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+
+  updateIdentifier: PropTypes.func,
+  updateRegex: PropTypes.func,
+}
+
+
+function MetadataIdentifierInput({
+                                   index,
+                                   identifier,
+                                   outputTables,
+                                   updateIdentifier,
+                                   updateIdentifierOntology,
+                                   updateIdentifierOperation,
+                                   removeIdentifierOperation,
+                                   dataset,
+                                   updateRegex = null,
+                                   addIdentifierOperation = null
+                                 }) {
+  const [activeOutputTab, setActiveOutputTab] = useState('dataset');
+  const { profile, options } = useAdminApp();
+
+  return (
+    <form>
+
+      <DatatableIdentifierInput
+        index={index}
+        identifier={identifier}
+        updateIdentifier={updateIdentifier}
+        updateRegex={updateRegex}
+      />
+
+      {addIdentifierOperation && (
+        <Row><Col>
+          <Button
+            className="mt-1"
+            variant="success"
+            size="sm"
+            onClick={() => addIdentifierOperation(index)}
+          >
+            Add scalar operation
+          </Button>
+          <p></p>
+        </Col></Row>
+      )}
+
+      {Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
+        <Row key={opIndex} className="mb-3">
+          <Form.Group as={Col} sm={4} controlId={`identifierOperationOperator${index}${opIndex}`}>
+            <Form.Label column="sm">Operator</Form.Label>
+            <OperatorSelect
+              value={operation.operator}
+              onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)}
+            />
+          </Form.Group>
+
+          <Form.Group as={Col} sm={7} controlId={`identifierOperationValue${index}${opIndex}`}>
+            <Form.Label column="sm">Value</Form.Label>
+            <Form.Control
+              size="sm"
+              value={operation.value || ''}
+              onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
+            />
+          </Form.Group>
+
+          <Col sm={1} className="d-flex align-items-end justify-content-end">
+            <Button variant="danger" size="sm"
+                    onClick={() => removeIdentifierOperation(index, opIndex)}>
+              &times;
+            </Button>
+          </Col>
+        </Row>
+      ))}
+      <h3>Output</h3>
+      <Tabs activeKey={activeOutputTab}
+            onSelect={(k) => setActiveOutputTab(k)}
+            className="mb-3">
+
+        <Tab eventKey="dataset" title="Dataset">
+          <Form.Check
+            type="checkbox"
+            onChange={(e) => updateIdentifier(index, { 'isDatasetOutput': e.target.checked })}
+            checked={identifier.isDatasetOutput}
+            label={`Enable output in the dataset`}/>
+          {identifier.isDatasetOutput && (<Row className="mb-3">
+            <Col sm={6}>
               <OutputLayerInput index={index} identifier={identifier}
                                 updateIdentifier={updateIdentifier} dataset={dataset}/>
             </Col>
-            <Col sm={4}>
+            <Col sm={6}>
               <OutputKeyInput index={index} identifier={identifier}
                               updateIdentifier={updateIdentifier} dataset={dataset}/>
             </Col>
-          </Row>
-          <Row>
-            <Col>
-              <h4>Output Ontology <Button variant="info"
-                                          onClick={() => setShowOntology(!showOntology)}>{showOntology ? 'Hide' : 'Show'}</Button>
-              </h4>
-              <p>We use the TIB Terminology Service to allow you to assign an ontology terms to
-                properties.</p>
-            </Col>
-          </Row>
-          {showOntology ? <>
+          </Row>)}
+        </Tab>
+
+        <Tab eventKey="data" title="Datatables">
+          <Form.Check
+            type="checkbox"
+            onChange={(e) => updateIdentifier(index, { 'isDatatableOutput': e.target.checked })}
+            checked={identifier.isDatatableOutput}
+            label={`Enable output in datatables`}/>
+          {identifier.isDatatableOutput && (<>
+            <Row>
+              <Col sm={6}>
+                <OutputTableIndexSelect
+                  index={index}
+                  identifier={identifier}
+                  tables={outputTables}
+                  updateIdentifier={updateIdentifier}
+                />
+              </Col>
+              <Col sm={6}>
+                <Form.Group controlId={`outputKeyInput${index}`}>
+                  <Form.Label column="lg">Output key</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    value={identifier.outputDatatableKey || ""}
+                    onChange={(event) =>
+                      updateIdentifier(index, { outputDatatableKey: event.target.value })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <div>
+              <hr/>
+              <OverlayTrigger
+                placement="left"
+                overlay={
+                  <Tooltip id="metadata-tooltip">
+                    If enabled, metadata is read from the same input table as the data.<br/>
+                    If no metadata is found, values from <b>input table #{identifier.tableIndex + 1}</b> are used
+                    instead.<br/>
+                    If disabled, metadata is always taken from <b>input table #{identifier.tableIndex + 1}</b>.
+                  </Tooltip>
+                }
+              >
+                <Form.Check
+                  type="checkbox"
+                  onChange={(e) => {
+                    const isFirstMatch = e.target.checked ? identifier.isFirstMatch : false;
+                    updateIdentifier(index, { 'isLoobDatatableOutput': e.target.checked, isFirstMatch })
+                  }}
+                  checked={identifier.isLoobDatatableOutput || false}
+                  label={`Prefer source table metadata (fallback: table #${identifier.tableIndex + 1})`}/>
+              </OverlayTrigger>
+
+              <Form.Group>
+                <OverlayTrigger
+                  placement="left"
+                  overlay={
+                    <Tooltip id="first-match-tooltip">
+                      This is only interesting for <b>NTUPLES</b> output tables. If enabled, only the first matching value per group is written to the<br/>
+                      output data. If disabled, all matching values from each input table are included as a list.
+                    </Tooltip>
+                  }
+                ><Form.Check
+                  type="checkbox"
+                  disabled={!identifier.isLoobDatatableOutput}
+                  onChange={(e) => updateIdentifier(index, { 'isFirstMatch': e.target.checked })}
+                  checked={identifier.isFirstMatch || false}
+                  label={`Only use first match per group`}/>
+                </OverlayTrigger>
+              </Form.Group>
+            </div>
+
+          </>)}
+        </Tab>
+
+        <Tab eventKey="ontology" title="Rdf Graph">
+          <Form.Check
+            type="checkbox"
+            onChange={(e) => updateIdentifier(index, { 'isRdfOutput': e.target.checked })}
+            checked={identifier.isRdfOutput}
+            label={`Enable output in rdf graph`}/>
+          {identifier.isRdfOutput && (<>
+            <p>We use the TIB Terminology Service to allow you to assign an ontology terms to
+              properties.</p>
             <OntologyTermSelect term={identifier.object} predicate={identifier.predicate}
                                 objects={profile.objects} options={options}
                                 updateOntology={(a) => updateIdentifierOntology(index, a)}/>
@@ -181,30 +330,37 @@ function IndentifierInput({
                                    subjects={profile.subjects} datatypes={profile.datatypes}
                                    subjectInstances={profile.subjectInstances} options={options}
                                    updateOntology={(a) => updateIdentifierOntology(index, a)}/>
-          </> : <></>
-          }
-        </>
-      )}
+          </>)}
+        </Tab>
+      </Tabs>
 
     </form>
   )
 
 }
 
-IndentifierInput.propTypes = {
+MetadataIdentifierInput.propTypes = {
   index: PropTypes.number,
-  identifier: PropTypes.object,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array,
-  inputTables: PropTypes.array,
-  outputTables: PropTypes.array,
-  dataset: PropTypes.object,
-  updateIdentifier: PropTypes.func,
-  updateIdentifierOperation: PropTypes.func,
-  removeIdentifierOperation: PropTypes.func,
-  updateRegex: PropTypes.func,
-  updateIdentifierOntology: PropTypes.func,
-  addIdentifierOperation: PropTypes.func,
+  identifier:
+  PropTypes.object,
+  outputTables:
+  PropTypes.array,
+  dataset:
+  PropTypes.object,
+  updateIdentifier:
+  PropTypes.func,
+  updateIdentifierOperation:
+  PropTypes.func,
+  removeIdentifierOperation:
+  PropTypes.func,
+  updateRegex:
+  PropTypes.func,
+  updateIdentifierOntology:
+  PropTypes.func,
+  addIdentifierOperation:
+  PropTypes.func,
 }
 
-export default IndentifierInput
+export {
+  IdentifierInput, MetadataIdentifierInput, DatatableIdentifierInput
+}
