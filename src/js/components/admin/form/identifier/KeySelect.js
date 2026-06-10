@@ -43,7 +43,10 @@ const KeySelect = ({index, identifier, updateIdentifier}) => {
   return (
     <Row>
       {needsTableSelect && (<Col>
-        <DelayedActiveInputTableInput activeInputTable={inputTableIndex} setActiveInputTable={setInputTableIndex} delayTime={100}/>
+        <DelayedActiveInputTableInput activeInputTable={inputTableIndex}
+                                      setActiveInputTable={setInputTableIndex}
+                                      asInputGroup={false}
+                                      delayTime={100}/>
 
       </Col>)}
       <Col>

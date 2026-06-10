@@ -20,21 +20,21 @@ const inputTableShape = PropTypes.shape({
 });
 
 
-function FileHeader({header, tableIndex, tableIdx}) {
-  const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp();
-  const {addIdentifier, updateRegex} = BuildIdentifierHandler(profile, updateProfile, null, tableIdx);
+function FileHeader({ header, tableIndex, tableIdx }) {
+  const { activeTabKey, setActiveTabKey, profile, updateProfile } = useAdminApp();
+  const { addIdentifier, updateRegex } = BuildIdentifierHandler(profile, updateProfile, null, tableIdx);
 
   return <FileHeaderPresenter addIdentifier={(value) => {
     setActiveTabKey('metadata');
-    addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
+    addIdentifier('tableHeader', true, { match: "regex", value, tableIndex })
   }} header={header} updateRegex={(value) => {
-    return updateRegex({type: 'tableHeader', tableIndex, value, match: 'regex'});
+    return updateRegex({ type: 'tableHeader', tableIndex, value, match: 'regex' });
   }} tableIndex={tableIndex}
                               dataIndex={tableIdx}
   ></FileHeaderPresenter>
 }
 
-function DataGrid({table}) {
+function DataGrid({ table }) {
   const columnDefs = table.columns.map(column => ({
     field: column.key,
     headerName: column.name
@@ -80,7 +80,7 @@ DataGrid.propTypes = {
 };
 
 
-function Metadata({metadata}) {
+function Metadata({ metadata }) {
   return (
     <Card>
       <Card.Body>
@@ -101,7 +101,7 @@ Metadata.propTypes = {
   metadata: PropTypes.object.isRequired
 };
 
-function TabContents({activeTable, activeKey, tableIdx}) {
+function TabContents({ activeTable, activeKey, tableIdx }) {
   return (
     <div className="mt-3">
       {activeTable && (
@@ -172,11 +172,11 @@ TabContents.propTypes = {
 };
 
 
-function DelayedActiveInputTableInput({activeInputTable, setActiveInputTable, delayTime = 500}) {
-  const {inData: {activeData}} = useAdminApp();
+function DelayedActiveInputTableInput({ activeInputTable, setActiveInputTable, delayTime = 500, asInputGroup=true }) {
+  const { inData: { activeData } } = useAdminApp();
 
   const [localValue, setLocalValue] = useState(activeInputTable);
-  const {tables} = activeData;
+  const { tables } = activeData;
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -195,18 +195,28 @@ function DelayedActiveInputTableInput({activeInputTable, setActiveInputTable, de
   }, [localValue]);
   if (!activeData) return;
 
+  const form_control = (<Form.Control
+    style={{ minWidth: '30%' }}
+    type="number"
+    min={1}
+    max={tables.length}
+    value={localValue + 1}
+    onChange={(e) => setLocalValue(Number(e.target.value - 1))}
+  />);
+  const labelText = `Select input table: (1-${tables.length})`;
+
+  if (!asInputGroup) {
+    return (<Form.Group style={{ zIndex: 200 }}>
+      <Form.Label column="sm">{labelText}</Form.Label>
+      {form_control}
+    </Form.Group>);
+  }
+
   return (<Form.Group className="mb-3">
       <InputGroup>
-        <InputGroup.Text>{`Select input table: (1-${tables.length})`}</InputGroup.Text>
+        <InputGroup.Text>{labelText}</InputGroup.Text>
 
-        <Form.Control
-          style={{minWidth: '30%'}}
-          type="number"
-          min={1}
-          max={tables.length}
-          value={localValue + 1}
-          onChange={(e) => setLocalValue(Number(e.target.value - 1))}
-        />
+        {form_control}
       </InputGroup>
     </Form.Group>
   )
@@ -216,11 +226,23 @@ function DelayedActiveInputTableInput({activeInputTable, setActiveInputTable, de
 DelayedActiveInputTableInput.propTypes = {
   activeInputTable: PropTypes.number.isRequired,
   delayTime: PropTypes.number.isRequired,
-  setActiveInputTable: PropTypes.func.isRequired
+  setActiveInputTable: PropTypes.func.isRequired,
+  asInputGroup: PropTypes.bool
 }
 
-function InputTables({onDeleteInputFile}) {
-  const {profile, tableIdx, setTableIdx, activeInputTable, setActiveInputTable, inData: {activeData}} = useAdminApp();
+DelayedActiveInputTableInput.defaultProps = {
+  asInputGroup: true
+}
+
+function InputTables({ onDeleteInputFile }) {
+  const {
+    profile,
+    tableIdx,
+    setTableIdx,
+    activeInputTable,
+    setActiveInputTable,
+    inData: { activeData }
+  } = useAdminApp();
 
   const handleSourceSelect = (selectedKey) => {
     setTableIdx(Number(selectedKey));
@@ -305,4 +327,4 @@ InputTables.propTypes = {
 }
 
 export default InputTables
-export {DelayedActiveInputTableInput}
+export { DelayedActiveInputTableInput }
