@@ -27,6 +27,7 @@ module.exports = {
   },
   externals: {
     react: 'react',
+    "react-dom": "react-dom",
     'react-bootstrap': 'react-bootstrap',
     'ag-grid-community': 'ag-grid-community',
     'ag-grid-react': 'ag-grid-react',

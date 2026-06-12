@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import ConverterApi from '../../api/ConverterApi';
 import {
@@ -6,10 +6,11 @@ import {
   getProfileData,
   getTableMetadataOptions
 } from "../../utils/profileUtils";
+import PropTypes from "prop-types";
 
 const AppContext = createContext();
 
-export function AdminProvider({children}) {
+export function AdminProvider({ children, fetcherDatasets = null }) {
   const [activeTabKey, setActiveTabKey] = useState('basics');
   const [activeInputTable, setActiveInputTable] = useState(0);
   const [profiles, setProfiles] = useState([]);
@@ -28,17 +29,18 @@ export function AdminProvider({children}) {
     });
   }
 
-  const updateProfile = (nextProfile, {updateList = false} = {}) => {
-    setProfile({...nextProfile});
+  const updateProfile = (nextProfile, { updateList = false } = {}) => {
+    setProfile({ ...nextProfile });
     if (updateList) {
       updateProfileList(nextProfile);
     }
   };
 
   useEffect(() => {
+    const _fetcherDatasets = fetcherDatasets ?? ConverterApi.fetchDatasets;
     Promise.all([
       ConverterApi.fetchProfiles(),
-      ConverterApi.fetchDatasets(),
+      _fetcherDatasets(),
       ConverterApi.fetchOptions()
     ]).then(responses => {
       const [profilesResponse, datasetsResponse, optionsResponse] = responses
@@ -57,7 +59,7 @@ export function AdminProvider({children}) {
         fileMetadataOptions: getFileMetadataOptions(activeData),
         inputTables: activeData.tables,
         getTableMetadataOptions: (inputTable) => {
-          if(!tableMetadataArchive[inputTable]) {
+          if (!tableMetadataArchive[inputTable]) {
             tableMetadataArchive[inputTable] = getTableMetadataOptions(activeData?.tables, inputTable);
           }
           return tableMetadataArchive[inputTable];
@@ -83,6 +85,14 @@ export function AdminProvider({children}) {
       {children}
     </AppContext.Provider>
   );
+}
+
+AdminProvider.propTypes = {
+  fetcherDatasets: PropTypes.func
+}
+
+AdminProvider.defaultProps = {
+  fetcherDatasets: null
 }
 
 export function useAdminApp() {

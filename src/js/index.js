@@ -1,7 +1,10 @@
 import React from "react"
 import App from "./components/App.js"
+import ReactDOM from "react-dom";
 
-import { createRoot } from "react-dom/client";
 
-const root = createRoot(document.getElementById("root"));
-root.render(<App />);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const domElement = document.getElementById('root');
+  if (domElement) ReactDOM.render(<App />, domElement);
+});

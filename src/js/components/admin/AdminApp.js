@@ -10,6 +10,8 @@ import {AllCommunityModule, ModuleRegistry, provideGlobalGridOptions} from 'ag-g
 import {getProfileData} from "../../utils/profileUtils";
 import {GENERIC_PREDICATE} from "./form/common/TibFetchService";
 import {AdminProvider, useAdminApp} from "./AppContext";
+import PropTypes from "prop-types";
+import AppModal from "../../utils/modalWrapper";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -19,7 +21,7 @@ provideGlobalGridOptions({
 });
 
 
-function AdminAppContent() {
+function AdminAppContent({ModalComponent}) {
   const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp();
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -348,7 +350,6 @@ function AdminAppContent() {
   }
 
 
-
   return (
     <Container fluid={['create', 'update'].includes(status)}>
       <Breadcrumb className="mt-4">
@@ -399,69 +400,78 @@ function AdminAppContent() {
         {dispatchView()}
       </main>
 
-      <Modal show={createdModal}>
-        <Modal.Header>
-          <Modal.Title>Profile successfully created!</Modal.Title>
-        </Modal.Header>
+      <ModalComponent
+        show={createdModal}
+        onHide={hideCreatedModal}
+        title="Profile successfully created!"
+        showFooter
+        closeLabel="Close"
+      >
+        Your converter profile has been created successfully.
+      </ModalComponent>
 
-        <Modal.Footer>
-          <Button variant="primary" onClick={hideCreatedModal}>Great!</Button>
-        </Modal.Footer>
-      </Modal>
+      <ModalComponent
+        show={deleteModal}
+        onHide={hideDeleteModal}
+        title="Do you really want to delete this profile?"
+        closeLabel="Cancel"
+        primaryActionLabel="Delete profile"
+        onPrimaryAction={deleteProfile}
+      >
+        This action will permanently remove the selected converter profile.
+      </ModalComponent>
 
-      <Modal show={deleteModal}>
-        <Modal.Header>
-          <Modal.Title>Do you really want to delete this profile?</Modal.Title>
-        </Modal.Header>
-        <Modal.Footer>
-          <Button variant="default" onClick={hideDeleteModal}>Cancel</Button>
-          <Button variant="danger" onClick={deleteProfile}>Delete profile</Button>
-        </Modal.Footer>
-      </Modal>
+      <ModalComponent
+        show={identifierWarningModal}
+        onHide={cancelIdentifierWarning}
+        title="Identifier mismatch"
+        closeLabel="Cancel"
+        primaryActionLabel="Use file anyway"
+        onPrimaryAction={confirmIdentifierWarning}
+      >
+        The file was converted by a different profile. It is most likely that the identifiers do not match. Do you
+        still want to use this file?
+      </ModalComponent>
 
-      <Modal show={identifierWarningModal}>
-        <Modal.Header>
-          <Modal.Title>Identifier mismatch</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          The file was converted by a different profile. It is most likely that the identifiers do not match. Do you
-          still want to use this file?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={cancelIdentifierWarning}>Cancel</Button>
-          <Button variant="warning" onClick={confirmIdentifierWarning}>Use file anyway</Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showFileUpload} onHide={handleCloseFileUpload}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add File</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <FileUploadForm
-            onFileChangeHandler={updateFile}
-            onSubmitFileHandler={submitFileHandler}
-            errorMessage={errorMessage}
-            error={uploadError}
-            isLoading={isLoading}
-            disabled={false}
-          />
-        </Modal.Body>
-      </Modal>
+      <ModalComponent
+        show={showFileUpload}
+        onHide={handleCloseFileUpload}
+        title="Add File"
+        closeLabel="Cancel"
+      >
+        <FileUploadForm
+          onFileChangeHandler={updateFile}
+          onSubmitFileHandler={submitFileHandler}
+          errorMessage={errorMessage}
+          error={uploadError}
+          isLoading={isLoading}
+          disabled={false}
+        />
+      </ModalComponent>
     </Container>
   )
 }
 
-function AdminApp() {
+AdminAppContent.propTypes = {
+  ModalComponent: PropTypes.elementType.isRequired,
+};
+
+function AdminApp({ModalComponent = null, fetcherDatasets = null}) {
   return (
-    <AdminProvider>
-      <AdminAppContent/>
+    <AdminProvider fetcherDatasets={fetcherDatasets}>
+      <AdminAppContent ModalComponent={ModalComponent ?? AppModal}/>
     </AdminProvider>
   )
 }
 
-function jsonDiff(obj1, obj2) {
-  return obj2 !== JSON.stringify(obj1)
-}
+AdminApp.propTypes = {
+  ModalComponent: PropTypes.elementType,
+  fetcherDatasets: PropTypes.func,
+};
+
+AdminApp.defaultProps = {
+  ModalComponent: null,
+  fetcherDatasets: null,
+};
 
 export default AdminApp
