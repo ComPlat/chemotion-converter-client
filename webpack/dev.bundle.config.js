@@ -15,16 +15,16 @@ module.exports = {
       type: "umd",
     },
 
-    globalObject: "this",
+    globalObject: "typeof self !== 'undefined' ? self : this",
     clean: true,
   },
 
   externals: {
-    react: "react",
-    "react-dom": "react-dom",
-    "react-bootstrap": "react-bootstrap",
-    "ag-grid-community": "ag-grid-community",
-    "ag-grid-react": "ag-grid-react",
+    react: { commonjs: 'react', commonjs2: 'react', amd: 'react', root: 'React' },
+    'react-dom': { commonjs: 'react-dom', commonjs2: 'react-dom', amd: 'react-dom', root: 'ReactDOM' },
+    'react-bootstrap': { commonjs: 'react-bootstrap', commonjs2: 'react-bootstrap', amd: 'react-bootstrap', root: 'ReactBootstrap' },
+    'ag-grid-community': { commonjs: 'ag-grid-community', commonjs2: 'ag-grid-community', amd: 'ag-grid-community', root: 'agGrid' },
+    'ag-grid-react': { commonjs: 'ag-grid-react', commonjs2: 'ag-grid-react', amd: 'ag-grid-react', root: 'AgGridReact' },
   },
 
   module: {
