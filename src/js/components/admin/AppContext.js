@@ -8,17 +8,42 @@ import {
 } from "../../utils/profileUtils";
 import PropTypes from "prop-types";
 
-const AppContext = createContext();
+let AppContext = null;
 
-export function AdminProvider({ children, fetcherDatasets = null }) {
+function getAppContext() {
+  if (!AppContext) {
+    AppContext = createContext();
+  }
+
+  return AppContext;
+}
+
+export function AdminProvider({ children, isAdmin}) {
   const [activeTabKey, setActiveTabKey] = useState('basics');
   const [activeInputTable, setActiveInputTable] = useState(0);
-  const [profiles, setProfiles] = useState([]);
+  const [profiles, _setProfiles] = useState([]);
   const [datasets, setDatasets] = useState([]);
-  const [options, setOptions] = useState([]);
+  const [options, _setOptions] = useState([]);
   const [profile, setProfile] = useState(null);
   const [tableIdx, setTableIdx] = useState(0);
 
+
+  const setProfiles = (obj) => {
+    if (typeof obj === "object" && !Array.isArray(obj) &&  Object.hasOwn(obj, "profiles")) {
+      _setProfiles(obj.profiles);
+    } else {
+      _setProfiles(obj);
+    }
+  }
+
+
+  const setOptions = (obj) => {
+    if (typeof obj === "object" && !Array.isArray(obj) &&  Object.hasOwn(obj, "options")) {
+      _setOptions(obj.options);
+    } else {
+      _setOptions(obj);
+    }
+  }
 
   const updateProfileList = (profile) => {
     setProfiles(prevProfiles => {
@@ -37,18 +62,30 @@ export function AdminProvider({ children, fetcherDatasets = null }) {
   };
 
   useEffect(() => {
-    const _fetcherDatasets = fetcherDatasets ?? ConverterApi.fetchDatasets;
+    if (!isAdmin) {
+      ConverterApi.fetchProfiles(isAdmin).then((profilesResponse)=>{
+        setProfiles(profilesResponse);
+        setDatasets([]);
+        setOptions([]);
+      });
+      return;
+    }
+
     Promise.all([
-      ConverterApi.fetchProfiles(),
-      _fetcherDatasets(),
-      ConverterApi.fetchOptions()
+      ConverterApi.fetchProfiles(isAdmin),
+      ConverterApi.fetchDatasets(),
+      ConverterApi.fetchOptions(),
+      ConverterApi.fetchDatasetsUnits()
     ]).then(responses => {
-      const [profilesResponse, datasetsResponse, optionsResponse] = responses
+      const [profilesResponse,
+        datasetsResponse,
+        optionsResponse, datasetUnitsResponse] = responses
       setProfiles(profilesResponse);
       setDatasets(datasetsResponse);
       setOptions(optionsResponse);
+      setOptions(datasetUnitsResponse);
     })
-  }, []);
+  }, [isAdmin]);
 
   const inData = useMemo(() => {
     if (profile) {
@@ -69,7 +106,7 @@ export function AdminProvider({ children, fetcherDatasets = null }) {
     }
     return {};
   }, [profile?.data.length, tableIdx]);
-
+  getAppContext();
   return (
     <AppContext.Provider value={{
       activeTabKey, setActiveTabKey,
@@ -88,13 +125,9 @@ export function AdminProvider({ children, fetcherDatasets = null }) {
 }
 
 AdminProvider.propTypes = {
-  fetcherDatasets: PropTypes.func
-}
-
-AdminProvider.defaultProps = {
-  fetcherDatasets: null
+  isAdmin: PropTypes.bool.isRequired
 }
 
 export function useAdminApp() {
-  return useContext(AppContext);
+  return useContext(getAppContext());
 }

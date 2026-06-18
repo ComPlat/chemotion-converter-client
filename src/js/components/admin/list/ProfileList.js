@@ -14,7 +14,7 @@ function ProfileList({
 										 }) {
 	const sortedProfiles = profiles.sort((a, b) => a.title.localeCompare(b.title))
 
-	return (<ListGroup>
+	return (<ListGroup className="scroll">
 			{sortedProfiles.map((profile) => (
 				<ProfileListItem
 					key={profile.id}

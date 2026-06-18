@@ -57,7 +57,6 @@ function DataGrid({ table }) {
   return (
     <div className="ag-theme-alpine">
       <AgGridReact
-        enableColResize
         columnDefs={columnDefs}
         rowData={rowData}
         defaultColDef={defaultColDef}

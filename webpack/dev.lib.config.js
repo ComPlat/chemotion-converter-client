@@ -5,7 +5,7 @@ module.exports = {
   devtool: 'eval-source-map',
   mode: "development",
 
-  entry: "./src/js/bundle.js",
+  entry: ["./src/scss/bundle.scss", "./src/js/bundle.js"],
 
   output: {
     path: path.resolve(__dirname, '..', "dist"),
@@ -34,9 +34,19 @@ module.exports = {
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
-        },
+          options: {
+            presets: [
+              "@babel/preset-env",
+              ["@babel/preset-react", { runtime: "classic" }]
+            ]
+          }
+        }
       },
-    ],
+      {
+        test: /\.s?css$/,
+        use: ["style-loader", "css-loader", "sass-loader"]
+      }
+    ]
   },
 
   resolve: {

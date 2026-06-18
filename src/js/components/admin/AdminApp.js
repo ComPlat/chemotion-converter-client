@@ -21,7 +21,7 @@ provideGlobalGridOptions({
 });
 
 
-function AdminAppContent({ModalComponent}) {
+function AdminAppContent({ModalComponent, isAdmin}) {
   const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp();
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -173,7 +173,7 @@ function AdminAppContent({ModalComponent}) {
 
   const deleteProfile = () => {
     ConverterApi.deleteProfile(profile)
-      .then(() => ConverterApi.fetchProfiles())
+      .then(() => ConverterApi.fetchProfiles(isAdmin))
       .then((profilesResponse) => {
         hideDeleteModal();
         setStatus('list');
@@ -205,6 +205,7 @@ function AdminAppContent({ModalComponent}) {
               ...profile,
               data: [...profile.data, data]
             };
+            setProfile(nextProfile);
             setTableIdx(nextProfile.data.length - 1);
             setStatus('update');
           } else {
@@ -228,9 +229,10 @@ function AdminAppContent({ModalComponent}) {
               reactionVariations: {elements: [], identifiers: []}
             }
             setStatus('create');
+            setProfile(nextProfile);
           }
 
-          setProfile(nextProfile);
+
           setSelectedFile(null);
           setIsLoading(false);
           setUploadError(false);
@@ -317,7 +319,7 @@ function AdminAppContent({ModalComponent}) {
       return (
         <ProfileList
           profiles={profiles}
-          isAdmin
+          isAdmin={isAdmin}
           updateProfile={showUpdateView}
           deleteProfile={showDeleteModal}
           downloadProfile={downloadProfile}
@@ -386,10 +388,10 @@ function AdminAppContent({ModalComponent}) {
 
         {status === "list" &&
           <Col md={4} className="d-flex justify-content-end gap-2">
-            <Button variant="success" onClick={showImportView}>
+            <Button disabled={!isAdmin} variant="success" onClick={showImportView}>
               Import profile
             </Button>
-            <Button variant="primary" onClick={showCreateView}>
+            <Button disabled={!isAdmin} variant="primary" onClick={showCreateView}>
               Create new profile
             </Button>
           </Col>
@@ -454,24 +456,31 @@ function AdminAppContent({ModalComponent}) {
 
 AdminAppContent.propTypes = {
   ModalComponent: PropTypes.elementType.isRequired,
+  isAdmin: PropTypes.bool.isRequired,
 };
 
-function AdminApp({ModalComponent = null, fetcherDatasets = null}) {
+function AdminApp({ModalComponent = null, converterUrl = null, isAdmin = true}) {
+  if (converterUrl) {
+     ConverterApi.setConverterUrl(converterUrl);
+  }
+
   return (
-    <AdminProvider fetcherDatasets={fetcherDatasets}>
-      <AdminAppContent ModalComponent={ModalComponent ?? AppModal}/>
+    <AdminProvider isAdmin={isAdmin}>
+      <AdminAppContent ModalComponent={ModalComponent ?? AppModal}  isAdmin={isAdmin}/>
     </AdminProvider>
   )
 }
 
 AdminApp.propTypes = {
   ModalComponent: PropTypes.elementType,
-  fetcherDatasets: PropTypes.func,
+  converterUrl: PropTypes.string,
+  isAdmin: PropTypes.bool,
 };
 
 AdminApp.defaultProps = {
   ModalComponent: null,
-  fetcherDatasets: null,
+  converterUrl: null,
+  isAdmin: true,
 };
 
 export default AdminApp
