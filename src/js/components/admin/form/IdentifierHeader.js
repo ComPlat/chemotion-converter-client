@@ -1,35 +1,40 @@
-import React from "react"
+import React, {useState} from "react"
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
+import {Button, ListGroup, Collapse} from 'react-bootstrap';
+import {Pin, PinOff} from "lucide-react";
 
-function IdentifierHeader({ identifier, show, onToggle, onRemove }) {
+function IdentifierHeader({identifier, show, onToggle, onRemove}) {
   return (
     <div className="d-flex justify-content-between align-items-baseline">
       <div>
         <code>
-          { identifier.tableIndex !== undefined && `Input table #${identifier.tableIndex} ` }
-          { identifier.key }
-          { identifier.lineNumber !== undefined && `Line ${identifier.lineNumber}`}
+          {identifier.tableIndex !== undefined && `Input table #${identifier.tableIndex + 1} `}
+          {identifier.key}
+          {identifier.lineNumber !== undefined && `Line ${identifier.lineNumber}`}
         </code>
         {identifier.outputKey && (
           <>
             <span className="mx-1">&#8594;</span>
             <code>
-              { identifier.outputLayer && `${identifier.outputLayer}/`}
-              { identifier.outputKey }
+              {identifier.outputLayer && `${identifier.outputLayer}/`}
+              {identifier.outputKey}
             </code>
           </>
         )}
       </div>
 
       <div className="d-flex gap-1">
-        <Button
+
+        {show ? <Button
           variant="info"
           size="sm"
           onClick={() => onToggle()}
-        >
-          { show ? 'Hide' : 'Show' }
-        </Button>
+        ><Pin size={10} /></Button> : <Button
+          variant="dark"
+          size="sm"
+          onClick={() => onToggle()}
+        ><PinOff size={10} /></Button>}
+
         <Button
           variant="danger"
           size="sm"
@@ -42,6 +47,28 @@ function IdentifierHeader({ identifier, show, onToggle, onRemove }) {
   )
 }
 
+
+function IdentifierWithHeader({identifierInputTag, index, identifier, removeIdentifier}) {
+  const [show, setShow] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  return ( <ListGroup.Item key={index}
+                              onMouseEnter={() => setHovered(true)}
+                              onMouseLeave={() => setHovered(false)}>
+                <IdentifierHeader
+                  identifier={identifier}
+                  show={show}
+                  onToggle={() => setShow(!show)}
+                  onRemove={() => removeIdentifier(index)}
+                />
+                <Collapse in={show || hovered}>
+                  <div>
+                    {identifierInputTag}
+                  </div>
+                </Collapse>
+              </ListGroup.Item>)
+}
+
+
 IdentifierHeader.propTypes = {
   identifier: PropTypes.object,
   show: PropTypes.bool,
@@ -49,4 +76,4 @@ IdentifierHeader.propTypes = {
   onRemove: PropTypes.func
 }
 
-export default IdentifierHeader
+export default IdentifierWithHeader

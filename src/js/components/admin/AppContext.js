@@ -1,15 +1,23 @@
-import React, {createContext, useContext, useEffect, useState} from "react";
+import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
 
 import ConverterApi from '../../api/ConverterApi';
+import {
+  getFileMetadataOptions,
+  getProfileData,
+  getTableMetadataOptions
+} from "../../utils/profileUtils";
 
 const AppContext = createContext();
 
 export function AdminProvider({children}) {
   const [activeTabKey, setActiveTabKey] = useState('basics');
+  const [activeInputTable, setActiveInputTable] = useState(0);
   const [profiles, setProfiles] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [options, setOptions] = useState([]);
   const [profile, setProfile] = useState(null);
+  const [tableIdx, setTableIdx] = useState(0);
+
 
   const updateProfileList = (profile) => {
     setProfiles(prevProfiles => {
@@ -40,6 +48,26 @@ export function AdminProvider({children}) {
     })
   }, []);
 
+  const inData = useMemo(() => {
+    if (profile) {
+      const activeData = getProfileData(profile, tableIdx);
+      const tableMetadataArchive = {}
+      return {
+        activeData,
+        fileMetadataOptions: getFileMetadataOptions(activeData),
+        inputTables: activeData.tables,
+        getTableMetadataOptions: (inputTable) => {
+          if(!tableMetadataArchive[inputTable]) {
+            tableMetadataArchive[inputTable] = getTableMetadataOptions(activeData?.tables, inputTable);
+          }
+          return tableMetadataArchive[inputTable];
+        }
+      };
+
+    }
+    return {};
+  }, [profile?.data.length, tableIdx]);
+
   return (
     <AppContext.Provider value={{
       activeTabKey, setActiveTabKey,
@@ -47,7 +75,10 @@ export function AdminProvider({children}) {
       datasets, setDatasets,
       options, setOptions,
       profile, setProfile,
-      updateProfileList, updateProfile
+      updateProfile, updateProfileList,
+      tableIdx, setTableIdx,
+      activeInputTable, setActiveInputTable,
+      inData
     }}>
       {children}
     </AppContext.Provider>
