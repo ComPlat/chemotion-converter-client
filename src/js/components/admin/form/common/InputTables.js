@@ -57,7 +57,6 @@ function DataGrid({ table }) {
   return (
     <div className="ag-theme-alpine">
       <AgGridReact
-        enableColResize
         columnDefs={columnDefs}
         rowData={rowData}
         defaultColDef={defaultColDef}
@@ -225,13 +224,14 @@ function DelayedActiveInputTableInput({ activeInputTable, setActiveInputTable, d
 
 DelayedActiveInputTableInput.propTypes = {
   activeInputTable: PropTypes.number.isRequired,
-  delayTime: PropTypes.number.isRequired,
+  delayTime: PropTypes.number,
   setActiveInputTable: PropTypes.func.isRequired,
   asInputGroup: PropTypes.bool
 }
 
 DelayedActiveInputTableInput.defaultProps = {
-  asInputGroup: true
+  asInputGroup: true,
+  delayTime: 500
 }
 
 function InputTables({ onDeleteInputFile }) {
