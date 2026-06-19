@@ -24,6 +24,7 @@ export function AdminProvider({ children, isAdmin}) {
   const [profiles, _setProfiles] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [options, _setOptions] = useState([]);
+  const [datasetUnits, _setDatasetUnits] = useState([]);
   const [profile, setProfile] = useState(null);
   const [tableIdx, setTableIdx] = useState(0);
 
@@ -34,6 +35,11 @@ export function AdminProvider({ children, isAdmin}) {
     } else {
       _setProfiles(obj);
     }
+  }
+
+  const setDatasetUnits = (obj) => {
+    const a = Object.fromEntries(obj.map((x) => [x.field, {label: x.label, units: [...new Set(x.units.map((u)=> [u.label, u.key]).flat())]}]));
+    _setDatasetUnits(a);
   }
 
 
@@ -83,7 +89,7 @@ export function AdminProvider({ children, isAdmin}) {
       setProfiles(profilesResponse);
       setDatasets(datasetsResponse);
       setOptions(optionsResponse);
-      // setOptions(datasetUnitsResponse);
+      setDatasetUnits(datasetUnitsResponse);
     })
   }, [isAdmin]);
 
@@ -117,7 +123,7 @@ export function AdminProvider({ children, isAdmin}) {
       updateProfile, updateProfileList,
       tableIdx, setTableIdx,
       activeInputTable, setActiveInputTable,
-      inData
+      datasetUnits, inData
     }}>
       {children}
     </AppContext.Provider>
