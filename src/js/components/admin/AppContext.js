@@ -83,7 +83,6 @@ export function AdminProvider({ children, isAdmin}) {
       setProfiles(profilesResponse);
       setDatasets(datasetsResponse);
       setOptions(optionsResponse);
-      setOptions(datasetUnitsResponse);
     })
   }, [isAdmin]);
 
