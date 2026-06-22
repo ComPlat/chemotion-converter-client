@@ -35,7 +35,7 @@ function ReactionVariationsRow({activeButton = null, onRemove = null, identifier
 }
 
 ReactionVariationsRow.propTypes = {
-  identifiers: PropTypes.shape({}).isRequired,
+  identifiers: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   element: PropTypes.arrayOf(PropTypes.string).isRequired,
   onEdit: PropTypes.func.isRequired,
   onRemove: PropTypes.func,
@@ -86,7 +86,7 @@ function ReactionVariationsOverView({reactionVariations, handleRemove, handleOnE
 
 ReactionVariationsOverView.propTypes = {
   reactionVariations: PropTypes.shape({
-    identifiers: PropTypes.shape({}).isRequired,
+     identifiers: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     elements: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)).isRequired
   }).isRequired,
   handleOnEdit: PropTypes.func.isRequired,

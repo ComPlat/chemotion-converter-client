@@ -2,7 +2,8 @@ const path = require("path");
 const webpack = require('webpack');
 
 module.exports = {
-  mode: "production",
+  devtool: 'eval-source-map',
+  mode: "development",
 
   entry: ["./src/scss/bundle.scss", "./src/js/bundle.js"],
 
@@ -53,7 +54,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.NODE_ENV': JSON.stringify('development'),
       "process.env.CONVERTER_APP_URL": JSON.stringify(process.env.CONVERTER_APP_URL),
     })
   ],
