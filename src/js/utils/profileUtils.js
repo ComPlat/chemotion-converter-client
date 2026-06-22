@@ -11,6 +11,8 @@ function getProfileData(profile, tableIdx = 0) {
     return null;
   }
 
+  while (profile.data.length <= tableIdx && tableIdx > 0) tableIdx--;
+
   return Array.isArray(profile.data) ? profile.data[tableIdx] ?? null : profile.data;
 }
 
@@ -39,17 +41,17 @@ function getDistInputColumns(inputTables, tableIndex) {
   const table = inputTables[tableIndex];
   const columns = table?.columns.map((tableColumn, columnIndex) => {
     return {
-        label: tableColumn.name,
-        value: {
-          columnIndex
-        }
-      };
+      label: tableColumn.name,
+      value: {
+        columnIndex
+      }
+    };
   });
 
   return [{
-      label: `Table #${tableIndex}`,
-      options: columns || []
-    }];
+    label: `Table #${tableIndex}`,
+    options: columns || []
+  }];
 }
 
 function getFileMetadataOptions(activeData) {
@@ -84,9 +86,16 @@ function getTableMetadataOptions(inputTables, inputTableIndex = -1) {
       key,
       tableIndex,
       value,
-      label: `(#${tableIndex+1}) ${key}`,
+      label: `(#${tableIndex + 1}) ${key}`,
     }));
   });
 }
 
-export { getDataset, getProfileData, getInputColumns, getDistInputColumns, getFileMetadataOptions, getTableMetadataOptions }
+export {
+  getDataset,
+  getProfileData,
+  getInputColumns,
+  getDistInputColumns,
+  getFileMetadataOptions,
+  getTableMetadataOptions
+}
