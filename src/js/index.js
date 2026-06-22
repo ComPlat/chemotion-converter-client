@@ -1,5 +1,10 @@
 import React from "react"
-import ReactDOM from "react-dom"
 import App from "./components/App.js"
+import ReactDOM from "react-dom";
 
-ReactDOM.render(<App />, document.getElementById("root"))
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const domElement = document.getElementById('root');
+  if (domElement) ReactDOM.render(<App />, domElement);
+});

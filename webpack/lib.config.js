@@ -1,39 +1,60 @@
-const webpack = require('webpack')
-const path = require('path')
+const path = require("path");
+const webpack = require('webpack');
 
 module.exports = {
-  experiments: {
-    outputModule: true,
-  },
-  entry: {
-    bundle: './src/js/bundle.js',
-  },
-  resolve: { extensions: [".js", ".jsx"] },
+  mode: "production",
+
+  entry: ["./src/scss/bundle.scss", "./src/js/bundle.js"],
+
   output: {
-    libraryTarget: 'module',
-    path: path.resolve('./dist/'),
-    publicPath: '/',
-    filename: '[name].js',
+    path: path.resolve(__dirname, '..', "dist"),
+    filename: "bundle.js",
+
+    library: {
+      type: "umd",
+    },
+
+    globalObject: "typeof self !== 'undefined' ? self : this",
+    clean: true,
   },
+
+  externals: {
+    react: { commonjs: 'react', commonjs2: 'react', amd: 'react', root: 'React' },
+    'react-dom': { commonjs: 'react-dom', commonjs2: 'react-dom', amd: 'react-dom', root: 'ReactDOM' },
+    'react-bootstrap': { commonjs: 'react-bootstrap', commonjs2: 'react-bootstrap', amd: 'react-bootstrap', root: 'ReactBootstrap' },
+    'ag-grid-community': { commonjs: 'ag-grid-community', commonjs2: 'ag-grid-community', amd: 'ag-grid-community', root: 'agGrid' },
+    'ag-grid-react': { commonjs: 'ag-grid-react', commonjs2: 'ag-grid-react', amd: 'ag-grid-react', root: 'AgGridReact' },
+  },
+
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        exclude: /(node_modules|bower_components)/,
-        loader: "babel-loader",
-        options: { presets: ["@babel/env"] }
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              "@babel/preset-env",
+              ["@babel/preset-react", { runtime: "classic" }]
+            ]
+          }
+        }
       },
+      {
+        test: /\.s?css$/,
+        use: ["style-loader", "css-loader", "sass-loader"]
+      }
     ]
   },
-  externals: {
-    react: 'react',
-    'react-bootstrap': 'react-bootstrap',
-    'ag-grid-community': 'ag-grid-community',
-    'ag-grid-react': 'ag-grid-react',
+
+  resolve: {
+    extensions: [".js", ".jsx"],
   },
   plugins: [
-    new webpack.EnvironmentPlugin({
-      'CONVERTER_APP_URL': 'http://127.0.0.1:5000'
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      "process.env.CONVERTER_APP_URL": JSON.stringify(process.env.CONVERTER_APP_URL),
     })
-  ]
-}
+  ],
+};

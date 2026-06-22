@@ -1,0 +1,247 @@
+import React from 'react';
+import AsyncSelect from 'react-select/async';
+import PropTypes from 'prop-types';
+
+
+const CHEMOTION_URL = 'https://chemotion.net/chemotion/#';
+
+const GENERIC_PREDICATE = {
+  "description": [
+    "A planned process that has the objective to produce information about a material entity (the evaluant) by examining it."
+  ],
+  "id": "obi:class:http://purl.obolibrary.org/obo/OBI_0000070",
+  "iri": "http://purl.obolibrary.org/obo/OBI_0000070",
+  "label": "assay",
+  "namespace": "http://purl.obolibrary.org/obo/",
+  "obo_id": "OBI:0000070",
+  "ontology_name": "obi",
+  "ontology_prefix": "OBI",
+  "short_form": "OBI_0000070",
+  "type": "class"
+};
+
+const GENERIC_SUBJECT_PREDICATE = {
+  "iri": `${CHEMOTION_URL}has`,
+  "namespace": `${CHEMOTION_URL}`,
+  "ontology_name": "chemotion",
+  "ontology_prefix": "CHEMOTION",
+  "short_form": "CHEMOTION_has",
+  "description": [
+    "This is a generic predicate that leaves the type of connection undefined."
+  ],
+  "id": `CHEMOTION:property:${CHEMOTION_URL}has`,
+  "label": "has",
+  "obo_id": "CHEMOTION:has",
+  "type": "property"
+};
+
+const findOntologyById = (ontologyId, ontologyList) => {
+  return ontologyList.find((o) => o.id === ontologyId);
+}
+
+const addNamespaceToOntology = (ontology) => {
+  const re = /(.+[/#])([^/#]+)/g;
+  const [_all, namespace, _term] = re.exec(ontology.iri);
+  return {
+    ...ontology,
+    namespace,
+
+  };
+}
+
+const ontologySchemaToOption = (ontologyId, ontologyList = null) => {
+  if (!ontologyId) return ontologyId;
+  let ontologyJson;
+  if (!ontologyList) {
+    ontologyJson = ontologyId;
+  } else {
+    ontologyJson = findOntologyById(ontologyId, ontologyList);
+  }
+
+  return {
+    value: ontologyJson,
+    label: ontologyJson.label
+  };
+}
+
+const createChemotionTerm = (inputValue, preferredType) => {
+  const dataset = `chemotion`;
+  const newTerm = [dataset.toUpperCase(), inputValue.split(':').at(-1)];
+  const namespace = CHEMOTION_URL;
+  const iri = `${namespace}${newTerm[1]}`;
+  const termType = preferredType ?? "property";
+  return {
+    label: `Create new: ${newTerm[1]}`,
+    value: {
+      iri,
+      namespace,
+      "ontology_name": dataset.toLowerCase(),
+      "ontology_prefix": newTerm[0],
+      "short_form": newTerm.join('_'),
+      "description": ["Local entry"],
+      "id": `${newTerm[0]}:${termType}:${iri}`,
+      "label": newTerm[1],
+      "obo_id": newTerm.join(':'),
+      "type": termType
+    }
+  }
+}
+
+const fetchProperties = async (inputValue, create = true, preferredType = null, additionalOptions = [], ontology = null) => {
+  if (!inputValue) return [];
+  inputValue = inputValue.replaceAll(':', '_');
+  try {
+    const response = await fetch(
+      `https://api.terminology.tib.eu/api/select?q=${encodeURIComponent(inputValue)}${ontology ? '&ontology=' + ontology : ''}`
+    );
+
+    if (response.status !== 200) {
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (!data.response?.docs) {
+      return null;
+    }
+
+    let result = data.response.docs.filter((item) => Boolean(item.obo_id)).map((item) => {
+      const ontolog = addNamespaceToOntology(item);
+      return ontologySchemaToOption(ontolog);
+    });
+
+    if (additionalOptions) {
+      const lInputValue = inputValue.toLocaleLowerCase().replaceAll(" ", "");
+      const filteredAddedOptions = additionalOptions.filter((x) => x.obo_id.toLocaleLowerCase().includes(lInputValue)).map((x) => ontologySchemaToOption(x));
+      result = filteredAddedOptions.concat(result);
+    }
+
+    if (create) {
+      result.unshift(createChemotionTerm(inputValue, preferredType));
+    }
+
+    return result;
+  } catch (e) {
+    return null;
+  }
+};
+
+
+const checkTIB = (setCheckResult) => {
+  return () => {
+    let isMounted = true;
+
+    const _checkTIB = async () => {
+      try {
+        const result = await fetchProperties("JUST_A_RANDOM_STRING"); // returns true or false
+        if (isMounted) {
+          setCheckResult(result !== null);
+        }
+      } catch (error) {
+        console.error("Error during check:", error);
+        if (isMounted) {
+          setCheckResult(false); // fallback
+        }
+      }
+    };
+
+    _checkTIB().then(r => null);
+    return () => {
+      isMounted = false; // cleanup to avoid state updates on unmounted component
+    };
+  }
+}
+
+function OntologyAsyncSelect({
+                               onChange,
+                               placeholder,
+                               value,
+                               create = true,
+                               isClearable = true,
+                               additionalOptions = [],
+                               preferredType = null,
+                               additionalTypeWarning = null,
+                             }) {
+  const batchStyle = {
+    color: "#fff",
+    borderRadius: "5px",
+    padding: "2px 6px",
+    fontSize: "0.7em",
+    fontWeight: "bold",
+  }
+
+  return (
+    <div>
+      <AsyncSelect
+        cacheOptions
+        defaultOptions
+        loadOptions={(a) => fetchProperties(a, create, preferredType, additionalOptions)}
+        onChange={(newValue) => {
+          onChange(newValue);
+        }}
+        placeholder={placeholder}
+        value={value}
+        isClearable={isClearable}
+        formatOptionLabel={(option) => (
+          <div style={{position: "relative", paddingRight: "40px"}}>
+            <div style={{display: "flex", flexDirection: "column"}}>
+              <strong style={{
+                maxWidth: "60%"
+              }}>{option.label}</strong>
+              <small style={{color: "#666"}}>{option.value.iri}</small>
+              <small>{option.value.description.join(' ')}</small>
+
+              <div style={{
+                position: "absolute",
+                top: "4px",
+                right: "4px",
+                maxWidth: "40%"
+              }}>
+              <span style={{
+                ...batchStyle,
+                background: "#337ab7",
+              }}>{option.value.ontology_prefix}</span>
+                <span style={{
+                  ...batchStyle,
+                  background: "#5abedb",
+                }}>{option.value.obo_id.split(':').at(-1)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      />
+      {preferredType && value && preferredType.toLowerCase() !== value.value.type.toLowerCase() && (
+        <p className="small text-danger">
+          <b>{value.label}</b> is a <b>{value.value.type}</b> but should be a <b>{preferredType}</b>
+          {additionalTypeWarning && (<><br/>{additionalTypeWarning}</>)}
+        </p>
+      )}
+    </div>
+  );
+}
+
+OntologyAsyncSelect.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+  value: PropTypes.shape({
+    value: PropTypes.object,
+    label: PropTypes.string
+  }),
+  create: PropTypes.bool,
+  isClearable: PropTypes.bool,
+  additionalOptions: PropTypes.arrayOf(PropTypes.object),
+  preferredType: PropTypes.string,
+  additionalTypeWarning: PropTypes.string
+};
+
+export {
+  fetchProperties,
+  checkTIB,
+  addNamespaceToOntology,
+  OntologyAsyncSelect,
+  ontologySchemaToOption,
+  findOntologyById,
+  createChemotionTerm,
+  GENERIC_PREDICATE,
+  GENERIC_SUBJECT_PREDICATE,
+};

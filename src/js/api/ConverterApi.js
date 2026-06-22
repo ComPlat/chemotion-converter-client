@@ -1,15 +1,50 @@
-const converter_app_url = process.env.CONVERTER_APP_URL
-
 class ConverterApi {
 
-  static fetchProfiles () {
+  constructor() {
+    throw new Error('ConverterApi is a static singleton and cannot be instantiated.');
+  }
+
+  static converterUrl = process.env.CONVERTER_APP_URL;
+
+  static setConverterUrl(url) {
+    ConverterApi.converterUrl = url;
+  }
+
+  static getConverterUrl() {
+    return ConverterApi.converterUrl;
+  }
+
+  static fetchProfiles(isAdmin) {
     const requestOptions = {
       method: 'GET'
     }
 
-    return fetch(converter_app_url + '/profiles', requestOptions)
+    return fetch(ConverterApi.getConverterUrl() + `/profiles?admin=${isAdmin ? 1 : 0}`, requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
+        if (!response.ok) {
+          throw response
+        }
+        return response.json()
+      })
+      .then(data => {
+        return data
+      })
+  }
+
+  static fetchRestoreProfiles({ hard, version, profileId }) {
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ hard })
+    }
+
+    return fetch(`${ConverterApi.getConverterUrl()}/profiles/restore/${profileId}/${version}`, requestOptions)
+      .then(response => {
+        if (!response.ok) {
+          throw response
+        }
         return response.json()
       })
       .then(data => {
@@ -27,13 +62,15 @@ class ConverterApi {
       body: data
     }
 
-    return fetch(converter_app_url + '/tables', requestOptions)
+    return fetch(ConverterApi.getConverterUrl() + '/tables', requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
+        if (!response.ok) {
+          throw response
+        }
         return response.json()
       })
       .then(data => {
-          return data
+        return data
       })
   }
 
@@ -47,7 +84,7 @@ class ConverterApi {
     }
 
     let ok
-    return fetch(converter_app_url + '/profiles', requestOptions)
+    return fetch(ConverterApi.getConverterUrl() + '/profiles', requestOptions)
       .then(response => {
         ok = response.ok
         return response.json()
@@ -56,7 +93,10 @@ class ConverterApi {
         if (ok) {
           return data
         } else {
-          throw data
+          const error = new Error('A error occurred during processing.');
+          // Attach the custom data object to the error instance
+          error.data = data;
+          throw error;
         }
       })
   }
@@ -71,7 +111,7 @@ class ConverterApi {
     }
 
     let ok
-    return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
+    return fetch(ConverterApi.getConverterUrl() + '/profiles/' + profile.id, requestOptions)
       .then(response => {
         ok = response.ok
         return response.json()
@@ -80,24 +120,29 @@ class ConverterApi {
         if (ok) {
           return data
         } else {
-          throw new Error(data)
+          const error = new Error('A error occurred during processing.');
+          // Attach the custom data object to the error instance
+          error.data = data;
+          throw error;
         }
       })
   }
 
-  static deleteProfile (profile) {
+  static deleteProfile(profile) {
     const requestOptions = {
       method: 'DELETE'
     }
 
-    return fetch(converter_app_url + '/profiles/' + profile.id, requestOptions)
+    return fetch(ConverterApi.getConverterUrl() + '/profiles/' + profile.id, requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
-          return response
+        if (!response.ok) {
+          throw response
+        }
+        return response
       })
   }
 
-  static fetchConversion(file, format) {
+  static fetchConversion(file, format, asDownload = true) {
     const data = new FormData()
     data.append('file', file)
     data.append('format', format)
@@ -108,10 +153,13 @@ class ConverterApi {
     }
 
     let fileName
-    return fetch(converter_app_url + '/conversions', requestOptions)
+    return fetch(ConverterApi.getConverterUrl() + '/conversions', requestOptions)
       .then(response => {
         if (!response.ok) {
           throw response
+        }
+        if (!asDownload) {
+          return response;
         }
         fileName = response.headers.get('content-disposition')
           .split(';')
@@ -121,6 +169,9 @@ class ConverterApi {
         return response.blob()
       })
       .then(blob => {
+        if (!asDownload) {
+          return blob;
+        }
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -133,15 +184,17 @@ class ConverterApi {
       })
   }
 
-  static fetchDatasets () {
+  static fetchDatasets() {
 
     const requestOptions = {
       method: 'GET'
     }
 
-    return fetch(converter_app_url + '/datasets', requestOptions)
+    return fetch(ConverterApi.getConverterUrl() + '/datasets', requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
+        if (!response.ok) {
+          throw response
+        }
         return response.json()
       })
       .then(data => {
@@ -149,15 +202,35 @@ class ConverterApi {
       })
   }
 
-  static fetchOptions () {
+  static fetchDatasetsUnits() {
 
     const requestOptions = {
       method: 'GET'
     }
 
-    return fetch(converter_app_url + '/options', requestOptions)
+    return fetch(ConverterApi.getConverterUrl() + '/datasets_units', requestOptions)
       .then(response => {
-        if (!response.ok) { throw response }
+        if (!response.ok) {
+          throw response
+        }
+        return response.json()
+      })
+      .then(data => {
+        return data
+      })
+  }
+
+  static fetchOptions() {
+
+    const requestOptions = {
+      method: 'GET'
+    }
+
+    return fetch(ConverterApi.getConverterUrl() + '/options', requestOptions)
+      .then(response => {
+        if (!response.ok) {
+          throw response
+        }
         return response.json()
       })
       .then(data => {

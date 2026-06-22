@@ -1,8 +1,17 @@
 $header-height: 130px; // static height, manually computed
 $break-point: 990px;
 
-.scroll {
-  @media (min-width: $break-point) {
+@media not (min-width: $break-point) {
+  body {
+    overflow: auto;
+  }
+}
+
+@media (min-width: $break-point) {
+  body {
+    overflow: hidden;
+  }
+  .scroll {
     height: calc(100vh - #{$header-height});
     overflow-y: auto;
     padding-right: 10px;

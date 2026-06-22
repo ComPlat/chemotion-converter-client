@@ -1,24 +1,36 @@
 pre {
-    background-color: rgb(249, 249, 249);
+  background-color: rgb(249, 249, 249);
+  counter-reset: line;
 
-    &:before {
-        counter-reset: listing;
+  .code-line-index {
+    display: inline-block;
+
+    width: 4em;
+    padding-right: 1em;
+    margin-right: 1em;
+
+    text-align: right;
+    border-right: 1px solid silver;
+
+    button {
+      display: inline-block;
     }
 
-    code {
-        display: block;
-        counter-increment: listing;
+    span {
+      display: inline-block;
     }
+  }
 
-    code:before {
-        content: counter(listing);
-        display: inline-block;
+  .active-header-select {
+    background-color: #0dcaf088;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
 
-        width: 4em;
-        padding-right: 1em;
-        margin-right: 1em;
 
-        text-align: right;
-        border-right: 1px solid silver;
-    }
+
+  code {
+    display: inline-block;
+  }
+
 }

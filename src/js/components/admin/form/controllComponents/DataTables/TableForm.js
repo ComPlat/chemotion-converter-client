@@ -1,0 +1,141 @@
+import React, {useMemo} from "react"
+import PropTypes from 'prop-types';
+
+import HeaderInput from '../../table/HeaderInput'
+import TableColumn from './TableColumn'
+import TableIdentifier from './TableIdentifier'
+import ExtendedHeaderInput from "../../table/ExtendedHeaderInput";
+import {Col, Form, Row} from "react-bootstrap";
+import {useAdminApp} from "../../../AppContext";
+
+
+function TableForm({
+                     table, inputTables, inputTable, inputColumns,
+                     updateTable, updateHeader,
+                     addOperation, updateOperation, updateOperationDescription, removeOperation
+                   }) {
+  const {options, inData: {getTableMetadataOptions}} = useAdminApp();
+  const creatableHeaderOptions = {"DATA TYPE": options["DATA TYPE"], XUNITS: options.XUNITS, YUNITS: options.YUNITS};
+  const tableMetadataOptions = getTableMetadataOptions(inputTable);
+  const fixedHeaderOptions = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(options).filter(
+        ([key]) => !(key in creatableHeaderOptions) && !["rdf", "VERSION", "DATA_LOOP_CLASSES"].includes(key)
+      )
+    );
+  }, [options]);
+
+  return (
+    <div>
+      <div className="fw-bold">
+        Table header
+      </div>
+
+      {Object.keys(fixedHeaderOptions).map((optionKey, index) => (
+        <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
+                     values={fixedHeaderOptions[optionKey]} updateHeader={updateHeader}/>
+      ))}
+
+      {Object.keys(creatableHeaderOptions).map((optionKey, index) => (
+        <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
+                             values={creatableHeaderOptions[optionKey]} updateHeader={updateHeader}/>
+      ))}
+
+      {(table.loopType !== 'none' && table.loopOutput === 'SINGLE FILE (NTUPLES)') && (
+        <Form.Group as={Row}>
+          <Form.Label as={Col} sm={4} column="sm">NTUPLES PAGE HEADER</Form.Label>
+          <Col sm={8}>
+            <Form.Select
+              size="sm"
+              value={table.nTuplePageHeader}
+              onChange={event => {
+                const {value} = event.target;
+                updateTable('nTuplePageHeader', value, true);
+              }}
+            >
+              <option value="___+">Incrementing Page Index</option>
+              <option value="___TABLE_NAME">Input Table Name</option>
+              <option disabled>---METADATA---</option>
+              <>
+                {[...new Set(tableMetadataOptions.map(o => o.key))].map((option, optionIndex) => (
+                  <option key={optionIndex} data-idx={optionIndex} value={option}>{option}</option>
+                ))}
+              </>
+            </Form.Select>
+          </Col>
+        </Form.Group>
+      )}
+      <div className="mt-3 fw-bold">
+        Table columns
+      </div>
+
+      {(table.header['DATA CLASS'] === 'XYDATA') ? (
+        <div>
+          <div className="mb-2">
+            Which metadata should be used for the x-values?
+          </div>
+          {['FIRSTX', 'LASTX', 'DELTAX'].map((headerKey, index) => (
+            <TableIdentifier
+              key={index}
+              index={index + 1000}
+              headerKey={headerKey}
+              table={table}
+              inputTables={inputTables}
+              updateHeader={updateHeader}
+            />
+          ))}
+        </div>
+      ) : (
+        <TableColumn
+          table={table.table}
+          label="Which column should be used as x-values?"
+          columnKey="xColumn"
+          operationsKey="xOperations"
+          inputColumns={inputColumns}
+          updateTable={updateTable}
+          addOperation={addOperation}
+          updateOperation={updateOperation}
+          updateOperationDescription={updateOperationDescription}
+          removeOperation={removeOperation}
+          tableMetadataOptions={tableMetadataOptions}
+          inputTables={inputTables}/>
+      )}
+
+      <TableColumn
+        table={table.table}
+        label="Which column should be used as y-values?"
+        columnKey="yColumn"
+        operationsKey="yOperations"
+        inputColumns={inputColumns}
+        updateTable={updateTable}
+        addOperation={addOperation}
+        updateOperation={updateOperation}
+        updateOperationDescription={updateOperationDescription}
+        removeOperation={removeOperation}
+        tableMetadataOptions={tableMetadataOptions}
+        inputTables={inputTables}
+      />
+
+      <small className="text-muted">The data you pick will determine which table columns are going to
+        converted.</small>
+    </div>
+  )
+}
+
+TableForm.propTypes = {
+  table: PropTypes.shape({
+    header: PropTypes.object,
+    table: PropTypes.object
+  }).isRequired,
+  inputTables: PropTypes.array.isRequired,
+  inputTable: PropTypes.number.isRequired,
+  inputColumns: PropTypes.array.isRequired,
+  updateTable: PropTypes.func.isRequired,
+  updateHeader: PropTypes.func.isRequired,
+  updateOperationDescription: PropTypes.func.isRequired,
+  addOperation: PropTypes.func.isRequired,
+  updateOperation: PropTypes.func.isRequired,
+  removeOperation: PropTypes.func.isRequired,
+}
+
+export default TableForm

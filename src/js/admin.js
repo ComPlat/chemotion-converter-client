@@ -1,5 +1,10 @@
 import React from "react"
-import ReactDOM from "react-dom"
 import AdminApp from "./components/admin/AdminApp.js"
+import ReactDOM from "react-dom";
 
-ReactDOM.render(<AdminApp />, document.getElementById("root"))
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const domElement = document.getElementById('root');
+  if (domElement) ReactDOM.render(<AdminApp />, domElement);
+});

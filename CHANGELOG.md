@@ -1,3 +1,37 @@
+## [0.15.0](https://github.com/ComPlat/chemotion-converter-client/compare/v0.15.0...v0.14.0)
+* feat:
+  * Input Fields for Software and devices by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/116
+* fixes:
+  * gui to slow if to many tables and add select for ntupels by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/103
+  * Configured AgGrid by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/114
+  * dropdown select default value by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/110
+* build:
+  * new devcontainer by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/112
+* chore
+  * Bump node-forge from 1.3.1 to 1.3.2 by @dependabot[bot] in https://github.com/ComPlat/chemotion-converter-client/pull/109
+  * Bump lodash from 4.17.21 to 4.17.23 by @dependabot[bot] in https://github.com/ComPlat/chemotion-converter-client/pull/119
+
+
+## [0.14.0](https://github.com/ComPlat/chemotion-converter-client/compare/v0.14.0...v0.13.0)
+
+* feat:
+  * column metadata calculation by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/81
+  * regex generator by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/100 
+  * default profiles in the git repository by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/94
+  * add disable button to profile by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/95
+
+* fixes:
+  * current loop button unflexible by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/86
+  * missing scrollbar by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/104
+  
+* chore:
+  * Bump webpack-dev-server from 4.15.2 to 5.2.1 by @dependabot[bot] in https://github.com/ComPlat/chemotion-converter-client/pull/96
+  * Bump http-proxy-middleware from 2.0.7 to 2.0.9 by @dependabot[bot] in https://github.com/ComPlat/chemotion-converter-client/pull/90
+  * Bump @babel/runtime from 7.25.6 to 7.27.0 by @dependabot[bot] in https://github.com/ComPlat/chemotion-converter-client/pull/91
+  * backport v0.13.1 update by @PiTrem in https://github.com/ComPlat/chemotion-converter-client/pull/89
+
+## [0.13.0](https://github.com/ComPlat/chemotion-converter-client/compare/v0.13.0...v0.12.0)
+
 ## [0.12.0](https://github.com/ComPlat/chemotion-converter-client/compare/v0.11.0...v0.12.0) (2024-09-25)
 
 * chore: Update to bootstrap 5.3, react-bootstrap 2.10 (#67) ([af24306](https://github.com/ComPlat/chemotion-converter-client/commit/af24306)), closes [#67](https://github.com/ComPlat/chemotion-converter-client/issues/67)
