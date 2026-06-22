@@ -4,7 +4,6 @@
   "main": "./dist/bundle.js",
   "files": [
     "dist",
-    "src",
     "public",
     "README.md"
   ],
