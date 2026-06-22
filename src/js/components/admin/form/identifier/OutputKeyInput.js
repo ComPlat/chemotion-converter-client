@@ -37,21 +37,25 @@ const FieldDescription = ({ field, layer }) => {
 
 const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
   const layer = (dataset?.layers ?? {})[identifier.outputLayer];
+  const { datasetUnits } = useAdminApp();
   const { dsOpt, currentField, value } = useMemo(() => {
+
     const fields = layer?.fields || [];
     const selectableFields = fields.reduce((acc, field) => {
       acc.push(field);
       if (field.type === 'system-defined') {
+        const units = datasetUnits[field.option_layers];
         acc.push({
           ...field,
           type: 'system-defined-unit',
           label: `${field.label}(unit)`,
-          field: `___unit___${field.field}`
+          field: `___unit___${field.field}`,
+          enum: units.unit_keys
         });
       }
       return acc;
     }, []);
-    const dsOpt = selectableFields.map((e) => ({ value: e.field, label: e.label }))
+    const dsOpt = selectableFields.map((e) => ({ value: e.field, label: e.label, enum: e?.enum || null }))
     const currentField = selectableFields.find(o => o.field === identifier.outputKey);
     const value = currentField ? { value: currentField?.field, label: currentField?.label || '' } : null;
     return { dsOpt, currentField, value };
@@ -68,7 +72,7 @@ const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
           isRtl={false}
           name="s-dataset"
           onChange={(event) =>
-            updateIdentifier(index, { outputKey: event.value })
+            updateIdentifier(index, { outputKey: event.value, outputEnum: event.enum })
           }
           options={dsOpt}
           value={value}

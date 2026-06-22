@@ -38,7 +38,11 @@ export function AdminProvider({ children, isAdmin}) {
   }
 
   const setDatasetUnits = (obj) => {
-    const a = Object.fromEntries(obj.map((x) => [x.field, {label: x.label, units: [...new Set(x.units.map((u)=> [u.label, u.key]).flat())]}]));
+    const a = Object.fromEntries(obj.map((x) => [x.field, {
+      label: x.label,
+      units: x.units.map((u)=> u.label),
+      unit_keys: x.units.map((u)=> ({key: u.key, label: u.label})),
+    }]));
     _setDatasetUnits(a);
   }
 
