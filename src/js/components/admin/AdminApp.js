@@ -36,8 +36,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
   const [identifierWarningModal, setIdentifierWarningModal] = useState(false);
   const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
-
-  const ontologyRef = React.createRef();
+  const [ontologyRef, setOntologyRef] = useState("");
 
   const setOriginProfile = (obj1) => {
     setSaveabel(false);
@@ -187,13 +186,10 @@ function AdminAppContent({ModalComponent, isAdmin}) {
 
   const processUploadedFile = (file) => {
     setIsLoading(true);
-    const ontology = ontologyRef.current.value;
-
-    return ConverterApi.fetchTables(file, ontology)
+    return ConverterApi.fetchTables(file, ontologyRef)
       .then(data => {
         if (data) {
           const uploadedProfileData = Array.isArray(data) ? data[0] : data;
-          const currentProfileData = getProfileData(profile, 0);
           let nextProfile = {};
           if (profile) {
             const fileExists = profile.data.some(item => item.metadata.file_name === uploadedProfileData?.metadata?.file_name);
@@ -264,7 +260,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
       const storedProfile = await storeProfile(true);
       let profileId;
       try {
-        const res = await (await ConverterApi.fetchConversion(selectedFile, 'metajson', false)).json();
+        const res = await (await ConverterApi.fetchConversion(selectedFile, 'metajson', false, ontologyRef)).json();
         profileId = res.profile_id;
       } catch {
       }
@@ -336,8 +332,9 @@ function AdminAppContent({ModalComponent, isAdmin}) {
           onFileChangeHandler={updateFile}
           onSubmitFileHandler={handler}
           ontologyRef={ontologyRef}
-                    errorMessage={errorMessage}
-                    error={uploadError}
+          setOtologyRef={setOntologyRef}
+          errorMessage={errorMessage}
+          error={uploadError}
           isLoading={isLoading}
           disabled={selectedFile === null}
         />
@@ -448,6 +445,8 @@ function AdminAppContent({ModalComponent, isAdmin}) {
         <FileUploadForm
           onFileChangeHandler={updateFile}
           onSubmitFileHandler={submitFileHandler}
+          ontologyRef={ontologyRef}
+          setOtologyRef={setOntologyRef}
           errorMessage={errorMessage}
           error={uploadError}
           isLoading={isLoading}
