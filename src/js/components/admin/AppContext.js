@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 
 import ConverterApi from '../../api/ConverterApi';
 import {
+  formatUnit,
   getFileMetadataOptions,
   getProfileData,
   getTableMetadataOptions
@@ -40,7 +41,7 @@ export function AdminProvider({ children, isAdmin}) {
   const setDatasetUnits = (obj) => {
     const a = Object.fromEntries(obj.map((x) => [x.field, {
       label: x.label,
-      units: x.units.map((u)=> u.label),
+      units: x.units.map((u)=> formatUnit(u.label)),
       unit_keys: x.units.map((u)=> ({key: u.key, label: u.label})),
     }]));
     _setDatasetUnits(a);

@@ -91,11 +91,31 @@ function getTableMetadataOptions(inputTables, inputTableIndex = -1) {
   });
 }
 
+function formatUnit(str) {
+  return str.replace(/<sup>(\d+)<\/sup>/g, (_, n) => {
+    const superscripts = {
+      "0": "⁰",
+      "1": "¹",
+      "2": "²",
+      "3": "³",
+      "4": "⁴",
+      "5": "⁵",
+      "6": "⁶",
+      "7": "⁷",
+      "8": "⁸",
+      "9": "⁹",
+    };
+
+    return n.split("").map(d => superscripts[d] ?? d).join("");
+  });
+}
+
 export {
   getDataset,
   getProfileData,
   getInputColumns,
   getDistInputColumns,
   getFileMetadataOptions,
-  getTableMetadataOptions
+  getTableMetadataOptions,
+  formatUnit
 }
