@@ -14,7 +14,10 @@ function TableForm({
                      updateTable, updateHeader,
                      addOperation, updateOperation, updateOperationDescription, removeOperation
                    }) {
-  const {options, inData: {getTableMetadataOptions}} = useAdminApp();
+  const {options, inData: {getTableMetadataOptions}} = useAdminApp((s) => ({
+    options: s.options,
+    inData: s.inData
+  }));
   const creatableHeaderOptions = {"DATA TYPE": options["DATA TYPE"], XUNITS: options.XUNITS, YUNITS: options.YUNITS};
   const tableMetadataOptions = getTableMetadataOptions(inputTable);
   const fixedHeaderOptions = useMemo(() => {

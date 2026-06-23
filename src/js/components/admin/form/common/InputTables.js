@@ -21,7 +21,12 @@ const inputTableShape = PropTypes.shape({
 
 
 function FileHeader({ header, tableIndex, tableIdx }) {
-  const { activeTabKey, setActiveTabKey, profile, updateProfile } = useAdminApp();
+  const { activeTabKey, setActiveTabKey, profile, updateProfile } = useAdminApp((s) => ({
+    activeTabKey: s.activeTabKey,
+    setActiveTabKey: s.setActiveTabKey,
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
   const { addIdentifier, updateRegex } = BuildIdentifierHandler(profile, updateProfile, null, tableIdx);
 
   return <FileHeaderPresenter addIdentifier={(value) => {
@@ -172,7 +177,7 @@ TabContents.propTypes = {
 
 
 function DelayedActiveInputTableInput({ activeInputTable, setActiveInputTable, delayTime = 500, asInputGroup=true }) {
-  const { inData: { activeData } } = useAdminApp();
+  const { inData: { activeData } } = useAdminApp((s) => ({ inData: s.inData }));
 
   const [localValue, setLocalValue] = useState(activeInputTable);
   const { tables } = activeData;
@@ -242,7 +247,14 @@ function InputTables({ onDeleteInputFile }) {
     activeInputTable,
     setActiveInputTable,
     inData: { activeData }
-  } = useAdminApp();
+  } = useAdminApp((s) => ({
+    profile: s.profile,
+    tableIdx: s.tableIdx,
+    setTableIdx: s.setTableIdx,
+    activeInputTable: s.activeInputTable,
+    setActiveInputTable: s.setActiveInputTable,
+    inData: s.inData
+  }));
 
   const handleSourceSelect = (selectedKey) => {
     setTableIdx(Number(selectedKey));

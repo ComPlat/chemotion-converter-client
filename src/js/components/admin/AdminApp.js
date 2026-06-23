@@ -22,7 +22,15 @@ provideGlobalGridOptions({
 
 
 function AdminAppContent({ModalComponent, isAdmin}) {
-  const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp();
+  const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp((s) => ({
+    profiles: s.profiles,
+    setProfiles: s.setProfiles,
+    profile: s.profile,
+    setProfile: s.setProfile,
+    updateProfileList: s.updateProfileList,
+    options: s.options,
+    setTableIdx: s.setTableIdx
+  }));
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
   const [originProfile, _setOriginProfile] = useState(null);

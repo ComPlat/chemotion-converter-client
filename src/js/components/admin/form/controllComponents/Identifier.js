@@ -8,7 +8,10 @@ import {useAdminApp} from "../../AppContext";
 
 
 function CheckIdentifier({dataset, tableIdx}) {
-  const {profile, updateProfile: setProfile} = useAdminApp();
+  const {profile, updateProfile: setProfile} = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
 
 
   const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);
@@ -56,7 +59,11 @@ CheckIdentifier.propTypes = {
 
 
 function MetadataIdentifier({dataset, tableIdx}) {
-  const {profile, updateProfile: setProfile, options} = useAdminApp();
+  const {profile, updateProfile: setProfile, options} = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile,
+    options: s.options
+  }));
 
 
   const ih = BuildIdentifierHandler(profile, setProfile, dataset, tableIdx);

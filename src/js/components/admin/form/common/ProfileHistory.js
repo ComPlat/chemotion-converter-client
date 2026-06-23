@@ -7,7 +7,10 @@ import {useAdminApp} from "../../AppContext";
 
 export default function ProfileHistory({}) {
 
-  const {profile, updateProfile} = useAdminApp();
+  const {profile, updateProfile} = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
 
   const [selectedVersion, setSelectedVersion] = useState(null);
   const {diff_history: versions} = profile;

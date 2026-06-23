@@ -11,7 +11,10 @@ const defaultRegex = '.+';
 const regexList = [integerRegex, floatRegex, emailRegex, defaultRegex];
 
 export default function FileHeaderPresenter({header, addIdentifier, updateRegex, tableIndex, dataIndex}) {
-  const {profile, updateProfile: setProfile} = useAdminApp();
+  const {profile, updateProfile: setProfile} = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
   const [selection, setSelection] = useState(["", ""]);
   const [selectionElement, setSelectionElement] = useState(null);
   const [menuPos, setMenuPos] = useState(null);
