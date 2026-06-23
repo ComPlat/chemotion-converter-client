@@ -1,28 +1,27 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import {Tabs, Tab, Col, Card, Form, InputGroup} from "react-bootstrap";
-import OutputTables from "./DataTables";
+import OutputTables from "./DataTables/DataTables";
 import {CheckIdentifier, MetadataIdentifier} from "./Identifier";
 import OntologyManager from "./Ontology";
+import ReactionVariations from "./ReactionVariations";
 import {getDataset} from "../../../../utils/profileUtils";
+import {useAdminApp} from "../../AppContext";
+import ProfileHistory from "../common/ProfileHistory";
 
-const profileShape = PropTypes.shape({
-  title: PropTypes.string,
-  description: PropTypes.string,
-  software: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-  devices: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-  subjectInstances: PropTypes.object,
-  subjects: PropTypes.array,
-  predicates: PropTypes.array,
-  identifiers: PropTypes.array,
-  tables: PropTypes.array,
-  ols: PropTypes.string
-});
-
-
-function ProfileBasics({profile, setProfile}) {
+function ProfileBasics() {
+  const {profile, updateProfile: setProfile} = useAdminApp();
   const [software, setSoftware] = useState(profile.software);
   const [devices, setDevices] = useState(profile.devices);
+
+  useEffect(() => {
+    setSoftware(profile.software);
+  }, [profile.software]);
+
+  useEffect(() => {
+    setDevices(profile.devices);
+  }, [profile.devices]);
+
   const onRootPropertyChange = (e) => {
     const {name, value} = e.target;
     setProfile({...profile, [name]: value});
@@ -52,6 +51,8 @@ function ProfileBasics({profile, setProfile}) {
                       value={profile.title}/>
         <Form.Text>Please add a title for this profile.</Form.Text>
       </Form.Group>
+      <p>Profile version: {profile.profile_version}</p>
+      <p>Converter version: {profile.converter_version ?? '?'}</p>
 
       <Form.Group controlId="profile-description" className="mt-3">
         <Form.Label column="lg">Description</Form.Label>
@@ -81,12 +82,8 @@ function ProfileBasics({profile, setProfile}) {
   </Card>)
 }
 
-ProfileBasics.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired
-};
-
-export default function FormNavigatorCol({profile, setProfile, options, datasets, activeTabKey, setActiveTabKey, tableIdx}) {
+export default function FormNavigatorCol({activeTabKey, setActiveTabKey}) {
+  const {profile, datasets, tableIdx} = useAdminApp();
   const dataset = getDataset(profile, datasets);
 
   return (
@@ -98,24 +95,31 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
               className="mb-3">
 
           <Tab eventKey="basics" title="Basics">
-            <ProfileBasics profile={profile} setProfile={setProfile}/>
+            <ProfileBasics/>
+            <br/>
+            <ProfileHistory />
           </Tab>
 
           <Tab eventKey="ontology" title="Ontology">
-            <OntologyManager profile={profile} setProfile={setProfile} options={options} datasets={datasets}
-                             dataset={dataset}/>
+            <OntologyManager dataset={dataset}/>
           </Tab>
 
           <Tab eventKey="identifier" title="Identifier">
-            <CheckIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
+            <CheckIdentifier dataset={dataset}
+                             tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="data" title="Data tables">
-            <OutputTables profile={profile} setProfile={setProfile} options={options} tableIdx={tableIdx}/>
+            <OutputTables tableIdx={tableIdx}/>
           </Tab>
 
           <Tab eventKey="metadata" title="Metadata">
-            <MetadataIdentifier profile={profile} setProfile={setProfile} options={options} dataset={dataset} tableIdx={tableIdx}/>
+            <MetadataIdentifier dataset={dataset}
+                                tableIdx={tableIdx}/>
+          </Tab>
+
+          <Tab eventKey="reactionVariations" title="Reaction Variations values">
+            <ReactionVariations tableIdx={tableIdx}/>
           </Tab>
         </Tabs>
       </div>
@@ -124,11 +128,6 @@ export default function FormNavigatorCol({profile, setProfile, options, datasets
 }
 
 FormNavigatorCol.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
-  options: PropTypes.object,
-  datasets: PropTypes.array,
   activeTabKey: PropTypes.string.isRequired,
-  setActiveTabKey: PropTypes.func.isRequired,
-  tableIdx: PropTypes.number.isRequired
+  setActiveTabKey: PropTypes.func.isRequired
 };

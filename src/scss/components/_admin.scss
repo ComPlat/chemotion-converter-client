@@ -26,6 +26,31 @@
 #main-form-tabs {
   position: sticky;
   top: 0;
-  z-index: 200;
+  z-index: 500;
   background-color: #fff;
+}
+
+.identifier-variation-btn {
+  min-width: stretch;
+}
+
+.identifier-variation-header {
+      text-align: center;
+    font-weight: bold;
+    background: #0dcaf0;
+    margin: 0 12px;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.variation-row-remove-btn {
+  position: absolute;
+  left: 0;
+  display: none;
+}
+
+tr:hover {
+  .variation-row-remove-btn {
+    display: inline-block;
+  }
 }

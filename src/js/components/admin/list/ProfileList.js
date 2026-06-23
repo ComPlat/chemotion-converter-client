@@ -14,7 +14,7 @@ function ProfileList({
 										 }) {
 	const sortedProfiles = profiles.sort((a, b) => a.title.localeCompare(b.title))
 
-	return (<ListGroup>
+	return (<ListGroup className="scroll">
 			{sortedProfiles.map((profile) => (
 				<ProfileListItem
 					key={profile.id}
@@ -24,6 +24,7 @@ function ProfileList({
 					description={profile.description}
 					isDisabled={profile.isDisabled ?? false}
 					isDefaultProfile={profile.isDefaultProfile}
+					profileVersion={profile.profile_version}
 					toggleDisableProfile={() => toggleDisableProfile(profile)}
 					updateProfile={() => updateProfile(profile)}
 					deleteProfile={() => deleteProfile(profile)}

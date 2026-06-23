@@ -1,43 +1,4 @@
-@use "sass:meta";
-@use "components/layout";
-
+@use "bundle";
 @import "bootstrap/dist/css/bootstrap.css";
 @import "ag-grid-community/styles/ag-grid.css";
 @import "ag-grid-community/styles/ag-theme-alpine.css";
-@include meta.load-css("components/pre");
-@include meta.load-css("components/table");
-@include meta.load-css("components/admin");
-
-#root > .container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-/* Container */
-.loop-select-container {
-  flex: 1 1 auto;
-}
-
-/* Control element */
-.loop-select_control {
-  min-height: 38px;
-}
-
-/* Target the portal wrapper */
-.loop-select-menu-portal {
-  z-index: 9999 !important;
-  position: relative; /* ensures stacking works correctly */
-}
-
-/* Target the actual menu */
-.loop-select-menu {
-  z-index: 9999 !important;
-}
-
-main {
-  flex: 1; /* takes remaining space */
-
-      overflow-x: hidden;
-    overflow-y: auto;
-}

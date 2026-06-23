@@ -13,17 +13,25 @@ const TruncatedTextWithTooltip = ({ text }) => {
     }
   }, [text]);
 
+  const content = (
+    <Col as="dt" lg={5}>
+      <div ref={textRef} className='div-nowrap'>{text}:</div>
+    </Col>
+  );
+
+  if (!isTruncated) {
+    return content;
+  }
+
   return (
     <OverlayTrigger placement="top-start"
-      overlay={isTruncated ? (
+      overlay={(
         <Tooltip id="tooltip-truncated">
           {text}
         </Tooltip>
-      ) : (<></>) }
+      )}
     >
-      <Col as="dt" lg={5}>
-        <div ref={textRef} className='div-nowrap'>{text}:</div>
-      </Col>
+      {content}
     </OverlayTrigger>
   );
 };

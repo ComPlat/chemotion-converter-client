@@ -1,27 +1,29 @@
-import React from "react"
+import React, {useMemo} from "react"
 import PropTypes from 'prop-types';
 
-import HeaderInput from './table/HeaderInput'
+import HeaderInput from '../../table/HeaderInput'
 import TableColumn from './TableColumn'
 import TableIdentifier from './TableIdentifier'
-import ExtendedHeaderInput from "./table/ExtendedHeaderInput";
+import ExtendedHeaderInput from "../../table/ExtendedHeaderInput";
 import {Col, Form, Row} from "react-bootstrap";
+import {useAdminApp} from "../../../AppContext";
 
 
 function TableForm({
-  table, inputTables, inputColumns, options,
-  updateTable, updateHeader,
-  addOperation, updateOperation, updateOperationDescription, removeOperation,
-  fileMetadataOptions, tableMetadataOptions
-}) {
-  const xy_units = {XUNITS: options.XUNITS, YUNITS: options.YUNITS}
-
-  const headerOptions = Object.keys(options).reduce(function (filtered, key) {
-    if (!(key in xy_units) && key !== 'rdf' ){
-       filtered[key] = options[key];
-    }
-    return filtered;
-  }, {});
+                     table, inputTables, inputTable, inputColumns,
+                     updateTable, updateHeader,
+                     addOperation, updateOperation, updateOperationDescription, removeOperation
+                   }) {
+  const {options, inData: {getTableMetadataOptions}} = useAdminApp();
+  const creatableHeaderOptions = {"DATA TYPE": options["DATA TYPE"], XUNITS: options.XUNITS, YUNITS: options.YUNITS};
+  const tableMetadataOptions = getTableMetadataOptions(inputTable);
+  const fixedHeaderOptions = useMemo(() => {
+    return Object.fromEntries(
+      Object.entries(options).filter(
+        ([key]) => !(key in creatableHeaderOptions) && !["rdf", "VERSION", "DATA_LOOP_CLASSES"].includes(key)
+      )
+    );
+  }, [options]);
 
   return (
     <div>
@@ -29,26 +31,26 @@ function TableForm({
         Table header
       </div>
 
-      {Object.keys(headerOptions).map((optionKey, index) => (
+      {Object.keys(fixedHeaderOptions).map((optionKey, index) => (
         <HeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
-                     values={headerOptions[optionKey]} updateHeader={updateHeader}/>
+                     values={fixedHeaderOptions[optionKey]} updateHeader={updateHeader}/>
       ))}
 
-      {Object.keys(xy_units).map((optionKey, index) => (
+      {Object.keys(creatableHeaderOptions).map((optionKey, index) => (
         <ExtendedHeaderInput key={index} optionKey={optionKey} value={table.header[optionKey]}
-                             values={xy_units[optionKey]} updateHeader={updateHeader}/>
+                             values={creatableHeaderOptions[optionKey]} updateHeader={updateHeader}/>
       ))}
 
-      {(table.header['DATA CLASS'] === 'NTUPLES') && (
+      {(table.loopType !== 'none' && table.loopOutput === 'SINGLE FILE (NTUPLES)') && (
         <Form.Group as={Row}>
-          <Form.Label as={Col} sm={4}>NTUPLES PAGE HEADER</Form.Label>
+          <Form.Label as={Col} sm={4} column="sm">NTUPLES PAGE HEADER</Form.Label>
           <Col sm={8}>
             <Form.Select
               size="sm"
-              value={table.header['NTUPLES_PAGE_HEADER']}
+              value={table.nTuplePageHeader}
               onChange={event => {
                 const {value} = event.target;
-                updateHeader('NTUPLES_PAGE_HEADER', value);
+                updateTable('nTuplePageHeader', value, true);
               }}
             >
               <option value="___+">Incrementing Page Index</option>
@@ -77,12 +79,9 @@ function TableForm({
               key={index}
               index={index + 1000}
               headerKey={headerKey}
-              opitions={options}
               table={table}
               inputTables={inputTables}
               updateHeader={updateHeader}
-              fileMetadataOptions={fileMetadataOptions}
-              tableMetadataOptions={tableMetadataOptions}
             />
           ))}
         </div>
@@ -99,8 +98,7 @@ function TableForm({
           updateOperationDescription={updateOperationDescription}
           removeOperation={removeOperation}
           tableMetadataOptions={tableMetadataOptions}
-          inputTables={inputTables}
-        />
+          inputTables={inputTables}/>
       )}
 
       <TableColumn
@@ -125,18 +123,19 @@ function TableForm({
 }
 
 TableForm.propTypes = {
-  table: PropTypes.object,
-  inputTables: PropTypes.array,
-  inputColumns: PropTypes.array,
-  options: PropTypes.object,
-  updateTable: PropTypes.func,
-  updateHeader: PropTypes.func,
-  updateOperationDescription: PropTypes.func,
-  addOperation: PropTypes.func,
-  updateOperation: PropTypes.func,
-  removeOperation: PropTypes.func,
-  fileMetadataOptions: PropTypes.array,
-  tableMetadataOptions: PropTypes.array
+  table: PropTypes.shape({
+    header: PropTypes.object,
+    table: PropTypes.object
+  }).isRequired,
+  inputTables: PropTypes.array.isRequired,
+  inputTable: PropTypes.number.isRequired,
+  inputColumns: PropTypes.array.isRequired,
+  updateTable: PropTypes.func.isRequired,
+  updateHeader: PropTypes.func.isRequired,
+  updateOperationDescription: PropTypes.func.isRequired,
+  addOperation: PropTypes.func.isRequired,
+  updateOperation: PropTypes.func.isRequired,
+  removeOperation: PropTypes.func.isRequired,
 }
 
 export default TableForm
