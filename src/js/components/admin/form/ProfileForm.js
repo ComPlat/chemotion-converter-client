@@ -1,43 +1,21 @@
-import React, {useCallback, useEffect, useState} from "react"
+import React, {useCallback, useEffect} from "react"
 import PropTypes from 'prop-types';
 import {Alert, Button, ButtonGroup, Row} from 'react-bootstrap';
 
 import InputTables from "./common/InputTables";
 import FormNavigatorCol from "./controllComponents/FormNavigator";
-
-const profileShape = PropTypes.shape({
-  data: PropTypes.oneOfType([
-    PropTypes.shape({
-      metadata: PropTypes.object,
-      tables: PropTypes.array
-    }),
-    PropTypes.arrayOf(PropTypes.shape({
-      metadata: PropTypes.object,
-      tables: PropTypes.array
-    }))
-  ]),
-  tables: PropTypes.arrayOf(PropTypes.shape({
-    table: PropTypes.object,
-    loopType: PropTypes.string
-  })).isRequired
-});
+import {useAdminApp} from "../AppContext";
 
 function ProfileForm({
                        status,
-                       profile,
-                       options,
-                       datasets,
-                       updateProfile,
                        storeProfile,
                        error,
                        errorMessage,
                        savable,
-                       handleShowFileUpload,
-                       tableIdx,
-                       setTableIdx
+                       handleShowFileUpload
                      }) {
 
-  const [activeTabKey, setActiveTabKey] = useState("basics");
+  const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp();
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -68,6 +46,7 @@ function ProfileForm({
     const errors = [];
 
     check_loop_fields(profile, errors);
+    clean_dead_links(profile, errors);
 
     if (errors.length > 0) {
       alert(errors.join("\n"));
@@ -87,10 +66,19 @@ function ProfileForm({
     return _onSubmit(true);
   }
 
+  const clean_dead_links = (profile) => {
+    const uuids = profile.tables.map((x) => x['uuid']);
+    profile.identifiers.forEach((i) => {
+      if (i['outputTableIndex']) {
+        i['outputTableIndex'] = i['outputTableIndex'].filter((x) => uuids.includes(x));
+      }
+    });
+
+  }
   const check_loop_fields = (profile, errors) => {
     profile.tables.forEach((t, tableIndex) => {
       t.table['loop_header']?.forEach((lh, lhIndex) => {
-        if (lh.column?.columnIndex == null) {
+        if (typeof lh.column !== 'string') {
           errors.push(`In Output Table ${tableIndex}: no column header selected for loop condition ${lhIndex}`);
         }
       });
@@ -138,20 +126,10 @@ function ProfileForm({
             <Alert variant="danger" dismissible>{errorMessage}</Alert>
           </div>
         )}
-        <InputTables setActiveTabKey={setActiveTabKey}
-                     profile={profile}
-                     setProfile={updateProfile}
-                     tableIdx={tableIdx}
-                     onDeleteInputFile={onDeleteInputFile}
-                     setTableIdx={setTableIdx}/>
+        <InputTables onDeleteInputFile={onDeleteInputFile}/>
         <FormNavigatorCol
-          profile={profile}
-          datasets={datasets}
-          options={options}
-          setProfile={updateProfile}
           activeTabKey={activeTabKey}
           setActiveTabKey={setActiveTabKey}
-          tableIdx={tableIdx}
         />
 
       </Row>
@@ -162,17 +140,11 @@ function ProfileForm({
 
 ProfileForm.propTypes = {
   status: PropTypes.string.isRequired,
-  profile: profileShape.isRequired,
-  options: PropTypes.object.isRequired,
-  datasets: PropTypes.array.isRequired,
-  updateProfile: PropTypes.func.isRequired,
   storeProfile: PropTypes.func.isRequired,
   error: PropTypes.bool.isRequired,
   errorMessage: PropTypes.string.isRequired,
   savable: PropTypes.bool.isRequired,
-  onFilehandleShowFileUploadChangeHandler: PropTypes.func.isRequired,
-  setTableIdx: PropTypes.func.isRequired,
-  tableIdx: PropTypes.number.isRequired,
+  handleShowFileUpload: PropTypes.func.isRequired,
 }
 
 export default ProfileForm

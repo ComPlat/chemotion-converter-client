@@ -1,11 +1,11 @@
-import {Button, Card, Col, Nav, NavDropdown, OverlayTrigger, Popover, Row} from "react-bootstrap";
+import { Button, Card, Col, Form, InputGroup, Nav, NavDropdown, OverlayTrigger, Popover, Row } from "react-bootstrap";
 import PropTypes from 'prop-types';
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import FileHeaderPresenter from "../HeaderPresenter";
-import {AgGridReact} from "ag-grid-react";
+import { AgGridReact } from "ag-grid-react";
 import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip";
-import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
-import {getProfileData} from "../../../../utils/profileUtils";
+import { BuildIdentifierHandler } from "../../../../utils/identifierUtils";
+import { useAdminApp } from "../../AppContext";
 
 const columnShape = PropTypes.shape({
   key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -19,31 +19,22 @@ const inputTableShape = PropTypes.shape({
   columns: PropTypes.arrayOf(columnShape)
 });
 
-const profileDataShape = PropTypes.shape({
-  metadata: PropTypes.object,
-  tables: PropTypes.arrayOf(inputTableShape)
-});
 
-const profileShape = PropTypes.shape({
-  data: PropTypes.oneOfType([
-    profileDataShape,
-    PropTypes.arrayOf(profileDataShape)
-  ])
-});
+function FileHeader({ header, tableIndex, tableIdx }) {
+  const { activeTabKey, setActiveTabKey, profile, updateProfile } = useAdminApp();
+  const { addIdentifier, updateRegex } = BuildIdentifierHandler(profile, updateProfile, null, tableIdx);
 
-function FileHeader({setActiveTabKey, header, tableIndex, profile, setProfile, tableIdx}) {
-  const {addIdentifier, updateRegex} = BuildIdentifierHandler(profile, setProfile, null, tableIdx);
   return <FileHeaderPresenter addIdentifier={(value) => {
     setActiveTabKey('metadata');
-    addIdentifier('tableHeader', true, {match: "regex", value, tableIndex})
+    addIdentifier('tableHeader', true, { match: "regex", value, tableIndex })
   }} header={header} updateRegex={(value) => {
-    return updateRegex({lineNumber: null, tableIndex, value, match: 'regex'});
-  }} profile={profile} setProfile={setProfile} tableIndex={tableIndex}
+    return updateRegex({ type: 'tableHeader', tableIndex, value, match: 'regex' });
+  }} tableIndex={tableIndex}
                               dataIndex={tableIdx}
   ></FileHeaderPresenter>
 }
 
-function DataGrid({table}) {
+function DataGrid({ table }) {
   const columnDefs = table.columns.map(column => ({
     field: column.key,
     headerName: column.name
@@ -66,7 +57,6 @@ function DataGrid({table}) {
   return (
     <div className="ag-theme-alpine">
       <AgGridReact
-        enableColResize
         columnDefs={columnDefs}
         rowData={rowData}
         defaultColDef={defaultColDef}
@@ -79,11 +69,8 @@ function DataGrid({table}) {
 }
 
 FileHeader.propTypes = {
-  setActiveTabKey: PropTypes.func.isRequired,
   header: PropTypes.arrayOf(PropTypes.string),
   tableIndex: PropTypes.number.isRequired,
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
   tableIdx: PropTypes.number.isRequired
 };
 
@@ -92,7 +79,7 @@ DataGrid.propTypes = {
 };
 
 
-function Metadata({metadata}) {
+function Metadata({ metadata }) {
   return (
     <Card>
       <Card.Body>
@@ -113,7 +100,7 @@ Metadata.propTypes = {
   metadata: PropTypes.object.isRequired
 };
 
-function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeKey, tableIdx}) {
+function TabContents({ activeTable, activeKey, tableIdx }) {
   return (
     <div className="mt-3">
       {activeTable && (
@@ -160,8 +147,7 @@ function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeK
                     </span>
                 </OverlayTrigger>
               </h4>
-              <FileHeader setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile}
-                          header={activeTable.header} tableIndex={activeKey} tableIdx={tableIdx}></FileHeader>
+              <FileHeader header={activeTable.header} tableIndex={activeKey} tableIdx={tableIdx}></FileHeader>
             </div>
           )}
 
@@ -179,33 +165,88 @@ function TabContents({setActiveTabKey, profile, setProfile, activeTable, activeK
 }
 
 TabContents.propTypes = {
-  setActiveTabKey: PropTypes.func.isRequired,
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
   activeTable: inputTableShape,
   activeKey: PropTypes.number.isRequired,
   tableIdx: PropTypes.number.isRequired
 };
 
-function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableIdx, onDeleteInputFile}) {
-  const profileData = getProfileData(profile, tableIdx);
 
-  const handleSelect = (selectedKey) => {
-    setActiveKey(Number(selectedKey));
-  };
+function DelayedActiveInputTableInput({ activeInputTable, setActiveInputTable, delayTime = 500, asInputGroup=true }) {
+  const { inData: { activeData } } = useAdminApp();
+
+  const [localValue, setLocalValue] = useState(activeInputTable);
+  const { tables } = activeData;
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localValue < 0) {
+        setLocalValue(0);
+        return;
+      }
+      if (localValue >= tables.length) {
+        setLocalValue(tables.length - 1);
+        return;
+      }
+      setActiveInputTable(localValue);
+    }, delayTime);
+
+    return () => clearTimeout(timeout);
+  }, [localValue]);
+  if (!activeData) return;
+
+  const form_control = (<Form.Control
+    style={{ minWidth: '30%' }}
+    type="number"
+    min={1}
+    max={tables.length}
+    value={localValue + 1}
+    onChange={(e) => setLocalValue(Number(e.target.value - 1))}
+  />);
+  const labelText = `Select input table: (1-${tables.length})`;
+
+  if (!asInputGroup) {
+    return (<Form.Group style={{ zIndex: 200 }}>
+      <Form.Label column="sm">{labelText}</Form.Label>
+      {form_control}
+    </Form.Group>);
+  }
+
+  return (<Form.Group className="mb-3">
+      <InputGroup>
+        <InputGroup.Text>{labelText}</InputGroup.Text>
+
+        {form_control}
+      </InputGroup>
+    </Form.Group>
+  )
+}
+
+
+DelayedActiveInputTableInput.propTypes = {
+  activeInputTable: PropTypes.number.isRequired,
+  delayTime: PropTypes.number,
+  setActiveInputTable: PropTypes.func.isRequired,
+  asInputGroup: PropTypes.bool
+}
+
+DelayedActiveInputTableInput.defaultProps = {
+  asInputGroup: true,
+  delayTime: 500
+}
+
+function InputTables({ onDeleteInputFile }) {
+  const {
+    profile,
+    tableIdx,
+    setTableIdx,
+    activeInputTable,
+    setActiveInputTable,
+    inData: { activeData }
+  } = useAdminApp();
 
   const handleSourceSelect = (selectedKey) => {
     setTableIdx(Number(selectedKey));
   };
-
-  const tabs = ((profileData?.tables ?? []).map((table, idx) => (
-    <NavDropdown.Item eventKey={idx} key={idx}>
-      {`Input table # ${idx}`}
-    </NavDropdown.Item>
-  )));
-
-  // state
-  const [activeKey, setActiveKey] = useState(0);
 
   useEffect(() => {
     if (Array.isArray(profile.data) && tableIdx >= profile.data.length) {
@@ -219,18 +260,18 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
   }, [profile.data, setTableIdx, tableIdx]);
 
   useEffect(() => {
-    if (!profileData?.tables?.length) {
-      setActiveKey(0);
+    if (!activeData?.tables?.length) {
+      setActiveInputTable(0);
       return;
     }
 
-    if (activeKey >= profileData.tables.length) {
-      setActiveKey(0);
+    if (activeInputTable >= activeData.tables.length) {
+      setActiveInputTable(0);
     }
-  }, [activeKey, profileData]);
+  }, [activeInputTable, activeData]);
 
   return (<Col md={7}>
-    {profileData
+    {activeData
       ? (
         <div className="scroll">
           <h4>Input file metadata</h4>
@@ -246,7 +287,7 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
                 {profile.data.map((dataEntry, idx) => (
                   <NavDropdown.Item eventKey={idx} key={idx}
                                     className="d-flex justify-content-between align-items-center">
-                    <span>{profile.data[idx].metadata.file_name}</span>
+                    <span>{dataEntry.metadata.file_name}</span>
 
                     <Button
                       variant="danger"
@@ -265,20 +306,12 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
               </NavDropdown>
             </Nav>
           )}
-          {Object.keys(profileData.metadata).length > 0 && (<Metadata metadata={profileData.metadata}></Metadata>)}
+          {Object.keys(activeData.metadata).length > 0 && (<Metadata metadata={activeData.metadata}></Metadata>)}
           <h4 className="mt-3">Input tables</h4>
-          <Nav
-            variant="tabs"
-            activeKey={activeKey}
-            onSelect={handleSelect}
-            id="nav-tab-example"
-          >
-            <NavDropdown title={`Input table # ${activeKey}`} id="nav-dropdown">
-              {tabs}
-            </NavDropdown>
-          </Nav>
-          <TabContents setActiveTabKey={setActiveTabKey} profile={profile} setProfile={setProfile}
-                       activeTable={profileData.tables[activeKey]} activeKey={activeKey}
+
+          <DelayedActiveInputTableInput activeInputTable={activeInputTable}
+                                        setActiveInputTable={setActiveInputTable}/>
+          <TabContents activeTable={activeData.tables[activeInputTable]} activeKey={activeInputTable}
                        tableIdx={tableIdx}></TabContents>
         </div>
       ) : (
@@ -290,12 +323,8 @@ function InputTables({profile, setProfile, setActiveTabKey, tableIdx, setTableId
 }
 
 InputTables.propTypes = {
-  profile: profileShape.isRequired,
-  setProfile: PropTypes.func.isRequired,
-  setActiveTabKey: PropTypes.func.isRequired,
-  tableIdx: PropTypes.number.isRequired,
-  setTableIdx: PropTypes.func.isRequired,
   onDeleteInputFile: PropTypes.func.isRequired
 }
 
 export default InputTables
+export { DelayedActiveInputTableInput }

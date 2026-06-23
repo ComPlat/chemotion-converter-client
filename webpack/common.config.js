@@ -69,7 +69,7 @@ module.exports = {
       ]
     }),
     new webpack.EnvironmentPlugin({
-      'CONVERTER_APP_URL': 'http://127.0.0.1:5000'
+      'CONVERTER_APP_URL': 'http://127.0.0.1:5000',
     })
   ]
 }

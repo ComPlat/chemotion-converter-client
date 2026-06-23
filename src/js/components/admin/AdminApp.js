@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Breadcrumb, Button, Col, Container, Modal, Row} from 'react-bootstrap';
 
 import ConverterApi from '../../api/ConverterApi';
@@ -9,6 +9,9 @@ import FileUploadForm from './upload/FileUploadForm';
 import {AllCommunityModule, ModuleRegistry, provideGlobalGridOptions} from 'ag-grid-community';
 import {getProfileData} from "../../utils/profileUtils";
 import {GENERIC_PREDICATE} from "./form/common/TibFetchService";
+import {AdminProvider, useAdminApp} from "./AppContext";
+import PropTypes from "prop-types";
+import AppModal from "../../utils/modalWrapper";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -18,14 +21,12 @@ provideGlobalGridOptions({
 });
 
 
-function AdminApp() {
+function AdminAppContent({ModalComponent, isAdmin}) {
+  const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp();
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
-  const [profiles, setProfiles] = useState([]);
-  const [options, setOptions] = useState([]);
-  const [datasets, setDatasets] = useState([]);
-  const [profile, setProfile] = useState(null);
-  const [originProfile, setOriginProfile] = useState(null);
+  const [originProfile, _setOriginProfile] = useState(null);
+  const [saveabel, setSaveabel] = useState(false);
   const [error, setError] = useState(false);
   const [uploadError, setUploadError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -35,28 +36,14 @@ function AdminApp() {
   const [identifierWarningModal, setIdentifierWarningModal] = useState(false);
   const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
-  const [tableIdx, setTableIdx] = useState(0);
 
-  useEffect(() => {
-    Promise.all([
-      ConverterApi.fetchProfiles(),
-      ConverterApi.fetchDatasets(),
-      ConverterApi.fetchOptions()
-    ]).then(responses => {
-      const [profilesResponse, datasetsResponse, optionsResponse] = responses
-      setProfiles(profilesResponse);
-      setDatasets(datasetsResponse);
-      setOptions(optionsResponse);
-    })
-  }, []);
-
-  const updateProfileList = (profile) => {
-    setProfiles(prevProfiles => {
-      const updatedProfiles = [...prevProfiles];
-      const index = updatedProfiles.findIndex(p => (p.id === profile.id))
-      updatedProfiles[index] = profile
-      return updatedProfiles;
-    });
+  const setOriginProfile = (obj1) => {
+    setSaveabel(false);
+    if (obj1) {
+      _setOriginProfile(JSON.stringify(obj1));
+    } else {
+      _setOriginProfile(null);
+    }
   }
 
   const showListView = () => {
@@ -95,13 +82,6 @@ function AdminApp() {
   const hideDeleteModal = () => {
     setDeleteModal(false);
     setProfile(null);
-  };
-
-  const updateProfile = (nextProfile, {updateList = false} = {}) => {
-    setProfile({...nextProfile});
-    if (updateList) {
-      updateProfileList(nextProfile);
-    }
   };
 
   const createProfile = (nextProfile, silent = false) => {
@@ -162,12 +142,6 @@ function AdminApp() {
       return;
     }
 
-    if (Array.isArray(profile.identifiers)) {
-      profile.identifiers.forEach(identifier => {
-        delete identifier.show;
-      });
-    }
-
     if (status === 'create') {
       return createProfile(profile, silent);
     } else if (status === 'update') {
@@ -199,7 +173,7 @@ function AdminApp() {
 
   const deleteProfile = () => {
     ConverterApi.deleteProfile(profile)
-      .then(() => ConverterApi.fetchProfiles())
+      .then(() => ConverterApi.fetchProfiles(isAdmin))
       .then((profilesResponse) => {
         hideDeleteModal();
         setStatus('list');
@@ -231,6 +205,7 @@ function AdminApp() {
               ...profile,
               data: [...profile.data, data]
             };
+            setProfile(nextProfile);
             setTableIdx(nextProfile.data.length - 1);
             setStatus('update');
           } else {
@@ -250,12 +225,14 @@ function AdminApp() {
               objects: [], datatypes: [],
               converter_version: options?.VERSION ?? '0.0',
               subjectInstances: {},
-              rootOntology: GENERIC_PREDICATE
+              rootOntology: GENERIC_PREDICATE,
+              reactionVariations: {elements: [], identifiers: []}
             }
             setStatus('create');
+            setProfile(nextProfile);
           }
 
-          setProfile(nextProfile);
+
           setSelectedFile(null);
           setIsLoading(false);
           setUploadError(false);
@@ -320,8 +297,8 @@ function AdminApp() {
     }
 
     const reader = new FileReader()
-    reader.readAsText(selectedFile)
-    reader.onload = handleLoad
+    reader.readAsText(selectedFile);
+    reader.onload = handleLoad;
   };
 
   const handleCloseFileUpload = () => setShowFileUpload(false);
@@ -333,12 +310,16 @@ function AdminApp() {
     }
   }
 
+  if (!saveabel && profile && JSON.stringify(profile) !== originProfile) {
+    setSaveabel(true);
+  }
+
   const dispatchView = () => {
     if (status === 'list') {
       return (
         <ProfileList
           profiles={profiles}
-          isAdmin
+          isAdmin={isAdmin}
           updateProfile={showUpdateView}
           deleteProfile={showDeleteModal}
           downloadProfile={downloadProfile}
@@ -361,21 +342,15 @@ function AdminApp() {
       return (
         <ProfileForm
           status={status}
-          profile={profile}
-          options={options}
-          datasets={datasets}
           errorMessage={errorMessage}
-          savable={profile !== originProfile}
+          savable={saveabel}
           error={error}
-          updateProfile={updateProfile}
           storeProfile={storeProfile}
-          handleShowFileUpload={handleShowFileUpload}
-          tableIdx={tableIdx}
-          setTableIdx={setTableIdx}
-        />
+          handleShowFileUpload={handleShowFileUpload}/>
       )
     }
   }
+
 
   return (
     <Container fluid={['create', 'update'].includes(status)}>
@@ -413,10 +388,10 @@ function AdminApp() {
 
         {status === "list" &&
           <Col md={4} className="d-flex justify-content-end gap-2">
-            <Button variant="success" onClick={showImportView}>
+            <Button disabled={!isAdmin} variant="success" onClick={showImportView}>
               Import profile
             </Button>
-            <Button variant="primary" onClick={showCreateView}>
+            <Button disabled={!isAdmin} variant="primary" onClick={showCreateView}>
               Create new profile
             </Button>
           </Col>
@@ -427,57 +402,85 @@ function AdminApp() {
         {dispatchView()}
       </main>
 
-      <Modal show={createdModal}>
-        <Modal.Header>
-          <Modal.Title>Profile successfully created!</Modal.Title>
-        </Modal.Header>
+      <ModalComponent
+        show={createdModal}
+        onHide={hideCreatedModal}
+        title="Profile successfully created!"
+        showFooter
+        closeLabel="Close"
+      >
+        Your converter profile has been created successfully.
+      </ModalComponent>
 
-        <Modal.Footer>
-          <Button variant="primary" onClick={hideCreatedModal}>Great!</Button>
-        </Modal.Footer>
-      </Modal>
+      <ModalComponent
+        show={deleteModal}
+        onHide={hideDeleteModal}
+        title="Do you really want to delete this profile?"
+        closeLabel="Cancel"
+        primaryActionLabel="Delete profile"
+        onPrimaryAction={deleteProfile}
+      >
+        This action will permanently remove the selected converter profile.
+      </ModalComponent>
 
-      <Modal show={deleteModal}>
-        <Modal.Header>
-          <Modal.Title>Do you really want to delete this profile?</Modal.Title>
-        </Modal.Header>
-        <Modal.Footer>
-          <Button variant="default" onClick={hideDeleteModal}>Cancel</Button>
-          <Button variant="danger" onClick={deleteProfile}>Delete profile</Button>
-        </Modal.Footer>
-      </Modal>
+      <ModalComponent
+        show={identifierWarningModal}
+        onHide={cancelIdentifierWarning}
+        title="Identifier mismatch"
+        closeLabel="Cancel"
+        primaryActionLabel="Use file anyway"
+        onPrimaryAction={confirmIdentifierWarning}
+      >
+        The file was converted by a different profile. It is most likely that the identifiers do not match. Do you
+        still want to use this file?
+      </ModalComponent>
 
-      <Modal show={identifierWarningModal}>
-        <Modal.Header>
-          <Modal.Title>Identifier mismatch</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          The file was converted by a different profile. It is most likely that the identifiers do not match. Do you
-          still want to use this file?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={cancelIdentifierWarning}>Cancel</Button>
-          <Button variant="warning" onClick={confirmIdentifierWarning}>Use file anyway</Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showFileUpload} onHide={handleCloseFileUpload}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add File</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <FileUploadForm
-            onFileChangeHandler={updateFile}
-            onSubmitFileHandler={submitFileHandler}
-            errorMessage={errorMessage}
-            error={uploadError}
-            isLoading={isLoading}
-            disabled={false}
-          />
-        </Modal.Body>
-      </Modal>
+      <ModalComponent
+        show={showFileUpload}
+        onHide={handleCloseFileUpload}
+        title="Add File"
+        closeLabel="Cancel"
+      >
+        <FileUploadForm
+          onFileChangeHandler={updateFile}
+          onSubmitFileHandler={submitFileHandler}
+          errorMessage={errorMessage}
+          error={uploadError}
+          isLoading={isLoading}
+          disabled={false}
+        />
+      </ModalComponent>
     </Container>
   )
 }
+
+AdminAppContent.propTypes = {
+  ModalComponent: PropTypes.elementType.isRequired,
+  isAdmin: PropTypes.bool.isRequired,
+};
+
+function AdminApp({ModalComponent = null, converterUrl = null, isAdmin = true}) {
+  if (converterUrl) {
+     ConverterApi.setConverterUrl(converterUrl);
+  }
+
+  return (
+    <AdminProvider isAdmin={isAdmin}>
+      <AdminAppContent ModalComponent={ModalComponent ?? AppModal}  isAdmin={isAdmin}/>
+    </AdminProvider>
+  )
+}
+
+AdminApp.propTypes = {
+  ModalComponent: PropTypes.elementType,
+  converterUrl: PropTypes.string,
+  isAdmin: PropTypes.bool,
+};
+
+AdminApp.defaultProps = {
+  ModalComponent: null,
+  converterUrl: null,
+  isAdmin: true,
+};
 
 export default AdminApp
