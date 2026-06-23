@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import PropTypes from 'prop-types';
 import { Alert, Button, Form, Spinner } from 'react-bootstrap';
+import { DatasetSelect } from "../form/common/DatasetCard";
 
 function FileUploadForm({
   error,
@@ -28,10 +29,9 @@ function FileUploadForm({
         <Form.Control type="file" id="fileUpload" onChange={onFileChangeHandler} />
       </Form.Group>
 
-          <Form.Group className="mb-3" controlId="OntologyLabelGroup">
-            <Form.Label column={"lg"}>Ontology</Form.Label>
-            <Form.Control type="text" placeholder="n.d." value={ontology} onChange={(e) => setOntology(e.target.value)}/>
-          </Form.Group>
+          <DatasetSelect dataset={ontology} updateOntology={(x) => {
+            setOntology(x.obo_id)
+          }}/>
 
         <div className="d-flex justify-content-end mt-4">
         <Button

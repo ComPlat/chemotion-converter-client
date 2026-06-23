@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {Card} from "react-bootstrap";
-import DatasetCard from "../common/DatasetCard";
-import {addNamespaceToOntology, GENERIC_PREDICATE} from "../common/TibFetchService";
+import { DatasetCard } from "../common/DatasetCard";
+import {GENERIC_PREDICATE} from "../common/TibFetchService";
 import {cleanOntology} from "../../../../utils/identifierUtils";
 import OntologySubjectPredicateSelect from "../identifier/OntologySubjectPredicateSelect";
 import {useAdminApp} from "../../AppContext";
@@ -16,39 +16,11 @@ export default function OntologyManager({dataset}) {
       if (!ontology) {
         profile.ols = null;
         profile.rootOntology = GENERIC_PREDICATE;
-        setProfile(profile);
       } else {
-        profile.ols = ontology;
-        fetch(`https://www.ebi.ac.uk/ols4/api/ontologies/CHMO/terms?obo_id=${ontology}&lang=en`).then(async (res) => {
-          const {_embedded} = await res.json();
-          let {
-            iri,
-            ontology_name,
-            ontology_prefix,
-            short_form,
-            description,
-            id,
-            label,
-            obo_id,
-            type
-          } = _embedded.terms[0];
-          id = id ?? `${ontology_prefix}:properties:${iri}`;
-          type = type ?? 'class';
-          profile.rootOntology = addNamespaceToOntology({
-            iri,
-            ontology_name,
-            ontology_prefix,
-            short_form,
-            description,
-            id,
-            label,
-            obo_id,
-            type
-          });
-        }).finally(() => {
-          setProfile(profile);
-        })
+        profile.ols = ontology.obo_id;
+        profile.rootOntology = ontology;
       }
+      setProfile(profile);
     }
   }
 
@@ -75,7 +47,7 @@ export default function OntologyManager({dataset}) {
           datasetId={dataset?.name ?? 'Assay'}/>
       </Card.Body>
     </Card>
-  </>)
+  </>);
 }
 
 OntologyManager.propTypes = {
