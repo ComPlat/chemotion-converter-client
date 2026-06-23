@@ -82,11 +82,13 @@ function DatasetSelect({ dataset, updateOntology }) {
     return (
       <Form.Group>
         <Form.Label column="lg">Datasets</Form.Label>
-        <FormInput
+      <p>You can select a CHMO ontology term or enter a valid CHMO OBO ID (e.g. for "thin-layer chromatography" enter "CHMO:0001007")</p>
+        <Form.Control
+          type="text"
           isDisabled={false}
           name="dataset"
-          value={currentValue || ""}
-          onChange={(event) => updateHandler(event?.value)}
+          value={currentValue.value || currentValue || ""}
+          onChange={(event) => updateHandler(event.target.value)}
         />
       </Form.Group>
     );
