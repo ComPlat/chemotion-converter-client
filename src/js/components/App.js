@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {Alert, Button, Col, Container, Form, Row} from 'react-bootstrap';
+import {Alert, Button, Col, Container, Form, OverlayTrigger, Row, Tooltip} from 'react-bootstrap';
 
 import ConverterApi from '../api/ConverterApi'
 
@@ -63,7 +63,19 @@ function App() {
               <Button variant="primary" size="lg" onClick={onSubmitFileHandler}>Upload</Button>
             </div>
             <p className="text-center">For testing and advanced functions (like ontologies), you could also use the following command:
-                <code> curl -X POST http://localhost:5000/conversions   -u username:password   -F "file=@/path/to/your/file.xyz"   -F "format=jcampzip" -F "ontology=???" -o output.zip</code>!
+                <OverlayTrigger
+                  placement="top"
+                  overlay={
+                    <Tooltip id="curl-ontology-tooltip">
+                      The URL could be different, if front- and backend are running in productive env, eg. <code>IP:Port/api/v1/conversions</code> <br />
+                      <code>username:password</code> are ignored in dev environment. <br />
+                      Replace <code>obo:id</code> with a valid CHMO OBO ID, e.g. <code>CHMO:0001007</code> for
+                      &quot;thin-layer chromatography&quot;. The plain term name is not resolved &ndash; use the ID.
+                    </Tooltip>
+                  }
+                >
+                  <code style={{cursor: 'help'}}> curl -X POST http://localhost:5000/conversions   -u username:password   -F "file=@/path/to/your/file.xyz"   -F "format=jcampzip" -F "ontology=obo:id" -o output.zip</code>
+                </OverlayTrigger>!
               </p>
               <Form.Group controlId="format-select" className="mt-3">
               <Form.Label column="sm">Conversion format</Form.Label>

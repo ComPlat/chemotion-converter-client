@@ -221,6 +221,9 @@ function AdminAppContent({ModalComponent, isAdmin}) {
               devices: [],
               software: [],
               ontology: '',
+              // Carry the ontology chosen during upload into the profile so the
+              // Ontology tab is pre-filled. Empty selection -> null (no artefacts).
+              ols: ontologyRef || null,
               objects: [], datatypes: [],
               converter_version: options?.VERSION ?? '0.0',
               subjectInstances: {},

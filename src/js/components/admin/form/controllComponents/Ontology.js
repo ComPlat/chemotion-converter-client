@@ -32,7 +32,7 @@ export default function OntologyManager({dataset}) {
   }
 
   return (<>
-    <DatasetCard dataset={dataset} datasets={datasets} updateOntology={updateOntology}></DatasetCard>
+    <DatasetCard dataset={dataset ?? profile?.ols} datasets={datasets} updateOntology={updateOntology}></DatasetCard>
 
     <Card className="mt-3">
       <Card.Header>Subject Instances</Card.Header>

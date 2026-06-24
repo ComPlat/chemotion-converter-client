@@ -40,19 +40,55 @@ function DatasetSelect({ dataset, updateOntology }) {
   }, [checkApi]);
 
   useEffect(() => {
+    let cancelled = false;
 
-    if (typeof dataset === "string") {
-      dataset = datasets.find((ds) => ds.ols === dataset) || {
-        ols: dataset,
-        name: dataset
-      };
-    }
-    const value = dataset?.ols || dataset?.obo_id;
-    if (value === currentValue?.value) return;
-    setCurrentValue(dataset ? {
-      value,
-      label: dataset?.name || dataset.label,
-    } : '');
+    const resolveDataset = async () => {
+      let resolved = dataset;
+
+      if (typeof resolved === "string") {
+        if (!resolved) {
+          setCurrentValue('');
+          return;
+        }
+        const listed = datasets.find((ds) => ds.ols === resolved);
+        if (listed) {
+          resolved = listed;
+        } else {
+          // Already resolved to this id (e.g. right after a selection in the
+          // upload dialog): keep the current label, skip the redundant lookup.
+          if (currentValue?.value === resolved) return;
+          // Freely entered CHMO ID (not in the dataset list): resolve its
+          // term label via the OLS4 API so the field shows the translated name.
+          try {
+            const res = await fetch(`${OLS4_BASE_URL}/ontologies/CHMO/terms?obo_id=${resolved}&lang=en`);
+            if (res.ok) {
+              const { _embedded } = await res.json();
+              const term = _embedded?.terms?.[0];
+              if (term && !cancelled) {
+                setCurrentValue({ value: term.obo_id, label: term.label });
+                return;
+              }
+            }
+          } catch (e) {
+            // fall through to the raw-id fallback below
+          }
+          resolved = { ols: resolved, name: resolved };
+        }
+      }
+
+      if (cancelled) return;
+      const value = resolved?.ols || resolved?.obo_id;
+      if (value === currentValue?.value) return;
+      setCurrentValue(resolved ? {
+        value,
+        label: resolved?.name || resolved.label,
+      } : '');
+    };
+
+    resolveDataset();
+    return () => {
+      cancelled = true;
+    };
   }, [dataset, dsOpt]);
 
 
