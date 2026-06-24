@@ -1,21 +1,43 @@
-import { Card, Form } from "react-bootstrap";
+import { Card, Form, Button } from "react-bootstrap";
 import CreatableSelect from 'react-select/creatable';
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { addNamespaceToOntology } from "./TibFetchService";
-import { FormInput } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useAdminApp } from "../../AppContext";
+
+const OLS4_BASE_URL = 'https://www.ebi.ac.uk/ols4/api';
+const API_ERROR_MESSAGE = 'The EBI OLS4 API is currently not reachable. Please check your internet connection and try again later.';
 
 let timeOutHandler = null;
 
 function DatasetSelect({ dataset, updateOntology }) {
   const { datasets } = useAdminApp();
   const [currentValue, setCurrentValue] = useState('')
+  const [apiAvailable, setApiAvailable] = useState(true);
+  const [isChecking, setIsChecking] = useState(false);
   const dsOpt = useMemo(() => {
     return datasets.map(ds => {
       return { value: ds?.ols, label: ds?.name };
     });
   }, []);
+
+  // Check whether the EBI OLS4 API is reachable. Used on mount and by the retry button.
+  const checkApi = useCallback(async () => {
+    setIsChecking(true);
+    try {
+      const res = await fetch(`${OLS4_BASE_URL}/ontologies/CHMO`);
+      setApiAvailable(res.ok);
+    } catch (e) {
+      setApiAvailable(false);
+    } finally {
+      setIsChecking(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkApi();
+  }, [checkApi]);
 
   useEffect(() => {
 
@@ -35,13 +57,26 @@ function DatasetSelect({ dataset, updateOntology }) {
 
 
   const updateHandler = (ontology) => {
-    setCurrentValue({ value: ontology, label: ontology });
     if (timeOutHandler) {
       clearTimeout(timeOutHandler);
+      timeOutHandler = null;
     }
+    // Empty / cleared field: reset the value and the resulting table entry without
+    // querying the API. Otherwise a request with obo_id=undefined would return
+    // stale artefacts from previous runs.
+    if (!ontology) {
+      setCurrentValue('');
+      updateOntology(null);
+      return;
+    }
+    setCurrentValue({ value: ontology, label: ontology });
     timeOutHandler = setTimeout(() => {
       timeOutHandler = null;
-      fetch(`https://www.ebi.ac.uk/ols4/api/ontologies/CHMO/terms?obo_id=${ontology}&lang=en`).then(async (res) => {
+      fetch(`${OLS4_BASE_URL}/ontologies/CHMO/terms?obo_id=${ontology}&lang=en`).then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`EBI OLS4 API responded with status ${res.status}`);
+        }
+        setApiAvailable(true);
         const { _embedded } = await res.json();
         let {
           iri,
@@ -73,23 +108,42 @@ function DatasetSelect({ dataset, updateOntology }) {
         })
       }).catch(()=> {
         setCurrentValue('')
+        setApiAvailable(false);
       });
 
     }, 200);
   }
 
+  const retryButton = (
+    <Button
+      variant="outline-secondary"
+      onClick={checkApi}
+      disabled={isChecking}
+      title="Retry connection to the EBI OLS4 API"
+    >
+      <RefreshCw size={16} />
+    </Button>
+  );
+
   if (!datasets || datasets.length === 0) {
     return (
       <Form.Group>
         <Form.Label column="lg">Datasets</Form.Label>
-      <p>You can select a CHMO ontology term or enter a valid CHMO OBO ID (e.g. for "thin-layer chromatography" enter "CHMO:0001007")</p>
-        <Form.Control
-          type="text"
-          isDisabled={false}
-          name="dataset"
-          value={currentValue.value || currentValue || ""}
-          onChange={(event) => updateHandler(event.target.value)}
-        />
+      <p>You can select a CHMO ontology term or enter a valid CHMO OBO ID (e.g. for "thin-layer chromatography" enter "CHMO:0001007") &rarr; requires online connection to the EBI OLS4 API.</p>
+        <div className="d-flex align-items-center" style={{ gap: '0.5rem' }}>
+          <Form.Control
+            type="text"
+            disabled={!apiAvailable}
+            name="dataset"
+            style={{ flex: '1 1 auto' }}
+            value={currentValue.value || currentValue || ""}
+            onChange={(event) => updateHandler(event.target.value)}
+          />
+          {retryButton}
+        </div>
+        {!apiAvailable && (
+          <p className="small text-danger mt-1">{API_ERROR_MESSAGE}</p>
+        )}
       </Form.Group>
     );
   }
@@ -98,17 +152,25 @@ function DatasetSelect({ dataset, updateOntology }) {
   return (
     <Form.Group>
       <Form.Label column="lg">Datasets</Form.Label>
-      <p>You can select a CHMO ontology term or enter a valid CHMO OBO ID (e.g. for "thin-layer chromatography" enter "CHMO:0001007")</p>
-      <CreatableSelect
-        isDisabled={false}
-        isLoading={false}
-        isClearable={true}
-        isRtl={false}
-        name="dataset"
-        options={dsOpt}
-        value={currentValue || ""}
-        onChange={(event) => updateHandler(event?.value)}
-      />
+      <p>You can select a CHMO ontology term or enter a valid CHMO OBO ID (e.g. for "thin-layer chromatography" enter "CHMO:0001007") &rarr; requires online connection to the EBI OLS4 API.</p>
+      <div className="d-flex align-items-center" style={{ gap: '0.5rem' }}>
+        <div style={{ flex: '1 1 auto' }}>
+          <CreatableSelect
+            isDisabled={!apiAvailable}
+            isLoading={false}
+            isClearable={true}
+            isRtl={false}
+            name="dataset"
+            options={dsOpt}
+            value={currentValue || ""}
+            onChange={(event) => updateHandler(event?.value)}
+          />
+        </div>
+        {retryButton}
+      </div>
+      {!apiAvailable && (
+        <p className="small text-danger mt-1">{API_ERROR_MESSAGE}</p>
+      )}
     </Form.Group>
   );
 }

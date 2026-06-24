@@ -30,7 +30,7 @@ function FileUploadForm({
       </Form.Group>
 
           <DatasetSelect dataset={ontology} updateOntology={(x) => {
-            setOntology(x.obo_id)
+            setOntology(x?.obo_id ?? "")
           }}/>
 
         <div className="d-flex justify-content-end mt-4">
