@@ -15,7 +15,12 @@ function ProfileForm({
                        handleShowFileUpload
                      }) {
 
-  const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp();
+  const {activeTabKey, setActiveTabKey, profile, updateProfile} = useAdminApp((s) => ({
+    activeTabKey: s.activeTabKey,
+    setActiveTabKey: s.setActiveTabKey,
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {

@@ -8,7 +8,9 @@ import {useAdminApp} from "../../AppContext";
 
 const KeySelect = ({index, identifier, updateIdentifier}) => {
   const [inputTableIndex, setInputTableIndex] = useState(identifier.tableIndex);
-  const {inData: {fileMetadataOptions, getTableMetadataOptions}} = useAdminApp();
+  const {inData: {fileMetadataOptions, getTableMetadataOptions}} = useAdminApp((s) => ({
+    inData: s.inData
+  }));
 
   const [selectOptions, needsTableSelect] = useMemo(() => {
     if (identifier.type === 'fileMetadata') {

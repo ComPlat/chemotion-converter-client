@@ -16,7 +16,11 @@ export default function DataTableCardContent({
                                                tableIdx
                                              }) {
 
-  const { profile, updateProfile: setProfile, inData: { getTableMetadataOptions } } = useAdminApp();
+  const { profile, updateProfile: setProfile, inData: { getTableMetadataOptions } } = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile,
+    inData: s.inData
+  }));
 
   const inputTable = table.inputTableIndex ?? 0;
   const setInputTable = useCallback((value) => {
