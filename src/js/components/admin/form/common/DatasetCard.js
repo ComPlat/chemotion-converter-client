@@ -16,6 +16,9 @@ function DatasetSelect({ dataset, updateOntology }) {
   const [currentValue, setCurrentValue] = useState('')
   const [apiAvailable, setApiAvailable] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
+  // Set when the API is reachable but the entered ID has no matching CHMO term
+  // (an invalid input, as opposed to an API outage tracked by apiAvailable).
+  const [termError, setTermError] = useState(null);
   const dsOpt = useMemo(() => {
     return datasets.map(ds => {
       return { value: ds?.ols, label: ds?.name };
@@ -101,6 +104,7 @@ function DatasetSelect({ dataset, updateOntology }) {
     // querying the API. Otherwise a request with obo_id=undefined would return
     // stale artefacts from previous runs.
     if (!ontology) {
+      setTermError(null);
       setCurrentValue('');
       updateOntology(null);
       return;
@@ -109,11 +113,32 @@ function DatasetSelect({ dataset, updateOntology }) {
     timeOutHandler = setTimeout(() => {
       timeOutHandler = null;
       fetch(`${OLS4_BASE_URL}/ontologies/CHMO/terms?obo_id=${ontology}&lang=en`).then(async (res) => {
+        const notFoundMessage = `No CHMO term found for "${ontology}". Please enter a valid CHMO OBO ID, e.g. "CHMO:0001007".`;
+        // 404 = the term does not exist: invalid input, but the API IS reachable.
+        // OLS4 returns 404 (not 200 with an empty body) for unknown obo_ids.
+        if (res.status === 404) {
+          setApiAvailable(true);
+          setTermError(notFoundMessage);
+          setCurrentValue('');
+          updateOntology(null);
+          return;
+        }
+        // Any other non-OK status (5xx, ...) is a real server-side failure.
         if (!res.ok) {
           throw new Error(`EBI OLS4 API responded with status ${res.status}`);
         }
+        // A successful (2xx) response means the API is reachable.
         setApiAvailable(true);
         const { _embedded } = await res.json();
+        const term = _embedded?.terms?.[0];
+        if (!term) {
+          // Reachable, 200, but no matching term -> treat as invalid input.
+          setTermError(notFoundMessage);
+          setCurrentValue('');
+          updateOntology(null);
+          return;
+        }
+        setTermError(null);
         let {
           iri,
           ontology_name,
@@ -124,7 +149,7 @@ function DatasetSelect({ dataset, updateOntology }) {
           label,
           obo_id,
           type
-        } = _embedded.terms[0];
+        } = term;
         id = id ?? `${ontology_prefix}:properties:${iri}`;
         type = type ?? 'class';
         updateOntology(addNamespaceToOntology({
@@ -143,6 +168,7 @@ function DatasetSelect({ dataset, updateOntology }) {
           label
         })
       }).catch(()=> {
+        // Network error or non-OK status: the API is unreachable.
         setCurrentValue('')
         setApiAvailable(false);
       });
@@ -180,6 +206,9 @@ function DatasetSelect({ dataset, updateOntology }) {
         {!apiAvailable && (
           <p className="small text-danger mt-1">{API_ERROR_MESSAGE}</p>
         )}
+        {apiAvailable && termError && (
+          <p className="small text-danger mt-1">{termError}</p>
+        )}
       </Form.Group>
     );
   }
@@ -206,6 +235,9 @@ function DatasetSelect({ dataset, updateOntology }) {
       </div>
       {!apiAvailable && (
         <p className="small text-danger mt-1">{API_ERROR_MESSAGE}</p>
+      )}
+      {apiAvailable && termError && (
+        <p className="small text-danger mt-1">{termError}</p>
       )}
     </Form.Group>
   );

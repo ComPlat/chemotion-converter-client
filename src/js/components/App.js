@@ -70,7 +70,9 @@ function App() {
                       The URL could be different, if front- and backend are running in productive env, eg. <code>IP:Port/api/v1/conversions</code> <br />
                       <code>username:password</code> are ignored in dev environment. <br />
                       Replace <code>obo:id</code> with a valid CHMO OBO ID, e.g. <code>CHMO:0001007</code> for
-                      &quot;thin-layer chromatography&quot;. The plain term name is not resolved &ndash; use the ID.
+                      &quot;thin-layer chromatography&quot;. The plain term name is not resolved &ndash; use the ID. <br />
+                      <code>output.zip</code> is the name of the output file. <br />
+                      Advanced ERROR messages could be given by <code>--fail-with-body -o output.zip || cat output.zip</code> instead of <code>-o output.zip</code>
                     </Tooltip>
                   }
                 >
