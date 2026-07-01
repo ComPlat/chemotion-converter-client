@@ -5,7 +5,9 @@ import Select from 'react-select';
 import { useAdminApp } from "../../AppContext";
 
 const FieldDescription = ({ field, layer }) => {
-  const { datasetUnits } = useAdminApp();
+  const { datasetUnits } = useAdminApp((s) => ({
+    datasetUnits: s.datasetUnits
+  }));
 
   if (!field) {
     return null;
@@ -37,7 +39,9 @@ const FieldDescription = ({ field, layer }) => {
 
 const OutputKeyInput = ({ index, identifier, updateIdentifier, dataset }) => {
   const layer = (dataset?.layers ?? {})[identifier.outputLayer];
-  const { datasetUnits } = useAdminApp();
+  const { datasetUnits } = useAdminApp((s) => ({
+    datasetUnits: s.datasetUnits
+  }));
   const { dsOpt, currentField, value } = useMemo(() => {
 
     const fields = layer?.fields || [];
