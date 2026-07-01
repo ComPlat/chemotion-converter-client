@@ -102,7 +102,10 @@ function ReactionVariationEditView({activeRow, tableIdx, activeButton, reactionV
   ];
   const activeId = activeRow[activeButton];
   const [active, setActive] = useState(tabOptions[0]);
-  const {profile, updateProfile: setProfile} = useAdminApp();
+  const {profile, updateProfile: setProfile} = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
   const [identifier, _setIdentifier] = useState(null)
 
   const setIdentifier = (identifier) => {
@@ -195,7 +198,10 @@ ReactionVariationEditView.propTypes = {
 
 
 function ReactionVariations({tableIdx}) {
-  const {profile, updateProfile: setProfile} = useAdminApp();
+  const {profile, updateProfile: setProfile} = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
   const [activeRow, setActiveRow] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
 

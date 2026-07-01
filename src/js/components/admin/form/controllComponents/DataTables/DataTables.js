@@ -11,7 +11,12 @@ import {v4 as uuidv4} from 'uuid';
 
 
 export default function OutputTables({tableIdx}) {
-  const {profile, updateProfile: setProfile, options, inData: {inputTables}} = useAdminApp();
+  const {profile, updateProfile: setProfile, options, inData: {inputTables}} = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile,
+    options: s.options,
+    inData: s.inData
+  }));
 
 
 

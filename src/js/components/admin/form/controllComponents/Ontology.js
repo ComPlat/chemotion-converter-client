@@ -9,7 +9,12 @@ import {useAdminApp} from "../../AppContext";
 
 
 export default function OntologyManager({dataset}) {
-  const {datasets, options, profile, updateProfile: setProfile} = useAdminApp();
+  const {datasets, options, profile, updateProfile: setProfile} = useAdminApp((s) => ({
+    datasets: s.datasets,
+    options: s.options,
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
 
   const updateOntology = (ontology) => {
     if (typeof profile != 'undefined' && profile !== null) {

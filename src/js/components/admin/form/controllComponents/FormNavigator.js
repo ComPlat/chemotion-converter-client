@@ -10,7 +10,10 @@ import {useAdminApp} from "../../AppContext";
 import ProfileHistory from "../common/ProfileHistory";
 
 function ProfileBasics() {
-  const {profile, updateProfile: setProfile} = useAdminApp();
+  const {profile, updateProfile: setProfile} = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile
+  }));
   const [software, setSoftware] = useState(profile.software);
   const [devices, setDevices] = useState(profile.devices);
 
@@ -83,7 +86,11 @@ function ProfileBasics() {
 }
 
 export default function FormNavigatorCol({activeTabKey, setActiveTabKey}) {
-  const {profile, datasets, tableIdx} = useAdminApp();
+  const {profile, datasets, tableIdx} = useAdminApp((s) => ({
+    profile: s.profile,
+    datasets: s.datasets,
+    tableIdx: s.tableIdx
+  }));
   const dataset = getDataset(profile, datasets);
 
   return (

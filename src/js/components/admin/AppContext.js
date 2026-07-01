@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
+import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import PropTypes from "prop-types";
 
 import ConverterApi from '../../api/ConverterApi';
 import {
@@ -7,138 +10,147 @@ import {
   getProfileData,
   getTableMetadataOptions
 } from "../../utils/profileUtils";
-import PropTypes from "prop-types";
 
-let AppContext = null;
+// Key that changes only when inData needs to be recomputed. Mirrors the
+// original useMemo dependency list of [profile?.data.length, tableIdx].
+const inDataKey = (profile, tableIdx) =>
+  `${profile ? profile.data.length : "none"}:${tableIdx}`;
 
-function getAppContext() {
-  if (!AppContext) {
-    AppContext = createContext();
+const computeInData = (profile, tableIdx) => {
+  if (!profile) {
+    return {};
   }
 
-  return AppContext;
-}
-
-export function AdminProvider({ children, isAdmin}) {
-  const [activeTabKey, setActiveTabKey] = useState('basics');
-  const [activeInputTable, setActiveInputTable] = useState(0);
-  const [profiles, _setProfiles] = useState([]);
-  const [datasets, setDatasets] = useState([]);
-  const [options, _setOptions] = useState([]);
-  const [datasetUnits, _setDatasetUnits] = useState([]);
-  const [profile, setProfile] = useState(null);
-  const [tableIdx, setTableIdx] = useState(0);
-
-
-  const setProfiles = (obj) => {
-    if (typeof obj === "object" && !Array.isArray(obj) &&  Object.hasOwn(obj, "profiles")) {
-      _setProfiles(obj.profiles);
-    } else {
-      _setProfiles(obj);
-    }
-  }
-
-  const setDatasetUnits = (obj) => {
-    const a = Object.fromEntries(obj.map((x) => [x.field, {
-      label: x.label,
-      units: x.units.map((u)=> formatUnit(u.label)),
-      unit_keys: x.units.map((u)=> ({key: u.key, label: u.label})),
-    }]));
-    _setDatasetUnits(a);
-  }
-
-
-  const setOptions = (obj) => {
-    if (typeof obj === "object" && !Array.isArray(obj) &&  Object.hasOwn(obj, "options")) {
-      _setOptions(obj.options);
-    } else {
-      _setOptions(obj);
-    }
-  }
-
-  const updateProfileList = (profile) => {
-    setProfiles(prevProfiles => {
-      const updatedProfiles = [...prevProfiles];
-      const index = updatedProfiles.findIndex(p => (p.id === profile.id))
-      updatedProfiles[index] = profile
-      return updatedProfiles;
-    });
-  }
-
-  const updateProfile = (nextProfile, { updateList = false } = {}) => {
-    setProfile({ ...nextProfile });
-    if (updateList) {
-      updateProfileList(nextProfile);
+  const activeData = getProfileData(profile, tableIdx);
+  const tableMetadataArchive = {};
+  return {
+    activeData,
+    fileMetadataOptions: getFileMetadataOptions(activeData),
+    inputTables: activeData.tables,
+    getTableMetadataOptions: (inputTable) => {
+      if (!tableMetadataArchive[inputTable]) {
+        tableMetadataArchive[inputTable] = getTableMetadataOptions(activeData?.tables, inputTable);
+      }
+      return tableMetadataArchive[inputTable];
     }
   };
+};
+
+export const useAdminStore = create((set, get) => {
+  // Recompute inData lazily, only when its dependencies actually change, so the
+  // (stable) inData reference doesn't force re-renders of components reading it.
+  const withInData = (partial) => {
+    const profile = "profile" in partial ? partial.profile : get().profile;
+    const tableIdx = "tableIdx" in partial ? partial.tableIdx : get().tableIdx;
+    const nextKey = inDataKey(profile, tableIdx);
+    if (nextKey === get()._inDataKey) {
+      return partial;
+    }
+    return { ...partial, inData: computeInData(profile, tableIdx), _inDataKey: nextKey };
+  };
+
+  return {
+    activeTabKey: 'basics',
+    activeInputTable: 0,
+    profiles: [],
+    datasets: [],
+    datasetUnits: {},
+    options: [],
+    profile: null,
+    tableIdx: 0,
+    inData: {},
+    _inDataKey: inDataKey(null, 0),
+
+    setActiveTabKey: (activeTabKey) => set({ activeTabKey }),
+    setActiveInputTable: (activeInputTable) => set({ activeInputTable }),
+    setDatasets: (datasets) => set({ datasets }),
+
+    setProfiles: (obj) => {
+      if (typeof obj === "function") {
+        set((state) => ({ profiles: obj(state.profiles) }));
+      } else if (typeof obj === "object" && !Array.isArray(obj) && Object.hasOwn(obj, "profiles")) {
+        set({ profiles: obj.profiles });
+      } else {
+        set({ profiles: obj });
+      }
+    },
+
+    setOptions: (obj) => {
+      if (typeof obj === "object" && !Array.isArray(obj) && Object.hasOwn(obj, "options")) {
+        set({ options: obj.options });
+      } else {
+        set({ options: obj });
+      }
+    },
+
+    setDatasetUnits : (obj) => {
+      const datasetUnits = Object.fromEntries(obj.map((x) => [x.field, {
+        label: x.label,
+        units: x.units.map((u)=> formatUnit(u.label)),
+        unit_keys: x.units.map((u)=> ({key: u.key, label: u.label})),
+      }]));
+      set({ datasetUnits });
+    },
+
+    setProfile: (profile) => set(withInData({ profile })),
+    setTableIdx: (tableIdx) => set(withInData({ tableIdx })),
+
+    updateProfileList: (profile) => set((state) => {
+      const updatedProfiles = [...state.profiles];
+      const index = updatedProfiles.findIndex((p) => p.id === profile.id);
+      updatedProfiles[index] = profile;
+      return { profiles: updatedProfiles };
+    }),
+
+    updateProfile: (nextProfile, { updateList = false } = {}) => {
+      set(withInData({ profile: { ...nextProfile } }));
+      if (updateList) {
+        get().updateProfileList(nextProfile);
+      }
+    },
+
+    initialize: (isAdmin) => {
+      if (!isAdmin) {
+        ConverterApi.fetchProfiles(isAdmin).then((profilesResponse) => {
+          get().setProfiles(profilesResponse);
+          set({ datasets: [], options: [] });
+        });
+        return;
+      }
+
+      Promise.all([
+        ConverterApi.fetchProfiles(isAdmin),
+        ConverterApi.fetchDatasets(),
+        ConverterApi.fetchOptions(),
+        ConverterApi.fetchDatasetsUnits()
+      ]).then((responses) => {
+        const [profilesResponse, datasetsResponse, optionsResponse, datasetUnitsResponse] = responses;
+        get().setProfiles(profilesResponse);
+        get().setDatasets(datasetsResponse);
+        get().setOptions(optionsResponse);
+        get().setDatasetUnits(datasetUnitsResponse);
+      });
+    }
+  };
+});
+
+// Backwards-compatible hook. Pass a selector to subscribe to just the slice of
+// state a component needs; the shallow comparison keeps object selectors stable
+// so a component only re-renders when its own slice changes.
+export function useAdminApp(selector) {
+  return useAdminStore(useShallow(selector ?? ((state) => state)));
+}
+
+export function AdminProvider({ children, isAdmin }) {
+  const initialize = useAdminStore((state) => state.initialize);
 
   useEffect(() => {
-    if (!isAdmin) {
-      ConverterApi.fetchProfiles(isAdmin).then((profilesResponse)=>{
-        setProfiles(profilesResponse);
-        setDatasets([]);
-        setOptions([]);
-      });
-      return;
-    }
+    initialize(isAdmin);
+  }, [isAdmin, initialize]);
 
-    Promise.all([
-      ConverterApi.fetchProfiles(isAdmin),
-      ConverterApi.fetchDatasets(),
-      ConverterApi.fetchOptions(),
-      ConverterApi.fetchDatasetsUnits()
-    ]).then(responses => {
-      const [profilesResponse,
-        datasetsResponse,
-        optionsResponse, datasetUnitsResponse] = responses
-      setProfiles(profilesResponse);
-      setDatasets(datasetsResponse);
-      setOptions(optionsResponse);
-      setDatasetUnits(datasetUnitsResponse);
-    })
-  }, [isAdmin]);
-
-  const inData = useMemo(() => {
-    if (profile) {
-      const activeData = getProfileData(profile, tableIdx);
-      const tableMetadataArchive = {}
-      return {
-        activeData,
-        fileMetadataOptions: getFileMetadataOptions(activeData),
-        inputTables: activeData.tables,
-        getTableMetadataOptions: (inputTable) => {
-          if (!tableMetadataArchive[inputTable]) {
-            tableMetadataArchive[inputTable] = getTableMetadataOptions(activeData?.tables, inputTable);
-          }
-          return tableMetadataArchive[inputTable];
-        }
-      };
-
-    }
-    return {};
-  }, [profile?.data.length, tableIdx]);
-  getAppContext();
-  return (
-    <AppContext.Provider value={{
-      activeTabKey, setActiveTabKey,
-      profiles, setProfiles,
-      datasets, setDatasets,
-      options, setOptions,
-      profile, setProfile,
-      updateProfile, updateProfileList,
-      tableIdx, setTableIdx,
-      activeInputTable, setActiveInputTable,
-      datasetUnits, inData
-    }}>
-      {children}
-    </AppContext.Provider>
-  );
+  return children;
 }
 
 AdminProvider.propTypes = {
   isAdmin: PropTypes.bool.isRequired
-}
-
-export function useAdminApp() {
-  return useContext(getAppContext());
 }

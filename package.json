@@ -28,7 +28,8 @@
     "lucide-react": "^1.14.0",
     "prop-types": "^15.8.1",
     "react-select": "^5.10.2",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "zustand": "^4.5.7"
   },
   "peerDependencies": {
     "ag-grid-community": "~33.0",

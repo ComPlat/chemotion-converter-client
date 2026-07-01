@@ -53,7 +53,12 @@ export default function LoopForm({
     updateProfile: setProfile,
     options: {DATA_LOOP_CLASSES},
     inData: {inputTables, getTableMetadataOptions}
-  } = useAdminApp();
+  } = useAdminApp((s) => ({
+    profile: s.profile,
+    updateProfile: s.updateProfile,
+    options: s.options,
+    inData: s.inData
+  }));
 
   const toggleMatchTables = (index, op_index = -1, value) => {
     const profile_table = profile.tables[index]

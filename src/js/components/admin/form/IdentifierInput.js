@@ -161,7 +161,7 @@ function MetadataIdentifierInput({
                                    addIdentifierOperation = null
                                  }) {
   const [activeOutputTab, setActiveOutputTab] = useState('dataset');
-  const { profile, options } = useAdminApp();
+  const { profile, options } = useAdminApp((s) => ({ profile: s.profile, options: s.options }));
 
   return (
     <form>
