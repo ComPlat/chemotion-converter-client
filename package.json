@@ -4,13 +4,14 @@
   "main": "./dist/bundle.js",
   "files": [
     "dist",
+    "src",
     "public",
     "README.md"
   ],
   "scripts": {
     "build:prod": "webpack --config webpack/prod.config.js --mode production",
     "build:bundle": "webpack --config webpack/lib.config.js --mode production",
-    "build:dev_bundle": "webpack --config webpack/dev.lib.config.js --mode development",
+    "build:dev_bundle": "webpack --config webpack/dev.lib.config.js --watch --mode development",
     "build": "webpack --config webpack/dev.config.js --mode development",
     "watch": "webpack --config webpack/dev.config.js --watch --mode development",
     "serve": "webpack-dev-server --config webpack/dev.config.js --open --mode development"

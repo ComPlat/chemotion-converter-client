@@ -21,8 +21,7 @@ const inputTableShape = PropTypes.shape({
 
 
 function FileHeader({ header, tableIndex, tableIdx }) {
-  const { activeTabKey, setActiveTabKey, profile, updateProfile } = useAdminApp((s) => ({
-    activeTabKey: s.activeTabKey,
+  const { setActiveTabKey, profile, updateProfile } = useAdminApp((s) => ({
     setActiveTabKey: s.setActiveTabKey,
     profile: s.profile,
     updateProfile: s.updateProfile

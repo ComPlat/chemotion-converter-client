@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 
 import ConverterApi from '../../api/ConverterApi';
 import {
+  formatUnit,
   getFileMetadataOptions,
   getProfileData,
   getTableMetadataOptions
@@ -53,6 +54,7 @@ export const useAdminStore = create((set, get) => {
     activeInputTable: 0,
     profiles: [],
     datasets: [],
+    datasetUnits: {},
     options: [],
     profile: null,
     tableIdx: 0,
@@ -79,6 +81,15 @@ export const useAdminStore = create((set, get) => {
       } else {
         set({ options: obj });
       }
+    },
+
+    setDatasetUnits : (obj) => {
+      const datasetUnits = Object.fromEntries(obj.map((x) => [x.field, {
+        label: x.label,
+        units: x.units.map((u)=> formatUnit(u.label)),
+        unit_keys: x.units.map((u)=> ({key: u.key, label: u.label})),
+      }]));
+      set({ datasetUnits });
     },
 
     setProfile: (profile) => set(withInData({ profile })),
@@ -113,10 +124,11 @@ export const useAdminStore = create((set, get) => {
         ConverterApi.fetchOptions(),
         ConverterApi.fetchDatasetsUnits()
       ]).then((responses) => {
-        const [profilesResponse, datasetsResponse, optionsResponse] = responses;
+        const [profilesResponse, datasetsResponse, optionsResponse, datasetUnitsResponse] = responses;
         get().setProfiles(profilesResponse);
         get().setDatasets(datasetsResponse);
         get().setOptions(optionsResponse);
+        get().setDatasetUnits(datasetUnitsResponse);
       });
     }
   };
