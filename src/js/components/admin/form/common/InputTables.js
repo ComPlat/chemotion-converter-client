@@ -7,6 +7,12 @@ import TruncatedTextWithTooltip from "./TruncatedTextWithTooltip";
 import { BuildIdentifierHandler } from "../../../../utils/identifierUtils";
 import { useAdminApp } from "../../AppContext";
 
+const OLS4_BASE_URL = 'https://www.ebi.ac.uk/ols4/api';
+// Display-only key for the resolved CHMO term name. It is intentionally NOT
+// added to the metadata object itself, so it never becomes a selectable
+// identifier source for a teaching profile -- it is shown for reference only.
+const ONTOLOGY_REF_KEY = 'ontology name (Ref only, should not be used for teaching profile)';
+
 const columnShape = PropTypes.shape({
   key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   name: PropTypes.string
@@ -84,6 +90,32 @@ DataGrid.propTypes = {
 
 
 function Metadata({ metadata }) {
+  const [ontologyLabel, setOntologyLabel] = useState(null);
+  const oboId = metadata.ontology;
+
+  // Resolve the plain term name of the CHMO ontology id for display only.
+  // Best-effort: any lookup/network error simply hides the reference row.
+  useEffect(() => {
+    let cancelled = false;
+    setOntologyLabel(null);
+    if (!oboId) return undefined;
+    (async () => {
+      try {
+        const res = await fetch(`${OLS4_BASE_URL}/ontologies/CHMO/terms?obo_id=${oboId}&lang=en`);
+        if (res.ok) {
+          const { _embedded } = await res.json();
+          const term = _embedded?.terms?.[0];
+          if (term && !cancelled) setOntologyLabel(term.label);
+        }
+      } catch (e) {
+        // ignore: reference-only field
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [oboId]);
+
   return (
     <Card>
       <Card.Body>
@@ -94,6 +126,12 @@ function Metadata({ metadata }) {
               <Col as="dd" lg={7}>{metadata[key] || ' '}</Col>
             </React.Fragment>
           ))}
+          {ontologyLabel && (
+            <React.Fragment>
+              <TruncatedTextWithTooltip text={ONTOLOGY_REF_KEY}/>
+              <Col as="dd" lg={7}>{ontologyLabel}</Col>
+            </React.Fragment>
+          )}
         </Row>
       </Card.Body>
     </Card>

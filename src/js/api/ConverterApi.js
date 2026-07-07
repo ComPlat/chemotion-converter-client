@@ -52,9 +52,10 @@ class ConverterApi {
       })
   }
 
-  static fetchTables(file) {
+  static fetchTables(file, ontology) {
     const data = new FormData()
     data.append('file', file)
+    data.append('ontology', ontology)
 
     const requestOptions = {
       method: 'POST',
@@ -141,10 +142,13 @@ class ConverterApi {
       })
   }
 
-  static fetchConversion(file, format, asDownload = true) {
-    const data = new FormData()
-    data.append('file', file)
-    data.append('format', format)
+  static fetchConversion(file, format, asDownload = true, ontology=null) {
+    const data = new FormData();
+    data.append('file', file);
+    data.append('format', format);
+    if (ontology) {
+      data.append('ontology', ontology);
+    }
 
     const requestOptions = {
       method: 'POST',

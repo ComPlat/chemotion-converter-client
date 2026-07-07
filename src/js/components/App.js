@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {Alert, Button, Col, Container, Form, Row} from 'react-bootstrap';
+import {Alert, Button, Col, Container, Form, OverlayTrigger, Row, Tooltip} from 'react-bootstrap';
 
 import ConverterApi from '../api/ConverterApi'
 
@@ -62,7 +62,24 @@ function App() {
             <div className="d-grid gap-2">
               <Button variant="primary" size="lg" onClick={onSubmitFileHandler}>Upload</Button>
             </div>
-            <Form.Group controlId="format-select" className="mt-3">
+            <p className="text-center">For testing and advanced functions (like ontologies), you could also use the following command:
+                <OverlayTrigger
+                  placement="top"
+                  overlay={
+                    <Tooltip id="curl-ontology-tooltip">
+                      The URL could be different, if front- and backend are running in productive env, eg. <code>IP:Port/api/v1/conversions</code> <br />
+                      <code>username:password</code> are ignored in dev environment. <br />
+                      Replace <code>obo:id</code> with a valid CHMO OBO ID, e.g. <code>CHMO:0001007</code> for
+                      &quot;thin-layer chromatography&quot;. The plain term name is not resolved &ndash; use the ID. <br />
+                      <code>output.zip</code> is the name of the output file. <br />
+                      Advanced ERROR messages could be given by <code>--fail-with-body -o output.zip || cat output.zip</code> instead of <code>-o output.zip</code>
+                    </Tooltip>
+                  }
+                >
+                  <code style={{cursor: 'help'}}> curl -X POST http://localhost:5000/conversions   -u username:password   -F "file=@/path/to/your/file.xyz"   -F "format=jcampzip" -F "ontology=obo:id" -o output.zip</code>
+                </OverlayTrigger>!
+              </p>
+              <Form.Group controlId="format-select" className="mt-3">
               <Form.Label column="sm">Conversion format</Form.Label>
               <Form.Select value={format} onChange={onFormatChangeHandler}>
                 <option value="jcampzip">Zip file containing JCAMP files</option>
