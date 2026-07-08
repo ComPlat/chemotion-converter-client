@@ -1,3 +1,38 @@
+## [0.16.0](https://github.com/ComPlat/chemotion-converter-client/compare/v0.16.0...v0.15.0)
+* feat:
+  * Ontologie selector by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/121
+  * Feat: Replace column header by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/135
+  * 149 introduce profile versioning and diff support by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/150
+  * Reaction variation autofill by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/152
+  * 155 make units for system defined inputs configurable in the converter by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/157
+  * Ontology api call by @herrdivad in https://github.com/ComPlat/chemotion-converter-client/pull/98
+  * Reintigrate into chemotion by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/156
+* fixes:
+  * Fix select in eln by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/123
+  * 118 replace example file in profile by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/131
+  * moved DATA TYPE to creatableHeaderOptions by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/132
+  * 130 ontology object missing by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/134
+  * 138 replace data file check identifier by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/139
+  * fix: changed loop metadata select lookup to metadata by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/146
+  * fixed error handling and added profile exists check by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/147
+  * Fixed merge buf options by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/153
+  * 151 performance degradation with many output tables generated in loops by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/154
+* refactor:
+  * Refactoring by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/129
+  * Replace admin Context with Zustand store to cut re-renders by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/159
+* chore:
+  * Fixed Docu and .vmrc by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/126
+  * Bump postcss from 8.5.8 to 8.5.12 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/148
+  * Bump webpack-dev-server from 5.2.3 to 5.2.5 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/160
+  * Bump @babel/core from 7.29.0 to 7.29.6 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/161
+  * Bump shell-quote from 1.8.3 to 1.8.4 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/162
+  * Bump launch-editor from 2.12.0 to 2.14.1 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/163
+  * Bump serialize-javascript from 7.0.4 to 7.0.6 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/164
+  * Bump http-proxy-middleware from 2.0.9 to 2.0.10 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/165
+  * Bump @babel/plugin-transform-modules-systemjs from 7.29.0 to 7.29.7 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/166
+  * Bump fast-uri from 3.1.0 to 3.1.3 by @dependabot in https://github.com/ComPlat/chemotion-converter-client/pull/167
+
+
 ## [0.15.0](https://github.com/ComPlat/chemotion-converter-client/compare/v0.15.0...v0.14.0)
 * feat:
   * Input Fields for Software and devices by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/116
