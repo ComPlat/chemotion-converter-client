@@ -45,6 +45,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
   const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [ontologyRef, setOntologyRef] = useState("");
+  const [deviceRef, setDeviceRef] = useState("");
 
   const setOriginProfile = (obj1) => {
     setSaveabel(false);
@@ -194,7 +195,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
 
   const processUploadedFile = (file) => {
     setIsLoading(true);
-    return ConverterApi.fetchTables(file, ontologyRef)
+    return ConverterApi.fetchTables(file, ontologyRef, deviceRef)
       .then(data => {
         if (data) {
           const uploadedProfileData = Array.isArray(data) ? data[0] : data;
@@ -226,7 +227,9 @@ function AdminAppContent({ModalComponent, isAdmin}) {
               data: [data],
               subjects: [],
               predicates: [],
-              devices: [],
+              // Carry the device chosen during upload into the profile so it is
+              // pre-filled. Empty selection -> empty list.
+              devices: deviceRef ? [deviceRef] : [],
               software: [],
               ontology: '',
               // Carry the ontology chosen during upload into the profile so the
@@ -271,7 +274,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
       const storedProfile = await storeProfile(true);
       let profileId;
       try {
-        const res = await (await ConverterApi.fetchConversion(selectedFile, 'metajson', false, ontologyRef)).json();
+        const res = await (await ConverterApi.fetchConversion(selectedFile, 'metajson', false, ontologyRef, deviceRef)).json();
         profileId = res.profile_id;
       } catch {
       }
@@ -344,6 +347,8 @@ function AdminAppContent({ModalComponent, isAdmin}) {
           onSubmitFileHandler={handler}
           ontologyRef={ontologyRef}
           setOtologyRef={setOntologyRef}
+          deviceRef={deviceRef}
+          setDeviceRef={setDeviceRef}
           errorMessage={errorMessage}
           error={uploadError}
           isLoading={isLoading}
@@ -458,6 +463,8 @@ function AdminAppContent({ModalComponent, isAdmin}) {
           onSubmitFileHandler={submitFileHandler}
           ontologyRef={ontologyRef}
           setOtologyRef={setOntologyRef}
+          deviceRef={deviceRef}
+          setDeviceRef={setDeviceRef}
           errorMessage={errorMessage}
           error={uploadError}
           isLoading={isLoading}

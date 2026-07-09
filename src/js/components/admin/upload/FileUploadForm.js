@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import PropTypes from 'prop-types';
 import { Alert, Button, Form, Spinner } from 'react-bootstrap';
 import { DatasetSelect } from "../form/common/DatasetCard";
+import { DeviceSelect } from "../form/common/DeviceCard";
 
 function FileUploadForm({
   error,
@@ -11,11 +12,17 @@ function FileUploadForm({
   disabled,
   isLoading,
   ontologyRef=null,
-  setOtologyRef=null
+  setOtologyRef=null,
+  deviceRef=null,
+  setDeviceRef=null
 }) {
   let [ontology, setOntology] = [ontologyRef, setOtologyRef];
   if(!setOntology) {
     [ontology, setOntology] = useState(ontologyRef || "");
+  }
+  let [device, setDevice] = [deviceRef, setDeviceRef];
+  if(!setDevice) {
+    [device, setDevice] = useState(deviceRef || "");
   }
 
 
@@ -31,6 +38,10 @@ function FileUploadForm({
 
           <DatasetSelect dataset={ontology} updateOntology={(x) => {
             setOntology(x?.obo_id ?? "")
+          }}/>
+
+          <DeviceSelect device={device || ""} updateDevice={(x) => {
+            setDevice(x ?? "")
           }}/>
 
         <div className="d-flex justify-content-end mt-4">
@@ -63,11 +74,15 @@ FileUploadForm.propTypes = {
   errorMessage: PropTypes.string.isRequired,
   ontologyRef: PropTypes.string,
   setOtologyRef: PropTypes.func,
+  deviceRef: PropTypes.string,
+  setDeviceRef: PropTypes.func,
 }
 
 FileUploadForm.defaultProps = {
   ontologyRef: null,
   setOtologyRef: null,
+  deviceRef: null,
+  setDeviceRef: null,
 }
 
 export default FileUploadForm
