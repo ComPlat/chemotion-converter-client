@@ -20,6 +20,20 @@ provideGlobalGridOptions({
   theme: "legacy",
 });
 
+// Turns a rejected ConverterApi call into a message to display. The rejection
+// can be an Error carrying converter-app's `{ Validation, ... }` body on `.data`
+// (a create/update validation failure), but also a bare Error or Response with
+// no `.data` (a network failure, or an upstream error whose body was not JSON).
+// `Object.values(undefined)` throws "Cannot convert undefined or null to object"
+// and takes down the save, so every shape has to be guarded.
+const formatConverterError = (errors) => {
+  const data = errors && errors.data;
+  if (data && typeof data === 'object') {
+    return Object.values(data).join(', ');
+  }
+  return (errors && errors.message) || 'An error occurred during processing.';
+};
+
 
 function AdminAppContent({ModalComponent, isAdmin}) {
   const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp((s) => ({
@@ -120,7 +134,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
       })
       .catch(errors => {
         setUploadError(true);
-        setErrorMessage(Object.values(errors.data).join(', '));
+        setErrorMessage(formatConverterError(errors));
         setIsLoading(false);
       });
   };
@@ -141,7 +155,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
       })
       .catch(errors => {
         setError(true);
-        setErrorMessage(Object.values(errors.data).join(', '));
+        setErrorMessage(formatConverterError(errors));
         setIsLoading(false);
       });
   };
