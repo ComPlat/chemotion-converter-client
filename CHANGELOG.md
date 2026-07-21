@@ -1,3 +1,11 @@
+## [0.16.1](https://github.com/ComPlat/chemotion-converter-client/compare/v0.16.1...v0.16.0)
+* fixes:
+  * guard profile save/create error handler against a missing error body by @PiTrem in https://github.com/ComPlat/chemotion-converter-client/pull/170
+* chore:
+  * Bump ws from 8.19.0 to 8.21.1 by @dependabot[bot] in https://github.com/ComPlat/chemotion-converter-client/pull/169
+  * Bump websocket-driver from 0.7.4 to 0.7.5 by @dependabot[bot] in https://github.com/ComPlat/chemotion-converter-client/pull/171
+
+
 ## [0.16.0](https://github.com/ComPlat/chemotion-converter-client/compare/v0.16.0...v0.15.0)
 * feat:
   * Ontologie selector by @StarmanMartin in https://github.com/ComPlat/chemotion-converter-client/pull/121
