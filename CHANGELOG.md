@@ -1,3 +1,10 @@
+## [0.16.2](https://github.com/ComPlat/chemotion-converter-client/compare/v0.16.2...v0.16.1)
+* fixes:
+  * scope scroll-lock CSS to the app root instead of body/main by @headri in https://github.com/ComPlat/chemotion-converter-client/pull/173
+* chore:
+  * Bump webpack-dev-server from 5.2.5 to 5.2.6 by @dependabot[bot] in https://github.com/ComPlat/chemotion-converter-client/pull/172
+
+
 ## [0.16.1](https://github.com/ComPlat/chemotion-converter-client/compare/v0.16.1...v0.16.0)
 * fixes:
   * guard profile save/create error handler against a missing error body by @PiTrem in https://github.com/ComPlat/chemotion-converter-client/pull/170
