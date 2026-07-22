@@ -379,7 +379,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
 
 
   return (
-    <Container fluid={['create', 'update'].includes(status)}>
+    <Container className="chemotion-converter-app" fluid={['create', 'update'].includes(status)}>
       <Breadcrumb className="mt-4">
         <Breadcrumb.Item
           onClick={showListView}

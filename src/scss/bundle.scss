@@ -5,7 +5,7 @@
 @include meta.load-css("components/table");
 @include meta.load-css("components/admin");
 
-#root > .container {
+.chemotion-converter-app {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -32,9 +32,8 @@
   z-index: 9999 !important;
 }
 
-main {
+.chemotion-converter-app main {
   flex: 1; /* takes remaining space */
-
-      overflow-x: hidden;
-    overflow-y: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
