@@ -1,17 +1,14 @@
 $header-height: 130px; // static height, manually computed
 $break-point: 990px;
 
-@media not (min-width: $break-point) {
-  body {
-    overflow: auto;
-  }
-}
-
+// Scoped to .chemotion-converter-app rather than body/main/#root: this
+// package is also consumed as an embedded npm component (see bundle.js),
+// where body belongs to the host page and must not be touched.
 @media (min-width: $break-point) {
-  body {
+  .chemotion-converter-app {
     overflow: hidden;
   }
-  .scroll {
+  .chemotion-converter-app .scroll {
     height: calc(100vh - #{$header-height});
     overflow-y: auto;
     padding-right: 10px;

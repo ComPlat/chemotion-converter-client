@@ -46,7 +46,7 @@ function App() {
   };
 
   return (
-    <Container>
+    <Container className="chemotion-converter-app">
       <Row>
         <Col md={{ span: 6, offset: 3 }}>
           <h1 className="text-center p-5">Chemotion file converter</h1>
