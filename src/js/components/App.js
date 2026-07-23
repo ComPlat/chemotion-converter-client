@@ -71,12 +71,14 @@ function App() {
                       <code>username:password</code> are ignored in dev environment. <br />
                       Replace <code>obo:id</code> with a valid CHMO OBO ID, e.g. <code>CHMO:0001007</code> for
                       &quot;thin-layer chromatography&quot;. The plain term name is not resolved &ndash; use the ID. <br />
+                      <code>device=your-device</code> is optional and accepts any free string (e.g. an instrument
+                      name from your ELN). It is stored as file metadata and can be used as a profile identifier by profile admins. <br />
                       <code>output.zip</code> is the name of the output file. <br />
                       Advanced ERROR messages could be given by <code>--fail-with-body -o output.zip || cat output.zip</code> instead of <code>-o output.zip</code>
                     </Tooltip>
                   }
                 >
-                  <code style={{cursor: 'help'}}> curl -X POST http://localhost:5000/conversions   -u username:password   -F "file=@/path/to/your/file.xyz"   -F "format=jcampzip" -F "ontology=obo:id" -o output.zip</code>
+                  <code style={{cursor: 'help'}}> curl -X POST http://localhost:5000/conversions   -u username:password   -F "file=@/path/to/your/file.xyz"   -F "format=jcampzip" -F "ontology=obo:id" -F "device=your-device" -o output.zip</code>
                 </OverlayTrigger>!
               </p>
               <Form.Group controlId="format-select" className="mt-3">
