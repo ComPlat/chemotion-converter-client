@@ -1,15 +1,15 @@
-import React, {useState} from 'react';
-import {Breadcrumb, Button, Col, Container, Modal, Row} from 'react-bootstrap';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Breadcrumb, Button, Col, Container, Modal, Row } from 'react-bootstrap';
 
 import ConverterApi from '../../api/ConverterApi';
 
 import ProfileList from './list/ProfileList';
 import ProfileForm from './form/ProfileForm';
 import FileUploadForm from './upload/FileUploadForm';
-import {AllCommunityModule, ModuleRegistry, provideGlobalGridOptions} from 'ag-grid-community';
-import {getProfileData} from "../../utils/profileUtils";
-import {GENERIC_PREDICATE} from "./form/common/TibFetchService";
-import {AdminProvider, useAdminApp} from "./AppContext";
+import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
+import { getProfileData } from "../../utils/profileUtils";
+import { GENERIC_PREDICATE } from "./form/common/TibFetchService";
+import { AdminProvider, useAdminApp } from "./AppContext";
 import PropTypes from "prop-types";
 import AppModal from "../../utils/modalWrapper";
 
@@ -35,8 +35,8 @@ const formatConverterError = (errors) => {
 };
 
 
-function AdminAppContent({ModalComponent, isAdmin}) {
-  const {profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx} = useAdminApp((s) => ({
+function AdminAppContent({ ModalComponent, isAdmin }) {
+  const { profiles, setProfiles, profile, setProfile, updateProfileList, options, setTableIdx } = useAdminApp((s) => ({
     profiles: s.profiles,
     setProfiles: s.setProfiles,
     profile: s.profile,
@@ -48,7 +48,6 @@ function AdminAppContent({ModalComponent, isAdmin}) {
   const [status, setStatus] = useState('list');
   const [selectedFile, setSelectedFile] = useState(null);
   const [originProfile, _setOriginProfile] = useState(null);
-  const [saveabel, setSaveabel] = useState(false);
   const [error, setError] = useState(false);
   const [uploadError, setUploadError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -59,9 +58,10 @@ function AdminAppContent({ModalComponent, isAdmin}) {
   const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [ontologyRef, setOntologyRef] = useState("");
+  const [saveable, setSaveable] = useState(false);
 
   const setOriginProfile = (obj1) => {
-    setSaveabel(false);
+    setSaveable(false);
     if (obj1) {
       _setOriginProfile(JSON.stringify(obj1));
     } else {
@@ -250,7 +250,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
               converter_version: options?.VERSION ?? '0.0',
               subjectInstances: {},
               rootOntology: GENERIC_PREDICATE,
-              reactionVariations: {elements: [], identifiers: []}
+              reactionVariations: { elements: [], identifiers: [] }
             }
             setStatus('create');
             setProfile(nextProfile);
@@ -334,9 +334,16 @@ function AdminAppContent({ModalComponent, isAdmin}) {
     }
   }
 
-  if (!saveabel && profile && JSON.stringify(profile) !== originProfile) {
-    setSaveabel(true);
-  }
+  useEffect(() => {
+    if (saveable || profile && JSON.stringify(profile) !== originProfile) {
+      setSaveable(true);
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    const isSaveable = profile && JSON.stringify(profile) !== originProfile;
+    setSaveable(isSaveable);
+  }, [originProfile]);
 
   const dispatchView = () => {
     if (status === 'list') {
@@ -369,7 +376,7 @@ function AdminAppContent({ModalComponent, isAdmin}) {
         <ProfileForm
           status={status}
           errorMessage={errorMessage}
-          savable={saveabel}
+          savable={saveable}
           error={error}
           storeProfile={storeProfile}
           handleShowFileUpload={handleShowFileUpload}/>
@@ -487,14 +494,14 @@ AdminAppContent.propTypes = {
   isAdmin: PropTypes.bool.isRequired,
 };
 
-function AdminApp({ModalComponent = null, converterUrl = null, isAdmin = true}) {
+function AdminApp({ ModalComponent = null, converterUrl = null, isAdmin = true }) {
   if (converterUrl) {
-     ConverterApi.setConverterUrl(converterUrl);
+    ConverterApi.setConverterUrl(converterUrl);
   }
 
   return (
     <AdminProvider isAdmin={isAdmin}>
-      <AdminAppContent ModalComponent={ModalComponent ?? AppModal}  isAdmin={isAdmin}/>
+      <AdminAppContent ModalComponent={ModalComponent ?? AppModal} isAdmin={isAdmin}/>
     </AdminProvider>
   )
 }
