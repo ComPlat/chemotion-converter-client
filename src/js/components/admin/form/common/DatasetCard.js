@@ -266,10 +266,7 @@ function DatasetCard({ dataset, updateOntology }) {
 }
 
 DatasetCard.propTypes = {
-  dataset: PropTypes.shape({
-    ols: PropTypes.string,
-    name: PropTypes.string
-  }),
+  dataset:PropTypes.string.isRequired,
   updateOntology: PropTypes.func.isRequired,
 }
 

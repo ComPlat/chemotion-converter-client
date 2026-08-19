@@ -1,8 +1,8 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import {Alert, Button, ButtonGroup, Container, Form, Modal, OverlayTrigger, Table, Tooltip} from "react-bootstrap";
-import {getProfileData} from "../../../utils/profileUtils";
-import {useAdminApp} from "../AppContext";
+import { Alert, Button, ButtonGroup, Container, Form, Modal, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
+import { getProfileData } from "../../../utils/profileUtils";
+import { useAdminApp } from "../AppContext";
 
 const integerRegex = '[+-]?\\d+';
 const floatRegex = '[+-]?(?:\\d*[,.]\\d+|\\d+)(?:[eE][+-]?\\d+)?';
@@ -10,8 +10,8 @@ const emailRegex = '[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}';
 const defaultRegex = '.+';
 const regexList = [integerRegex, floatRegex, emailRegex, defaultRegex];
 
-export default function FileHeaderPresenter({header, addIdentifier, updateRegex, tableIndex, dataIndex}) {
-  const {profile, updateProfile: setProfile} = useAdminApp((s) => ({
+export default function FileHeaderPresenter({ header, addIdentifier, updateRegex, tableIndex, dataIndex }) {
+  const { profile, updateProfile: setProfile } = useAdminApp((s) => ({
     profile: s.profile,
     updateProfile: s.updateProfile
   }));
@@ -27,8 +27,10 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
   const paragraphRef = useRef(null);
 
   const [multilineMode, setMultilineMode] = useState(false);
-  const [multilineSelection, setMultilineSelection] = useState("");
-  const [multilineSelectionIndex, setMultilineSelectionIndex] = useState(-1);
+  const [multilineSelection, _setMultilineSelection] = useState([]);
+
+  const multilineSelectionReg = useMemo(() => multilineSelection.map(({ feature }) => feature).join('[\\s\\S]*'), [multilineSelection]);
+  const multilineSelectionRes = useMemo(() => updateRegex(multilineSelectionReg), [multilineSelectionReg]);
 
   const setNewSelection = (selection = ["", ""], selectionContainer = null) => {
     setSelection(selection);
@@ -39,6 +41,13 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
     }
   };
 
+  const setMultilineSelection = ({ idx, feature }) => {
+    if (!multilineSelection.some((oldFeature) =>oldFeature.idx === idx)) {
+      multilineSelection.push({ idx, feature });
+      const newMultilineSelection = [...multilineSelection].sort((a, b) => a.idx - b.idx);
+      _setMultilineSelection(newMultilineSelection);
+    }
+  }
   const escapeRegex = str => str.replace(/[/.*+?^${}()|[\]\\]/g, "\\$&").replace(/\t/g, '\\s*');
 
   function buildRegexWithSnippet(line, [prefix, snippet]) {
@@ -137,33 +146,40 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
       }}>{menuErrorMsg}</p>;
     }
     if (multilineMode) {
+      const canBeAdded = !multilineSelection.some((oldFeature) =>oldFeature.idx === selectionElement?.parentElement.dataset.idx);
       return <>
         <p className="mb-1 p-2" style={{
           backgroundColor: '#f8f8f8', fontStyle: 'bold',
 
-        }}>Generate identifier</p>
-        <div className="p-2">
+        }}>Generate metadata identifier</p>
+        {canBeAdded ? <div className="p-2">
           To add <span className="fw-bold"> {selection[1]}</span> as additional feature to your regex,
           simply click <Button
           size="sm"
           onClick={() => {
-            const newFeature = escapeRegex(selection[1]);
-            setMultilineSelection(`${newFeature}[\\s\\S]*\\n${multilineSelection}`);
-            setMultilineSelectionIndex(selectionElement?.parentElement.dataset.idx);
+            const feature = escapeRegex(selection[1]);
+            const newFeature = {
+              idx: selectionElement?.parentElement.dataset.idx,
+              feature
+            };
+
+            setMultilineSelection(newFeature);
             hidePopover();
           }}
           variant="info"
         >Add</Button>
         </div>
+          : <div className="p-2">A feature from line {parseInt(selectionElement?.parentElement.dataset.idx) + 1} is already used!</div>
+        }
       </>
     }
     return <>
       <p className="mb-1 p-2" style={{
         backgroundColor: '#f8f8f8', fontStyle: 'bold',
 
-      }}>Generate identifier</p>
+      }}>Generate metadata identifier</p>
       <div className="p-2">
-        <p>To create a new selector for the value <span className="fw-bold"> {selection[1]}</span>,
+        <p>To create a new metadata identifier for the value <span className="fw-bold"> {selection[1]}</span>,
           simply click <Button
             size="sm"
             onClick={() => handleOptionClick()}
@@ -176,9 +192,13 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
             onClick={() => {
               setMultilineMode(true);
               const res = buildRegexWithSnippet(selectionElement?.textContent, selection);
-              setMultilineSelection(res.substring(1, res.length - 1));
+              const feature = res.substring(1, res.length - 1);
+              const newFeature = {
+                idx: selectionElement?.parentElement.dataset.idx,
+                feature
+              };
+              setMultilineSelection(newFeature);
               hidePopover();
-              setMultilineSelectionIndex(selectionElement?.parentElement.dataset.idx);
             }}
             variant="info"
           >
@@ -192,7 +212,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
   const useAsColumnHeader = (line) => {
     const headers = line.split(seperator);
 
-    const updatedProfile = {...profile};
+    const updatedProfile = { ...profile };
     const profileData = getProfileData(profile, dataIndex);
     if (!profileData?.tables?.[tableIndex]) {
       return;
@@ -212,7 +232,7 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
         })),
       };
     } else {
-      updatedProfile.data = {...profileData};
+      updatedProfile.data = { ...profileData };
       updatedProfile.data.tables = [...profileData.tables];
       updatedProfile.data.tables[tableIndex] = {
         ...profileData.tables[tableIndex],
@@ -279,7 +299,8 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
             <Table striped bordered hover>
               <thead>
               <tr>
-                {profileData?.tables?.[tableIndex]?.columns.map((column, i) => <th key={column.key ?? i}>{headers[i] ?? column.name}</th>)}
+                {profileData?.tables?.[tableIndex]?.columns.map((column, i) => <th
+                  key={column.key ?? i}>{headers[i] ?? column.name}</th>)}
               </tr>
               </thead>
               <tbody/>
@@ -295,25 +316,25 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
     </Modal>
 
     {multilineMode && (<Alert variant="warning" style={{
-      position: 'fixed', zIndex: 202, right: '3px', top: '118px', width: '42vw', minWidth: '400px', bottom: '20px'
+      position: 'fixed', zIndex: 501, right: '3px', top: '118px', width: '42vw', minWidth: '400px', bottom: '20px'
     }}><b className="alert-heading">Multiline mode enabled.</b>
       <p>In this mode, you can create an identifier that identifies a value from the header based on features from
         multiple lines. To exit this mode, you must either press Cancel or create the Identifier.</p>
       <p>Select additional regex features from previous lines for more precise matching.</p>
-      <p>Current regex is: <b>{multilineSelection}</b></p>
-      {updateRegex(multilineSelection)}
-      <Button variant="success"
+      <p>Current regex is: <b>{multilineSelectionReg}</b></p>
+      {multilineSelectionRes}
+      {multilineSelectionRes ? <Button variant="success"
               size="sm"
               onClick={() => {
-                addIdentifier(multilineSelection);
-                setMultilineSelection("");
+                addIdentifier(multilineSelectionReg);
+                _setMultilineSelection([]);
                 setMultilineMode(false);
                 hidePopover();
-              }}>Create Identifier</Button>
+              }}>Create Identifier</Button> : <p>Your regex does not find any string.</p>}
       <Button variant="danger"
               size="sm"
               onClick={() => {
-                setMultilineSelection("");
+                _setMultilineSelection([]);
                 setMultilineMode(false);
                 hidePopover();
               }}
@@ -322,12 +343,12 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
     <pre>
         <div ref={paragraphRef}>
           {header.map((line, index) => {
-            return <React.Fragment key={index}>{(!multilineMode || index < multilineSelectionIndex) && (<>
+            return <React.Fragment key={index}>{(<>
 							<span className="code-line-index"
-                                  id={index}
-                                  onMouseEnter={() => setActiveLine(index)}
-                                  onMouseLeave={() => !showTableHeaderModal && setActiveLine(null)}
-                            >
+                    id={index}
+                    onMouseEnter={() => setActiveLine(index)}
+                    onMouseLeave={() => !showTableHeaderModal && setActiveLine(null)}
+              >
                               {activeLine === index ? (<OverlayTrigger placement="bottom"
                                                                        overlay={<Tooltip id="code-line-tooltip">
                                                                          Use this line as column header
@@ -338,14 +359,10 @@ export default function FileHeaderPresenter({header, addIdentifier, updateRegex,
 
                               </OverlayTrigger>) : (<span>{index + 1}</span>)}
 							</span>
-              <code className={activeLine === index ? "active-header-select" : ""} data-idx={index}>{line + 1}</code><br/>
+              <code className={activeLine === index ? "active-header-select" : ""} data-idx={index}>{line}</code><br/>
             </>)}</React.Fragment>
           })}
         </div>
-      {header.map((line, index) => {
-        return <React.Fragment key={index}>{(multilineMode && index >= multilineSelectionIndex) && (
-          <code style={{color: '#aaa'}} data-idx={index}>{line + 1}</code>)}</React.Fragment>
-      })}
       </pre>
 
     {menuPos && (<div
