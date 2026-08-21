@@ -5,6 +5,7 @@ import {Alert, Button, ButtonGroup, Row} from 'react-bootstrap';
 import InputTables from "./common/InputTables";
 import FormNavigatorCol from "./controllComponents/FormNavigator";
 import {useAdminApp} from "../AppContext";
+import {findBrokenTemplateReferences} from "../../../utils/identifierUtils";
 
 function ProfileForm({
                        status,
@@ -51,6 +52,7 @@ function ProfileForm({
     const errors = [];
 
     check_loop_fields(profile, errors);
+    check_composed_references(profile, errors);
     clean_dead_links(profile, errors);
 
     if (errors.length > 0) {
@@ -80,6 +82,13 @@ function ProfileForm({
     });
 
   }
+  const check_composed_references = (profile, errors) => {
+    findBrokenTemplateReferences(profile).forEach(({identifier}) => {
+      errors.push(`In the composed metadata "${identifier.outputKey || identifier.id}": one building `
+        + `block points to a metadata entry that no longer exists. Please open the builder and fix it.`);
+    });
+  }
+
   const check_loop_fields = (profile, errors) => {
     profile.tables.forEach((t, tableIndex) => {
       t.table['loop_header']?.forEach((lh, lhIndex) => {
