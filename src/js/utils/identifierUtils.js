@@ -312,7 +312,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
         }
       } catch {
       }
-      return <></>;
+      return null;
     }
   };
 
