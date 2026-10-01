@@ -114,7 +114,6 @@ function ComposedIdentifierForm({ identifiers, outputTables, dataset, ih }) {
           show
           onHide={() => setEditId(null)}
           identifier={editIdentifier}
-          dataset={dataset}
           addIdentifier={ih.addIdentifier}
           updateIdentifier={ih.updateIdentifier}
           updateRegex={ih.updateRegex}

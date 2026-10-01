@@ -96,9 +96,20 @@ export default function FormNavigatorCol({activeTabKey, setActiveTabKey}) {
   return (
     <Col md={5}>
       <div className="scroll">
+        {/*
+          mountOnEnter: a tab is built only when it is opened for the first time, so
+          profile updates do not re-render tabs that were never visited.
+
+          Possible further speed-up: add unmountOnExit as well, then only the visible tab
+          exists and re-renders on every profile change. Not enabled on purpose, because
+          leaving a tab then discards its local UI state (expanded/pinned entries, open
+          builders, scroll position) and re-opening a large tab takes a moment to build.
+          Profile data is not affected, it lives in the store.
+        */}
         <Tabs activeKey={activeTabKey}
               onSelect={(k) => setActiveTabKey(k)}
               id="main-form-tabs"
+              mountOnEnter
               className="mb-3">
 
           <Tab eventKey="basics" title="Basics">

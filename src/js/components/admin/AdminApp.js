@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Breadcrumb, Button, Col, Container, Modal, Row } from 'react-bootstrap';
+import { unstable_batchedUpdates } from 'react-dom';
+import { debounce } from 'lodash';
 
 import ConverterApi from '../../api/ConverterApi';
 
@@ -334,13 +336,31 @@ function AdminAppContent({ ModalComponent, isAdmin }) {
     }
   }
 
+  // Serializing the profile is expensive because profile.data holds the complete
+  // example files, so the check waits until editing pauses for 500 ms. It reads the
+  // latest values from refs, so a check queued before a save never compares against
+  // the outdated origin. The update runs from a timer, which React 17 does not batch.
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
+  const originProfileRef = useRef(originProfile);
+  originProfileRef.current = originProfile;
+  const checkSaveable = useMemo(() => debounce(() => {
+    const currentProfile = profileRef.current;
+    if (currentProfile && JSON.stringify(currentProfile) !== originProfileRef.current) {
+      unstable_batchedUpdates(() => setSaveable(true));
+    }
+  }, 500), []);
+
+  useEffect(() => () => checkSaveable.cancel(), [checkSaveable]);
+
   useEffect(() => {
-    if (saveable || profile && JSON.stringify(profile) !== originProfile) {
-      setSaveable(true);
+    if (!saveable) {
+      checkSaveable();
     }
   }, [profile]);
 
   useEffect(() => {
+    checkSaveable.cancel();
     const isSaveable = profile && JSON.stringify(profile) !== originProfile;
     setSaveable(isSaveable);
   }, [originProfile]);

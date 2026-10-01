@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import PropTypes from 'prop-types';
 import { Alert, Badge, Button, Col, Form, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import Select from 'react-select';
 import { ArrowDown, ArrowUp, Pencil, X } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
+import { unstable_batchedUpdates } from 'react-dom';
+import { debounce } from "lodash";
 
 import AppModal from '../../../../utils/modalWrapper';
 import { DatatableIdentifierInput } from '../IdentifierInput';
-import OutputKeyInput from '../identifier/OutputKeyInput';
-import OutputLayerInput from '../identifier/OutputLayerInput';
 import { useAdminApp } from "../../AppContext";
 import {
   identifierLabel,
@@ -190,7 +190,6 @@ function ComposedMetadataModal({
                                  show,
                                  onHide,
                                  identifier,
-                                 dataset,
                                  addIdentifier,
                                  updateIdentifier,
                                  updateRegex
@@ -198,24 +197,59 @@ function ComposedMetadataModal({
   const { profile, tableIdx } = useAdminApp((s) => ({ profile: s.profile, tableIdx: s.tableIdx }));
   const [segments, setSegments] = useState([]);
   const [expandedKey, setExpandedKey] = useState(null);
+  const [missingPlaceholder, setMissingPlaceholder] = useState('');
 
   // The template string in the profile stays the single source of truth; the local
   // copy only adds stable keys so editing a text block does not lose the focus.
   useEffect(() => {
     if (show) {
       setSegments(withKeys(parseTemplate(identifier.template)));
+      setMissingPlaceholder(identifier.missingPlaceholder ?? '');
       setExpandedKey(null);
     }
   }, [show, identifier.id]);
 
-  const applySegments = (nextSegments) => {
-    setSegments(nextSegments);
-    updateIdentifier(identifier.id, { template: serializeTemplate(nextSegments) });
+  // Every profile update re-renders the whole admin form, so typed input is written
+  // to the profile only after a short pause. Pending changes of several fields are
+  // merged; the latest updateIdentifier is used because it closes over the current profile.
+  // React 17 only batches updates inside its own event handlers: without
+  // unstable_batchedUpdates, a write from the timer re-renders every component
+  // subscribed to the profile in a separate pass.
+  const updateIdentifierRef = useRef(updateIdentifier);
+  updateIdentifierRef.current = updateIdentifier;
+  const pendingUpdate = useRef(null);
+  const commitPending = useMemo(() => debounce(() => {
+    if (pendingUpdate.current) {
+      const { id, data } = pendingUpdate.current;
+      pendingUpdate.current = null;
+      unstable_batchedUpdates(() => updateIdentifierRef.current(id, data));
+    }
+  }, 500), []);
+
+  useEffect(() => () => commitPending.flush(), [commitPending]);
+
+  const commit = (data, { immediate = true } = {}) => {
+    const pendingData = pendingUpdate.current?.id === identifier.id ? pendingUpdate.current.data : {};
+    pendingUpdate.current = { id: identifier.id, data: { ...pendingData, ...data } };
+    commitPending();
+    if (immediate) {
+      commitPending.flush();
+    }
   }
 
-  const replaceSegment = (index, data) => applySegments(segments.map(
+  const handleHide = () => {
+    commitPending.flush();
+    onHide();
+  }
+
+  const applySegments = (nextSegments, options) => {
+    setSegments(nextSegments);
+    commit({ template: serializeTemplate(nextSegments) }, options);
+  }
+
+  const replaceSegment = (index, data, options) => applySegments(segments.map(
     (segment, i) => (i === index ? { ...segment, ...data } : segment)
-  ));
+  ), options);
 
   const removeSegment = (index) => applySegments(segments.filter((_, i) => i !== index));
 
@@ -247,7 +281,7 @@ function ComposedMetadataModal({
 
   const options = buildingBlockOptions(profile.identifiers ?? [], identifier.id);
   const preview = resolveTemplate({
-    identifier: { ...identifier, template: serializeTemplate(segments) },
+    identifier: { ...identifier, template: serializeTemplate(segments), missingPlaceholder },
     profile,
     tableIdx
   });
@@ -258,7 +292,7 @@ function ComposedMetadataModal({
   return (
     <AppModal
       show={show}
-      onHide={onHide}
+      onHide={handleHide}
       size="xl"
       title="Compose a metadata value"
       closeLabel="Close"
@@ -266,7 +300,8 @@ function ComposedMetadataModal({
     >
       <small className="text-muted">
         <p className="mb-1">
-          Assemble the value of one target field from other metadata and your own words. The blocks
+          Assemble one metadata value from other metadata and your own words; where it is written to
+          is set in the <b>Output</b> section of the metadata list. The blocks
           are separated by a single space automatically; a block that starts with punctuation, such
           as a comma, is attached to the block before it.
         </p>
@@ -276,25 +311,7 @@ function ComposedMetadataModal({
         </p>
       </small>
 
-      <h5 className="mt-3">Target field</h5>
-      <Row>
-        <Col sm={6}>
-          <OutputLayerInput index={0} identifier={identifier} dataset={dataset}
-                            updateIdentifier={(_, data) => updateIdentifier(identifier.id, data)}/>
-        </Col>
-        <Col sm={6}>
-          <OutputKeyInput index={0} identifier={identifier} dataset={dataset}
-                          updateIdentifier={(_, data) => updateIdentifier(identifier.id, data)}/>
-        </Col>
-      </Row>
-      {!identifier.isDatasetOutput && (
-        <Alert variant="warning" className="mt-2 mb-0 py-1 small">
-          Output in the dataset is disabled for this entry. Enable it in the <b>Output</b> section of
-          the metadata list, otherwise the composed value is not written to the dataset.
-        </Alert>
-      )}
-
-      <h5 className="mt-4">Building blocks</h5>
+      <h5 className="mt-3">Building blocks</h5>
       {segments.length === 0 && (
         <p className="text-muted small">No blocks yet — add a metadata source or a text block.</p>
       )}
@@ -317,7 +334,8 @@ function ComposedMetadataModal({
                     size="sm"
                     value={segment.value ?? ''}
                     placeholder="Your own words, e.g. clamped on"
-                    onChange={(event) => replaceSegment(index, { value: event.target.value })}
+                    onChange={(event) => replaceSegment(index, { value: event.target.value },
+                      { immediate: false })}
                   />
                 </Col>
                 <Col md={3}>{actions}</Col>
@@ -364,7 +382,7 @@ function ComposedMetadataModal({
           <Form.Select
             size="sm"
             value={identifier.onMissing ?? 'skip'}
-            onChange={(event) => updateIdentifier(identifier.id, { onMissing: event.target.value })}
+            onChange={(event) => commit({ onMissing: event.target.value })}
           >
             <option value="skip">Write nothing at all</option>
             <option value="empty">Leave the gap empty</option>
@@ -375,11 +393,12 @@ function ComposedMetadataModal({
           <Col md={6}>
             <Form.Control
               size="sm"
-              value={identifier.missingPlaceholder ?? ''}
+              value={missingPlaceholder}
               placeholder="e.g. unknown"
-              onChange={(event) => updateIdentifier(identifier.id, {
-                missingPlaceholder: event.target.value
-              })}
+              onChange={(event) => {
+                setMissingPlaceholder(event.target.value);
+                commit({ missingPlaceholder: event.target.value }, { immediate: false });
+              }}
             />
           </Col>
         )}
@@ -407,7 +426,6 @@ ComposedMetadataModal.propTypes = {
   show: PropTypes.bool.isRequired,
   onHide: PropTypes.func.isRequired,
   identifier: PropTypes.object.isRequired,
-  dataset: PropTypes.object,
   addIdentifier: PropTypes.func.isRequired,
   updateIdentifier: PropTypes.func.isRequired,
   updateRegex: PropTypes.func
