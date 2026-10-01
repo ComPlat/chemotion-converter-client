@@ -19,6 +19,15 @@ function MetadataIdentifierForm({
   return (
     <div className="mb-3">
       <div className="fw-bold">{label}</div>
+
+      <Button
+        className="mt-1"
+        variant="success"
+        size="sm"
+        onClick={() => addIdentifier(type, optional)}
+      >
+        {optional ? 'Add metadata' : 'Add Identifier'}
+      </Button>
       {hasIdentifiers && (
         <ListGroup>
           {identifiers.map((identifier, index) => (
@@ -48,15 +57,6 @@ function MetadataIdentifierForm({
           ))}
         </ListGroup>
       )}
-
-      <Button
-        className="mt-1"
-        variant="success"
-        size="sm"
-        onClick={() => addIdentifier(type, optional)}
-      >
-        {optional ? 'Add metadata' : 'Add Identifier'}
-      </Button>
     </div>
   )
 }

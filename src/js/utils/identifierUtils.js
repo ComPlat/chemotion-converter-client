@@ -488,7 +488,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
         return <p>Current match: <b>{resolved}</b> (<a target="_blank" href="https://regex101.com/">regex101</a>)
         </p>;
       }
-      return <></>;
+      return null;
     }
   };
 
