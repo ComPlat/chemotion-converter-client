@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react"
 import PropTypes from 'prop-types';
-import { Button, ListGroup, Collapse } from 'react-bootstrap';
-import { Pin, PinOff } from "lucide-react";
+import { Button, ListGroup, Collapse, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Pin, PinOff, Settings } from "lucide-react";
 import { debounce } from "lodash";
 
-function IdentifierHeader({ identifier, show, onToggle, onRemove, hovered, setHovered }) {
+function IdentifierHeader({
+                            identifier, show, onToggle, onRemove, setHovered,
+                            onConfigure = null, configureTooltip = 'Open the builder', summary = null
+                          }) {
   if (!setHovered) setHovered = () => null;
   if (!onToggle) onToggle = () => null;
   if (!onRemove) onRemove = () => null;
@@ -33,9 +36,11 @@ function IdentifierHeader({ identifier, show, onToggle, onRemove, hovered, setHo
          onClick={() => onToggle()}>
       <div>
         <code>
-          {identifier.tableIndex !== undefined && `Input table #${identifier.tableIndex + 1} `}
-          {identifier.key}
-          {identifier.lineNumber !== undefined && `Line ${identifier.lineNumber}`}
+          {summary ?? (<>
+            {identifier.tableIndex !== undefined && `Input table #${identifier.tableIndex + 1} `}
+            {identifier.key}
+            {identifier.lineNumber !== undefined && `Line ${identifier.lineNumber}`}
+          </>)}
         </code>
         {identifier.outputKey && (
           <>
@@ -49,6 +54,23 @@ function IdentifierHeader({ identifier, show, onToggle, onRemove, hovered, setHo
       </div>
 
       <div className="d-flex gap-1">
+
+        {onConfigure && (
+          <OverlayTrigger
+            placement="left"
+            overlay={<Tooltip id="configure-identifier-tooltip">{configureTooltip}</Tooltip>}
+          >
+            <Button
+              variant="outline-primary"
+              size="sm"
+              aria-label={configureTooltip}
+              onClick={(e) => {
+                e.stopPropagation();
+                onConfigure();
+              }}
+            ><Settings size={12}/></Button>
+          </OverlayTrigger>
+        )}
 
         {show ? <Button
           variant="info"
@@ -76,7 +98,10 @@ function IdentifierHeader({ identifier, show, onToggle, onRemove, hovered, setHo
 }
 
 
-function IdentifierWithHeader({ identifierInputTag, index, identifier, removeIdentifier }) {
+function IdentifierWithHeader({
+                                identifierInputTag, index, identifier, removeIdentifier,
+                                onConfigure = null, configureTooltip = undefined, summary = null
+                              }) {
   const [show, setShow] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -101,7 +126,7 @@ function IdentifierWithHeader({ identifierInputTag, index, identifier, removeIde
     };
   }
 
-  return (<ListGroup.Item key={index} style={{ position: "relative" }}>
+  const header = (
     <IdentifierHeader
       setHovered={setHovered}
       identifier={identifier}
@@ -109,18 +134,17 @@ function IdentifierWithHeader({ identifierInputTag, index, identifier, removeIde
       hovered={hovered}
       onToggle={() => setShow(!show)}
       onRemove={() => removeIdentifier(index)}
+      onConfigure={onConfigure}
+      configureTooltip={configureTooltip}
+      summary={summary}
     />
+  );
+
+  return (<ListGroup.Item key={index} style={{ position: "relative" }}>
+    {header}
     <Collapse style={getStyle()} in={show || hovered}>
       <div>
-      {!show && <div><h3>Click to open:</h3>
-        <IdentifierHeader
-      setHovered={setHovered}
-      identifier={identifier}
-      show={show}
-      hovered={hovered}
-      onToggle={() => setShow(!show)}
-      onRemove={() => removeIdentifier(index)}
-    /></div>}
+        {!show && <div><h3>Click to open:</h3>{header}</div>}
         {identifierInputTag}
       </div>
     </Collapse>
@@ -134,11 +158,24 @@ IdentifierHeader.propTypes = {
   hovered: PropTypes.bool,
   onToggle: PropTypes.func,
   onRemove: PropTypes.func,
-  setHovered: PropTypes.func
+  setHovered: PropTypes.func,
+  onConfigure: PropTypes.func,
+  configureTooltip: PropTypes.string,
+  summary: PropTypes.node
 }
 
 IdentifierHeader.defaultProps = {
   setHovered: null,
+}
+
+IdentifierWithHeader.propTypes = {
+  identifierInputTag: PropTypes.node,
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  removeIdentifier: PropTypes.func,
+  onConfigure: PropTypes.func,
+  configureTooltip: PropTypes.string,
+  summary: PropTypes.node
 }
 
 export default IdentifierWithHeader

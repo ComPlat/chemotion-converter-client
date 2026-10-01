@@ -34,6 +34,31 @@
   min-width: stretch;
 }
 
+.composed-canvas {
+  border-left: 3px solid #0dcaf0;
+  padding-left: 0.5rem;
+}
+
+.composed-segment {
+  padding: 0.25rem 0;
+
+  & + .composed-segment {
+    border-top: 1px dashed #dee2e6;
+  }
+}
+
+// long values (file names, paths) are cut off instead of pushing the row controls out
+.composed-value {
+  display: block;
+  max-width: 100%;
+}
+
+.composed-source-editor {
+  background: #f8f9fa;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+}
+
 .identifier-variation-header {
       text-align: center;
     font-weight: bold;

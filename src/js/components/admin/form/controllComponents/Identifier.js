@@ -4,6 +4,7 @@ import React, {useMemo, useState} from "react";
 import PropTypes from "prop-types";
 import {BuildIdentifierHandler} from "../../../../utils/identifierUtils";
 import MetadataIdentifierForm from "../MetadataIdentifierForm";
+import ComposedIdentifierForm from "../composed/ComposedIdentifierForm";
 import {useAdminApp} from "../../AppContext";
 
 
@@ -108,6 +109,12 @@ function MetadataIdentifier({dataset, tableIdx}) {
               <li>
                 The <code>Output layer</code> input is used for additional processing in the Chemotion ELN.
               </li>
+              <li>
+                With <code>Composed from other metadata</code> you can fill one field from several
+                metadata entries and your own words, e.g. a comment like
+                <code> {'{anode}'} clamped on {'{carrier metal}'}</code>. The gear button opens the
+                builder.
+              </li>
             </ul>
           </small>
         </Card.Body>
@@ -140,6 +147,12 @@ function MetadataIdentifier({dataset, tableIdx}) {
             />
           ))
         }
+        <ComposedIdentifierForm
+          identifiers={profile.identifiers}
+          outputTables={profile.tables}
+          dataset={dataset}
+          ih={ih}
+        />
       </Card.Body>
     </Card>
   </>)

@@ -142,6 +142,11 @@ Metadata.propTypes = {
   metadata: PropTypes.object.isRequired
 };
 
+// The example data can be huge (e.g. 18k metadata keys in one table) and only changes
+// on upload, so the views below must not re-render on every profile edit. Their props
+// come from inData, which keeps its references while the example data is unchanged.
+const MemoMetadata = React.memo(Metadata);
+
 function TabContents({ activeTable, activeKey, tableIdx }) {
   return (
     <div className="mt-3">
@@ -151,7 +156,7 @@ function TabContents({ activeTable, activeKey, tableIdx }) {
           {activeTable.metadata && Object.keys(activeTable.metadata).length > 0 && (
             <div className="mt-3">
               <h4>Input table metadata</h4>
-              <Metadata metadata={activeTable.metadata}/>
+              <MemoMetadata metadata={activeTable.metadata}/>
             </div>
           )}
 
@@ -211,6 +216,8 @@ TabContents.propTypes = {
   activeKey: PropTypes.number.isRequired,
   tableIdx: PropTypes.number.isRequired
 };
+
+const MemoTabContents = React.memo(TabContents);
 
 
 function DelayedActiveInputTableInput({ activeInputTable, setActiveInputTable, delayTime = 500, asInputGroup=true }) {
@@ -355,13 +362,13 @@ function InputTables({ onDeleteInputFile }) {
               </NavDropdown>
             </Nav>
           )}
-          {Object.keys(activeData.metadata).length > 0 && (<Metadata metadata={activeData.metadata}></Metadata>)}
+          {Object.keys(activeData.metadata).length > 0 && (<MemoMetadata metadata={activeData.metadata}/>)}
           <h4 className="mt-3">Input tables</h4>
 
           <DelayedActiveInputTableInput activeInputTable={activeInputTable}
                                         setActiveInputTable={setActiveInputTable}/>
-          <TabContents activeTable={activeData.tables[activeInputTable]} activeKey={activeInputTable}
-                       tableIdx={tableIdx}></TabContents>
+          <MemoTabContents activeTable={activeData.tables[activeInputTable]} activeKey={activeInputTable}
+                           tableIdx={tableIdx}/>
         </div>
       ) : (
         <p>

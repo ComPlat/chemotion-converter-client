@@ -148,72 +148,23 @@ DatatableIdentifierInput.propTypes = {
 }
 
 
-function MetadataIdentifierInput({
-                                   index,
-                                   identifier,
-                                   outputTables,
-                                   updateIdentifier,
-                                   updateIdentifierOntology,
-                                   updateIdentifierOperation,
-                                   removeIdentifierOperation,
-                                   dataset,
-                                   updateRegex = null,
-                                   addIdentifierOperation = null
-                                 }) {
+function IdentifierOutputTabs({
+                                index,
+                                identifier,
+                                outputTables,
+                                dataset,
+                                updateIdentifier,
+                                updateIdentifierOntology
+                              }) {
   const [activeOutputTab, setActiveOutputTab] = useState('dataset');
   const { profile, options } = useAdminApp((s) => ({ profile: s.profile, options: s.options }));
+  // a composed identifier reads from other identifiers, so it has no input table of its own
+  const fallbackTable = identifier.tableIndex === undefined
+    ? 'the input table configured on its building blocks'
+    : `input table #${identifier.tableIndex + 1}`;
 
   return (
-    <form>
-
-      <DatatableIdentifierInput
-        index={index}
-        identifier={identifier}
-        updateIdentifier={updateIdentifier}
-        updateRegex={updateRegex}
-      />
-
-      {addIdentifierOperation && (
-        <Row><Col>
-          <Button
-            className="mt-1"
-            variant="success"
-            size="sm"
-            onClick={() => addIdentifierOperation(index)}
-          >
-            Add scalar operation
-          </Button>
-          <p></p>
-        </Col></Row>
-      )}
-
-      {Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
-        <Row key={opIndex} className="mb-3">
-          <Form.Group as={Col} sm={4} controlId={`identifierOperationOperator${index}${opIndex}`}>
-            <Form.Label column="sm">Operator</Form.Label>
-            <OperatorSelect
-              value={operation.operator}
-              onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)}
-            />
-          </Form.Group>
-
-          <Form.Group as={Col} sm={7} controlId={`identifierOperationValue${index}${opIndex}`}>
-            <Form.Label column="sm">Value</Form.Label>
-            <Form.Control
-              size="sm"
-              value={operation.value || ''}
-              onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
-            />
-          </Form.Group>
-
-          <Col sm={1} className="d-flex align-items-end justify-content-end">
-            <Button variant="danger" size="sm"
-                    onClick={() => removeIdentifierOperation(index, opIndex)}>
-              &times;
-            </Button>
-          </Col>
-        </Row>
-      ))}
+    <>
       <h3>Output</h3>
       <Tabs activeKey={activeOutputTab}
             onSelect={(k) => setActiveOutputTab(k)}
@@ -273,9 +224,9 @@ function MetadataIdentifierInput({
                 overlay={
                   <Tooltip id="metadata-tooltip">
                     If enabled, metadata is read from the same input table as the data.<br/>
-                    If no metadata is found, values from <b>input table #{identifier.tableIndex + 1}</b> are used
+                    If no metadata is found, values from <b>{fallbackTable}</b> are used
                     instead.<br/>
-                    If disabled, metadata is always taken from <b>input table #{identifier.tableIndex + 1}</b>.
+                    If disabled, metadata is always taken from <b>{fallbackTable}</b>.
                   </Tooltip>
                 }
               >
@@ -286,7 +237,7 @@ function MetadataIdentifierInput({
                     updateIdentifier(index, { 'isLoobDatatableOutput': e.target.checked, isFirstMatch })
                   }}
                   checked={identifier.isLoobDatatableOutput || false}
-                  label={`Prefer source table metadata (fallback: table #${identifier.tableIndex + 1})`}/>
+                  label={`Prefer source table metadata (fallback: ${fallbackTable})`}/>
               </OverlayTrigger>
 
               <Form.Group>
@@ -333,6 +284,91 @@ function MetadataIdentifierInput({
           </>)}
         </Tab>
       </Tabs>
+    </>
+  )
+}
+
+IdentifierOutputTabs.propTypes = {
+  index: PropTypes.number,
+  identifier: PropTypes.object,
+  outputTables: PropTypes.array,
+  dataset: PropTypes.object,
+  updateIdentifier: PropTypes.func,
+  updateIdentifierOntology: PropTypes.func,
+}
+
+function MetadataIdentifierInput({
+                                   index,
+                                   identifier,
+                                   outputTables,
+                                   updateIdentifier,
+                                   updateIdentifierOntology,
+                                   updateIdentifierOperation,
+                                   removeIdentifierOperation,
+                                   dataset,
+                                   updateRegex = null,
+                                   addIdentifierOperation = null
+                                 }) {
+
+  return (
+    <form>
+
+      <DatatableIdentifierInput
+        index={index}
+        identifier={identifier}
+        updateIdentifier={updateIdentifier}
+        updateRegex={updateRegex}
+      />
+
+      {addIdentifierOperation && (
+        <Row><Col>
+          <Button
+            className="mt-1"
+            variant="success"
+            size="sm"
+            onClick={() => addIdentifierOperation(index)}
+          >
+            Add scalar operation
+          </Button>
+          <p></p>
+        </Col></Row>
+      )}
+
+      {Array.isArray(identifier.operations) && identifier.operations.map((operation, opIndex) => (
+        <Row key={opIndex} className="mb-3">
+          <Form.Group as={Col} sm={4} controlId={`identifierOperationOperator${index}${opIndex}`}>
+            <Form.Label column="sm">Operator</Form.Label>
+            <OperatorSelect
+              value={operation.operator}
+              onChange={value => updateIdentifierOperation(index, opIndex, 'operator', value)}
+            />
+          </Form.Group>
+
+          <Form.Group as={Col} sm={7} controlId={`identifierOperationValue${index}${opIndex}`}>
+            <Form.Label column="sm">Value</Form.Label>
+            <Form.Control
+              size="sm"
+              value={operation.value || ''}
+              onChange={event => updateIdentifierOperation(index, opIndex, 'value', event.target.value)}
+            />
+          </Form.Group>
+
+          <Col sm={1} className="d-flex align-items-end justify-content-end">
+            <Button variant="danger" size="sm"
+                    onClick={() => removeIdentifierOperation(index, opIndex)}>
+              &times;
+            </Button>
+          </Col>
+        </Row>
+      ))}
+      <IdentifierOutputTabs
+        index={index}
+        identifier={identifier}
+        outputTables={outputTables}
+        dataset={dataset}
+        updateIdentifier={updateIdentifier}
+        updateIdentifierOntology={updateIdentifierOntology}
+      />
 
     </form>
   )
@@ -362,5 +398,5 @@ MetadataIdentifierInput.propTypes = {
 }
 
 export {
-  IdentifierInput, MetadataIdentifierInput, DatatableIdentifierInput
+  IdentifierInput, MetadataIdentifierInput, DatatableIdentifierInput, IdentifierOutputTabs
 }
