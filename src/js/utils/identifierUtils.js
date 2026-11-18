@@ -296,7 +296,7 @@ function BuildIdentifierHandler(profile, setProfile, dataset, tableIdx = 0) {
       let header = getSelectedMatch({identifier: {lineNumber, key, type, value, tableIndex, match}, profile, tableIdx});
 
       if (match !== 'regex') {
-        return <p>Current match: <b>{header[0]?.substring(0,100) ?? '-'}</b></p>;
+        return <p>Current match: <b>{header[0] != null ? String(header[0]).substring(0, 100) : '-'}</b></p>;
       }
 
       const regexPattern = value;
