@@ -12,6 +12,7 @@ import { GENERIC_PREDICATE } from "./form/common/TibFetchService";
 import { AdminProvider, useAdminApp } from "./AppContext";
 import PropTypes from "prop-types";
 import AppModal from "../../utils/modalWrapper";
+import ErrorBoundary from "./ErrorBoundary";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -432,7 +433,9 @@ function AdminAppContent({ ModalComponent, isAdmin }) {
       </Row>
 
       <main>
-        {dispatchView()}
+        <ErrorBoundary onReset={showListView}>
+          {dispatchView()}
+        </ErrorBoundary>
       </main>
 
       <ModalComponent
